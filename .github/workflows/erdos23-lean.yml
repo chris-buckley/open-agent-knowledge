@@ -7,6 +7,12 @@ on:
     paths:
       - research/erdos23/**
       - .github/workflows/erdos23-lean.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - research/erdos23/**
+      - .github/workflows/erdos23-lean.yml
   workflow_dispatch:
 
 jobs:
