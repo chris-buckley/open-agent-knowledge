@@ -20,7 +20,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: leanprover/lean-action@v1
+      - name: Install pinned Lean
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/erdos23
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: false
+          nanoda: false
+      - name: Generate exact dependency manifest
+        working-directory: research/erdos23
+        run: lake update
+      - name: Build and independently check
+        uses: leanprover/lean-action@v1
         with:
           lake-package-directory: research/erdos23
           use-mathlib-cache: true
