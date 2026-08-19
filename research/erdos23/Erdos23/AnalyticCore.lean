@@ -3,7 +3,7 @@ import Mathlib
 namespace Erdos23
 
 /-- The edge weight used by the fractional odd-cycle cover construction. -/
-def coverWeight {V E : Type*} (q : V → ℝ) (γ : ℝ)
+noncomputable def coverWeight {V E : Type*} (q : V → ℝ) (γ : ℝ)
     (left right : E → V) (e : E) : ℝ :=
   (q (left e) + q (right e)) / (2 * γ)
 
@@ -12,7 +12,7 @@ theorem coverWeight_nonneg {V E : Type*} (q : V → ℝ) (γ : ℝ)
     (left right : E → V) (hq : ∀ v, 0 ≤ q v) (hγ : 0 < γ) (e : E) :
     0 ≤ coverWeight q γ left right e := by
   unfold coverWeight
-  positivity
+  exact div_nonneg (add_nonneg (hq _) (hq _)) (by positivity)
 
 /-- If every odd cycle has endpoint charge at least `2 * γ`, the construction covers it. -/
 theorem coverWeight_feasible {V E C : Type*} [DecidableEq E]
@@ -23,7 +23,8 @@ theorem coverWeight_feasible {V E C : Type*} [DecidableEq E]
   intro c
   simp only [coverWeight]
   rw [← Finset.sum_div]
-  exact (le_div_iff₀ (by positivity)).2 (hcycle c)
+  apply (le_div_iff₀ (by positivity)).2
+  simpa only [one_mul] using hcycle c
 
 /-- The objective value telescopes once the endpoint-charge identity is known. -/
 theorem coverWeight_cost {V E : Type*} [Fintype E]
@@ -35,8 +36,8 @@ theorem coverWeight_cost {V E : Type*} [Fintype E]
     (∑ e, w e * ((q (left e) + q (right e)) / (2 * γ))) =
         ∑ e, (w e * (q (left e) + q (right e))) / (2 * γ) := by
           apply Finset.sum_congr rfl
-          intro e he
-          simpa only [mul_div_assoc]
+          intro e _
+          rw [mul_div_assoc]
     _ = (∑ e, w e * (q (left e) + q (right e))) / (2 * γ) := by
           rw [Finset.sum_div]
     _ = 1 / (2 * γ) := by rw [hcost]
@@ -63,7 +64,7 @@ theorem odd_girth_cost_identity (g : ℝ) (hg : 1 < g) :
   have hg0 : g ≠ 0 := by linarith
   have hgm1 : g - 1 ≠ 0 := by linarith
   field_simp [hg0, hgm1]
-  <;> ring
+  all_goals ring
 
 /-- The odd-girth-seven constant is `3 / 98`. -/
 theorem odd_girth_seven_constant :
