@@ -1,0 +1,28 @@
+name: Erdős 23 Lean verification
+
+on:
+  push:
+    branches:
+      - research/erdos23-lean-verify
+    paths:
+      - research/erdos23/**
+      - .github/workflows/erdos23-lean.yml
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/erdos23
+          use-mathlib-cache: true
+          build-args: --wfail
+          nanoda: true
+          nanoda-allow-sorry: false
+      - name: Reject placeholders
+        run: |
+          if grep -R -n -E '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' research/erdos23 --include='*.lean'; then
+            exit 1
+          fi
