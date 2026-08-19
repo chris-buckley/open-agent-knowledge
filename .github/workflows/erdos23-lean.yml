@@ -20,19 +20,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install pinned Lean
-        uses: leanprover/lean-action@v1
-        with:
-          lake-package-directory: research/erdos23
-          auto-config: false
-          build: false
-          test: false
-          lint: false
-          use-github-cache: false
-          nanoda: false
+      - name: Install elan
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Generate exact dependency manifest
         working-directory: research/erdos23
-        run: lake update
+        run: |
+          lake --version
+          lake update
       - name: Build and independently check
         uses: leanprover/lean-action@v1
         with:
