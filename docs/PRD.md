@@ -70,6 +70,9 @@ The set of node types is closed.
 - Triggers route intent to the knowledge.
 - A trigger records why the interpreter looks at the knowledge.
 - A trigger separates use with intent from use by discovery.
+- A trigger is the knowledge's signpost to the outside.
+- Anything searching or routing reads triggers before it enters the knowledge.
+- A trigger signposts the composition that holds it.
 - Triggers are optional.
 
 ### State
@@ -97,7 +100,8 @@ The set of node types is closed.
 - The set of node types is closed.
 - The node types are instructions, constants, schemas, triggers, state, processes, and input.
 - Interpretation belongs to the instructions node type, because it is a rule for how to interpret the knowledge.
-- The consumer of the knowledge is named the interpreter.
+- The consumer of the knowledge is named the interpreter, confirmed over actor on 2026-08-21.
+- The name trigger is confirmed over signal on 2026-08-21, because it names what makes an outsider enter.
 - The unit of the vocabulary is named the node.
 - A structure is a tree of nodes, and leaves can reference each other.
 - Triggers are optional in a composition.

@@ -64,8 +64,8 @@ WHEN you infer repository rules, you MUST know these concepts:
 name,meaning
 operating context,"the complete information and rules supplied to an agent: instructions, constants, schemas, state, triggers, processes, input"
 OAK,"Open Agent Knowledge, the universal knowledge standard this repository defines, formerly UAOC"
-interpreter,"the actor that arrives at OAK knowledge and interprets it: a human, an agent, or a program"
-trigger,"the node that signposts knowledge to the outside; it records why an interpreter enters, and its match guides which instructions, schemas, and processes apply"
+interpreter,"the human, agent, or program that interprets OAK knowledge before using it"
+trigger,"the node that signposts knowledge to the outside; it records why an interpreter enters and, when matched, guides which instructions, schemas, and processes apply"
 ```
 
 WHEN working in this repository, you MUST:
