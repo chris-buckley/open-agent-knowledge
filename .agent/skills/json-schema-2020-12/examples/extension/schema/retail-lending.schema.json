@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schema/retail-lending",
+  "title": "RetailLendingSystem",
+  "description": "A domain adaptor that must satisfy BaseSystem and adds tagged lending node and relationship kinds.",
+  "$ref": "#/$defs/RetailLendingSystem",
+  "$defs": {
+    "LoanProductNode": {
+      "title": "LoanProductNode",
+      "allOf": [
+        {
+          "$ref": "https://example.org/schema/system#/$defs/NodeCore"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "loan-product"
+            },
+            "currency": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            }
+          },
+          "required": [
+            "currency"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "RepaymentStructureNode": {
+      "title": "RepaymentStructureNode",
+      "allOf": [
+        {
+          "$ref": "https://example.org/schema/system#/$defs/NodeCore"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "repayment-structure"
+            },
+            "frequency": {
+              "enum": [
+                "weekly",
+                "fortnightly",
+                "monthly"
+              ]
+            }
+          },
+          "required": [
+            "frequency"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "RetailContainerNode": {
+      "title": "RetailContainerNode",
+      "allOf": [
+        {
+          "$ref": "https://example.org/schema/system#/$defs/NodeCore"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "container"
+            },
+            "children": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/RetailNode"
+              }
+            }
+          },
+          "required": [
+            "children"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "RetailNode": {
+      "title": "RetailNode",
+      "oneOf": [
+        {
+          "$ref": "https://example.org/schema/system#/$defs/ServiceNode"
+        },
+        {
+          "$ref": "https://example.org/schema/system#/$defs/StoreNode"
+        },
+        {
+          "$ref": "#/$defs/RetailContainerNode"
+        },
+        {
+          "$ref": "#/$defs/LoanProductNode"
+        },
+        {
+          "$ref": "#/$defs/RepaymentStructureNode"
+        }
+      ]
+    },
+    "OffersRelationship": {
+      "title": "OffersRelationship",
+      "allOf": [
+        {
+          "$ref": "https://example.org/schema/system#/$defs/RelationshipCore"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "offers"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "UsesRepaymentStructureRelationship": {
+      "title": "UsesRepaymentStructureRelationship",
+      "allOf": [
+        {
+          "$ref": "https://example.org/schema/system#/$defs/RelationshipCore"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "uses-repayment-structure"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "RetailRelationship": {
+      "title": "RetailRelationship",
+      "oneOf": [
+        {
+          "$ref": "https://example.org/schema/system#/$defs/ContainsRelationship"
+        },
+        {
+          "$ref": "https://example.org/schema/system#/$defs/StoresInRelationship"
+        },
+        {
+          "$ref": "#/$defs/OffersRelationship"
+        },
+        {
+          "$ref": "#/$defs/UsesRepaymentStructureRelationship"
+        }
+      ]
+    },
+    "RetailLendingSystem": {
+      "allOf": [
+        {
+          "$ref": "https://example.org/schema/system"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "domain": {
+              "const": "retail-lending"
+            },
+            "nodes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/RetailNode"
+              }
+            },
+            "relationships": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/RetailRelationship"
+              }
+            }
+          },
+          "required": [
+            "domain"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}

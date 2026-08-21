@@ -1,0 +1,37 @@
+{
+  "id": "system:retail-lending",
+  "domain": "retail-lending",
+  "nodes": [
+    {
+      "id": "node:lending",
+      "kind": "container",
+      "label": "Retail lending",
+      "children": [
+        {
+          "id": "node:home-loan",
+          "kind": "loan-product",
+          "label": "Home loan",
+          "currency": "AUD"
+        },
+        {
+          "id": "node:monthly",
+          "kind": "repayment-structure",
+          "label": "Monthly repayments",
+          "frequency": "monthly"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "relationship:loan-uses-monthly",
+      "kind": "uses-repayment-structure",
+      "from": "node:home-loan",
+      "to": "node:missing"
+    }
+  ],
+  "metadata": {
+    "owner": "lending-domain",
+    "version": "1.0.0"
+  }
+}

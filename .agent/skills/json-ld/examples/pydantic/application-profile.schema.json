@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schema/system-application-profile",
+  "title": "Framed system JSON-LD application profile",
+  "type": "object",
+  "required": [
+    "@context",
+    "@id",
+    "@type",
+    "label",
+    "nodes",
+    "relationships"
+  ],
+  "properties": {
+    "@context": {
+      "const": "https://example.org/context/system-v1.jsonld"
+    },
+    "@id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "@type": {
+      "const": "System"
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1
+    },
+    "extends": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/relationship"
+      }
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "service": {
+      "type": "object",
+      "required": [
+        "@id",
+        "@type",
+        "label"
+      ],
+      "properties": {
+        "@id": {
+          "type": "string"
+        },
+        "@type": {
+          "const": "Service"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "store": {
+      "type": "object",
+      "required": [
+        "@id",
+        "@type",
+        "label"
+      ],
+      "properties": {
+        "@id": {
+          "type": "string"
+        },
+        "@type": {
+          "const": "Store"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "adaptor": {
+      "type": "object",
+      "required": [
+        "@id",
+        "@type",
+        "label",
+        "links_to"
+      ],
+      "properties": {
+        "@id": {
+          "type": "string"
+        },
+        "@type": {
+          "const": "Adaptor"
+        },
+        "label": {
+          "type": "string"
+        },
+        "links_to": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "node": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/service"
+        },
+        {
+          "$ref": "#/$defs/store"
+        },
+        {
+          "$ref": "#/$defs/adaptor"
+        }
+      ]
+    },
+    "relationship": {
+      "type": "object",
+      "required": [
+        "@id",
+        "@type",
+        "kind",
+        "from",
+        "to"
+      ],
+      "properties": {
+        "@id": {
+          "type": "string"
+        },
+        "@type": {
+          "const": "Relationship"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date"
+        },
+        "source_document": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

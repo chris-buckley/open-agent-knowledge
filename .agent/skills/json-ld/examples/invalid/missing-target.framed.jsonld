@@ -1,0 +1,24 @@
+{
+  "@context": "https://example.org/context/system-v1.jsonld",
+  "@id": "sys:broken",
+  "@type": "System",
+  "label": "Broken system",
+  "nodes": [
+    {
+      "@id": "sys:broken/adaptor",
+      "@type": "Adaptor",
+      "label": "Broken adaptor",
+      "links_to": "sys:missing/service"
+    }
+  ],
+  "relationships": [
+    {
+      "@id": "rel:broken-link",
+      "@type": "Relationship",
+      "kind": "links_to",
+      "from": "sys:broken/adaptor",
+      "to": "sys:missing/service",
+      "source_document": "doc:missing-target"
+    }
+  ]
+}

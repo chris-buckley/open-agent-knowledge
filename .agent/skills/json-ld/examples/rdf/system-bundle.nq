@@ -1,0 +1,25 @@
+<https://example.org/system/base/store> <https://example.org/term/label> "Base store"  .
+<https://example.org/system/domain/adaptor> <https://example.org/term/label> "Domain adaptor"  .
+<https://example.org/relationship/domain-adaptor-links-base-service> <https://example.org/term/to> <https://example.org/system/base/service>  .
+<https://example.org/system/base/store> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://example.org/schema/Store>  .
+<https://example.org/relationship/domain-adaptor-links-base-service> <https://example.org/term/from> <https://example.org/system/domain/adaptor>  .
+<https://example.org/relationship/domain-adaptor-links-base-service> <https://example.org/term/effective_from> "2026-01-01"^^<http://www.w3.org/2001/XMLSchema#date>  .
+<https://example.org/system/base/service> <https://example.org/term/label> "Inherited service"  .
+<https://example.org/relationship/domain-adaptor-links-base-service> <https://example.org/term/confidence> "1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>  .
+<https://example.org/system/domain> <https://example.org/term/relationships> <https://example.org/relationship/domain-adaptor-links-base-service>  .
+<https://example.org/system/domain> <https://example.org/term/extends> <https://example.org/system/base>  .
+<https://example.org/system/domain> <https://example.org/term/nodes> <https://example.org/system/domain/adaptor>  .
+<https://example.org/system/domain/adaptor> <https://example.org/term/links_to> <https://example.org/system/base/service>  .
+<https://example.org/system/domain/adaptor> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://example.org/schema/Adaptor>  .
+<https://example.org/system/base> <https://example.org/term/nodes> <https://example.org/system/base/store>  .
+<https://example.org/system/domain> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://example.org/schema/System>  .
+<https://example.org/relationship/domain-adaptor-links-base-service> <https://example.org/term/kind> <https://example.org/term/links_to>  .
+<https://example.org/system/base> <https://example.org/term/nodes> <https://example.org/system/base/service>  .
+<https://example.org/system/base> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://example.org/schema/System>  .
+<https://example.org/relationship/domain-adaptor-links-base-service> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://example.org/schema/Relationship>  .
+<https://example.org/system/domain> <https://example.org/term/label> "Domain extension"  .
+<https://example.org/system/base/service> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://example.org/schema/Service>  .
+<https://example.org/system/base> <https://example.org/term/label> "Base system"  .
+<https://example.org/system/domain> <https://example.org/term/nodes> <https://example.org/system/base/service>  .
+<https://example.org/relationship/domain-adaptor-links-base-service> <https://example.org/term/source_document> <https://example.org/document/domain-extension>  .
+

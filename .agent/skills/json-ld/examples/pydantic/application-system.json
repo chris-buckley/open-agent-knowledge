@@ -1,0 +1,29 @@
+{
+  "id": "sys:domain",
+  "label": "Domain extension",
+  "extends": "sys:base",
+  "nodes": [
+    {
+      "id": "sys:base/service",
+      "kind": "Service",
+      "label": "Inherited service"
+    },
+    {
+      "id": "sys:domain/adaptor",
+      "kind": "Adaptor",
+      "label": "Domain adaptor",
+      "links_to": "sys:base/service"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel:domain-adaptor-links-base-service",
+      "kind": "links_to",
+      "from_id": "sys:domain/adaptor",
+      "to_id": "sys:base/service",
+      "confidence": 1.0,
+      "effective_from": "2026-01-01",
+      "source_document": "doc:domain-extension"
+    }
+  ]
+}

@@ -1,0 +1,488 @@
+{
+  "$defs": {
+    "ContainerNode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "container",
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "children": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "container": "#/$defs/ContainerNode",
+                "loan-product": "#/$defs/LoanProductNode",
+                "repayment-structure": "#/$defs/RepaymentStructureNode",
+                "service": "#/$defs/ServiceNode",
+                "store": "#/$defs/StoreNode"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ServiceNode"
+              },
+              {
+                "$ref": "#/$defs/StoreNode"
+              },
+              {
+                "$ref": "#/$defs/ContainerNode"
+              },
+              {
+                "$ref": "#/$defs/LoanProductNode"
+              },
+              {
+                "$ref": "#/$defs/RepaymentStructureNode"
+              }
+            ]
+          },
+          "title": "Children",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "label",
+        "children"
+      ],
+      "title": "ContainerNode",
+      "type": "object"
+    },
+    "ContainsRelationship": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "from": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "To",
+          "type": "string"
+        },
+        "kind": {
+          "const": "contains",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "from",
+        "to",
+        "kind"
+      ],
+      "title": "ContainsRelationship",
+      "type": "object"
+    },
+    "LoanProductNode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "loan-product",
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "label",
+        "currency"
+      ],
+      "title": "LoanProductNode",
+      "type": "object"
+    },
+    "Metadata": {
+      "additionalProperties": true,
+      "properties": {
+        "owner": {
+          "minLength": 1,
+          "title": "Owner",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Version"
+        }
+      },
+      "required": [
+        "owner"
+      ],
+      "title": "Metadata",
+      "type": "object"
+    },
+    "OffersRelationship": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "from": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "To",
+          "type": "string"
+        },
+        "kind": {
+          "const": "offers",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "from",
+        "to",
+        "kind"
+      ],
+      "title": "OffersRelationship",
+      "type": "object"
+    },
+    "RepaymentStructureNode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "repayment-structure",
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "frequency": {
+          "enum": [
+            "weekly",
+            "fortnightly",
+            "monthly"
+          ],
+          "title": "Frequency",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "label",
+        "frequency"
+      ],
+      "title": "RepaymentStructureNode",
+      "type": "object"
+    },
+    "ServiceNode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "service",
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "endpoint": {
+          "format": "uri",
+          "minLength": 1,
+          "title": "Endpoint",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "label",
+        "endpoint"
+      ],
+      "title": "ServiceNode",
+      "type": "object"
+    },
+    "StoreNode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "store",
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "engine": {
+          "minLength": 1,
+          "title": "Engine",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "label",
+        "engine"
+      ],
+      "title": "StoreNode",
+      "type": "object"
+    },
+    "StoresInRelationship": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "from": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "To",
+          "type": "string"
+        },
+        "kind": {
+          "const": "stores-in",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "from",
+        "to",
+        "kind"
+      ],
+      "title": "StoresInRelationship",
+      "type": "object"
+    },
+    "UsesRepaymentStructureRelationship": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "from": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "description": "An application identifier; target existence needs a graph-wide check.",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+          "title": "To",
+          "type": "string"
+        },
+        "kind": {
+          "const": "uses-repayment-structure",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "from",
+        "to",
+        "kind"
+      ],
+      "title": "UsesRepaymentStructureRelationship",
+      "type": "object"
+    }
+  },
+  "$id": "https://example.org/schema/retail-lending-pydantic",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A Pydantic-generated portable shape corresponding to the hand-authored RetailLendingSystem example. It is not byte-for-byte identical.",
+  "properties": {
+    "id": {
+      "description": "An application identifier; target existence needs a graph-wide check.",
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+      "title": "Id",
+      "type": "string"
+    },
+    "domain": {
+      "const": "retail-lending",
+      "title": "Domain",
+      "type": "string"
+    },
+    "nodes": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "container": "#/$defs/ContainerNode",
+            "loan-product": "#/$defs/LoanProductNode",
+            "repayment-structure": "#/$defs/RepaymentStructureNode",
+            "service": "#/$defs/ServiceNode",
+            "store": "#/$defs/StoreNode"
+          },
+          "propertyName": "kind"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/ServiceNode"
+          },
+          {
+            "$ref": "#/$defs/StoreNode"
+          },
+          {
+            "$ref": "#/$defs/ContainerNode"
+          },
+          {
+            "$ref": "#/$defs/LoanProductNode"
+          },
+          {
+            "$ref": "#/$defs/RepaymentStructureNode"
+          }
+        ]
+      },
+      "title": "Nodes",
+      "type": "array"
+    },
+    "relationships": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "contains": "#/$defs/ContainsRelationship",
+            "offers": "#/$defs/OffersRelationship",
+            "stores-in": "#/$defs/StoresInRelationship",
+            "uses-repayment-structure": "#/$defs/UsesRepaymentStructureRelationship"
+          },
+          "propertyName": "kind"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/ContainsRelationship"
+          },
+          {
+            "$ref": "#/$defs/StoresInRelationship"
+          },
+          {
+            "$ref": "#/$defs/OffersRelationship"
+          },
+          {
+            "$ref": "#/$defs/UsesRepaymentStructureRelationship"
+          }
+        ]
+      },
+      "title": "Relationships",
+      "type": "array"
+    },
+    "metadata": {
+      "$ref": "#/$defs/Metadata"
+    }
+  },
+  "required": [
+    "id",
+    "domain",
+    "nodes",
+    "relationships",
+    "metadata"
+  ],
+  "title": "RetailLendingSystem",
+  "type": "object"
+}

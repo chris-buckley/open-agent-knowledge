@@ -1,0 +1,35 @@
+{
+  "@context": "https://example.org/context/system-v1.jsonld",
+  "@id": "sys:domain",
+  "@type": "System",
+  "@embed": "@once",
+  "@explicit": true,
+  "@requireAll": true,
+  "@omitDefault": false,
+  "label": {},
+  "extends": {
+    "@embed": "@never"
+  },
+  "nodes": {
+    "@embed": "@once",
+    "@explicit": true,
+    "label": {},
+    "links_to": {}
+  },
+  "relationships": {
+    "@embed": "@once",
+    "@explicit": true,
+    "kind": {},
+    "from": {
+      "@embed": "@never"
+    },
+    "to": {
+      "@embed": "@never"
+    },
+    "confidence": {
+      "@default": 1.0
+    },
+    "effective_from": {},
+    "source_document": {}
+  }
+}

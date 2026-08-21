@@ -1,0 +1,34 @@
+{
+  "@context": "https://example.org/context/container-v1.jsonld",
+  "@id": "sys:container-demo",
+  "@type": "Service",
+  "label_by_language": {
+    "en": [
+      "System service",
+      "Service"
+    ],
+    "fr": "Service système"
+  },
+  "status_by_source": {
+    "source-a": "approved",
+    "source-b": "draft"
+  },
+  "nodes_by_id": {
+    "sys:container-demo/store": {
+      "@type": "Store"
+    }
+  },
+  "nodes_by_type": {
+    "Service": {
+      "@id": "sys:container-demo/child-service"
+    },
+    "Store": {
+      "@id": "sys:container-demo/child-store"
+    }
+  },
+  "ordered_steps": [
+    "capture",
+    "validate",
+    "publish"
+  ]
+}

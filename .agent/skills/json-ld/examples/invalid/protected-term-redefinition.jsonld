@@ -1,0 +1,10 @@
+{
+  "@context": [
+    "https://example.org/context/protected-v1.jsonld",
+    {
+      "label": "https://attacker.invalid/redefined-label"
+    }
+  ],
+  "@id": "https://example.org/system/protected",
+  "label": "This must be rejected"
+}

@@ -1,0 +1,4 @@
+{
+  "@context": "https://example.org/context/cycle-a.jsonld",
+  "@id": "https://example.org/system/cycle"
+}

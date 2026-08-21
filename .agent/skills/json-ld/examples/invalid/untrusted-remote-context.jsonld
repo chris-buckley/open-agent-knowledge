@@ -1,0 +1,5 @@
+{
+  "@context": "https://attacker.invalid/context.jsonld",
+  "@id": "https://example.org/system/untrusted",
+  "name": "Meaning can be remapped by the untrusted context"
+}

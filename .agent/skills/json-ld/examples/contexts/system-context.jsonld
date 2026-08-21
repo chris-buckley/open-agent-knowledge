@@ -1,0 +1,78 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "@protected": true,
+    "@base": "https://example.org/",
+    "@vocab": "https://example.org/term/",
+    "sys": {
+      "@id": "https://example.org/system/",
+      "@prefix": true
+    },
+    "rel": {
+      "@id": "https://example.org/relationship/",
+      "@prefix": true
+    },
+    "schema": {
+      "@id": "https://example.org/schema/",
+      "@prefix": true
+    },
+    "term": {
+      "@id": "https://example.org/term/",
+      "@prefix": true
+    },
+    "doc": {
+      "@id": "https://example.org/document/",
+      "@prefix": true
+    },
+    "xsd": {
+      "@id": "http://www.w3.org/2001/XMLSchema#",
+      "@prefix": true
+    },
+    "label": "term:label",
+    "extends": {
+      "@id": "term:extends",
+      "@type": "@id"
+    },
+    "nodes": {
+      "@id": "term:nodes",
+      "@container": "@set"
+    },
+    "relationships": {
+      "@id": "term:relationships",
+      "@container": "@set"
+    },
+    "links_to": {
+      "@id": "term:links_to",
+      "@type": "@id"
+    },
+    "kind": {
+      "@id": "term:kind",
+      "@type": "@id"
+    },
+    "from": {
+      "@id": "term:from",
+      "@type": "@id"
+    },
+    "to": {
+      "@id": "term:to",
+      "@type": "@id"
+    },
+    "source_document": {
+      "@id": "term:source_document",
+      "@type": "@id"
+    },
+    "confidence": {
+      "@id": "term:confidence",
+      "@type": "xsd:decimal"
+    },
+    "effective_from": {
+      "@id": "term:effective_from",
+      "@type": "xsd:date"
+    },
+    "System": "schema:System",
+    "Service": "schema:Service",
+    "Store": "schema:Store",
+    "Adaptor": "schema:Adaptor",
+    "Relationship": "schema:Relationship"
+  }
+}

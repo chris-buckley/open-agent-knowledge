@@ -1,0 +1,58 @@
+# json-schema-2020-12 package manifest
+# Build date: 2026-08-05
+# Entries exclude PACKAGE_MANIFEST.txt and SHA256SUMS.txt.
+# Payload files listed: 52
+
+bytes  path
+   18978  BUILD_REPORT.md
+    1063  LICENSE
+    2311  SKILL.md
+     401  assets/constants/README.md
+     348  assets/formats/README.md
+    2135  examples/README.md
+     894  examples/extension/README.md
+     788  examples/extension/retail-lending.missing-target.json
+     788  examples/extension/retail-lending.valid.json
+    4584  examples/extension/schema/retail-lending.schema.json
+     871  examples/invalid/README.md
+     759  examples/invalid/retail-lending-node.invalid.json
+     805  examples/invalid/retail-lending.invalid.json
+    1165  examples/pydantic/README.md
+   12909  examples/pydantic/generated.schema.json
+    6133  examples/pydantic/model.py
+    5933  examples/pydantic/node.generated.schema.json
+     755  examples/recursive/README.md
+     116  examples/recursive/strict-tree.invalid.json
+     474  examples/recursive/strict-tree.schema.json
+     137  examples/recursive/strict-tree.valid.json
+     419  examples/recursive/tree.schema.json
+     409  examples/registry.json
+     805  examples/system/README.md
+     599  examples/system/base-system-closed.invalid.json
+     577  examples/system/base-system.valid.json
+     353  examples/system/schema/system-closed.schema.json
+    6389  examples/system/schema/system.schema.json
+    3064  guides/author-a-schema-v1.0.0.guide.md
+    2830  guides/debug-validation-v1.0.0.guide.md
+    3146  guides/design-an-extensible-contract-v1.0.0.guide.md
+    2502  guides/split-a-schema-across-files-v1.0.0.guide.md
+    2110  processes/generate-from-pydantic.md
+    1848  processes/review-schema-change.md
+    1586  processes/validate-schema-and-instance.md
+    8623  references/00-source-manifest.md
+    7259  references/01-core-and-vocabularies.md
+    7760  references/02-identifiers-and-references.md
+   10296  references/03-validation-keywords.md
+    9275  references/04-composition-and-extension.md
+    9136  references/05-pydantic-v2-integration.md
+    4850  references/06-openapi-3-1-interoperability.md
+    8590  references/07-validation-and-diagnostics.md
+    5975  references/08-error-catalog.md
+      71  requirements.txt
+    1083  scripts/README.md
+   20304  scripts/_common.py
+    4383  scripts/check_graph_targets.py
+    6007  scripts/check_references.py
+    4985  scripts/validate_instance.py
+    1541  scripts/validate_schema.py
+   17496  tests/test_examples.py

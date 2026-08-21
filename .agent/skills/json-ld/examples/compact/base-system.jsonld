@@ -1,0 +1,18 @@
+{
+  "@context": "https://example.org/context/system-v1.jsonld",
+  "@id": "sys:base",
+  "@type": "System",
+  "label": "Base system",
+  "nodes": [
+    {
+      "@id": "sys:base/service",
+      "@type": "Service",
+      "label": "Inherited service"
+    },
+    {
+      "@id": "sys:base/store",
+      "@type": "Store",
+      "label": "Base store"
+    }
+  ]
+}

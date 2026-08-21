@@ -1,0 +1,7 @@
+{
+  "@context": "https://example.org/context/system-v1.jsonld",
+  "@id": "sys:domain/adaptor",
+  "@type": "Adaptor",
+  "label": "Domain adaptor",
+  "links_to": "sys:base/service"
+}

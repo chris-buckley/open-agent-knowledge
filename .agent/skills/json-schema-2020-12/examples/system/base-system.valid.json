@@ -1,0 +1,29 @@
+{
+  "id": "system:base-example",
+  "nodes": [
+    {
+      "id": "node:orders",
+      "kind": "service",
+      "label": "Orders service",
+      "endpoint": "https://example.org/orders"
+    },
+    {
+      "id": "node:orders-db",
+      "kind": "store",
+      "label": "Orders database",
+      "engine": "PostgreSQL"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "relationship:orders-stores-in-orders-db",
+      "kind": "stores-in",
+      "from": "node:orders",
+      "to": "node:orders-db"
+    }
+  ],
+  "metadata": {
+    "owner": "platform-team",
+    "version": "1.0.0"
+  }
+}

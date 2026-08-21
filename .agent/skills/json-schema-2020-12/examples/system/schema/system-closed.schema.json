@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schema/system-closed",
+  "title": "ClosedBaseSystem",
+  "description": "A leaf profile that closes the otherwise extensible BaseSystem object.",
+  "allOf": [
+    {
+      "$ref": "https://example.org/schema/system"
+    }
+  ],
+  "unevaluatedProperties": false
+}

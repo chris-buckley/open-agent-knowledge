@@ -1,0 +1,10 @@
+{
+  "@context": "https://example.org/context/system-v1.jsonld",
+  "@id": "sys:base/service",
+  "@type": "Service",
+  "@reverse": {
+    "links_to": {
+      "@id": "sys:domain/adaptor"
+    }
+  }
+}

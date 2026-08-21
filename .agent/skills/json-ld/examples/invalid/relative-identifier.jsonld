@@ -1,0 +1,7 @@
+{
+  "@context": {
+    "label": "https://example.org/term/label"
+  },
+  "@id": "relative-node",
+  "label": "Relative without a governed base"
+}

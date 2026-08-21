@@ -1,0 +1,7 @@
+{
+  "https://example.org/schema/system": "system/schema/system.schema.json",
+  "https://example.org/schema/system-closed": "system/schema/system-closed.schema.json",
+  "https://example.org/schema/retail-lending": "extension/schema/retail-lending.schema.json",
+  "https://example.org/schema/tree": "recursive/tree.schema.json",
+  "https://example.org/schema/strict-tree": "recursive/strict-tree.schema.json"
+}

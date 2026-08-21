@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schema/strict-tree",
+  "title": "TaggedTreeNode",
+  "$dynamicAnchor": "node",
+  "allOf": [
+    {
+      "$ref": "https://example.org/schema/tree"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tag": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "tag"
+      ]
+    }
+  ],
+  "unevaluatedProperties": false
+}

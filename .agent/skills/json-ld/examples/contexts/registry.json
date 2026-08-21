@@ -1,0 +1,30 @@
+{
+  "documents": {
+    "https://example.org/context/container-v1.jsonld": {
+      "content_type": "application/ld+json",
+      "path": "container-context.jsonld",
+      "sha256": "58794855233408d8e2e0e4dbf3807857d991ec2e143cd58f97a7a38be7484379"
+    },
+    "https://example.org/context/cycle-a.jsonld": {
+      "content_type": "application/ld+json",
+      "path": "cycle-a.jsonld",
+      "sha256": "68a483e4feb02e60f51f090d749a9218d1b87aaa1077a68651f6d29407645fe3"
+    },
+    "https://example.org/context/cycle-b.jsonld": {
+      "content_type": "application/ld+json",
+      "path": "cycle-b.jsonld",
+      "sha256": "17a256286ac54355734600dacb5654aa799891c61e745a9c543c3cca6cd522b2"
+    },
+    "https://example.org/context/protected-v1.jsonld": {
+      "content_type": "application/ld+json",
+      "path": "protected-context.jsonld",
+      "sha256": "d707adc7197bc03f8ace273756f89f08710ca92f6975e4c00a4a37822c79c203"
+    },
+    "https://example.org/context/system-v1.jsonld": {
+      "content_type": "application/ld+json",
+      "path": "system-context.jsonld",
+      "sha256": "27a70c090ae7205c95ebae579472992d6f12a051783c32e63f502a31030b9d18"
+    }
+  },
+  "version": 1
+}

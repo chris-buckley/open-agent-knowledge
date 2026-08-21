@@ -1,0 +1,10 @@
+{
+  "@context": "https://example.org/context/system-v1.jsonld",
+  "@id": "rel:domain-adaptor-links-base-service",
+  "@type": "Relationship",
+  "kind": "term:links_to",
+  "from": "sys:domain/adaptor",
+  "to": "sys:base/service",
+  "confidence": 1.0,
+  "source_document": "doc:domain-extension"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "root",
+  "tag": "folder",
+  "children": [
+    {
+      "name": "leaf",
+      "children": []
+    }
+  ]
+}

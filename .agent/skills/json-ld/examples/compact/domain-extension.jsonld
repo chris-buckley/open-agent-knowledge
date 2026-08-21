@@ -1,0 +1,30 @@
+{
+  "@context": "https://example.org/context/system-v1.jsonld",
+  "@id": "sys:domain",
+  "@type": "System",
+  "label": "Domain extension",
+  "extends": "sys:base",
+  "nodes": [
+    {
+      "@id": "sys:domain/adaptor",
+      "@type": "Adaptor",
+      "label": "Domain adaptor",
+      "links_to": "sys:base/service"
+    },
+    {
+      "@id": "sys:base/service"
+    }
+  ],
+  "relationships": [
+    {
+      "@id": "rel:domain-adaptor-links-base-service",
+      "@type": "Relationship",
+      "kind": "term:links_to",
+      "from": "sys:domain/adaptor",
+      "to": "sys:base/service",
+      "confidence": 1.0,
+      "effective_from": "2026-01-01",
+      "source_document": "doc:domain-extension"
+    }
+  ]
+}

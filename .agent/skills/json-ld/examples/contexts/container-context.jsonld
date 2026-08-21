@@ -1,0 +1,46 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "@base": "https://example.org/",
+    "@vocab": "https://example.org/term/",
+    "sys": {
+      "@id": "https://example.org/system/",
+      "@prefix": true
+    },
+    "schema": {
+      "@id": "https://example.org/schema/",
+      "@prefix": true
+    },
+    "term": {
+      "@id": "https://example.org/term/",
+      "@prefix": true
+    },
+    "id": "@id",
+    "type": "@type",
+    "label_by_language": {
+      "@id": "term:label",
+      "@container": [
+        "@language",
+        "@set"
+      ]
+    },
+    "status_by_source": {
+      "@id": "term:status",
+      "@container": "@index"
+    },
+    "nodes_by_id": {
+      "@id": "term:nodes",
+      "@container": "@id"
+    },
+    "nodes_by_type": {
+      "@id": "term:typedNodes",
+      "@container": "@type"
+    },
+    "ordered_steps": {
+      "@id": "term:orderedSteps",
+      "@container": "@list"
+    },
+    "Service": "schema:Service",
+    "Store": "schema:Store"
+  }
+}

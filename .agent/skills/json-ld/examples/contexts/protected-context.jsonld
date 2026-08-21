@@ -1,0 +1,11 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "@protected": true,
+    "term": {
+      "@id": "https://example.org/term/",
+      "@prefix": true
+    },
+    "label": "term:label"
+  }
+}
