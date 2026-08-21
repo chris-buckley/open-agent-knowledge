@@ -71,7 +71,7 @@ WHEN working in this repository, you MUST:
 
 - Read `docs/PRD.md` before any other work.
 
-WHEN you work with JSON-LD or JSON Schema, you MUST:
+WHEN you work with JSON-LD, JSON Schema, or Pydantic, you MUST:
 
 - Use the matching skill in `.agent/skills`.
 - Read its `SKILL.md` before you start.
