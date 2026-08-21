@@ -70,6 +70,10 @@ interpreter,the agent that interprets UAOC knowledge and follows its instruction
 WHEN working in this repository, you MUST:
 
 - Read `docs/PRD.md` before any other work.
+- Apply the reduce principle: less is more. This is the most important instruction and principle.
+- Attack every implementation, every line of code, and every line of documentation, no matter what.
+- Make every bit of information fight for its place.
+- Remove what does not win its place.
 
 WHEN you work with JSON-LD, JSON Schema, or Pydantic, you MUST:
 
