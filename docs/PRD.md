@@ -103,8 +103,18 @@ The set of node types is closed.
 - Triggers are optional in a composition.
 - Pydantic v2 is the description language for the vocabulary.
 - The output order is Pydantic v2 as the driver, then JSON-LD, then YAML-LD.
+- Pydantic v2 is the authoring tool, and every other representation derives from the authored tree.
+- Knowledge is authored as a nested tree, because nesting gives one root, one parent, and no containment cycle structurally.
+- The flat node registry is derived from the tree during validation, not authored.
+- Each node has exactly one type from the closed set, so every node validates at authoring time.
+- Cross-references use typed fields, not a generic link field.
+- Node IDs are absolute IRI-shaped strings, independent of file placement.
+- Root validation rejects duplicate IDs, missing reference targets, and wrong target types.
+- Constants and state hold any JSON value.
+- Validation is strict: no type coercion and no unknown fields.
+- Composition is structure, not an eighth node type.
 - The PRD uses one short sentence per idea.
 
 ## Open questions
 
-- What fields does every node share? Deferred on 2026-08-21 while the user reviews the PRD.
+- What fields does every node share? Deferred on 2026-08-21 while the user reviews the PRD. The title field is out of the sketch until this is decided.
