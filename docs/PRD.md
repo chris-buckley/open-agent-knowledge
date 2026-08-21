@@ -1,5 +1,7 @@
 # UAOC Product Requirements
 
+A reference sketch of the vocabulary as Pydantic v2 models is in [vocabulary_sketch.py](vocabulary_sketch.py).
+
 ## Purpose
 
 - UAOC is the Universal Agent Operating Context.
@@ -15,7 +17,8 @@
 ## Constraints
 
 - Define one thing once.
-- Build every structure as a tree of vocabulary elements.
+- Build every structure as a tree of nodes.
+- Leaves in the tree can reference each other.
 - The tree can represent an enormous range of knowledge types from the foundational vocabulary.
 - Each vocabulary element is mandatory or optional.
 - The vocabulary stays very small.
@@ -76,6 +79,8 @@ The set of block types is closed.
 - The block types are instructions, constants, schemas, triggers, state, processes, and input.
 - Interpretation belongs to the instructions block type.
 - The consumer of the knowledge is named the interpreter.
+- The unit of the vocabulary is named the node.
+- A structure is a tree of nodes, and leaves can reference each other.
 - Triggers are optional in a composition.
 - Pydantic v2 is the description language for the vocabulary.
 - The PRD uses one short sentence per idea.
