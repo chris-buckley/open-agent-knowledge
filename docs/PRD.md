@@ -7,12 +7,20 @@ A reference sketch of the vocabulary as Pydantic v2 models is in [vocabulary_ske
 - UAOC is the Universal Agent Operating Context.
 - UAOC is a knowledge standard.
 - UAOC gives one standard vocabulary for knowledge.
-- UAOC defines the smallest building blocks of knowledge in a schema.
-- Blocks compose into larger structures.
-- A composition of blocks can represent an agent.
-- A composition of blocks can represent an SOP.
-- A composition of blocks can represent static information.
+- UAOC defines the smallest nodes of knowledge in a schema.
+- Nodes compose into larger structures.
+- A composition of nodes can represent an agent.
+- A composition of nodes can represent an SOP.
+- A composition of nodes can represent static information.
 - UAOC tells the interpreter how to interpret the knowledge before the interpreter uses it.
+
+## Principles
+
+- Reduce, reduce, reduce: less is more.
+- Find the common denominator in each part of the tree.
+- Identify it, recognize it, and implement only it.
+- Do not repeat yourself.
+- Write the smallest amount of code that represents a vast amount of knowledge.
 
 ## Constraints
 
@@ -22,12 +30,22 @@ A reference sketch of the vocabulary as Pydantic v2 models is in [vocabulary_ske
 - The tree can represent an enormous range of knowledge types from the foundational vocabulary.
 - Each vocabulary element is mandatory or optional.
 - The vocabulary stays very small.
-- The vocabulary holds only the block types this PRD lists.
+- The vocabulary holds only the node types this PRD lists.
 - Pydantic v2 models describe the whole vocabulary.
 
-## Block types
+## Outputs
 
-The set of block types is closed.
+- One knowledge tree can emit many output representations.
+- The main outputs are Pydantic v2, JSON-LD, YAML-LD, a file system representation, relational tables in SQL, and CSV files placed in the file system.
+- The file system representation is its own output, separate from CSV files placed in the file system.
+- Pydantic v2 is the driver and is implemented first.
+- JSON-LD is implemented after the driver.
+- YAML-LD is implemented after JSON-LD.
+- The remaining outputs are implemented after YAML-LD.
+
+## Node types
+
+The set of node types is closed.
 
 ### Instructions
 
@@ -75,16 +93,17 @@ The set of block types is closed.
 
 - The name is UAOC, short for Universal Agent Operating Context.
 - UAOC is a knowledge standard, not an information standard, because knowledge covers static information and executable instructions.
-- The set of block types is closed.
-- The block types are instructions, constants, schemas, triggers, state, processes, and input.
-- Interpretation belongs to the instructions block type.
+- The set of node types is closed.
+- The node types are instructions, constants, schemas, triggers, state, processes, and input.
+- Interpretation belongs to the instructions node type, because it is a rule for how to interpret the knowledge.
 - The consumer of the knowledge is named the interpreter.
 - The unit of the vocabulary is named the node.
 - A structure is a tree of nodes, and leaves can reference each other.
 - Triggers are optional in a composition.
 - Pydantic v2 is the description language for the vocabulary.
+- The output order is Pydantic v2 as the driver, then JSON-LD, then YAML-LD.
 - The PRD uses one short sentence per idea.
 
 ## Open questions
 
-- What fields does every block share? Deferred on 2026-08-21 because Chris reads the PRD first.
+- What fields does every node share? Deferred on 2026-08-21 while the user reviews the PRD.
