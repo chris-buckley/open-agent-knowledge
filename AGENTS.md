@@ -5,7 +5,7 @@ WHEN you start any work in this repository, you MUST:
 - IMPORTANT: Read these instructions in full before your first action. They govern ALL work in this repository, with NO exception.
 - Read the `AGENTS.md` of each directory you work in. This root file governs every `AGENTS.md` in this repository.
 - Treat every MUST in these files as a hard requirement, not guidance.
-- NEVER act against a rule in these files. When a task conflicts with a rule, stop and ask Chris.
+- NEVER act against a rule in these files. When a task conflicts with a rule, stop and ask the user.
 - Obey these files over habit, convention, and inferred preference.
 
 WHEN working in this repository, you MUST:
@@ -64,7 +64,29 @@ WHEN you infer repository rules, you MUST know these concepts:
 name,meaning
 operating context,"the complete information and rules supplied to an agent: instructions, constants, schemas, state, triggers, processes, input"
 UAOC,"Universal Agent Operating Context, the universal language this repository defines to describe an agent's operating context"
+interpreter,the agent that interprets UAOC knowledge and follows its instructions
 ```
+
+WHEN working in this repository, you MUST:
+
+- Read `docs/PRD.md` before any other work.
+
+WHEN you work with JSON-LD or JSON Schema, you MUST:
+
+- Use the matching skill in `.agent/skills`.
+- Read its `SKILL.md` before you start.
+- Search its references, guides, and examples exhaustively for material that applies to the work.
+- Apply that material when you plan and do the work.
+
+WHEN you name the consumer of UAOC knowledge, you MUST:
+
+- Use the concept interpreter.
+- Do not use reader.
+
+WHEN you write a document in this repository, you MUST:
+
+- Include only information relevant to the document's purpose.
+- Include only information the user confirmed.
 
 WHEN you implement a change, you MUST:
 
@@ -101,7 +123,7 @@ WHEN the user corrects or clarifies something you misinterpreted or got wrong, a
 - Prefer the nested `AGENTS.md` that governs the affected path or behaviour.
 - Update the root `AGENTS.md` only when the correction applies to the whole repository.
 - Update the only `AGENTS.md` when the repository has one.
-- Ask Chris before you proceed when the correct `AGENTS.md` is unclear.
+- Ask the user before you proceed when the correct `AGENTS.md` is unclear.
 
 WHEN you store a durable lesson, preference, or decision, you MUST:
 
