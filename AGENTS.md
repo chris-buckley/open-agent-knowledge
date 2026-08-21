@@ -63,8 +63,8 @@ WHEN you infer repository rules, you MUST know these concepts:
 ```csv
 name,meaning
 operating context,"the complete information and rules supplied to an agent: instructions, constants, schemas, state, triggers, processes, input"
-UAOC,"Universal Agent Operating Context, the universal language this repository defines to describe an agent's operating context"
-interpreter,the agent that interprets UAOC knowledge and follows its instructions
+OAK,"Open Agent Knowledge, the universal knowledge standard this repository defines, formerly UAOC"
+interpreter,the agent that interprets OAK knowledge and follows its instructions
 ```
 
 WHEN working in this repository, you MUST:
@@ -82,7 +82,7 @@ WHEN you work with JSON-LD, JSON Schema, or Pydantic, you MUST:
 - Search its references, guides, and examples exhaustively for material that applies to the work.
 - Apply that material when you plan and do the work.
 
-WHEN you name the consumer of UAOC knowledge, you MUST:
+WHEN you name the consumer of OAK knowledge, you MUST:
 
 - Use the concept interpreter.
 - Do not use reader.

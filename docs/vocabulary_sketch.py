@@ -1,4 +1,4 @@
-"""Reference sketch of the UAOC vocabulary as Pydantic v2 models.
+"""Reference sketch of the OAK vocabulary as Pydantic v2 models.
 
 This file supports docs/PRD.md. It is a reference, not the implementation.
 """

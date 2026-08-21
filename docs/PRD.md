@@ -1,18 +1,18 @@
-# UAOC Product Requirements
+# OAK Product Requirements
 
 A reference sketch of the vocabulary as Pydantic v2 models is in [vocabulary_sketch.py](vocabulary_sketch.py).
 
 ## Purpose
 
-- UAOC is the Universal Agent Operating Context.
-- UAOC is a knowledge standard.
-- UAOC gives one standard vocabulary for knowledge.
-- UAOC defines the smallest nodes of knowledge in a schema.
+- OAK is Open Agent Knowledge.
+- OAK is a knowledge standard.
+- OAK gives one standard vocabulary for knowledge.
+- OAK defines the smallest nodes of knowledge in a schema.
 - Nodes compose into larger structures.
 - A composition of nodes can represent an agent.
 - A composition of nodes can represent an SOP.
 - A composition of nodes can represent static information.
-- UAOC tells the interpreter how to interpret the knowledge before the interpreter uses it.
+- OAK tells the interpreter how to interpret the knowledge before the interpreter uses it.
 
 ## Principles
 
@@ -91,8 +91,9 @@ The set of node types is closed.
 
 ## Decisions
 
-- The name is UAOC, short for Universal Agent Operating Context.
-- UAOC is a knowledge standard, not an information standard, because knowledge covers static information and executable instructions.
+- The name is OAK, short for Open Agent Knowledge.
+- The name changed from UAOC, Universal Agent Operating Context, to OAK on 2026-08-21, because knowledge is broader than an operating context.
+- OAK is a knowledge standard, not an information standard, because knowledge covers static information and executable instructions.
 - The set of node types is closed.
 - The node types are instructions, constants, schemas, triggers, state, processes, and input.
 - Interpretation belongs to the instructions node type, because it is a rule for how to interpret the knowledge.
