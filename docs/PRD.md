@@ -9,10 +9,11 @@ A reference sketch of the vocabulary as Pydantic v2 models is in [vocabulary_ske
 - OAK gives one standard vocabulary for knowledge.
 - OAK defines the smallest nodes of knowledge in a schema.
 - Nodes compose into larger structures.
-- A composition of nodes can represent an agent.
-- A composition of nodes can represent an SOP.
-- A composition of nodes can represent static information.
 - OAK tells the interpreter how to interpret the knowledge before the interpreter uses it.
+
+### Representations
+
+- One or many nodes can represent (agent|SOP|static information|project|operating system|knowledge base|library|encoded file system|conversation).
 
 ## Principles
 
@@ -103,6 +104,55 @@ The set of node types is closed.
 ### Constants
 
 - Constants are values that stay the same in every use of the knowledge.
+
+Example: multi-line TEXT constant using TEXT<< ... >>. Tree symbols are not used because they cost extra tokens; use an indent instead.
+
+```text
+<constants>
+REPO_TREE: TEXT<<
+cb-agnostic-prompt-protocol
+  assets
+    constants
+      constants-json-block-v1.0.0.example.md
+    formats
+      format-code-map-v1.0.0.example.md
+      format-error-v1.0.0.example.md
+  SKILL.md
+>>
+</constants>
+```
+
+Example: multi-line JSON constant using JSON<< ... >>. Engines parse BODY as JsonValue then compile it to canonical JSON (see json_spacing).
+
+```text
+<constants>
+DEFAULT_TZ: "Z"
+
+API_CONFIG: JSON<<
+{
+  "api_base_path": "/v1",
+  "default_time_zone": DEFAULT_TZ,
+  "retries": 3,
+  "timeout_ms": 2000
+}
+>>
+</constants>
+```
+
+Example: multi-line CSV constant using CSV<< ... >>. Engines parse BODY as CSV then compile it to canonical JSON rows (see 00 Structure / 02 Linting).
+
+```text
+<constants>
+DEFAULT_TZ: "Z"
+
+SERVICE_TABLE: CSV<<
+service,region,default_tz,enabled,note
+billing,us-east-1,DEFAULT_TZ,true,"Primary billing region"
+support,ap-southeast-2,"Australia/Brisbane",true,"Escalations use ""follow the sun"""
+reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
+>>
+</constants>
+```
 
 ### Schemas
 
