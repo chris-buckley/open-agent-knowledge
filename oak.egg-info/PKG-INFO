@@ -1,8 +1,0 @@
-Metadata-Version: 2.4
-Name: oak
-Version: 0.0.0
-Summary: Open Agent Knowledge, a knowledge standard authored as Pydantic v2 models
-Requires-Python: >=3.11
-Requires-Dist: pydantic[email,timezone]>=2.12
-Requires-Dist: pydantic-extra-types[all]>=2.11
-Requires-Dist: pydantic-settings>=2.15
