@@ -5,6 +5,7 @@ updated: 2026-08-22
 owner: Christopher Buckley
 sketch: vocabulary_sketch.py
 authoring:
+  - These rules govern every line after the first `---` that follows the Purpose section; the Purpose prose above it is exempt.
   - This document is the complete ground truth for OAK; it evolves and is never partial.
   - Read it in full before any work.
   - One short sentence per line, one idea per sentence.
@@ -17,9 +18,7 @@ authoring:
 
 # OAK Product Requirements
 
-## Global
-
-### Purpose
+## Purpose
 
 Open Agent Knowledge (OAK) is a knowledge standard. OAK gives one standard vocabulary for knowledge by defining the smallest nodes of knowledge in a schema. Nodes compose into larger structures that OAK can compile into many different outputs. OAK is the next iteration of the [Agnostic Prompt Standard (APS)](https://github.com/chris-buckley/agnostic-prompt-standard).
 
@@ -36,7 +35,9 @@ Practical applications include, but are not limited to:
 - Encoded file systems
 - Conversations
 
-### Principles
+---
+
+## Principles
 
 1. Reduce, reduce, reduce: less is more.
 2. Find the common denominator in each part of the tree.
@@ -45,7 +46,7 @@ Practical applications include, but are not limited to:
 5. Write the smallest amount of code that represents a vast amount of knowledge.
 6. OAK has no comments: the knowledge documents itself, self-(describes|explains|documents)
 
-### Constraints
+## Constraints
 
 1. Define one thing once.
 2. Build every structure as a tree of nodes.
@@ -58,7 +59,7 @@ Practical applications include, but are not limited to:
 
 The set of node types is closed.
 
-### Output model
+## Output model
 
 - One knowledge tree can emit many output representations.
 - The main outputs are Pydantic v2, OAK, JSON-LD, YAML-LD, a file system representation, relational tables in SQL, and CSV files placed in the file system.
@@ -106,9 +107,9 @@ oak_sections:
 - A controlled style preserves meaning, obligation, negation, conditions, and step order.
 - A renderer fails when it cannot validate a requested controlled style.
 
-### Text conventions
+## Text conventions
 
-#### Numbers, units, and time
+### Numbers, units, and time
 
 ```yaml
 numbers_units_time:
@@ -129,7 +130,7 @@ numbers_units_time:
     local_times_require_offset_or_iana: true
 ```
 
-#### Sentence, paragraph, and list limits
+### Sentence, paragraph, and list limits
 
 ```yaml
 sentence_limits:
@@ -145,7 +146,7 @@ lists:
   supportive_bullets: true
 ```
 
-### Decisions
+## Decisions
 
 - The name is OAK, short for Open Agent Knowledge.
 - The name changed from UAOC, Universal Agent Operating Context, to OAK on 2026-08-21, because knowledge is broader than an operating context.
@@ -176,7 +177,7 @@ lists:
 - A renderer claims APS compatibility only when the tree and text meet APS rules.
 - The PRD uses one short sentence per idea.
 
-### Open questions
+## Open questions
 
 - What fields does every node share? Deferred on 2026-08-21 while the user reviews the PRD. The title field is out of the sketch until this is decided.
 
