@@ -100,6 +100,7 @@ WHEN you name the consumer of OAK knowledge, you MUST:
 
 WHEN you change `docs/PRD.md`, you MUST:
 
+- Follow the `authoring` rules in its front matter.
 - Explain the exact lines to the user before you write them.
 - Write them only after the user agrees.
 - Compress a list of alternatives into one line in the form `(a|b|c)` to reduce tokens.
