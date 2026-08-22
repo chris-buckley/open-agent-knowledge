@@ -66,6 +66,7 @@ operating context,"the complete information and rules supplied to an agent: inst
 OAK,"Open Agent Knowledge, the universal knowledge standard this repository defines, formerly UAOC"
 interpreter,"the human, agent, or program that interprets OAK knowledge before using it"
 trigger,"the node that signposts knowledge to the outside; it records why an interpreter enters and, when matched, guides which instructions, schemas, and processes apply"
+APS,"Agnostic Prompt Standard, the legacy standard that OAK succeeds; its skill snapshot is in `legacy-snapshot-aps`"
 ```
 
 WHEN working in this repository, you MUST:
@@ -86,6 +87,12 @@ WHEN you work with JSON-LD, JSON Schema, or Pydantic, you MUST:
 - Search its references, guides, and examples exhaustively for material that applies to the work.
 - Apply that material when you plan and do the work.
 
+WHEN you use APS material, you MUST:
+
+- Treat APS as legacy reference, not a source to swap into OAK 1:1.
+- Adopt an APS element only when `docs/PRD.md` or the user adopts it.
+- Keep OAK names and definitions; do not carry APS names over.
+
 WHEN you name the consumer of OAK knowledge, you MUST:
 
 - Use the concept interpreter.
@@ -95,6 +102,7 @@ WHEN you change `docs/PRD.md`, you MUST:
 
 - Explain the exact lines to the user before you write them.
 - Write them only after the user agrees.
+- Compress a list of alternatives into one line in the form `(a|b|c)` to reduce tokens.
 
 WHEN you write a document in this repository, you MUST:
 
