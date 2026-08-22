@@ -4,7 +4,7 @@ This file supports docs/PRD.md. It is a reference, not the implementation.
 """
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
@@ -127,3 +127,8 @@ class Knowledge(Composition):
 
 Composition.model_rebuild()
 Knowledge.model_rebuild()
+
+
+def dump_pydantic(knowledge: Knowledge) -> dict[str, Any]:
+    """The Pydantic output. Omits unset optional fields."""
+    return knowledge.model_dump(exclude_unset=True)

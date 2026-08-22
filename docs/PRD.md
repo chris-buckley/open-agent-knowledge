@@ -9,10 +9,11 @@ authoring:
   - This document is the complete ground truth for OAK; it evolves and is never partial.
   - Read it in full before any work.
   - One short sentence per line, one idea per sentence.
+  - Write requirements as imperatives and definitions or rationale as declaratives.
   - Compress alternatives as (a|b|c).
   - Write only confirmed information.
   - Every line fights for its place; remove what loses.
-  - Each line maps to (Rust validator: type|literal|discriminated union|nested model|min or max length|gt or lt|regex|strict|no extra fields|frozen|JSON parse from bytes|Rust serializer: dump|JSON dump|include or exclude|exclude_if|alias|context|JSON Schema|Python callback: after validator|field validator|root graph check|field serializer|model serializer to text|purpose: intent|rationale); a line that maps to none is removed.
+  - Each line maps to (core schema: type|literal|discriminated union|nested model|min or max length|gt or lt|regex|strict|no extra fields|frozen|JSON parse from bytes|core serializer: dump|JSON dump|include or exclude|alias|context|Python engine rule: after validator|field validator|root graph check|exclude_if|field serializer|model serializer to text|JSON Schema|source lint|runtime check|purpose: intent|rationale); a line that maps to none is removed.
   - A line the engine can enforce is enforced in the models in the same pass, because pydantic-core runs the Rust items natively and dispatches the Python callbacks, so every such line is checked on every authoring.
 ---
 
@@ -37,38 +38,26 @@ Practical applications include, but are not limited to:
 
 ---
 
-## Principles
-
-1. Reduce, reduce, reduce: less is more.
-2. Find the common denominator in each part of the tree.
-3. Identify it, recognize it, and implement only it.
-4. Do not repeat yourself.
-5. Write the smallest amount of code that represents a vast amount of knowledge.
-6. OAK has no comments: the knowledge documents itself, self-(describes|explains|documents)
-
 ## Constraints
 
-1. Define one thing once.
-2. Build every structure as a tree of nodes.
-3. Leaves in the tree can reference each other.
-4. The tree can represent an enormous range of knowledge types from the foundational vocabulary.
-5. Each vocabulary element is mandatory or optional.
-6. The vocabulary stays very small.
-7. The vocabulary holds only the node types this PRD lists.
-8. Pydantic v2 models describe the whole vocabulary.
-
-The set of node types is closed.
+1. Reject an empty (ID|text) field.
+2. Reject a process with no steps.
+3. Reject unknown fields.
+4. Reject a node type other than (instruction|constant|schema|state|trigger|process|input).
+5. Require one root composition.
+6. Require each composition child to be a (node|composition).
+7. Reject duplicate IDs across nodes and compositions.
+8. Reject a (missing|wrong-type) reference target.
+9. Omit unset optional fields from the Pydantic output.
+10. OAK when authoring the build of OAK emits a EBNF grammar for OAK itself, which is a meta-grammar for OAK.
 
 ## Output model
 
 - One knowledge tree can emit many output representations.
 - The main outputs are Pydantic v2, OAK, JSON-LD, YAML-LD, a file system representation, relational tables in SQL, and CSV files placed in the file system.
-- The file system representation is its own output, separate from CSV files placed in the file system.
-- OAK generates an EBNF grammar of the OAK output as an output.
-- Pydantic v2 is the driver.
-- Pydantic v2 is the authoring form; JSON-LD, YAML-LD, and the file system representation are interchangeable once built.
+- Pydantic v2 is the authoring form; JSON-LD, YAML-LD, and file system representation are interchangeable once built.
 - OAK is the default output.
-- The OAK output is text.
+- The OAK output is prose structured text which optimises for disambiguation for AI Models.
 - Each projection defines what it preserves, what it loses, and how it orders content.
 - OAK renders from the authored tree with a variant and a style.
 - These render choices do not change the authored tree or the vocabulary.

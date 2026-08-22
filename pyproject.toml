@@ -1,0 +1,10 @@
+[project]
+name = "oak"
+version = "0.0.0"
+description = "Open Agent Knowledge, a knowledge standard authored as Pydantic v2 models"
+requires-python = ">=3.11"
+dependencies = [
+  "pydantic[email,timezone]>=2.12",
+  "pydantic-extra-types[all]>=2.11",
+  "pydantic-settings>=2.15",
+]
