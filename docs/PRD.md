@@ -167,12 +167,9 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 
 - Triggers route intent to the knowledge.
 - A trigger records why the interpreter enters the knowledge.
-- A trigger can reference one process to follow when it matches.
+- A trigger can optionally reference one process to follow when it matches.
 - A trigger without a process remains a signpost.
 - A trigger separates use with intent from use by discovery.
-- A trigger is the knowledge's signpost to the outside.
-- Anything searching or routing reads triggers before it enters the knowledge.
-- A trigger signposts the composition that holds it.
 - Triggers are optional.
 
 ### Processes
@@ -235,10 +232,11 @@ lists:
 - The set of node types is closed.
 - The node types are instructions, constants, schemas, state, triggers, processes, and input.
 - OAK is the next iteration of APS; it keeps the APS section order and uses its own names.
-- Interpretation rules belong to instructions, because they govern every entry.
+- Interpretation rules belong to instructions because they govern every entry.
 - A process reached through a trigger gives the ordered steps for that entry.
 - A composition's interpretation instructions apply before a process reached through a trigger.
-- A trigger can reference one process, and the reference must target a process node.
+- A trigger can optionally reference one process.
+- A trigger's process reference must target a process node.
 - Processes do not have to be referenced by triggers.
 - Multiple triggers can reference the same process or different processes.
 - The consumer of the knowledge is named the interpreter, confirmed over actor on 2026-08-21.
