@@ -49,7 +49,8 @@ class Schema(BaseNode):
 
 class Trigger(BaseNode):
     type: Literal["trigger"]
-    when: Text  # why the interpreter looks at this
+    when: Text  # why the interpreter enters
+    then: Ref | None = None  # process to follow when matched
 
 
 class State(BaseNode):
@@ -114,7 +115,9 @@ class Knowledge(Composition):
             for ref in composition.interpretation:
                 require(ref, (Instruction,), f"{composition.id}.interpretation")
         for node in nodes.values():
-            if isinstance(node, Process):
+            if isinstance(node, Trigger) and node.then is not None:
+                require(node.then, (Process,), f"{node.id}.then")
+            elif isinstance(node, Process):
                 for ref in node.uses:
                     require(ref, (Constant, Schema), f"{node.id}.uses")
             elif isinstance(node, Input):
