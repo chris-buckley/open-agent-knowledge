@@ -3,6 +3,7 @@ title: OAK Product Requirements
 status: draft
 updated: 2026-08-22
 owner: Christopher Buckley
+sketch: vocabulary_sketch.py
 authoring:
   - This document is the complete ground truth for OAK; it evolves and is never partial.
   - Read it in full before any work.
@@ -18,20 +19,22 @@ authoring:
 
 ## Global
 
-A reference sketch of the vocabulary as Pydantic v2 models is in [vocabulary_sketch.py](vocabulary_sketch.py).
-
 ### Purpose
 
-- OAK is Open Agent Knowledge.
-- OAK is a knowledge standard.
-- OAK gives one standard vocabulary for knowledge.
-- OAK defines the smallest nodes of knowledge in a schema.
-- Nodes compose into larger structures.
-- OAK tells the interpreter how to interpret the knowledge before the interpreter uses it.
+Open Agent Knowledge (OAK) is a knowledge standard. OAK gives one standard vocabulary for knowledge by defining the smallest nodes of knowledge in a schema. Nodes compose into larger structures that OAK can compile into many different outputs. OAK is the next iteration of the [Agnostic Prompt Standard (APS)](https://github.com/chris-buckley/agnostic-prompt-standard).
 
-#### Representations
-
-- One or many nodes can represent (agent|SOP|static information|project|operating system|knowledge base|library|encoded file system|conversation).
+Practical applications include, but are not limited to:
+- Prompts for Agents (AI Models)
+- Standard Operating Procedures (SOPs)
+- Product Requirements Document
+- React components
+- Static information
+- Entire projects
+- Operating systems
+- Knowledge base
+- Library documentation
+- Encoded file systems
+- Conversations
 
 ### Principles
 
