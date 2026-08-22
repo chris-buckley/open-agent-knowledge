@@ -75,6 +75,9 @@ WHEN working in this repository, you MUST:
 - Attack every implementation, every line of code, and every line of documentation, no matter what.
 - Make every bit of information fight for its place.
 - Remove what does not win its place.
+- Treat `docs/PRD.md` as the complete ground truth. It evolves; it is never partial.
+- Do not stage work into versions or phases, such as v0 or later.
+- Change the PRD and produce the code that meets it in one pass.
 
 WHEN you work with JSON-LD, JSON Schema, or Pydantic, you MUST:
 
@@ -87,6 +90,11 @@ WHEN you name the consumer of OAK knowledge, you MUST:
 
 - Use the concept interpreter.
 - Do not use reader.
+
+WHEN you change `docs/PRD.md`, you MUST:
+
+- Explain the exact lines to the user before you write them.
+- Write them only after the user agrees.
 
 WHEN you write a document in this repository, you MUST:
 
