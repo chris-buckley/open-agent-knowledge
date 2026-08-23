@@ -4,6 +4,17 @@ from typing import Annotated
 
 from pydantic import StringConstraints
 
-NON_BLANK_LINE_PATTERN = r"^[^\r\n]*[^\s][^\r\n]*$"
+from oak.vocabulary.syntax import CharacterClass, Repeat, Rule, Sequence
 
-NonBlankLine = Annotated[str, StringConstraints(pattern=NON_BLANK_LINE_PATTERN)]
+NON_BLANK_LINE_SYNTAX = Rule(
+    "non_blank_line",
+    Sequence(
+        (
+            Repeat(CharacterClass(r"^\r\n")),
+            CharacterClass(r"^\s"),
+            Repeat(CharacterClass(r"^\r\n")),
+        )
+    ),
+)
+
+NonBlankLine = Annotated[str, StringConstraints(pattern=NON_BLANK_LINE_SYNTAX.pattern)]

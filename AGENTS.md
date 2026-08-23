@@ -118,7 +118,7 @@ WHEN you change `docs/PRD.md`, you MUST:
 - Follow the `authoring` rules in its front matter.
 - Show the user one example per change with the exact PRD lines under it before you write them.
 - Write the examples to one markdown file in the scratchpad.
-- Open it as a preview beside the user with `vscipc --window open-agent-knowledge markdown.showPreviewToSide --uri <file uri>`, not as a raw file.
+- Open it as a preview beside the user with `vscipc markdown.showPreviewToSide --uri <file uri>`, not as a raw file.
 - Keep the chat reply to what the user must answer.
 - Write them only after the user agrees.
 - Compress a list of alternatives into one line in the form `(a|b|c)` to reduce tokens.

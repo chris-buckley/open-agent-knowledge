@@ -1,20 +1,56 @@
-"""Open Agent Knowledge: the authoring API."""
+"""Open Agent Knowledge: the direct Pydantic authoring API."""
 
-from oak.node.parts import AtLeast, AtMost, Lines, ListOf, MaxChars, NonEmpty, OneOf, Regex, Schema, Type, Where
-from oak.render import schema_json_ld, schema_xml
+from oak.node import Node, Root
+from oak.node.parts import (
+    AtLeast,
+    AtMost,
+    BindingFailure,
+    Constant,
+    Input,
+    Instruction,
+    Lines,
+    ListOf,
+    MaxChars,
+    NonEmpty,
+    OneOf,
+    Part,
+    Process,
+    Regex,
+    Schema,
+    SchemaBindingError,
+    State,
+    Trigger,
+    Type,
+    Where,
+    where,
+)
+from oak.render import node_json_ld, schema_json_ld, schema_xml
 
 __all__ = [
     "AtLeast",
     "AtMost",
+    "BindingFailure",
+    "Constant",
+    "Input",
+    "Instruction",
     "Lines",
     "ListOf",
     "MaxChars",
+    "Node",
     "NonEmpty",
     "OneOf",
+    "Part",
+    "Process",
     "Regex",
+    "Root",
     "Schema",
+    "SchemaBindingError",
+    "State",
+    "Trigger",
     "Type",
     "Where",
+    "node_json_ld",
     "schema_json_ld",
     "schema_xml",
+    "where",
 ]

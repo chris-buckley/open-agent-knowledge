@@ -1,7 +1,7 @@
 ---
 title: OAK Product Requirements
 status: draft
-updated: 2026-08-23
+updated: 2026-08-24
 owner: Christopher Buckley
 defaults:
   render: OAK
@@ -77,6 +77,11 @@ Practical applications include, but are not limited to:
 - The flat entry registry is derived from the tree during validation, not authored.
 - Cross-references use typed fields, not a generic link field.
 - Require each (node|entry) ID to use `IriId` independent of file placement.
+- Every entry shares only `id`.
+- Keep `name` and `purpose` part-specific.
+- Discriminate the closed entry union on `part`.
+- Author the tree root as `Root`.
+- Author each nested node as `Node`.
 - Root validation rejects duplicate IDs, missing reference targets, and wrong target types.
 - Constants and state hold any JSON value.
 - Validation is strict: no type coercion and no unknown fields.
@@ -161,14 +166,20 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Store each template as one verbatim string.
 - Keep `where` as an ordered list.
 - Give each `Where` one `Placeholder`, one non-empty constraint list, optional examples, and an optional description.
+- Author each `Where` with one `Placeholder` followed by its constraints.
 - Represent each constraint as one discriminated union of (type|one of|regex|non-empty|max chars|lines|list of|at least|at most) on a required `kind`.
+- Default each constraint `kind` in direct Pydantic authoring.
+- Keep each constraint `kind` required in JSON Schema.
 - Select each `type` value and each `list of` item from the vocabulary datatypes.
 - Give each (at least|at most) a value that is (number|Placeholder).
 - Extract each distinct `Placeholder` from the template.
 - Reject a duplicate `Placeholder` in `where`.
 - Reject a schema when its template `Placeholder` set and `where` `Placeholder` set differ.
 - Reject an (at least|at most) whose `Placeholder` value is absent from the same schema.
+- Reject examples on a `Where` with a `Placeholder` valued bound.
 - Reject a `lines` constraint when (both bounds are absent|the minimum exceeds the maximum).
+- Require each `lines` bound to be positive.
+- Restrict authored regex patterns to anchors, atoms, character classes, escapes, and quantifiers.
 - Reject a regex constraint that rust-regex cannot compile.
 - Name each rejection with one error code, such as `placeholder_where_mismatch`.
 - Apply every `Where` constraint to each value bound to its `Placeholder`.
@@ -176,6 +187,9 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Apply datatype validation before each bound comparison.
 - Validate regex values with rust-regex.
 - Accept placeholder bindings from the interpreter instead of recovering them from rendered text.
+- Raise `SchemaBindingError` when a schema binding fails.
+- Give each binding failure one code, one `Placeholder`, and one message.
+- Collect every binding failure before raising.
 
 ## State
 
@@ -186,11 +200,9 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Triggers route intent to the knowledge.
 - A trigger records why the interpreter enters the knowledge.
 - Require each trigger `when` value to use `NonBlankLine`.
-- A trigger can optionally reference one process to follow when it matches.
-- A trigger without a process remains a signpost.
+- Require each trigger to reference one process.
 - A trigger separates use with intent from use by discovery.
 - Triggers are optional.
-- A trigger can optionally reference one process.
 - A trigger's process reference must target a process entry.
 - Multiple triggers can reference the same process or different processes.
 - The name trigger is confirmed over signal on 2026-08-21, because it names what makes an outsider enter.
@@ -211,6 +223,7 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 
 - Input is the contract for what the knowledge expects to receive.
 - Input is defined before the knowledge is used.
+- Give input one `NonBlankLine` body.
 
 ## Vocabulary
 
@@ -270,8 +283,9 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 
 - One knowledge tree can render to many formats.
 - A render is a representation of one node or tree.
-- The renders are OAK, JSON-LD, YAML-LD, a file system representation, relational tables in SQL, and CSV files placed in the file system.
-- JSON-LD, YAML-LD, and the file system representation are interchangeable once built.
+- The renders are OAK and JSON-LD.
+- JSON-LD is the interchange render.
+- The Pydantic dump is an internal authoring snapshot.
 - Each projection defines what it preserves, what it loses, and how it orders content.
 
 ### OAK
@@ -301,11 +315,11 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Render each instruction or trigger as its text alone.
 - Render each constant name with `ConstantName`.
 - A process renders with an inner structure.
-- Render each schema template followed by `WHERE:` and one generated line for each `Where`.
+- Render each schema template followed by one blank line and `WHERE:`.
 - Preserve template whitespace in each text render.
 - Render `Where` entries in authored order.
-- Render each `Where` line from its delimited `Placeholder`, constraints in authored order, examples, and optional description.
-- Join constraints, examples, and the optional description with `; `.
+- Render each `Where` as one `Placeholder` line followed by indented detail lines.
+- Render each constraint, example, and description on its own detail line.
 - The OAK render loses node ids and keeps schema entry ids.
 
 #### XML
@@ -323,8 +337,11 @@ oak_parts:
     - <input>…</input>
 ```
 
-- The xml variant is well-formed XML.
-- Render schema text as XML character data without changing its parsed value.
+- The xml variant uses XML-like tags as text delimiters.
+- Render text between xml tags verbatim.
+- Escape xml attribute values.
+- Put each xml opening tag before its text on a separate line.
+- Put each xml closing tag after its text on a separate line.
 - The xml variant uses OAK names and node structure.
 - APS is not the canonical xml variant, because APS requires a process part and a process target that OAK does not.
 - Join instruction bodies inside `<instructions>` with one U+000A LINE FEED.
@@ -350,26 +367,14 @@ oak_parts:
 
 - Render each schema id as `@id`.
 - Render `Schema`, `Where`, and each constraint kind as `@type`.
-- Derive each `Where` `@id` from its schema `@id` and `Placeholder`.
+- Derive each `Where` `@id` as `{schema @id}/where/{Placeholder}`.
 - Render `where`, `constraints`, and `examples` as `@list` containers.
 - Define context terms for `template`, `where`, `placeholder`, `constraints`, `examples`, and each constraint field.
 - Render each `Placeholder` valued (at least|at most) value as the referenced `Where` `@id`.
-
-### YAML-LD
-
-TBC
-
-### File system
-
-TBC
-
-### SQL
-
-TBC
-
-### CSV
-
-TBC
+- Require the caller to supply the JSON-LD vocabulary IRI.
+- Define `oak` as the caller vocabulary prefix.
+- Render OAK `@type` values as `oak` compact IRIs.
+- Render one context at the root of each JSON-LD document.
 
 ---
 
@@ -417,18 +422,18 @@ oak
 │   ├── base.py  # shared config, references, rust-regex engine
 │   ├── node  # layer 1, one complete set of the seven parts
 │   │   ├── __init__.py
-│   │   ├── model.py  # the node model: seven parts, child nodes
+│   │   ├── model.py  # Node and Root: the seven parts, child nodes
 │   │   ├── graph.py  # root graph checks
 │   │   ├── dump.py  # Pydantic dump
 │   │   └── parts  # one module per part, its entry model
 │   │       ├── __init__.py  # the closed set, one discriminated union
-│   │       ├── instructions.py
-│   │       ├── constants.py
+│   │       ├── instructions.py  # Instruction
+│   │       ├── constants.py  # Constant
 │   │       ├── schemas.py  # Schema, Where, the constraint union, bind
-│   │       ├── state.py
-│   │       ├── triggers.py
-│   │       ├── processes.py
-│   │       └── input.py
+│   │       ├── state.py  # State
+│   │       ├── triggers.py  # Trigger
+│   │       ├── processes.py  # Process
+│   │       └── input.py  # Input
 │   ├── vocabulary  # layer 3, how information is conveyed without ambiguity; one file provides one thing
 │   │   ├── __init__.py
 │   │   ├── syntax.py  # restricted text syntax tree; generates Rust regex, JSON Schema pattern, EBNF
@@ -439,6 +444,7 @@ oak
 │   │   │   ├── non_blank_line.py  # NonBlankLine
 │   │   │   ├── constant_name.py  # ConstantName
 │   │   │   ├── placeholder.py  # Placeholder, template token extraction
+│   │   │   ├── regex_pattern.py  # RegexPattern, the portable authored subset
 │   │   │   └── ...
 │   │   ├── datatypes  # typed values, one model each
 │   │   │   ├── __init__.py
@@ -457,15 +463,13 @@ oak
 │       ├── __init__.py  # render selection, defaults apply
 │       ├── oak  # the default render
 │       │   ├── __init__.py
+│       │   ├── syntax.py  # WHERE wording, constraint text
 │       │   ├── arrangement.py  # seven parts in APS order
 │       │   ├── variants.py  # layer 4, xml tags or markdown fences
 │       │   └── styles.py  # authored, controlled ASD-STE100
-│       ├── json_ld.py  # @id, @type, @list, the context
-│       ├── yaml_ld.py
-│       ├── filesystem.py
-│       ├── sql.py
-│       └── csv.py
+│       └── json_ld.py  # @id, @type, @list, the context
 ├── build  # uses the package to generate the outputs
+│   ├── examples.py  # validate every model and field example
 │   ├── ebnf.py
 │   ├── prompt.py
 │   └── docs.py

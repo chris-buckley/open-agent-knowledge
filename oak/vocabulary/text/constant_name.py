@@ -4,7 +4,17 @@ from typing import Annotated
 
 from pydantic import StringConstraints
 
-CONSTANT_NAME_BODY = r"[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*"
-CONSTANT_NAME_PATTERN = rf"^{CONSTANT_NAME_BODY}$"
+from oak.vocabulary.syntax import CharacterClass, LiteralText, Repeat, Rule, Sequence
 
-ConstantName = Annotated[str, StringConstraints(pattern=CONSTANT_NAME_PATTERN)]
+CONSTANT_NAME_SYNTAX = Rule(
+    "constant_name",
+    Sequence(
+        (
+            CharacterClass("A-Z"),
+            Repeat(CharacterClass("A-Z0-9")),
+            Repeat(Sequence((LiteralText("_"), Repeat(CharacterClass("A-Z0-9"), minimum=1)))),
+        )
+    ),
+)
+
+ConstantName = Annotated[str, StringConstraints(pattern=CONSTANT_NAME_SYNTAX.pattern)]

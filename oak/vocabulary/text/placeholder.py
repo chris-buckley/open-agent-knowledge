@@ -1,14 +1,18 @@
-"""Placeholder: the bare name of a variable part of a template; `<NAME>` is its template text syntax."""
+"""Placeholder: the bare name of a variable part; `<NAME>` is its template text syntax."""
 
 import re
+from typing import Annotated
 
-from oak.vocabulary.text.constant_name import CONSTANT_NAME_BODY, ConstantName
+from pydantic import StringConstraints
 
-Placeholder = ConstantName
+from oak.vocabulary.syntax import Rule
+from oak.vocabulary.text.constant_name import CONSTANT_NAME_SYNTAX
 
-PLACEHOLDER_TOKEN_PATTERN = rf"^<{CONSTANT_NAME_BODY}>$"
+PLACEHOLDER_SYNTAX = Rule("placeholder", CONSTANT_NAME_SYNTAX.reference())
 
-_TOKEN = re.compile(rf"<({CONSTANT_NAME_BODY})>")
+Placeholder = Annotated[str, StringConstraints(pattern=PLACEHOLDER_SYNTAX.pattern)]
+
+_TOKEN = re.compile(f"<({PLACEHOLDER_SYNTAX.body})>")
 
 
 def placeholders_in(template: str) -> set[str]:

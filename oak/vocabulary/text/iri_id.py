@@ -4,6 +4,18 @@ from typing import Annotated
 
 from pydantic import StringConstraints
 
-IRI_ID_PATTERN = r"^[A-Za-z][A-Za-z0-9+.-]*:[^\s]+$"
+from oak.vocabulary.syntax import CharacterClass, LiteralText, Repeat, Rule, Sequence
 
-IriId = Annotated[str, StringConstraints(pattern=IRI_ID_PATTERN)]
+IRI_ID_SYNTAX = Rule(
+    "iri_id",
+    Sequence(
+        (
+            CharacterClass("A-Za-z"),
+            Repeat(CharacterClass(r"A-Za-z0-9+.\-")),
+            LiteralText(":"),
+            Repeat(CharacterClass(r"^\s"), minimum=1),
+        )
+    ),
+)
+
+IriId = Annotated[str, StringConstraints(pattern=IRI_ID_SYNTAX.pattern)]
