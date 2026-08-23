@@ -134,6 +134,11 @@ WHEN you implement a change, you MUST:
 - Avoid speculative abstractions, configuration, and indirection.
 - Keep components modular and concerns clearly separated.
 
+WHEN you change the package or `docs/PRD.md`, you MUST:
+
+- Update each file in `examples` that the change makes invalid.
+- Run each script in `examples` and keep its regenerated render next to it.
+
 WHEN a change makes a code path obsolete, you MUST:
 
 - Remove the obsolete path.

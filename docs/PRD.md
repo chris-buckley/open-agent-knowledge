@@ -318,8 +318,7 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Render each schema template followed by one blank line and `WHERE:`.
 - Preserve template whitespace in each text render.
 - Render `Where` entries in authored order.
-- Render each `Where` as one `Placeholder` line followed by indented detail lines.
-- Render each constraint, example, and description on its own detail line.
+- Render each `Where` as one line: its delimited `Placeholder`, constraints joined by `; `, examples once in brackets as `(e.g. ...)`, then the description.
 - The OAK render loses node ids and keeps schema entry ids.
 
 #### XML
@@ -415,6 +414,9 @@ oak
 ├── docs  # ground truth
 │   ├── PRD.md
 │   └── types.md  # Pydantic types the core schema validates
+├── examples  # authored trees, one per file; the render sits next to its author
+│   ├── outline.py  # authors one tree, writes outline.oak.md
+│   └── outline.oak.md  # * the OAK render of outline.py
 ├── legacy-snapshot-aps  # APS reference, read only
 ├── oak  # the package, what the PRD builds
 │   ├── __init__.py  # authoring API

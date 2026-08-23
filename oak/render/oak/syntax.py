@@ -7,7 +7,7 @@ from oak.vocabulary.text.placeholder import token
 
 WHERE_HEADING = "WHERE:"
 WHERE_ENTRY_PREFIX = "- "
-WHERE_DETAIL_PREFIX = "  - "
+WHERE_DETAIL_SEPARATOR = "; "
 
 
 def _scalar(value: str | int | float | bool) -> str:
@@ -54,13 +54,11 @@ def constraint_text(constraint: Constraint) -> str:
     raise TypeError(f"unsupported constraint {type(constraint).__name__}")
 
 
-def where_lines(where: Where) -> list[str]:
-    """Return one placeholder line and its authored detail lines."""
-    details = [constraint_text(constraint) for constraint in where.constraints]
-    details.extend(f"example: `{_scalar(example)}`" for example in where.examples)
+def where_line(where: Where) -> str:
+    """Return one dense line: the delimited placeholder, then its details joined by `; `."""
+    body = WHERE_DETAIL_SEPARATOR.join(constraint_text(constraint) for constraint in where.constraints)
+    if where.examples:
+        body += " (e.g. " + ", ".join(f"`{_scalar(example)}`" for example in where.examples) + ")"
     if where.description is not None:
-        details.append(where.description)
-    return [
-        WHERE_ENTRY_PREFIX + token(where.placeholder),
-        *(WHERE_DETAIL_PREFIX + detail for detail in details),
-    ]
+        body += WHERE_DETAIL_SEPARATOR + where.description
+    return WHERE_ENTRY_PREFIX + token(where.placeholder) + " " + body + "."

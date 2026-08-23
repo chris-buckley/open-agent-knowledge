@@ -1,7 +1,7 @@
 """The OAK arrangement of one schema."""
 
 from oak.node.parts.schemas import Schema
-from oak.render.oak.syntax import WHERE_HEADING, where_lines
+from oak.render.oak.syntax import WHERE_HEADING, where_line
 
 
 def _template_separator(template: str) -> str:
@@ -13,8 +13,8 @@ def _template_separator(template: str) -> str:
 
 
 def schema_text(schema: Schema) -> str:
-    """Return the template, one blank line, and generated WHERE details."""
-    lines = [line for item in schema.where for line in where_lines(item)]
+    """Return the template, one blank line, and one generated WHERE line per Where."""
+    lines = [where_line(item) for item in schema.where]
     where_text = WHERE_HEADING + "\n" + "\n".join(lines)
     if lines:
         where_text += "\n"
