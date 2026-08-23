@@ -1,62 +1,84 @@
-"""The JSON-LD render: ids become @id, kinds become @type, ordered lists become @list."""
+"""The JSON-LD render: ids become @id, kinds become @type, ordered values become @list."""
+
+from pydantic import ConfigDict, TypeAdapter
+from pydantic_core import PydanticCustomError
 
 from oak.node.parts.schemas import AtLeast, AtMost, Schema, Where
+from oak.vocabulary import IriId
 
-OAK = "https://open-agent-knowledge.org/vocab#"
+_VOCABULARY_ADAPTER = TypeAdapter(
+    IriId,
+    config=ConfigDict(strict=True, regex_engine="rust-regex"),
+)
 
-CONTEXT = {
-    "oak": {"@id": OAK, "@prefix": True},
-    "xsd": {"@id": "http://www.w3.org/2001/XMLSchema#", "@prefix": True},
-    "name": "oak:name",
-    "purpose": "oak:purpose",
-    "template": {"@id": "oak:template", "@type": "xsd:string"},
-    "where": {"@id": "oak:where", "@container": "@list"},
-    "placeholder": "oak:placeholder",
-    "constraints": {"@id": "oak:constraint", "@container": "@list"},
-    "examples": {"@id": "oak:example", "@container": "@list"},
-    "description": "oak:description",
-    "of": "oak:of",
-    "values": "oak:values",
-    "pattern": "oak:pattern",
-    "n": "oak:n",
-    "item": "oak:item",
-    "separator": "oak:separator",
-    "min": "oak:min",
-    "max": "oak:max",
-    "value": "oak:value",
+_TYPE_NAMES = {
+    "type": "Type",
+    "one_of": "OneOf",
+    "regex": "Regex",
+    "non_empty": "NonEmpty",
+    "max_chars": "MaxChars",
+    "lines": "Lines",
+    "list_of": "ListOf",
+    "at_least": "AtLeast",
+    "at_most": "AtMost",
 }
 
-TYPES = {
-    "type": "oak:Type",
-    "one_of": "oak:OneOf",
-    "regex": "oak:Regex",
-    "non_empty": "oak:NonEmpty",
-    "max_chars": "oak:MaxChars",
-    "lines": "oak:Lines",
-    "list_of": "oak:ListOf",
-    "at_least": "oak:AtLeast",
-    "at_most": "oak:AtMost",
-}
+
+def _vocabulary(value: str) -> str:
+    vocabulary = _VOCABULARY_ADAPTER.validate_python(value)
+    if not vocabulary.endswith(("#", "/", ":")):
+        raise PydanticCustomError(
+            "invalid_json_ld_vocabulary",
+            "JSON-LD vocabulary must end with #, /, or :",
+        )
+    return vocabulary
+
+
+def _term(vocabulary: str, name: str) -> str:
+    return vocabulary + name
+
+
+def _context(vocabulary: str) -> dict:
+    return {
+        "xsd": {"@id": "http://www.w3.org/2001/XMLSchema#", "@prefix": True},
+        "name": _term(vocabulary, "name"),
+        "purpose": _term(vocabulary, "purpose"),
+        "template": {"@id": _term(vocabulary, "template"), "@type": "xsd:string"},
+        "where": {"@id": _term(vocabulary, "where"), "@container": "@list"},
+        "placeholder": {"@id": _term(vocabulary, "placeholder"), "@type": "xsd:string"},
+        "constraints": {"@id": _term(vocabulary, "constraint"), "@container": "@list"},
+        "examples": {"@id": _term(vocabulary, "example"), "@container": "@list"},
+        "description": _term(vocabulary, "description"),
+        "of": _term(vocabulary, "of"),
+        "values": _term(vocabulary, "values"),
+        "pattern": _term(vocabulary, "pattern"),
+        "n": _term(vocabulary, "n"),
+        "item": _term(vocabulary, "item"),
+        "separator": _term(vocabulary, "separator"),
+        "min": _term(vocabulary, "min"),
+        "max": _term(vocabulary, "max"),
+        "value": _term(vocabulary, "value"),
+    }
 
 
 def where_id(schema: Schema, placeholder: str) -> str:
-    """The Where id derived from its schema id and placeholder."""
-    return f"{schema.id}#{placeholder}"
+    """The Where id derived from the complete schema id and placeholder."""
+    return f"{schema.id}/where/{placeholder}"
 
 
-def _constraint(schema: Schema, constraint) -> dict:
-    data = constraint.model_dump(exclude={"kind"}, exclude_unset=True)
+def _constraint(schema: Schema, constraint, vocabulary: str) -> dict:
+    data = constraint.model_dump(mode="json", exclude={"kind"}, exclude_unset=True)
     if isinstance(constraint, (AtLeast, AtMost)) and isinstance(constraint.value, str):
         data["value"] = {"@id": where_id(schema, constraint.value)}
-    return {"@type": TYPES[constraint.kind], **data}
+    return {"@type": _term(vocabulary, _TYPE_NAMES[constraint.kind]), **data}
 
 
-def _where(schema: Schema, where: Where) -> dict:
+def _where(schema: Schema, where: Where, vocabulary: str) -> dict:
     node = {
         "@id": where_id(schema, where.placeholder),
-        "@type": "oak:Where",
+        "@type": _term(vocabulary, "Where"),
         "placeholder": where.placeholder,
-        "constraints": [_constraint(schema, c) for c in where.constraints],
+        "constraints": [_constraint(schema, constraint, vocabulary) for constraint in where.constraints],
     }
     if where.examples:
         node["examples"] = list(where.examples)
@@ -65,9 +87,14 @@ def _where(schema: Schema, where: Where) -> dict:
     return node
 
 
-def schema_json_ld(schema: Schema) -> dict:
-    """One schema as a compact JSON-LD node object."""
-    node: dict = {"@context": CONTEXT, "@id": schema.id, "@type": "oak:Schema"}
-    node.update(schema.model_dump(include={"name", "purpose", "template"}, exclude_unset=True))
-    node["where"] = [_where(schema, w) for w in schema.where]
+def schema_json_ld(schema: Schema, *, vocabulary: str) -> dict:
+    """One schema as compact JSON-LD under one caller-owned vocabulary base."""
+    vocabulary = _vocabulary(vocabulary)
+    node: dict = {
+        "@context": _context(vocabulary),
+        "@id": schema.id,
+        "@type": _term(vocabulary, "Schema"),
+    }
+    node.update(schema.model_dump(mode="json", include={"name", "purpose", "template"}, exclude_unset=True))
+    node["where"] = [_where(schema, where, vocabulary) for where in schema.where]
     return node

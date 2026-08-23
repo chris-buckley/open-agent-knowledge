@@ -1,5 +1,6 @@
 """The schemas part: one schema is a verbatim template plus one Where per placeholder."""
 
+import json
 from collections import Counter
 from collections.abc import Mapping
 from functools import lru_cache
@@ -10,6 +11,7 @@ from pydantic import (
     ConfigDict,
     Field,
     FiniteFloat,
+    NonNegativeInt,
     PositiveInt,
     StringConstraints,
     TypeAdapter,
@@ -24,27 +26,113 @@ from oak.vocabulary.text.placeholder import placeholders_in
 
 NonEmptyText = Annotated[str, StringConstraints(min_length=1)]
 Scalar = str | int | FiniteFloat | bool
+Example = NonBlankLine | int | FiniteFloat | bool
 Bound = int | FiniteFloat | Placeholder
+
+_JSON_STRING_DATATYPES = frozenset({"string", "datetime", "uri", "path"})
+_NON_PORTABLE_ESCAPES = frozenset("AzZpPdDwWsSbB")
 
 
 @lru_cache(maxsize=512)
 def rust_regex_adapter(pattern: str) -> TypeAdapter[str]:
-    """One compiled rust-regex validator per authored pattern; building it compiles the pattern."""
+    """One compiled rust-regex validator per authored pattern."""
     return TypeAdapter(
         Annotated[str, StringConstraints(pattern=pattern)],
         config=ConfigDict(strict=True, regex_engine="rust-regex"),
     )
 
 
-def _compiles(pattern: str) -> str:
+def _escaped(text: str, index: int) -> bool:
+    count = 0
+    index -= 1
+    while index >= 0 and text[index] == "\\":
+        count += 1
+        index -= 1
+    return count % 2 == 1
+
+
+def _portable(pattern: str) -> None:
+    if len(pattern) < 2 or pattern[0] != "^" or pattern[-1] != "$" or _escaped(pattern, len(pattern) - 1):
+        raise PydanticCustomError("unanchored_regex", "regex must anchor the complete value with ^ and $")
+
+    body = pattern[1:-1]
+    depth = 0
+    in_class = False
+    escaped = False
+    index = 0
+
+    while index < len(body):
+        char = body[index]
+        if escaped:
+            if char in _NON_PORTABLE_ESCAPES or (char in "xu" and index + 1 < len(body) and body[index + 1] == "{"):
+                raise PydanticCustomError(
+                    "nonportable_regex",
+                    "regex uses syntax outside the rust-regex and ECMA-262 subset: {syntax}",
+                    {"syntax": "\\" + char},
+                )
+            escaped = False
+            index += 1
+            continue
+
+        if char == "\\":
+            escaped = True
+            index += 1
+            continue
+
+        if in_class:
+            if char == "]":
+                in_class = False
+            elif char == "[" or body.startswith(("&&", "--", "~~"), index):
+                raise PydanticCustomError(
+                    "nonportable_regex",
+                    "regex uses a non-portable character class operation",
+                )
+            index += 1
+            continue
+
+        if char == "[":
+            in_class = True
+        elif char == "(":
+            if body.startswith("(?", index) and not body.startswith("(?:", index):
+                raise PydanticCustomError(
+                    "nonportable_regex",
+                    "regex uses a non-portable group or mode",
+                )
+            depth += 1
+        elif char == ")":
+            depth -= 1
+        elif char == "|" and depth == 0:
+            raise PydanticCustomError(
+                "unscoped_regex_alternation",
+                "wrap a whole-pattern choice inside one group",
+            )
+        index += 1
+
+
+def _valid_pattern(pattern: str) -> str:
+    _portable(pattern)
     try:
         rust_regex_adapter(pattern)
     except SchemaError as error:
-        raise PydanticCustomError("invalid_rust_regex", "rust-regex cannot compile the pattern: {reason}", {"reason": str(error)}) from None
+        raise PydanticCustomError(
+            "invalid_rust_regex",
+            "rust-regex cannot compile the pattern: {reason}",
+            {"reason": str(error)},
+        ) from None
     return pattern
 
 
-RegexPattern = Annotated[str, StringConstraints(min_length=1), AfterValidator(_compiles)]
+REGEX_SOURCE_PATTERN = r"^\^[^\r\n]*\$$"
+RegexPattern = Annotated[
+    str,
+    StringConstraints(min_length=2, pattern=REGEX_SOURCE_PATTERN),
+    AfterValidator(_valid_pattern),
+]
+
+
+def _validate_text(datatype: Datatype, value: str) -> object:
+    source = json.dumps(value) if datatype in _JSON_STRING_DATATYPES else value
+    return DATATYPE_ADAPTERS[datatype].validate_json(source)
 
 
 class Type(OakModel):
@@ -55,6 +143,9 @@ class Type(OakModel):
 
     def check(self, value: object, values: Mapping[str, object]) -> None:
         DATATYPE_ADAPTERS[self.of].validate_python(value)
+
+    def check_example(self, value: Example) -> None:
+        _validate_text(self.of, value) if isinstance(value, str) else self.check(value, {})
 
 
 class OneOf(OakModel):
@@ -69,10 +160,10 @@ class OneOf(OakModel):
 
 
 class Regex(OakModel):
-    """The bound value matches one anchored rust-regex pattern."""
+    """The bound value matches one anchored portable rust-regex pattern."""
 
     kind: Literal["regex"]
-    pattern: RegexPattern = Field(description="The pattern, anchored to the whole string.", examples=["^[0-9]+$"])
+    pattern: RegexPattern = Field(description="The whole-value portable pattern.", examples=["^[0-9]+$"])
 
     def check(self, value: object, values: Mapping[str, object]) -> None:
         rust_regex_adapter(self.pattern).validate_python(value)
@@ -103,8 +194,8 @@ class Lines(OakModel):
     """The bound value has a line count inside the bounds; at least one bound is set."""
 
     kind: Literal["lines"]
-    min: PositiveInt | None = Field(default=None, description="The fewest lines.", examples=[1])
-    max: PositiveInt | None = Field(default=None, description="The most lines.", examples=[1])
+    min: NonNegativeInt | None = Field(default=None, description="The fewest lines.", examples=[1])
+    max: NonNegativeInt | None = Field(default=None, description="The most lines.", examples=[1])
 
     @model_validator(mode="after")
     def bounds(self) -> Self:
@@ -132,12 +223,11 @@ class ListOf(OakModel):
     def check(self, value: object, values: Mapping[str, object]) -> None:
         if not isinstance(value, str):
             raise ValueError(f"{value!r} is not text")
-        adapter = DATATYPE_ADAPTERS[self.item]
         for item in value.split(self.separator):
-            adapter.validate_json(item) if self.item in ("integer", "number", "boolean") else adapter.validate_python(item)
+            _validate_text(self.item, item)
 
 
-def _bound(value: Bound, values: Mapping[str, object]) -> int | float:
+def _bound(value: object, values: Mapping[str, object]) -> int | float:
     resolved = values[value] if isinstance(value, str) else value
     if isinstance(resolved, bool) or not isinstance(resolved, (int, float)):
         raise ValueError(f"{value!r} is not a number")
@@ -145,24 +235,24 @@ def _bound(value: Bound, values: Mapping[str, object]) -> int | float:
 
 
 class AtLeast(OakModel):
-    """The bound value is at least a number or the value bound to another placeholder of the same schema."""
+    """The bound value is at least a number or another placeholder value of the same schema."""
 
     kind: Literal["at_least"]
     value: Bound = Field(description="A number or a placeholder of the same schema.", examples=[1, "LINE_FROM"])
 
     def check(self, value: object, values: Mapping[str, object]) -> None:
-        if _bound(value, values) < _bound(self.value, values):  # type: ignore[arg-type]
+        if _bound(value, values) < _bound(self.value, values):
             raise ValueError(f"{value!r} is below {self.value!r}")
 
 
 class AtMost(OakModel):
-    """The bound value is at most a number or the value bound to another placeholder of the same schema."""
+    """The bound value is at most a number or another placeholder value of the same schema."""
 
     kind: Literal["at_most"]
     value: Bound = Field(description="A number or a placeholder of the same schema.", examples=[160, "LINE_TO"])
 
     def check(self, value: object, values: Mapping[str, object]) -> None:
-        if _bound(value, values) > _bound(self.value, values):  # type: ignore[arg-type]
+        if _bound(value, values) > _bound(self.value, values):
             raise ValueError(f"{value!r} is above {self.value!r}")
 
 
@@ -171,9 +261,11 @@ Constraint = Annotated[
     Field(discriminator="kind"),
 ]
 
+_BOUND_CONSTRAINTS = (AtLeast, AtMost)
+
 
 class Where(OakModel):
-    """One placeholder of the template, its constraints in authored order, and an optional description."""
+    """One placeholder, its constraints, examples, and an optional description."""
 
     placeholder: Placeholder = Field(description="The bare placeholder name.", examples=["OUTLINE_TITLE"])
     constraints: list[Constraint] = Field(
@@ -181,9 +273,9 @@ class Where(OakModel):
         description="The constraints every bound value must satisfy.",
         examples=[[{"kind": "type", "of": "string"}], [{"kind": "regex", "pattern": "^[0-9]+$"}]],
     )
-    examples: list[NonBlankLine] = Field(
+    examples: list[Example] = Field(
         default_factory=list,
-        description="Values that satisfy the constraints.",
+        description="Values that satisfy its local constraints.",
         examples=[["1.1", "1.2"]],
     )
     description: NonBlankLine | None = Field(
@@ -195,11 +287,35 @@ class Where(OakModel):
     @property
     def references(self) -> set[str]:
         """Every placeholder a constraint of this Where refers to."""
-        return {c.value for c in self.constraints if isinstance(c, (AtLeast, AtMost)) and isinstance(c.value, str)}
+        return {c.value for c in self.constraints if isinstance(c, _BOUND_CONSTRAINTS) and isinstance(c.value, str)}
+
+    @model_validator(mode="after")
+    def valid_examples(self) -> Self:
+        for index, example in enumerate(self.examples):
+            for constraint in self.constraints:
+                try:
+                    if isinstance(constraint, Type):
+                        constraint.check_example(example)
+                    elif isinstance(constraint, _BOUND_CONSTRAINTS) and isinstance(constraint.value, str):
+                        continue
+                    else:
+                        constraint.check(example, {self.placeholder: example})
+                except (ValueError, ValidationError, KeyError) as error:
+                    raise PydanticCustomError(
+                        "invalid_where_example",
+                        "example {index} for {placeholder} fails {kind}: {reason}",
+                        {
+                            "index": index,
+                            "placeholder": self.placeholder,
+                            "kind": constraint.kind,
+                            "reason": str(error),
+                        },
+                    ) from None
+        return self
 
 
 class Schema(OakModel):
-    """One output contract: the literal output as a template and one Where per placeholder."""
+    """One output contract: a template and one Where per placeholder."""
 
     id: IriId = Field(description="The entry id, unique across the tree.", examples=["oak:schema/outline"])
     name: NonBlankLine | None = Field(default=None, description="The display name.", examples=["Hierarchical Outline"])
@@ -225,10 +341,15 @@ class Schema(OakModel):
 
     @model_validator(mode="after")
     def links(self) -> Self:
-        names = [w.placeholder for w in self.where]
+        names = [where.placeholder for where in self.where]
         duplicates = sorted(name for name, count in Counter(names).items() if count > 1)
         if duplicates:
-            raise PydanticCustomError("duplicate_where_placeholder", "where repeats {placeholders}", {"placeholders": ", ".join(duplicates)})
+            raise PydanticCustomError(
+                "duplicate_where_placeholder",
+                "where repeats {placeholders}",
+                {"placeholders": ", ".join(duplicates)},
+            )
+
         in_template = self.placeholders
         missing = sorted(in_template - set(names))
         unknown = sorted(set(names) - in_template)
@@ -238,17 +359,23 @@ class Schema(OakModel):
                 "template and where placeholders differ; missing: {missing}; unused: {unused}",
                 {"missing": ", ".join(missing) or "none", "unused": ", ".join(unknown) or "none"},
             )
-        dangling = sorted(set().union(set(), *(w.references for w in self.where)) - in_template)
+
+        dangling = sorted(set().union(set(), *(where.references for where in self.where)) - in_template)
         if dangling:
-            raise PydanticCustomError("unknown_constraint_placeholder", "constraints reference {placeholders}", {"placeholders": ", ".join(dangling)})
+            raise PydanticCustomError(
+                "unknown_constraint_placeholder",
+                "constraints reference {placeholders}",
+                {"placeholders": ", ".join(dangling)},
+            )
+
         return self
 
     def bind(self, values: Mapping[str, object]) -> None:
-        """Validate the values an interpreter binds to the placeholders; raise one ValueError listing every failure."""
+        """Validate one complete placeholder binding."""
         failures: list[str] = []
         expected = self.placeholders
-        failures += [f"{name}: no value bound" for name in sorted(expected - set(values))]
-        failures += [f"{name}: not a placeholder of this schema" for name in sorted(set(values) - expected)]
+        failures += [f"[missing_binding] {name}: no value bound" for name in sorted(expected - set(values))]
+        failures += [f"[unknown_binding] {name}: not a placeholder of this schema" for name in sorted(set(values) - expected)]
         for where in self.where:
             if where.placeholder not in values:
                 continue
@@ -256,6 +383,10 @@ class Schema(OakModel):
                 try:
                     constraint.check(values[where.placeholder], values)
                 except (ValueError, ValidationError, KeyError) as error:
-                    failures.append(f"{where.placeholder}: {constraint.kind}: {error}")
+                    failures.append(f"[constraint_{constraint.kind}] {where.placeholder}: {error}")
         if failures:
-            raise ValueError("\n".join(failures))
+            raise PydanticCustomError(
+                "schema_binding_invalid",
+                "{failures}",
+                {"failures": "\n".join(failures)},
+            )
