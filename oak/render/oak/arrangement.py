@@ -1,19 +1,29 @@
-"""The OAK arrangement of a schema: the template verbatim, then WHERE:, then one generated line per Where."""
+"""The OAK arrangement of a schema: its template, WHERE:, then one line per Where."""
+
+import json
 
 from oak.node.parts.schemas import AtLeast, AtMost, Lines, ListOf, MaxChars, NonEmpty, OneOf, Regex, Schema, Type, Where
 from oak.vocabulary.text.placeholder import token
 
 
+def _scalar(value: str | int | float | bool) -> str:
+    return value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)
+
+
 def _bound(value: int | float | str) -> str:
-    return token(value) if isinstance(value, str) else str(value)
+    return token(value) if isinstance(value, str) else _scalar(value)
 
 
-def _lines(c: Lines) -> str:
-    if c.min is not None and c.max is not None:
-        return "is one line" if c.min == c.max == 1 else f"has {c.min} to {c.max} lines"
-    if c.max is not None:
-        return "is one line" if c.max == 1 else f"has at most {c.max} lines"
-    return f"has at least {c.min} lines"
+def _lines(constraint: Lines) -> str:
+    if constraint.min is not None and constraint.max is not None:
+        if constraint.min == constraint.max == 1:
+            return "is one line"
+        if constraint.min == constraint.max:
+            return f"has {constraint.min} lines"
+        return f"has {constraint.min} to {constraint.max} lines"
+    if constraint.max is not None:
+        return "is one line" if constraint.max == 1 else f"has at most {constraint.max} lines"
+    return f"has at least {constraint.min} lines"
 
 
 def sentence(constraint: Type | OneOf | Regex | NonEmpty | MaxChars | Lines | ListOf | AtLeast | AtMost) -> str:
@@ -22,7 +32,7 @@ def sentence(constraint: Type | OneOf | Regex | NonEmpty | MaxChars | Lines | Li
         case Type():
             return f"is {constraint.of}"
         case OneOf():
-            return "is one of " + ", ".join(f"`{v}`" for v in constraint.values)
+            return "is one of " + ", ".join(f"`{_scalar(value)}`" for value in constraint.values)
         case Regex():
             return f"matches `{constraint.pattern}`"
         case NonEmpty():
@@ -40,15 +50,15 @@ def sentence(constraint: Type | OneOf | Regex | NonEmpty | MaxChars | Lines | Li
 
 
 def where_line(where: Where) -> str:
-    """One WHERE line: the delimited placeholder, constraints in authored order, examples, then the description, joined by `; `."""
-    parts = [sentence(c) for c in where.constraints]
-    parts += [f"example: `{e}`" for e in where.examples]
+    """One WHERE line in authored order."""
+    parts = [sentence(constraint) for constraint in where.constraints]
+    parts += [f"example: `{_scalar(example)}`" for example in where.examples]
     if where.description is not None:
         parts.append(where.description)
     return f"- {token(where.placeholder)} " + "; ".join(parts) + "."
 
 
 def schema_text(schema: Schema) -> str:
-    """The template verbatim, one `WHERE:` line, then the Where lines in authored order."""
-    template = schema.template if schema.template.endswith("\n") else schema.template + "\n"
-    return template + "WHERE:\n" + "".join(where_line(w) + "\n" for w in schema.where)
+    """The exact template, one separator line feed when needed, then generated WHERE text."""
+    separator = "" if schema.template.endswith(("\n", "\r")) else "\n"
+    return schema.template + separator + "WHERE:\n" + "".join(where_line(where) + "\n" for where in schema.where)
