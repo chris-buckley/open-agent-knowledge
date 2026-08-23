@@ -71,6 +71,7 @@ package,"the Pydantic models, defaults, parser, and renderers the PRD builds; it
 render,"a format one knowledge tree renders to (OAK|Pydantic|JSON-LD|YAML-LD|file system|SQL|CSV); OAK is the default"
 build,"the directory that uses the package to generate the outputs; it is the `build` directory"
 output,"an artefact the build generates from the package once (EBNF|authoring prompt|documentation tree); it is in the `outputs` directory"
+text syntax,"the restricted syntax tree in `oak/syntax.py` from which the build generates each Rust regex, JSON Schema pattern, and EBNF production"
 ```
 
 WHEN working in this repository, you MUST:

@@ -74,7 +74,7 @@ Practical applications include, but are not limited to:
 - Composition is structure, not an eighth node type.
 - The flat node registry is derived from the tree during validation, not authored.
 - Cross-references use typed fields, not a generic link field.
-- Node IDs are absolute IRI-shaped strings, independent of file placement.
+- Require each (node|composition) ID to use `IriId` independent of file placement.
 - Root validation rejects duplicate IDs, missing reference targets, and wrong target types.
 - Constants and state hold any JSON value.
 - Validation is strict: no type coercion and no unknown fields.
@@ -93,8 +93,7 @@ Practical applications include, but are not limited to:
 - Instructions include policy.
 - Instructions MUST use one directive per line.
 - Each line MUST be a single imperative or declarative that changes system behavior.
-- Multiple sentences per line are forbidden.
-- Blank lines inside `<instructions>` are forbidden.
+- Require each instruction body to use `NonBlankLine`.
 - Instructions that interpretation references render first in the instructions section.
 - Interpretation rules belong to instructions because they govern every entry.
 - A composition's interpretation instructions apply before a process reached through a trigger.
@@ -165,6 +164,7 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 
 - Triggers route intent to the knowledge.
 - A trigger records why the interpreter enters the knowledge.
+- Require each trigger `when` value to use `NonBlankLine`.
 - A trigger can optionally reference one process to follow when it matches.
 - A trigger without a process remains a signpost.
 - A trigger separates use with intent from use by discovery.
@@ -178,6 +178,7 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 ## Processes
 
 - Processes are exact ways to do a task.
+- Require each process step to use `NonBlankLine`.
 - A process can use constants.
 - A process can use schemas.
 - A process can put constant values into schemas.
@@ -220,7 +221,8 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Every section appears, empty when the composition has no node of its type.
 - Each section holds the direct nodes of its type in authored order.
 - Sections are siblings; no section nests inside another.
-- An instruction or trigger renders as its sentence alone.
+- Render each instruction or trigger as its text alone.
+- Render each constant name with `ConstantName`.
 - A schema or process renders with an inner structure.
 - The OAK render loses node ids.
 
@@ -242,14 +244,16 @@ oak_sections:
 - The xml variant is well-formed XML.
 - The xml variant uses OAK names and composition structure.
 - APS is not the canonical xml variant, because APS requires a process section and a process target that OAK does not.
+- Join instruction bodies inside `<instructions>` with one U+000A LINE FEED.
 
 #### Markdown
 
 - The markdown variant uses headings, lists, and fenced blocks.
+- Render process steps as a numbered list.
 
 #### Styles
 
-- A style changes natural language wording only.
+- Apply a style to natural language wording and display formatting only.
 - Style is a render choice, not an interpretation instruction, because one tree must render in many styles.
 - The authored style preserves the authored wording.
 - A controlled style is a named and versioned renderer profile.
@@ -257,44 +261,47 @@ oak_sections:
 - A controlled style preserves meaning, obligation, negation, conditions, and step order.
 - A renderer fails when it cannot validate a requested controlled style.
 - An ASD-STE100 style names its governing edition and validation rules.
-
-```yaml
-numbers_units_time:
-  numbers:
-    decimals: "."
-    thousands: "U+2009 (thin space)"
-
-  units:
-    format: "<number><space><unit>"
-    percent: "50 %"
-    temperature: "60 °C"
-    symbols: middle_dot_between_compounds # U+00B7
-    catalog: units.json (project)
-
-  time:
-    iso8601: true
-    default_tz: "Z"
-    local_times_require_offset_or_iana: true
-```
-
-```yaml
-sentence_limits:
-  procedures: 20
-  descriptions: 25
-
-paragraph_limits:
-  sentences_max: 6
-  one_topic: true
-
-lists:
-  steps_numbered: true
-  supportive_bullets: true
-```
+- Use U+002E FULL STOP as the decimal separator.
+- Use U+2009 THIN SPACE as the thousands separator.
+- Render each quantity as a number, one U+0020 SPACE, and one unit.
+- Render percent with U+0025 PERCENT SIGN as its unit.
+- Render compound units with U+00B7 MIDDLE DOT.
+- Select each unit from the shared unit catalog.
+- Render temperature in °C.
+- Render each datetime in ISO 8601 form.
+- Render a zero UTC offset as `Z`.
+- Require each local datetime to include a numeric UTC offset.
+- Render an IANA time zone name separately when present.
+- Apply sentence, paragraph, and list limits through the named ASD-STE100 style when it is defined.
 
 ### Pydantic
 
 - Pydantic v2 is the description language for the vocabulary.
 - Pydantic v2 is the authoring tool, and every other representation derives from the authored tree.
+- Define `IriId` as an ASCII scheme, a colon, and one or more non-whitespace characters.
+- Define `NonBlankLine` as one line containing at least one non-whitespace character.
+- Define `ConstantName` as ASCII upper snake case without a leading, trailing, or repeated underscore.
+- Use the narrowest (type|literal|discriminated union|min length|max length|numeric bound|nested model) that states each rule.
+- Represent each closed token catalog with a (literal|enum).
+- Use regex only when the complete value is the shape of one string.
+- Anchor every regex pattern to the whole string.
+- Use source lint for text conventions embedded in prose.
+- Use a root graph check only for rules across nodes.
+- Represent a quantity as a nested model of a Decimal value and a unit enum; the serializer owns its display.
+- Represent a datetime as `AwareDatetime` with an optional `TimeZoneName`.
+- Reject a naive datetime; never convert one to UTC.
+- Do not add a field only for a render token; validate the token in the renderer through a module-level `TypeAdapter`.
+- Define each authored text syntax once in `oak/models.py`.
+- Define each OAK render text syntax once in `oak/render/oak.py`.
+- Build each regex pattern once at module import from its owning text syntax.
+- Build each reusable string shape with `Annotated[str, StringConstraints(pattern=...)]`.
+- Keep defaults and aliases at the field declaration and only constraints in the `Annotated` alias.
+- Keep each token catalog at module scope, or annotate it `ClassVar` on a model.
+- Set `regex_engine` to `rust-regex` on the shared OAK base model.
+- Pass each regex pattern as a string, because a compiled pattern forces `python-re`.
+- Use `[0-9]` and `[A-Za-z]` for ASCII classes, because Rust regex treats `\d` and `\w` as Unicode.
+- Validate every default value.
+- Build each `TypeAdapter` once at module import.
 
 ### JSON-LD
 
@@ -315,6 +322,10 @@ The build uses the package to generate the outputs once; a model writes OAK with
 ### EBNF
 
 - OAK when authoring the build of OAK emits a EBNF grammar for OAK itself, which is a meta-grammar for OAK.
+- Emit one EBNF production for each named text alias.
+- Generate each (Rust regex|JSON Schema pattern|EBNF production) from the same restricted text syntax of (literal|character class|sequence|choice|optional|repeat|named reference).
+- Do not derive one output syntax from another output syntax.
+- Do not use EBNF as a validator.
 
 ### Prompt
 
@@ -342,7 +353,8 @@ oak
 ├── oak  # the package, what the PRD builds
 │   ├── __init__.py  # authoring API
 │   ├── defaults.py  # render OAK, variant xml, style authored
-│   ├── models.py  # shared config, references, the seven node models, one discriminated union
+│   ├── syntax.py  # restricted text syntax tree; generates Rust regex, JSON Schema pattern, EBNF
+│   ├── models.py  # shared config, references, text aliases, value models, the seven node models, one discriminated union
 │   ├── composition.py  # composition model and root graph checks
 │   ├── parse.py  # OAK text to models
 │   └── render  # one module per format, renders one knowledge tree
