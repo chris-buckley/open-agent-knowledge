@@ -8,7 +8,7 @@ defaults:
   variant: xml
   style: authored
 open:
-  - What fields does every node share? Deferred on 2026-08-21 while the user reviews the PRD. The title field is out of the sketch until this is decided.
+  - What fields does every entry share? Deferred on 2026-08-21 while the user reviews the PRD. The title field is out of the sketch until this is decided.
   - How does OAK resolve two triggers that match one arrival? Deferred on 2026-08-21 until trigger execution is defined.
 authoring:
   - These rules govern every line after the first `---` that follows the Purpose section; the Purpose prose above it is exempt.
@@ -52,12 +52,12 @@ Practical applications include, but are not limited to:
 1. Reject an empty (ID|text) field.
 2. Reject a process with no steps.
 3. Reject unknown fields.
-4. Reject a node type other than (instruction|constant|schema|state|trigger|process|input).
-5. Require one root composition.
-6. Require each composition child to be a (node|composition).
-7. Reject duplicate IDs across nodes and compositions.
+4. Reject an entry outside the seven parts (instructions|constants|schemas|state|triggers|processes|input).
+5. Require one root node.
+6. Require each child of a node to be a node.
+7. Reject duplicate IDs across nodes and entries.
 8. Reject a (missing|wrong-type) reference target.
-9. Omit unset optional fields from the Pydantic render.
+9. Omit unset optional fields from the Pydantic dump.
 
 ## Structure
 
@@ -65,16 +65,18 @@ Practical applications include, but are not limited to:
 - The name changed from UAOC, Universal Agent Operating Context, to OAK on 2026-08-21, because knowledge is broader than an operating context.
 - OAK is a knowledge standard, not an information standard, because knowledge covers static information and executable instructions.
 - The consumer of the knowledge is named the interpreter, confirmed over actor on 2026-08-21.
-- The unit of the vocabulary is named the node.
-- The set of node types is closed.
-- The node types are instructions, constants, schemas, state, triggers, processes, and input.
-- Each node has exactly one type from the closed set, so every node validates at authoring time.
-- A structure is a tree of nodes, and leaves can reference each other.
+- OAK has four layers: the node, the render, the vocabulary, and the variant.
+- A node is one complete set of the seven parts.
+- The parts are instructions, constants, schemas, state, triggers, processes, and input.
+- The set of parts is closed.
+- An entry is one item in a part: one instruction, one constant, one schema, one state value, one trigger, one process, or the input.
+- Each entry belongs to exactly one part, so every entry validates at authoring time.
+- A tree is nodes nested in nodes, and entries can reference each other.
 - Knowledge is authored as a nested tree, because nesting gives one root, one parent, and no containment cycle structurally.
-- Composition is structure, not an eighth node type.
-- The flat node registry is derived from the tree during validation, not authored.
+- Composition is the nesting of nodes, not an eighth part.
+- The flat entry registry is derived from the tree during validation, not authored.
 - Cross-references use typed fields, not a generic link field.
-- Require each (node|composition) ID to use `IriId` independent of file placement.
+- Require each (node|entry) ID to use `IriId` independent of file placement.
 - Root validation rejects duplicate IDs, missing reference targets, and wrong target types.
 - Constants and state hold any JSON value.
 - Validation is strict: no type coercion and no unknown fields.
@@ -94,9 +96,9 @@ Practical applications include, but are not limited to:
 - Instructions MUST use one directive per line.
 - Each line MUST be a single imperative or declarative that changes system behavior.
 - Require each instruction body to use `NonBlankLine`.
-- Instructions that interpretation references render first in the instructions section.
+- Instructions that interpretation references render first in the instructions part.
 - Interpretation rules belong to instructions because they govern every entry.
-- A composition's interpretation instructions apply before a process reached through a trigger.
+- A node's interpretation instructions apply before a process reached through a trigger.
 
 ## Constants
 
@@ -170,10 +172,10 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - A trigger separates use with intent from use by discovery.
 - Triggers are optional.
 - A trigger can optionally reference one process.
-- A trigger's process reference must target a process node.
+- A trigger's process reference must target a process entry.
 - Multiple triggers can reference the same process or different processes.
 - The name trigger is confirmed over signal on 2026-08-21, because it names what makes an outsider enter.
-- Triggers are optional in a composition.
+- Triggers are optional in a node.
 
 ## Processes
 
@@ -191,45 +193,95 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Input is the contract for what the knowledge expects to receive.
 - Input is defined before the knowledge is used.
 
+## Vocabulary
+
+- The vocabulary is how information is conveyed without ambiguity inside every render.
+- The vocabulary holds the text shapes, the datatypes, the unit catalog, the time forms, and the display forms.
+- The vocabulary is where the core schema and the Rust regex checks run.
+- Every render uses the same vocabulary; OAK is the opinionated default render of it.
+- Define `IriId` as an ASCII scheme, a colon, and one or more non-whitespace characters.
+- Define `NonBlankLine` as one line containing at least one non-whitespace character.
+- Define `ConstantName` as ASCII upper snake case without a leading, trailing, or repeated underscore.
+- Represent each closed token catalog with a (literal|enum).
+- Represent a quantity as a nested model of a Decimal value and a unit enum; the serializer owns its display.
+- Represent a datetime as `AwareDatetime` with an optional `TimeZoneName`.
+- Reject a naive datetime; never convert one to UTC.
+- Use U+002E FULL STOP as the decimal separator.
+- Use U+2009 THIN SPACE as the thousands separator.
+- Render each quantity as a number, one U+0020 SPACE, and one unit.
+- Render percent with U+0025 PERCENT SIGN as its unit.
+- Render compound units with U+00B7 MIDDLE DOT.
+- Select each unit from the shared unit catalog.
+- Render temperature in °C.
+- Render each datetime in ISO 8601 form.
+- Render a zero UTC offset as `Z`.
+- Require each local datetime to include a numeric UTC offset.
+- Render an IANA time zone name separately when present.
+
+## Pydantic
+
+- Pydantic v2 is the authoring form, not a render.
+- Pydantic v2 is the description language for the vocabulary and the parts.
+- Pydantic v2 is the authoring tool, and every render derives from the authored tree.
+- Use the narrowest (type|literal|discriminated union|min length|max length|numeric bound|nested model) that states each rule.
+- Use regex only when the complete value is the shape of one string.
+- Anchor every regex pattern to the whole string.
+- Use source lint for text conventions embedded in prose.
+- Use a root graph check only for rules across (nodes|entries).
+- Do not add a field only for a render token; validate the token in the renderer through a module-level `TypeAdapter`.
+- Define each authored text syntax once in its own module under `oak/vocabulary/text/`.
+- Define each OAK render text syntax once in `oak/render/oak/`.
+- Build each regex pattern once at module import from its owning text syntax.
+- Build each reusable string shape with `Annotated[str, StringConstraints(pattern=...)]`.
+- Keep defaults and aliases at the field declaration and only constraints in the `Annotated` alias.
+- Keep each token catalog at module scope, or annotate it `ClassVar` on a model.
+- Set `regex_engine` to `rust-regex` on the shared OAK base model in `oak/base.py`.
+- Pass each regex pattern as a string, because a compiled pattern forces `python-re`.
+- Use `[0-9]` and `[A-Za-z]` for ASCII classes, because Rust regex treats `\d` and `\w` as Unicode.
+- Validate every default value.
+- Build each `TypeAdapter` once at module import.
+
 ## Render
 
 - One knowledge tree can render to many formats.
-- The renders are Pydantic v2, OAK, JSON-LD, YAML-LD, a file system representation, relational tables in SQL, and CSV files placed in the file system.
-- Pydantic v2 is the authoring form; JSON-LD, YAML-LD, and file system representation are interchangeable once built.
+- A render is a representation of one node or tree.
+- The renders are OAK, JSON-LD, YAML-LD, a file system representation, relational tables in SQL, and CSV files placed in the file system.
+- JSON-LD, YAML-LD, and the file system representation are interchangeable once built.
 - Each projection defines what it preserves, what it loses, and how it orders content.
 
 ### OAK
 
 - OAK is the default render.
-- The text render is named OAK and is the default render, because it is the render an interpreter uses directly.
+- The text render is named OAK and is the default render, because it is the render an interpreter uses directly; APS was its predecessor.
 - The OAK render is prose structured text which optimises for disambiguation for AI Models.
 - OAK renders from the authored tree with a variant and a style.
-- These render choices do not change the authored tree or the vocabulary.
-- OAK rendering uses variant and style outside the vocabulary, adding no node type or field.
+- These render choices do not change the authored tree.
+- OAK rendering uses variant and style outside the node, adding no part or field.
 - The default OAK rendering is xml and authored.
+- A variant is the delimiters that group the parts: (xml tags|markdown fences).
 - The variants are xml and markdown.
-- A variant changes syntax only.
+- A variant changes delimiters only.
 - Each variant defines how it escapes its delimiters.
 - A renderer claims APS compatibility only when the tree and text meet APS rules.
 
 #### Arrangement
 
-- The OAK render has seven sections in this order: instructions, constants, schemas, state, triggers, processes, input.
-- The OAK render has one arrangement, the seven sections in APS order, because OAK is the next iteration of APS.
-- OAK is the next iteration of APS; it keeps the APS section order and uses its own names.
-- Each top-level section MUST appear at most once.
-- Every section appears, empty when the composition has no node of its type.
-- Each section holds the direct nodes of its type in authored order.
-- Sections are siblings; no section nests inside another.
+- The OAK render has seven parts in this order: instructions, constants, schemas, state, triggers, processes, input.
+- The OAK render has one arrangement, the seven parts in APS order, because OAK is the next iteration of APS.
+- OAK is the next iteration of APS; it keeps the APS part order and uses its own names.
+- Each top-level part MUST appear at most once.
+- Every part appears, empty when the node has no entry for it.
+- Each part holds the node's own entries in authored order.
+- Parts are siblings; no part nests inside another.
 - Render each instruction or trigger as its text alone.
 - Render each constant name with `ConstantName`.
 - A schema or process renders with an inner structure.
-- The OAK render loses node ids.
+- The OAK render loses node and entry ids.
 
 #### XML
 
 ```yaml
-oak_sections:
+oak_parts:
   order: [instructions, constants, schemas, state, triggers, processes, input]
   tags:
     - <instructions>…</instructions>
@@ -242,8 +294,8 @@ oak_sections:
 ```
 
 - The xml variant is well-formed XML.
-- The xml variant uses OAK names and composition structure.
-- APS is not the canonical xml variant, because APS requires a process section and a process target that OAK does not.
+- The xml variant uses OAK names and node structure.
+- APS is not the canonical xml variant, because APS requires a process part and a process target that OAK does not.
 - Join instruction bodies inside `<instructions>` with one U+000A LINE FEED.
 
 #### Markdown
@@ -261,57 +313,27 @@ oak_sections:
 - A controlled style preserves meaning, obligation, negation, conditions, and step order.
 - A renderer fails when it cannot validate a requested controlled style.
 - An ASD-STE100 style names its governing edition and validation rules.
-- Use U+002E FULL STOP as the decimal separator.
-- Use U+2009 THIN SPACE as the thousands separator.
-- Render each quantity as a number, one U+0020 SPACE, and one unit.
-- Render percent with U+0025 PERCENT SIGN as its unit.
-- Render compound units with U+00B7 MIDDLE DOT.
-- Select each unit from the shared unit catalog.
-- Render temperature in °C.
-- Render each datetime in ISO 8601 form.
-- Render a zero UTC offset as `Z`.
-- Require each local datetime to include a numeric UTC offset.
-- Render an IANA time zone name separately when present.
 - Apply sentence, paragraph, and list limits through the named ASD-STE100 style when it is defined.
-
-### Pydantic
-
-- Pydantic v2 is the description language for the vocabulary.
-- Pydantic v2 is the authoring tool, and every other representation derives from the authored tree.
-- Define `IriId` as an ASCII scheme, a colon, and one or more non-whitespace characters.
-- Define `NonBlankLine` as one line containing at least one non-whitespace character.
-- Define `ConstantName` as ASCII upper snake case without a leading, trailing, or repeated underscore.
-- Use the narrowest (type|literal|discriminated union|min length|max length|numeric bound|nested model) that states each rule.
-- Represent each closed token catalog with a (literal|enum).
-- Use regex only when the complete value is the shape of one string.
-- Anchor every regex pattern to the whole string.
-- Use source lint for text conventions embedded in prose.
-- Use a root graph check only for rules across nodes.
-- Represent a quantity as a nested model of a Decimal value and a unit enum; the serializer owns its display.
-- Represent a datetime as `AwareDatetime` with an optional `TimeZoneName`.
-- Reject a naive datetime; never convert one to UTC.
-- Do not add a field only for a render token; validate the token in the renderer through a module-level `TypeAdapter`.
-- Define each authored text syntax once in `oak/models.py`.
-- Define each OAK render text syntax once in `oak/render/oak.py`.
-- Build each regex pattern once at module import from its owning text syntax.
-- Build each reusable string shape with `Annotated[str, StringConstraints(pattern=...)]`.
-- Keep defaults and aliases at the field declaration and only constraints in the `Annotated` alias.
-- Keep each token catalog at module scope, or annotate it `ClassVar` on a model.
-- Set `regex_engine` to `rust-regex` on the shared OAK base model.
-- Pass each regex pattern as a string, because a compiled pattern forces `python-re`.
-- Use `[0-9]` and `[A-Za-z]` for ASCII classes, because Rust regex treats `\d` and `\w` as Unicode.
-- Validate every default value.
-- Build each `TypeAdapter` once at module import.
 
 ### JSON-LD
 
+TBC
+
 ### YAML-LD
+
+TBC
 
 ### File system
 
+TBC
+
 ### SQL
 
+TBC
+
 ### CSV
+
+TBC
 
 ---
 
@@ -338,7 +360,10 @@ The build uses the package to generate the outputs once; a model writes OAK with
 
 ### Tree
 
-The tree below is a representation of the build as the PRD above is written; it evolves with every line above it.
+- The tree below represents the build as the PRD above is written.
+- The tree evolves with every line above it.
+- A comment that starts with `*` marks a file the build generates.
+- An entry `...` marks a group that grows as the PRD adds lines.
 
 ```t
 oak
@@ -353,14 +378,50 @@ oak
 ├── oak  # the package, what the PRD builds
 │   ├── __init__.py  # authoring API
 │   ├── defaults.py  # render OAK, variant xml, style authored
-│   ├── syntax.py  # restricted text syntax tree; generates Rust regex, JSON Schema pattern, EBNF
-│   ├── models.py  # shared config, references, text aliases, value models, the seven node models, one discriminated union
-│   ├── composition.py  # composition model and root graph checks
+│   ├── base.py  # shared config, references, rust-regex engine
+│   ├── node  # layer 1, one complete set of the seven parts
+│   │   ├── __init__.py
+│   │   ├── model.py  # the node model: seven parts, child nodes
+│   │   ├── graph.py  # root graph checks
+│   │   ├── dump.py  # Pydantic dump
+│   │   └── parts  # one module per part, its entry model
+│   │       ├── __init__.py  # the closed set, one discriminated union
+│   │       ├── instructions.py
+│   │       ├── constants.py
+│   │       ├── schemas.py
+│   │       ├── state.py
+│   │       ├── triggers.py
+│   │       ├── processes.py
+│   │       └── input.py
+│   ├── vocabulary  # layer 3, how information is conveyed without ambiguity; one file provides one thing
+│   │   ├── __init__.py
+│   │   ├── syntax.py  # restricted text syntax tree; generates Rust regex, JSON Schema pattern, EBNF
+│   │   ├── units.py  # the unit catalog, one enum
+│   │   ├── text  # text shapes, one alias each
+│   │   │   ├── __init__.py
+│   │   │   ├── iri_id.py  # IriId
+│   │   │   ├── non_blank_line.py  # NonBlankLine
+│   │   │   ├── constant_name.py  # ConstantName
+│   │   │   └── ...
+│   │   ├── datatypes  # typed values, one model each
+│   │   │   ├── __init__.py
+│   │   │   ├── quantity.py  # Decimal value and unit enum
+│   │   │   ├── datetime.py  # AwareDatetime and optional TimeZoneName
+│   │   │   └── ...
+│   │   └── display  # display forms, one rule set each
+│   │       ├── __init__.py
+│   │       ├── number.py  # decimal point, thousands separator
+│   │       ├── quantity.py  # number, space, unit; percent; middle dot
+│   │       ├── datetime.py  # ISO 8601, Z, offset, IANA name
+│   │       └── ...
 │   ├── parse.py  # OAK text to models
-│   └── render  # one module per format, renders one knowledge tree
-│       ├── __init__.py  # format selection, defaults apply
-│       ├── oak.py  # xml and markdown variants, styles
-│       ├── pydantic.py
+│   └── render  # layer 2, one module per render
+│       ├── __init__.py  # render selection, defaults apply
+│       ├── oak  # the default render
+│       │   ├── __init__.py
+│       │   ├── arrangement.py  # seven parts in APS order
+│       │   ├── variants.py  # layer 4, xml tags or markdown fences
+│       │   └── styles.py  # authored, controlled ASD-STE100
 │       ├── json_ld.py
 │       ├── yaml_ld.py
 │       ├── filesystem.py
@@ -371,8 +432,8 @@ oak
 │   ├── prompt.py
 │   └── docs.py
 ├── outputs  # snapshot of the oak build
-│   ├── oak.ebnf
-│   ├── prompt.md
-│   └── docs  # markdown tree, one file per model
+│   ├── oak.ebnf  # * the OAK meta-grammar
+│   ├── prompt.md  # * the authoring prompt, one markdown file of OAK
+│   └── docs  # * markdown tree, one file per model
 └── pyproject.toml
 ```

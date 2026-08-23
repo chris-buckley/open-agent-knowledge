@@ -65,13 +65,18 @@ name,meaning
 operating context,"the complete information and rules supplied to an agent: instructions, constants, schemas, state, triggers, processes, input"
 OAK,"Open Agent Knowledge, the universal knowledge standard this repository defines, formerly UAOC"
 interpreter,"the human, agent, or program that interprets OAK knowledge before using it"
-trigger,"the node that signposts knowledge to the outside; it records why an interpreter enters and, when matched, guides which instructions, schemas, and processes apply"
+node,"one complete set of the seven parts; a tree is nodes nested in nodes"
+part,"one of the seven parts of a node (instructions|constants|schemas|state|triggers|processes|input); the set is closed"
+entry,"one item in a part: one instruction, one constant, one schema, one state value, one trigger, one process, or the input"
+vocabulary,"how information is conveyed without ambiguity inside every render: text shapes, datatypes, units, time, and display forms; where the core schema and Rust regex checks run"
+variant,"the delimiters that group the parts in the OAK render (xml tags|markdown fences)"
+trigger,"the entry that signposts knowledge to the outside; it records why an interpreter enters and, when matched, guides which instructions, schemas, and processes apply"
 APS,"Agnostic Prompt Standard, the legacy standard that OAK succeeds; its skill snapshot is in `legacy-snapshot-aps`"
 package,"the Pydantic models, defaults, parser, and renderers the PRD builds; it is the `oak` directory"
-render,"a format one knowledge tree renders to (OAK|Pydantic|JSON-LD|YAML-LD|file system|SQL|CSV); OAK is the default"
+render,"a representation of one node or tree (OAK|JSON-LD|YAML-LD|file system|SQL|CSV); OAK is the opinionated default, the successor of APS"
 build,"the directory that uses the package to generate the outputs; it is the `build` directory"
 output,"an artefact the build generates from the package once (EBNF|authoring prompt|documentation tree); it is in the `outputs` directory"
-text syntax,"the restricted syntax tree in `oak/syntax.py` from which the build generates each Rust regex, JSON Schema pattern, and EBNF production"
+text syntax,"the restricted syntax tree in `oak/vocabulary/syntax.py` from which the build generates each Rust regex, JSON Schema pattern, and EBNF production"
 ```
 
 WHEN working in this repository, you MUST:
@@ -111,7 +116,10 @@ WHEN you name what OAK produces, you MUST:
 WHEN you change `docs/PRD.md`, you MUST:
 
 - Follow the `authoring` rules in its front matter.
-- Explain the exact lines to the user before you write them.
+- Show the user one example per change with the exact PRD lines under it before you write them.
+- Write the examples to one markdown file in the scratchpad.
+- Open it as a preview beside the user with `vscipc --window open-agent-knowledge markdown.showPreviewToSide --uri <file uri>`, not as a raw file.
+- Keep the chat reply to what the user must answer.
 - Write them only after the user agrees.
 - Compress a list of alternatives into one line in the form `(a|b|c)` to reduce tokens.
 
