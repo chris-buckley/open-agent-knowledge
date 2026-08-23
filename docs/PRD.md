@@ -44,6 +44,9 @@ Practical applications include, but are not limited to:
 - Library documentation
 - Encoded file systems
 - Conversations
+- Shell simulations (bash, PowerShell) that run as state machines
+
+Knowledge can also run: a tree whose state, triggers, and processes form a state machine is the machine itself, and an interpreter runs it continuously, reading state, matching triggers, and applying processes. Such a tree may need no input from the outside at all; it simply runs.
 
 ---
 
