@@ -3,6 +3,10 @@ title: OAK Product Requirements
 status: draft
 updated: 2026-08-22
 owner: Christopher Buckley
+defaults:
+  output: OAK
+  variant: xml
+  style: authored
 authoring:
   - These rules govern every line after the first `---` that follows the Purpose section; the Purpose prose above it is exempt.
   - This document is the complete ground truth for OAK; it evolves and is never partial.
@@ -14,6 +18,8 @@ authoring:
   - Every line fights for its place; remove what loses.
   - Each line maps to (core schema: type|literal|discriminated union|nested model|min or max length|gt or lt|regex|strict|no extra fields|frozen|JSON parse from bytes|core serializer: dump|JSON dump|include or exclude|alias|context|Python engine rule: after validator|field validator|root graph check|exclude_if|field serializer|model serializer to text|JSON Schema|source lint|runtime check|purpose: intent|rationale); a line that maps to none is removed.
   - A line the engine can enforce is enforced in the models in the same pass, because pydantic-core runs the Rust items natively and dispatches the Python callbacks, so every such line is checked on every authoring.
+  - Return the OAK output when no output, variant, or style is named; every default is OAK.
+  - Write no tests; the examples validate the build and tests add tokens and context for models.
 ---
 
 # OAK Product Requirements
@@ -317,5 +323,31 @@ The tree below is a representation of the build as the PRD above is written; it 
 
 ```text
 oak
-  placeholder
+  .agent  skills the agent reads, not PRD driven
+  .gitignore  repository infrastructure, not PRD driven
+  AGENTS.md  repository rules
+  CLAUDE.md  pointer to AGENTS.md
+  docs  ground truth
+    PRD.md
+    types.md  Pydantic types the core schema validates
+  examples  one authored composition per practical application
+    agent.py
+    sop.py
+    static.py
+  legacy-snapshot-aps  APS reference, read only
+  oak  the package
+    __init__.py  authoring API
+    models.py  the seven node models, one discriminated union
+    composition.py  root composition, graph checks, Pydantic output
+    renderers  one module per output
+      __init__.py  output API
+      pydantic.py
+      oak.py  xml and markdown variants, styles
+      json_ld.py
+      yaml_ld.py
+      filesystem.py
+      sql.py
+      csv.py
+      ebnf.py
+  pyproject.toml  package and dependencies
 ```
