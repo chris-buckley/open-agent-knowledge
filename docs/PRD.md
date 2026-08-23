@@ -7,6 +7,9 @@ defaults:
   output: OAK
   variant: xml
   style: authored
+open:
+  - What fields does every node share? Deferred on 2026-08-21 while the user reviews the PRD. The title field is out of the sketch until this is decided.
+  - How does OAK resolve two triggers that match one arrival? Deferred on 2026-08-21 until trigger execution is defined.
 authoring:
   - These rules govern every line after the first `---` that follows the Purpose section; the Purpose prose above it is exempt.
   - This document is the complete ground truth for OAK; it evolves and is never partial.
@@ -54,130 +57,29 @@ Practical applications include, but are not limited to:
 7. Reject duplicate IDs across nodes and compositions.
 8. Reject a (missing|wrong-type) reference target.
 9. Omit unset optional fields from the Pydantic output.
-10. OAK when authoring the build of OAK emits a EBNF grammar for OAK itself, which is a meta-grammar for OAK.
 
-## Output model
-
-- One knowledge tree can emit many output representations.
-- The main outputs are Pydantic v2, OAK, JSON-LD, YAML-LD, a file system representation, relational tables in SQL, and CSV files placed in the file system.
-- Pydantic v2 is the authoring form; JSON-LD, YAML-LD, and file system representation are interchangeable once built.
-- OAK is the default output.
-- The OAK output is prose structured text which optimises for disambiguation for AI Models.
-- Each projection defines what it preserves, what it loses, and how it orders content.
-- OAK renders from the authored tree with a variant and a style.
-- These render choices do not change the authored tree or the vocabulary.
-- The default OAK rendering is xml and authored.
-- The OAK output has seven sections in this order: instructions, constants, schemas, state, triggers, processes, input.
-
-```yaml
-oak_sections:
-  order: [instructions, constants, schemas, state, triggers, processes, input]
-  tags:
-    - <instructions>…</instructions>
-    - <constants>…</constants>
-    - <schemas>…</schemas>
-    - <state>…</state>
-    - <triggers>…</triggers>
-    - <processes>…</processes>
-    - <input>…</input>
-```
-
-- Each top-level section MUST appear at most once.
-- Every section appears, empty when the composition has no node of its type.
-- Each section holds the direct nodes of its type in authored order.
-- Sections are siblings; no section nests inside another.
-- The variants are xml and markdown.
-- A variant changes syntax only.
-- The xml variant is well-formed XML.
-- The markdown variant uses headings, lists, and fenced blocks.
-- An instruction or trigger renders as its sentence alone.
-- A schema or process renders with an inner structure.
-- The OAK output loses node ids.
-- Each variant defines how it escapes its delimiters.
-- A style changes natural language wording only.
-- The authored style preserves the authored wording.
-- A controlled style is a named and versioned renderer profile.
-- A controlled style rewrites only instruction bodies, trigger text, and process steps.
-- A controlled style preserves meaning, obligation, negation, conditions, and step order.
-- A renderer fails when it cannot validate a requested controlled style.
-
-## Text conventions
-
-### Numbers, units, and time
-
-```yaml
-numbers_units_time:
-  numbers:
-    decimals: "."
-    thousands: "U+2009 (thin space)"
-
-  units:
-    format: "<number><space><unit>"
-    percent: "50 %"
-    temperature: "60 °C"
-    symbols: middle_dot_between_compounds # U+00B7
-    catalog: units.json (project)
-
-  time:
-    iso8601: true
-    default_tz: "Z"
-    local_times_require_offset_or_iana: true
-```
-
-### Sentence, paragraph, and list limits
-
-```yaml
-sentence_limits:
-  procedures: 20
-  descriptions: 25
-
-paragraph_limits:
-  sentences_max: 6
-  one_topic: true
-
-lists:
-  steps_numbered: true
-  supportive_bullets: true
-```
-
-## Decisions
+## Structure
 
 - The name is OAK, short for Open Agent Knowledge.
 - The name changed from UAOC, Universal Agent Operating Context, to OAK on 2026-08-21, because knowledge is broader than an operating context.
 - OAK is a knowledge standard, not an information standard, because knowledge covers static information and executable instructions.
-- The set of node types is closed.
-- The node types are instructions, constants, schemas, state, triggers, processes, and input.
-- OAK is the next iteration of APS; it keeps the APS section order and uses its own names.
-- A composition's interpretation instructions apply before a process reached through a trigger.
 - The consumer of the knowledge is named the interpreter, confirmed over actor on 2026-08-21.
 - The unit of the vocabulary is named the node.
-- A structure is a tree of nodes, and leaves can reference each other.
-- Pydantic v2 is the description language for the vocabulary.
-- The text output is named OAK and is the default output, because it is the output an interpreter uses directly.
-- Pydantic v2 is the authoring tool, and every other representation derives from the authored tree.
-- Knowledge is authored as a nested tree, because nesting gives one root, one parent, and no containment cycle structurally.
-- The flat node registry is derived from the tree during validation, not authored.
+- The set of node types is closed.
+- The node types are instructions, constants, schemas, state, triggers, processes, and input.
 - Each node has exactly one type from the closed set, so every node validates at authoring time.
+- A structure is a tree of nodes, and leaves can reference each other.
+- Knowledge is authored as a nested tree, because nesting gives one root, one parent, and no containment cycle structurally.
+- Composition is structure, not an eighth node type.
+- The flat node registry is derived from the tree during validation, not authored.
 - Cross-references use typed fields, not a generic link field.
 - Node IDs are absolute IRI-shaped strings, independent of file placement.
 - Root validation rejects duplicate IDs, missing reference targets, and wrong target types.
 - Constants and state hold any JSON value.
 - Validation is strict: no type coercion and no unknown fields.
-- Composition is structure, not an eighth node type.
-- OAK rendering uses variant and style outside the vocabulary, adding no node type or field.
-- The OAK output has one arrangement, the seven sections in APS order, because OAK is the next iteration of APS.
-- An ASD-STE100 style names its governing edition and validation rules.
-- The xml variant uses OAK names and composition structure.
-- A renderer claims APS compatibility only when the tree and text meet APS rules.
 - The PRD uses one short sentence per idea.
 
-## Open questions
-
-- What fields does every node share? Deferred on 2026-08-21 while the user reviews the PRD. The title field is out of the sketch until this is decided.
-
 ## Instructions
-
-### Definition
 
 - Instructions are rules the interpreter of the knowledge must follow.
 - Instructions include interpretation rules.
@@ -189,23 +91,13 @@ lists:
 - Each line MUST be a single imperative or declarative that changes system behavior.
 - Multiple sentences per line are forbidden.
 - Blank lines inside `<instructions>` are forbidden.
-
-### Rendering
-
 - Instructions that interpretation references render first in the instructions section.
-
-### Decisions
-
 - Interpretation rules belong to instructions because they govern every entry.
-- Style is an output choice, not an interpretation instruction, because one tree must render in many styles.
+- A composition's interpretation instructions apply before a process reached through a trigger.
 
 ## Constants
 
-### Definition
-
 - Constants are values that stay the same in every use of the knowledge.
-
-### Examples
 
 Example: multi-line TEXT constant using TEXT<< ... >>. Tree symbols are not used because they cost extra tokens; use an indent instead.
 
@@ -258,20 +150,14 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 
 ## Schemas
 
-### Definition
-
 - Schemas are defined structures.
 - Schemas include schemas, templates, and formats.
 
 ## State
 
-### Definition
-
 - State holds values that change while the interpreter uses the knowledge.
 
 ## Triggers
-
-### Definition
 
 - Triggers route intent to the knowledge.
 - A trigger records why the interpreter enters the knowledge.
@@ -279,41 +165,146 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - A trigger without a process remains a signpost.
 - A trigger separates use with intent from use by discovery.
 - Triggers are optional.
-
-### Decisions
-
 - A trigger can optionally reference one process.
 - A trigger's process reference must target a process node.
 - Multiple triggers can reference the same process or different processes.
 - The name trigger is confirmed over signal on 2026-08-21, because it names what makes an outsider enter.
 - Triggers are optional in a composition.
 
-### Open questions
-
-- How does OAK resolve two triggers that match one arrival? Deferred on 2026-08-21 until trigger execution is defined.
-
 ## Processes
-
-### Definition
 
 - Processes are exact ways to do a task.
 - A process can use constants.
 - A process can use schemas.
 - A process can put constant values into schemas.
 - A process can act on information inside the knowledge.
-
-### Decisions
-
 - A process reached through a trigger gives the ordered steps for that entry.
 - Processes do not have to be referenced by triggers.
-- APS is not the canonical xml variant, because APS requires a process section and a process target that OAK does not.
 
 ## Input
 
-### Definition
-
 - Input is the contract for what the knowledge expects to receive.
 - Input is defined before the knowledge is used.
+
+## Outputs
+
+- One knowledge tree can emit many output representations.
+- The main outputs are Pydantic v2, OAK, JSON-LD, YAML-LD, a file system representation, relational tables in SQL, and CSV files placed in the file system.
+- Pydantic v2 is the authoring form; JSON-LD, YAML-LD, and file system representation are interchangeable once built.
+- Each projection defines what it preserves, what it loses, and how it orders content.
+
+### OAK
+
+- OAK is the default output.
+- The text output is named OAK and is the default output, because it is the output an interpreter uses directly.
+- The OAK output is prose structured text which optimises for disambiguation for AI Models.
+- OAK renders from the authored tree with a variant and a style.
+- These render choices do not change the authored tree or the vocabulary.
+- OAK rendering uses variant and style outside the vocabulary, adding no node type or field.
+- The default OAK rendering is xml and authored.
+- The variants are xml and markdown.
+- A variant changes syntax only.
+- Each variant defines how it escapes its delimiters.
+- A renderer claims APS compatibility only when the tree and text meet APS rules.
+
+#### Arrangement
+
+- The OAK output has seven sections in this order: instructions, constants, schemas, state, triggers, processes, input.
+- The OAK output has one arrangement, the seven sections in APS order, because OAK is the next iteration of APS.
+- OAK is the next iteration of APS; it keeps the APS section order and uses its own names.
+- Each top-level section MUST appear at most once.
+- Every section appears, empty when the composition has no node of its type.
+- Each section holds the direct nodes of its type in authored order.
+- Sections are siblings; no section nests inside another.
+- An instruction or trigger renders as its sentence alone.
+- A schema or process renders with an inner structure.
+- The OAK output loses node ids.
+
+#### XML
+
+```yaml
+oak_sections:
+  order: [instructions, constants, schemas, state, triggers, processes, input]
+  tags:
+    - <instructions>…</instructions>
+    - <constants>…</constants>
+    - <schemas>…</schemas>
+    - <state>…</state>
+    - <triggers>…</triggers>
+    - <processes>…</processes>
+    - <input>…</input>
+```
+
+- The xml variant is well-formed XML.
+- The xml variant uses OAK names and composition structure.
+- APS is not the canonical xml variant, because APS requires a process section and a process target that OAK does not.
+
+#### Markdown
+
+- The markdown variant uses headings, lists, and fenced blocks.
+
+#### Styles
+
+- A style changes natural language wording only.
+- Style is an output choice, not an interpretation instruction, because one tree must render in many styles.
+- The authored style preserves the authored wording.
+- A controlled style is a named and versioned renderer profile.
+- A controlled style rewrites only instruction bodies, trigger text, and process steps.
+- A controlled style preserves meaning, obligation, negation, conditions, and step order.
+- A renderer fails when it cannot validate a requested controlled style.
+- An ASD-STE100 style names its governing edition and validation rules.
+
+```yaml
+numbers_units_time:
+  numbers:
+    decimals: "."
+    thousands: "U+2009 (thin space)"
+
+  units:
+    format: "<number><space><unit>"
+    percent: "50 %"
+    temperature: "60 °C"
+    symbols: middle_dot_between_compounds # U+00B7
+    catalog: units.json (project)
+
+  time:
+    iso8601: true
+    default_tz: "Z"
+    local_times_require_offset_or_iana: true
+```
+
+```yaml
+sentence_limits:
+  procedures: 20
+  descriptions: 25
+
+paragraph_limits:
+  sentences_max: 6
+  one_topic: true
+
+lists:
+  steps_numbered: true
+  supportive_bullets: true
+```
+
+### Pydantic
+
+- Pydantic v2 is the description language for the vocabulary.
+- Pydantic v2 is the authoring tool, and every other representation derives from the authored tree.
+
+### JSON-LD
+
+### YAML-LD
+
+### File system
+
+### SQL
+
+### CSV
+
+### EBNF
+
+- OAK when authoring the build of OAK emits a EBNF grammar for OAK itself, which is a meta-grammar for OAK.
 
 ---
 
@@ -324,30 +315,30 @@ The tree below is a representation of the build as the PRD above is written; it 
 ```text
 oak
   .agent  skills the agent reads, not PRD driven
-  .gitignore  repository infrastructure, not PRD driven
+  .gitignore
   AGENTS.md  repository rules
   CLAUDE.md  pointer to AGENTS.md
   docs  ground truth
     PRD.md
     types.md  Pydantic types the core schema validates
-  examples  one authored composition per practical application
+  examples  executable compositions, they validate the build
     agent.py
     sop.py
     static.py
   legacy-snapshot-aps  APS reference, read only
   oak  the package
-    __init__.py  authoring API
-    models.py  the seven node models, one discriminated union
-    composition.py  root composition, graph checks, Pydantic output
-    renderers  one module per output
-      __init__.py  output API
-      pydantic.py
+    __init__.py  authoring and output API
+    models.py  shared config, references, the seven node models, one discriminated union
+    composition.py  composition model and root graph checks
+    outputs  one module per output
+      __init__.py  output selection, defaults to OAK xml authored
       oak.py  xml and markdown variants, styles
+      pydantic.py
       json_ld.py
       yaml_ld.py
       filesystem.py
       sql.py
       csv.py
-      ebnf.py
-  pyproject.toml  package and dependencies
+      ebnf.py  OAK meta-grammar
+  pyproject.toml
 ```
