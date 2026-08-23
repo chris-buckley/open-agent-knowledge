@@ -4,7 +4,7 @@ status: draft
 updated: 2026-08-22
 owner: Christopher Buckley
 defaults:
-  output: OAK
+  render: OAK
   variant: xml
   style: authored
 open:
@@ -21,8 +21,9 @@ authoring:
   - Every line fights for its place; remove what loses.
   - Each line maps to (core schema: type|literal|discriminated union|nested model|min or max length|gt or lt|regex|strict|no extra fields|frozen|JSON parse from bytes|core serializer: dump|JSON dump|include or exclude|alias|context|Python engine rule: after validator|field validator|root graph check|exclude_if|field serializer|model serializer to text|JSON Schema|source lint|runtime check|purpose: intent|rationale); a line that maps to none is removed.
   - A line the engine can enforce is enforced in the models in the same pass, because pydantic-core runs the Rust items natively and dispatches the Python callbacks, so every such line is checked on every authoring.
-  - Return the OAK output when no output, variant, or style is named; every default is OAK.
-  - Write no tests; the examples validate the build and tests add tokens and context for models.
+  - Return the OAK render when no render, variant, or style is named; every default is OAK.
+  - Write no tests; the examples on every model and field validate the build, and tests add tokens and context for models.
+  - Keep outputs and renders separate: the build uses the package to generate an output once; a render turns one knowledge tree into a format.
 ---
 
 # OAK Product Requirements
@@ -56,7 +57,7 @@ Practical applications include, but are not limited to:
 6. Require each composition child to be a (node|composition).
 7. Reject duplicate IDs across nodes and compositions.
 8. Reject a (missing|wrong-type) reference target.
-9. Omit unset optional fields from the Pydantic output.
+9. Omit unset optional fields from the Pydantic render.
 
 ## Structure
 
@@ -78,6 +79,9 @@ Practical applications include, but are not limited to:
 - Constants and state hold any JSON value.
 - Validation is strict: no type coercion and no unknown fields.
 - The PRD uses one short sentence per idea.
+- Give every model and field a title, a description, and examples; the prompt and the documentation derive from them.
+- Validate every example against its model or field in the build, so the examples are the only tests.
+- Parse OAK text into the models, so OAK written without the models is validated afterwards.
 
 ## Instructions
 
@@ -99,19 +103,19 @@ Practical applications include, but are not limited to:
 
 - Constants are values that stay the same in every use of the knowledge.
 
-Example: multi-line TEXT constant using TEXT<< ... >>. Tree symbols are not used because they cost extra tokens; use an indent instead.
+Example: multi-line TEXT constant using TEXT<< ... >>. Tree symbols mark each level.
 
 ```text
 <constants>
 REPO_TREE: TEXT<<
 cb-agnostic-prompt-protocol
-  assets
-    constants
-      constants-json-block-v1.0.0.example.md
-    formats
-      format-code-map-v1.0.0.example.md
-      format-error-v1.0.0.example.md
-  SKILL.md
+├── assets
+│   ├── constants
+│   │   └── constants-json-block-v1.0.0.example.md
+│   └── formats
+│       ├── format-code-map-v1.0.0.example.md
+│       └── format-error-v1.0.0.example.md
+└── SKILL.md
 >>
 </constants>
 ```
@@ -186,18 +190,18 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Input is the contract for what the knowledge expects to receive.
 - Input is defined before the knowledge is used.
 
-## Outputs
+## Render
 
-- One knowledge tree can emit many output representations.
-- The main outputs are Pydantic v2, OAK, JSON-LD, YAML-LD, a file system representation, relational tables in SQL, and CSV files placed in the file system.
+- One knowledge tree can render to many formats.
+- The renders are Pydantic v2, OAK, JSON-LD, YAML-LD, a file system representation, relational tables in SQL, and CSV files placed in the file system.
 - Pydantic v2 is the authoring form; JSON-LD, YAML-LD, and file system representation are interchangeable once built.
 - Each projection defines what it preserves, what it loses, and how it orders content.
 
 ### OAK
 
-- OAK is the default output.
-- The text output is named OAK and is the default output, because it is the output an interpreter uses directly.
-- The OAK output is prose structured text which optimises for disambiguation for AI Models.
+- OAK is the default render.
+- The text render is named OAK and is the default render, because it is the render an interpreter uses directly.
+- The OAK render is prose structured text which optimises for disambiguation for AI Models.
 - OAK renders from the authored tree with a variant and a style.
 - These render choices do not change the authored tree or the vocabulary.
 - OAK rendering uses variant and style outside the vocabulary, adding no node type or field.
@@ -209,8 +213,8 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 
 #### Arrangement
 
-- The OAK output has seven sections in this order: instructions, constants, schemas, state, triggers, processes, input.
-- The OAK output has one arrangement, the seven sections in APS order, because OAK is the next iteration of APS.
+- The OAK render has seven sections in this order: instructions, constants, schemas, state, triggers, processes, input.
+- The OAK render has one arrangement, the seven sections in APS order, because OAK is the next iteration of APS.
 - OAK is the next iteration of APS; it keeps the APS section order and uses its own names.
 - Each top-level section MUST appear at most once.
 - Every section appears, empty when the composition has no node of its type.
@@ -218,7 +222,7 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Sections are siblings; no section nests inside another.
 - An instruction or trigger renders as its sentence alone.
 - A schema or process renders with an inner structure.
-- The OAK output loses node ids.
+- The OAK render loses node ids.
 
 #### XML
 
@@ -246,7 +250,7 @@ oak_sections:
 #### Styles
 
 - A style changes natural language wording only.
-- Style is an output choice, not an interpretation instruction, because one tree must render in many styles.
+- Style is a render choice, not an interpretation instruction, because one tree must render in many styles.
 - The authored style preserves the authored wording.
 - A controlled style is a named and versioned renderer profile.
 - A controlled style rewrites only instruction bodies, trigger text, and process steps.
@@ -302,43 +306,61 @@ lists:
 
 ### CSV
 
-### EBNF
-
-- OAK when authoring the build of OAK emits a EBNF grammar for OAK itself, which is a meta-grammar for OAK.
-
 ---
 
 ## Build
 
+The build uses the package to generate the outputs once; a model writes OAK with the outputs; the models validate what it wrote.
+
+### EBNF
+
+- OAK when authoring the build of OAK emits a EBNF grammar for OAK itself, which is a meta-grammar for OAK.
+
+### Prompt
+
+- Emit the authoring prompt as one OAK file generated from the models: instructions from the constraints, schemas from the models, one process to write OAK (with|without) the models, one trigger for a model that arrives to write OAK.
+
+### Documentation
+
+- Emit the documentation as a directory tree of markdown generated from the models, one file per model, built from every model and field (title|description|examples).
+- Reject a model or field without a description.
+
+### Tree
+
 The tree below is a representation of the build as the PRD above is written; it evolves with every line above it.
 
-```text
+```md
 oak
-  .agent  skills the agent reads, not PRD driven
-  .gitignore
-  AGENTS.md  repository rules
-  CLAUDE.md  pointer to AGENTS.md
-  docs  ground truth
-    PRD.md
-    types.md  Pydantic types the core schema validates
-  examples  executable compositions, they validate the build
-    agent.py
-    sop.py
-    static.py
-  legacy-snapshot-aps  APS reference, read only
-  oak  the package
-    __init__.py  authoring and output API
-    models.py  shared config, references, the seven node models, one discriminated union
-    composition.py  composition model and root graph checks
-    outputs  one module per output
-      __init__.py  output selection, defaults to OAK xml authored
-      oak.py  xml and markdown variants, styles
-      pydantic.py
-      json_ld.py
-      yaml_ld.py
-      filesystem.py
-      sql.py
-      csv.py
-      ebnf.py  OAK meta-grammar
-  pyproject.toml
+├── .agent  # skills the agent reads, not PRD driven
+├── .gitignore
+├── AGENTS.md  # repository rules
+├── CLAUDE.md  # pointer to AGENTS.md
+├── docs  # ground truth
+│   ├── PRD.md
+│   └── types.md  # Pydantic types the core schema validates
+├── legacy-snapshot-aps  # APS reference, read only
+├── oak  # the package, what the PRD builds
+│   ├── __init__.py  # authoring API
+│   ├── defaults.py  # render OAK, variant xml, style authored
+│   ├── models.py  # shared config, references, the seven node models, one discriminated union
+│   ├── composition.py  # composition model and root graph checks
+│   ├── parse.py  # OAK text to models
+│   └── render  # one module per format, renders one knowledge tree
+│       ├── __init__.py  # format selection, defaults apply
+│       ├── oak.py  # xml and markdown variants, styles
+│       ├── pydantic.py
+│       ├── json_ld.py
+│       ├── yaml_ld.py
+│       ├── filesystem.py
+│       ├── sql.py
+│       └── csv.py
+├── build  # uses the package to generate the outputs
+│   ├── ebnf.py
+│   ├── prompt.py
+│   └── docs.py
+├── outputs  # snapshot of the oak build
+│   ├── oak.ebnf
+│   ├── prompt.oak
+│   └── docs  # markdown tree, one file per model
+└── pyproject.toml
 ```

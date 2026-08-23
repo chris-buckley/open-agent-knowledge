@@ -67,6 +67,10 @@ OAK,"Open Agent Knowledge, the universal knowledge standard this repository defi
 interpreter,"the human, agent, or program that interprets OAK knowledge before using it"
 trigger,"the node that signposts knowledge to the outside; it records why an interpreter enters and, when matched, guides which instructions, schemas, and processes apply"
 APS,"Agnostic Prompt Standard, the legacy standard that OAK succeeds; its skill snapshot is in `legacy-snapshot-aps`"
+package,"the Pydantic models, defaults, parser, and renderers the PRD builds; it is the `oak` directory"
+render,"a format one knowledge tree renders to (OAK|Pydantic|JSON-LD|YAML-LD|file system|SQL|CSV); OAK is the default"
+build,"the directory that uses the package to generate the outputs; it is the `build` directory"
+output,"an artefact the build generates from the package once (EBNF|authoring prompt|documentation tree); it is in the `outputs` directory"
 ```
 
 WHEN working in this repository, you MUST:
@@ -97,6 +101,11 @@ WHEN you name the consumer of OAK knowledge, you MUST:
 
 - Use the concept interpreter.
 - Do not use reader.
+
+WHEN you name what OAK produces, you MUST:
+
+- Use render for a format of one knowledge tree.
+- Use output for an artefact the build generates.
 
 WHEN you change `docs/PRD.md`, you MUST:
 
