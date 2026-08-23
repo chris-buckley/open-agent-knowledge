@@ -1,7 +1,7 @@
 ---
 title: OAK Product Requirements
 status: draft
-updated: 2026-08-22
+updated: 2026-08-23
 owner: Christopher Buckley
 defaults:
   render: OAK
@@ -155,8 +155,27 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 
 ## Schemas
 
-- Schemas are defined structures.
-- Schemas include schemas, templates, and formats.
+- Schemas hold every output contract an interpreter may render and every structure it may capture.
+- Define each output contract once in schemas, so each output is (verifiable|stable|machine-checkable).
+- Give each schema an optional `name`, an optional `purpose`, one `template`, and one `where` list.
+- Store each template as one verbatim string.
+- Keep `where` as an ordered list.
+- Give each `Where` one `Placeholder`, one non-empty constraint list, optional examples, and an optional description.
+- Represent each constraint as one discriminated union of (type|one of|regex|non-empty|max chars|lines|list of|at least|at most) on a required `kind`.
+- Select each `type` value and each `list of` item from the vocabulary datatypes.
+- Give each (at least|at most) a value that is (number|Placeholder).
+- Extract each distinct `Placeholder` from the template.
+- Reject a duplicate `Placeholder` in `where`.
+- Reject a schema when its template `Placeholder` set and `where` `Placeholder` set differ.
+- Reject an (at least|at most) whose `Placeholder` value is absent from the same schema.
+- Reject a `lines` constraint when (both bounds are absent|the minimum exceeds the maximum).
+- Reject a regex constraint that rust-regex cannot compile.
+- Name each rejection with one error code, such as `placeholder_where_mismatch`.
+- Apply every `Where` constraint to each value bound to its `Placeholder`.
+- Resolve each `Placeholder` valued (at least|at most) within the same schema instance.
+- Apply datatype validation before each bound comparison.
+- Validate regex values with rust-regex.
+- Accept placeholder bindings from the interpreter instead of recovering them from rendered text.
 
 ## State
 
@@ -202,6 +221,8 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Define `IriId` as an ASCII scheme, a colon, and one or more non-whitespace characters.
 - Define `NonBlankLine` as one line containing at least one non-whitespace character.
 - Define `ConstantName` as ASCII upper snake case without a leading, trailing, or repeated underscore.
+- Define `Placeholder` as `ConstantName`.
+- Delimit each `Placeholder` with `<` and `>` in template text; any other `<` is literal.
 - Represent each closed token catalog with a (literal|enum).
 - Represent a quantity as a nested model of a Decimal value and a unit enum; the serializer owns its display.
 - Represent a datetime as `AwareDatetime` with an optional `TimeZoneName`.
@@ -240,6 +261,10 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Use `[0-9]` and `[A-Za-z]` for ASCII classes, because Rust regex treats `\d` and `\w` as Unicode.
 - Validate every default value.
 - Build each `TypeAdapter` once at module import.
+- Emit the `Placeholder` pattern in JSON Schema.
+- Emit each discriminated union as `oneOf` branches selected by its `kind`.
+- Emit forbidden extra fields as `additionalProperties: false`.
+- Restrict each regex pattern emitted in JSON Schema to syntax accepted by both rust-regex and ECMA-262.
 
 ## Render
 
@@ -275,8 +300,13 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Parts are siblings; no part nests inside another.
 - Render each instruction or trigger as its text alone.
 - Render each constant name with `ConstantName`.
-- A schema or process renders with an inner structure.
-- The OAK render loses node and entry ids.
+- A process renders with an inner structure.
+- Render each schema template followed by `WHERE:` and one generated line for each `Where`.
+- Preserve template whitespace in each text render.
+- Render `Where` entries in authored order.
+- Render each `Where` line from its delimited `Placeholder`, constraints in authored order, examples, and optional description.
+- Join constraints, examples, and the optional description with `; `.
+- The OAK render loses node ids and keeps schema entry ids.
 
 #### XML
 
@@ -294,6 +324,7 @@ oak_parts:
 ```
 
 - The xml variant is well-formed XML.
+- Render schema text as XML character data without changing its parsed value.
 - The xml variant uses OAK names and node structure.
 - APS is not the canonical xml variant, because APS requires a process part and a process target that OAK does not.
 - Join instruction bodies inside `<instructions>` with one U+000A LINE FEED.
@@ -317,7 +348,12 @@ oak_parts:
 
 ### JSON-LD
 
-TBC
+- Render each schema id as `@id`.
+- Render `Schema`, `Where`, and each constraint kind as `@type`.
+- Derive each `Where` `@id` from its schema `@id` and `Placeholder`.
+- Render `where`, `constraints`, and `examples` as `@list` containers.
+- Define context terms for `template`, `where`, `placeholder`, `constraints`, `examples`, and each constraint field.
+- Render each `Placeholder` valued (at least|at most) value as the referenced `Where` `@id`.
 
 ### YAML-LD
 
@@ -388,7 +424,7 @@ oak
 │   │       ├── __init__.py  # the closed set, one discriminated union
 │   │       ├── instructions.py
 │   │       ├── constants.py
-│   │       ├── schemas.py
+│   │       ├── schemas.py  # Schema, Where, the constraint union, bind
 │   │       ├── state.py
 │   │       ├── triggers.py
 │   │       ├── processes.py
@@ -402,9 +438,11 @@ oak
 │   │   │   ├── iri_id.py  # IriId
 │   │   │   ├── non_blank_line.py  # NonBlankLine
 │   │   │   ├── constant_name.py  # ConstantName
+│   │   │   ├── placeholder.py  # Placeholder, template token extraction
 │   │   │   └── ...
 │   │   ├── datatypes  # typed values, one model each
 │   │   │   ├── __init__.py
+│   │   │   ├── names.py  # Datatype, the name catalog, one validator each
 │   │   │   ├── quantity.py  # Decimal value and unit enum
 │   │   │   ├── datetime.py  # AwareDatetime and optional TimeZoneName
 │   │   │   └── ...
@@ -422,7 +460,7 @@ oak
 │       │   ├── arrangement.py  # seven parts in APS order
 │       │   ├── variants.py  # layer 4, xml tags or markdown fences
 │       │   └── styles.py  # authored, controlled ASD-STE100
-│       ├── json_ld.py
+│       ├── json_ld.py  # @id, @type, @list, the context
 │       ├── yaml_ld.py
 │       ├── filesystem.py
 │       ├── sql.py
