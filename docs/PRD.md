@@ -3,7 +3,6 @@ title: OAK Product Requirements
 status: draft
 updated: 2026-08-22
 owner: Christopher Buckley
-sketch: vocabulary_sketch.py
 authoring:
   - These rules govern every line after the first `---` that follows the Purpose section; the Purpose prose above it is exempt.
   - This document is the complete ground truth for OAK; it evolves and is never partial.
@@ -309,3 +308,14 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 
 - Input is the contract for what the knowledge expects to receive.
 - Input is defined before the knowledge is used.
+
+---
+
+## Build
+
+The tree below is a representation of the build as the PRD above is written; it evolves with every line above it.
+
+```text
+oak
+  placeholder
+```
