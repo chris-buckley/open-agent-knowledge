@@ -318,7 +318,7 @@ The build uses the package to generate the outputs once; a model writes OAK with
 
 ### Prompt
 
-- Emit the authoring prompt as one OAK file generated from the models: instructions from the constraints, schemas from the models, one process to write OAK (with|without) the models, one trigger for a model that arrives to write OAK.
+- Emit the authoring prompt as one markdown file of OAK generated from the models: instructions from the constraints, schemas from the models, one process to write OAK (with|without) the models, one trigger for a model that arrives to write OAK.
 
 ### Documentation
 
@@ -329,7 +329,7 @@ The build uses the package to generate the outputs once; a model writes OAK with
 
 The tree below is a representation of the build as the PRD above is written; it evolves with every line above it.
 
-```md
+```t
 oak
 ├── .agent  # skills the agent reads, not PRD driven
 ├── .gitignore
@@ -360,7 +360,7 @@ oak
 │   └── docs.py
 ├── outputs  # snapshot of the oak build
 │   ├── oak.ebnf
-│   ├── prompt.oak
+│   ├── prompt.md
 │   └── docs  # markdown tree, one file per model
 └── pyproject.toml
 ```
