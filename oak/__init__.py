@@ -25,7 +25,7 @@ from oak.node.parts import (
     Where,
     where,
 )
-from oak.render import node_json_ld, schema_json_ld, schema_xml
+from oak.render import node_json_ld, node_xml, schema_json_ld, schema_xml
 
 __all__ = [
     "AtLeast",
@@ -52,6 +52,7 @@ __all__ = [
     "Type",
     "Where",
     "node_json_ld",
+    "node_xml",
     "schema_json_ld",
     "schema_xml",
     "where",

@@ -118,9 +118,7 @@ WHEN you name what OAK produces, you MUST:
 WHEN you change `docs/PRD.md`, you MUST:
 
 - Follow the `authoring` rules in its front matter.
-- Show the user one example per change with the exact PRD lines under it before you write them.
-- Write the examples to one markdown file in the scratchpad.
-- Open it as a preview beside the user with `vscipc markdown.showPreviewToSide --uri <file uri>`, not as a raw file.
+- Show the user each change as one runnable Python example authored with the package, its generated output, and the exact PRD lines, before you write them.
 - Keep the chat reply to what the user must answer.
 - Write them only after the user agrees.
 - Compress a list of alternatives into one line in the form `(a|b|c)` to reduce tokens.

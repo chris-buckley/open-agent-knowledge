@@ -8,7 +8,6 @@ from oak import (
     Interface,
     Lines,
     MaxChars,
-    Node,
     NonEmpty,
     Process,
     Regex,
@@ -17,7 +16,7 @@ from oak import (
     State,
     Trigger,
     Type,
-    schema_xml,
+    node_xml,
     where,
 )
 
@@ -45,7 +44,7 @@ outline = Schema(
 <LEVEL_1_NUMBER> <STATEMENT>
  <LEVEL_2_NUMBER> <STATEMENT>
   <LEVEL_3_NUMBER> <STATEMENT>
-...
+…
 """,
     where=[
         where(
@@ -138,9 +137,8 @@ root = Root(
             description="The outline returned by the outline process.",
         ),
     ],
-    children=[Node(id="oak:node/child")],
 )
 
 target = pathlib.Path(__file__).with_name("outline.oak.md")
-target.write_text(schema_xml(outline) + "\n", encoding="utf-8", newline="\n")
+target.write_text(node_xml(root) + "\n", encoding="utf-8", newline="\n")
 print(f"wrote {target}")

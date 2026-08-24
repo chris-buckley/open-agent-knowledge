@@ -2,7 +2,12 @@
 
 import json
 
+from oak.node.parts.constants import Constant
+from oak.node.parts.interfaces import Interface
+from oak.node.parts.processes import Process
 from oak.node.parts.schemas import AtLeast, AtMost, Constraint, Lines, ListOf, MaxChars, NonEmpty, OneOf, Regex, Type, Where
+from oak.node.parts.state import State
+from oak.node.parts.triggers import Trigger
 from oak.vocabulary.text.placeholder import token
 
 WHERE_HEADING = "WHERE:"
@@ -62,3 +67,34 @@ def where_line(where: Where) -> str:
     if where.description is not None:
         body += WHERE_DETAIL_SEPARATOR + where.description
     return WHERE_ENTRY_PREFIX + token(where.placeholder) + " " + body + "."
+
+
+def value_text(value: object) -> str:
+    """Return one JSON value on one line."""
+    return json.dumps(value, ensure_ascii=False)
+
+
+def named_value_line(entry: Constant | State) -> str:
+    """Return one `NAME: value` line for a constant or a state value."""
+    return f"{entry.name}: {value_text(entry.value)}"
+
+
+def trigger_line(trigger: Trigger) -> str:
+    """Return one trigger line: its text, then an arrow to its process id."""
+    return f"- {trigger.when} -> {trigger.process}"
+
+
+def process_lines(process: Process) -> list[str]:
+    """Return the process inner lines: references, then numbered steps."""
+    lines = []
+    if process.consumes:
+        lines.append("consumes: " + ", ".join(process.consumes))
+    if process.emits:
+        lines.append("emits: " + ", ".join(process.emits))
+    lines.extend(f"{number}. {step}" for number, step in enumerate(process.steps, start=1))
+    return lines
+
+
+def interface_body(interface: Interface) -> str:
+    """Return the interface inner text: its description, or nothing."""
+    return interface.description or ""

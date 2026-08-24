@@ -256,6 +256,7 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Define `ConstantName` as ASCII upper snake case without a leading, trailing, or repeated underscore.
 - Define `Placeholder` as `ConstantName`.
 - Delimit each `Placeholder` with `<` and `>` in template text; any other `<` is literal.
+- In a template, a line of one U+2026 HORIZONTAL ELLIPSIS tells the interpreter the pattern above it continues; the engine gives it no meaning.
 - Represent each closed token catalog with a (literal|enum).
 - Represent a quantity as a nested model of a Decimal value and a unit enum; the serializer owns its display.
 - Represent a datetime as `AwareDatetime` with an optional `TimeZoneName`.
@@ -333,7 +334,13 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Every part appears, empty when the node has no entry for it.
 - Each part holds the node's own entries in authored order.
 - Parts are siblings; no part nests inside another.
-- Render each instruction or trigger as its text alone.
+- Render each instruction as its text alone.
+- Render each trigger as its text, one ` -> `, then its process id.
+- Render each (constant|state) entry as its name, `: `, and its value as JSON on one line.
+- Render each process with its id and name, one `consumes:` and one `emits:` line when present, then its steps as a numbered list.
+- Render each interface with its id, direction, and schema reference, and its description as its body.
+- Render each child node as one nested `node` block after the seven parts.
+- Separate the parts and each nested `node` block with one blank line.
 - Render each constant name with `ConstantName`.
 - A process renders with an inner structure.
 - Render process interface references inside the process structure.
@@ -371,7 +378,6 @@ oak_parts:
 #### Markdown
 
 - The markdown variant uses headings, lists, and fenced blocks.
-- Render process steps as a numbered list.
 
 #### Styles
 
