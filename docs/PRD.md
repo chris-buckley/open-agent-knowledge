@@ -374,19 +374,22 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Each part holds the node's own entries in authored order.
 - Parts are siblings; no part nests inside another.
 - Render each instruction as its text alone.
-- Render each trigger as its text, one ` -> `, then its process id.
+- Render each trigger as one self-closing `trigger` tag with one `id`, one `when`, and one `process` attribute.
 - Render each (constant|state) entry as its name, `: `, and its value as JSON on one line.
-- Render each process with its id and name, one `STEPS:` line, and its typed steps as a numbered tree.
+- Render each process with its id and name, then its typed steps one per line in authored order.
+- Line order carries the step sequence; render no step numbers and no heading.
+- Indent grouped lines by two spaces under their parent line.
 - Render each process value as one of (JSON literal|`constant ` and its id|`state ` and its id|`interface ` and its id and placeholder|`binding ` and its placeholder).
 - Render each act with `ACT`, its instruction, optional `INPUTS:`, and optional `OUTPUTS:`.
 - Render each set on one line with `SET state`, its state id, ` = `, and its value.
 - Render each emit with `EMIT interface`, its interface id, and one binding per line.
-- Render each if with `IF`, its condition, `THEN:`, and `ELSE:` when present.
+- Render each if with `IF`, its condition, its indented then steps, and `ELSE:` with its indented otherwise steps when present.
 - Render each call on one line with `CALL process` and its process id.
 - Render each fail on one line with `FAIL` and its JSON string message.
 - Render each interface with its id, direction, and schema reference, and its description as its body.
 - Render each child node as one nested `node` block after the seven parts.
 - Separate the parts and each nested `node` block with one blank line.
+- Separate sibling (schema|process|interface) blocks with one blank line.
 - Render each constant name with `ConstantName`.
 - A process renders with an inner structure.
 - Render each process reference at the step or value that uses it.
@@ -395,7 +398,7 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Preserve template whitespace in each text render.
 - Render `Where` entries in authored order.
 - Render each `Where` as one line: its delimited `Placeholder`, constraints joined by `; `, examples once in brackets as `(e.g. ...)`, then the description.
-- The OAK render loses node ids and keeps schema, process, and interface entry ids.
+- The OAK render loses node ids and keeps schema, trigger, process, and interface entry ids.
 
 #### XML
 
@@ -497,7 +500,7 @@ oak
 ├── examples  # authored trees, one per file; the render sits next to its author
 │   ├── incident_triage.py  # authors one agent-facing tree
 │   ├── incident_triage.oak.md  # * the OAK render of incident_triage.py
-│   ├── shell.py  # authors one closed state machine
+│   ├── shell.py  # authors one shell state machine
 │   └── shell.oak.md  # * the OAK render of shell.py
 ├── legacy-snapshot-aps  # APS reference, read only
 ├── oak  # the package, what the PRD builds

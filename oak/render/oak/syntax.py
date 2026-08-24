@@ -36,7 +36,6 @@ from oak.node.parts.schemas import (
     Where,
 )
 from oak.node.parts.state import State
-from oak.node.parts.triggers import Trigger
 from oak.vocabulary.text.placeholder import token
 
 WHERE_HEADING = "WHERE:"
@@ -114,11 +113,6 @@ def named_value_line(entry: Constant | State) -> str:
     return f"{entry.name}: {value_text(entry.value)}"
 
 
-def trigger_line(trigger: Trigger) -> str:
-    """Return one trigger line: its text, then an arrow to its process id."""
-    return f"- {trigger.when} -> {trigger.process}"
-
-
 def process_value_text(value: Value) -> str:
     """Return one dense process value reference."""
     match value:
@@ -145,61 +139,49 @@ def condition_text(condition: Condition) -> str:
 
 
 def _binding_line(binding: ValueBinding, indent: int) -> str:
-    return (
-        " " * indent
-        + f"- {token(binding.placeholder)} = {process_value_text(binding.value)}."
-    )
+    return " " * indent + f"{token(binding.placeholder)} = {process_value_text(binding.value)}"
 
 
-def _step_lines(step: Step, number: int, indent: int) -> list[str]:
-    prefix = " " * indent + f"{number}. "
-    detail_indent = indent + 3
-    child_indent = indent + 6
+def _step_lines(step: Step, indent: int) -> list[str]:
+    prefix = " " * indent
+    inner = indent + 2
 
     if isinstance(step, Act):
         lines = [prefix + f"ACT {step.instruction}"]
         if step.inputs:
-            lines.append(" " * detail_indent + "INPUTS:")
-            lines.extend(
-                _binding_line(binding, child_indent) for binding in step.inputs
-            )
+            lines.append(" " * inner + "INPUTS:")
+            lines.extend(_binding_line(binding, inner + 2) for binding in step.inputs)
         if step.outputs:
             outputs = ", ".join(token(output) for output in step.outputs)
-            lines.append(" " * detail_indent + f"OUTPUTS: {outputs}.")
+            lines.append(" " * inner + f"OUTPUTS: {outputs}")
         return lines
     if isinstance(step, Set):
-        return [
-            prefix
-            + f"SET state {step.state} = {process_value_text(step.value)}."
-        ]
+        return [prefix + f"SET state {step.state} = {process_value_text(step.value)}"]
     if isinstance(step, Emit):
         lines = [prefix + f"EMIT interface {step.interface}:"]
-        lines.extend(
-            _binding_line(binding, detail_indent) for binding in step.bindings
-        )
+        lines.extend(_binding_line(binding, inner) for binding in step.bindings)
         return lines
     if isinstance(step, If):
         lines = [prefix + f"IF {condition_text(step.condition)}:"]
-        lines.append(" " * detail_indent + "THEN:")
-        for child_number, child in enumerate(step.then, start=1):
-            lines.extend(_step_lines(child, child_number, child_indent))
+        for child in step.then:
+            lines.extend(_step_lines(child, inner))
         if step.otherwise is not None:
-            lines.append(" " * detail_indent + "ELSE:")
-            for child_number, child in enumerate(step.otherwise, start=1):
-                lines.extend(_step_lines(child, child_number, child_indent))
+            lines.append(prefix + "ELSE:")
+            for child in step.otherwise:
+                lines.extend(_step_lines(child, inner))
         return lines
     if isinstance(step, Call):
-        return [prefix + f"CALL process {step.process}."]
+        return [prefix + f"CALL process {step.process}"]
     if isinstance(step, Fail):
-        return [prefix + f"FAIL {value_text(step.message)}."]
+        return [prefix + f"FAIL {value_text(step.message)}"]
     raise TypeError(f"unsupported process step {type(step).__name__}")
 
 
 def process_lines(process: Process) -> list[str]:
-    """Return the process inner lines: one heading and one numbered step tree."""
-    lines = ["STEPS:"]
-    for number, step in enumerate(process.steps, start=1):
-        lines.extend(_step_lines(step, number, 0))
+    """Return the process inner lines: its steps in order, grouped by indentation."""
+    lines: list[str] = []
+    for step in process.steps:
+        lines.extend(_step_lines(step, 0))
     return lines
 
 

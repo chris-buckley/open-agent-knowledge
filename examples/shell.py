@@ -1,21 +1,60 @@
-"""Author one closed OAK state machine and write its render."""
+"""Author one OAK shell state machine and write its render."""
 
 import pathlib
 
 from oak import (
     Call,
     Condition,
+    Emit,
     Fail,
     If,
     Instruction,
+    Interface,
+    InterfaceValue,
     LiteralValue,
+    NonEmpty,
     Process,
     Root,
+    Schema,
     Set,
     State,
-    StateValue,
     Trigger,
+    Type,
+    ValueBinding,
     node_xml,
+    where,
+)
+
+command_line = Schema(
+    id="oak:schema/command-line",
+    name="Command Line",
+    purpose="Carry one command the user types.",
+    template="<COMMAND>",
+    where=[
+        where(
+            "COMMAND",
+            Type(of="string"),
+            NonEmpty(),
+            examples=["pwd", "exit"],
+            description="the exact command string",
+        )
+    ],
+)
+
+terminal_output = Schema(
+    id="oak:schema/terminal-output",
+    name="Terminal Output",
+    purpose="Carry one line the shell prints.",
+    template="<OUTPUT>",
+    where=[
+        where(
+            "OUTPUT",
+            Type(of="string"),
+            NonEmpty(),
+            examples=["/oak", "logout"],
+            description="the printed line",
+        )
+    ],
 )
 
 root = Root(
@@ -26,27 +65,18 @@ root = Root(
             body="Treat each command as an exact string.",
         )
     ],
+    schemas=[command_line, terminal_output],
     state=[
         State(
             id="oak:state/mode",
             name="MODE",
             value="open",
-        ),
-        State(
-            id="oak:state/command",
-            name="COMMAND",
-            value="pwd",
-        ),
-        State(
-            id="oak:state/output",
-            name="OUTPUT",
-            value="",
-        ),
+        )
     ],
     triggers=[
         Trigger(
-            id="oak:trigger/open",
-            when="The shell mode is open.",
+            id="oak:trigger/command",
+            when="A command line arrives while the shell mode is open.",
             process="oak:process/route",
         )
     ],
@@ -57,7 +87,10 @@ root = Root(
             steps=[
                 If(
                     condition=Condition(
-                        left=StateValue(state="oak:state/command"),
+                        left=InterfaceValue(
+                            interface="oak:interface/stdin",
+                            placeholder="COMMAND",
+                        ),
                         operator="equals",
                         right=LiteralValue(value="pwd"),
                     ),
@@ -65,7 +98,10 @@ root = Root(
                     otherwise=[
                         If(
                             condition=Condition(
-                                left=StateValue(state="oak:state/command"),
+                                left=InterfaceValue(
+                                    interface="oak:interface/stdin",
+                                    placeholder="COMMAND",
+                                ),
                                 operator="equals",
                                 right=LiteralValue(value="exit"),
                             ),
@@ -82,29 +118,49 @@ root = Root(
             id="oak:process/pwd",
             name="Run pwd",
             steps=[
-                Set(
-                    state="oak:state/output",
-                    value=LiteralValue(value="/oak"),
-                ),
-                Set(
-                    state="oak:state/command",
-                    value=LiteralValue(value="exit"),
-                ),
+                Emit(
+                    interface="oak:interface/stdout",
+                    bindings=[
+                        ValueBinding(
+                            placeholder="OUTPUT",
+                            value=LiteralValue(value="/oak"),
+                        )
+                    ],
+                )
             ],
         ),
         Process(
             id="oak:process/exit",
             name="Run exit",
             steps=[
-                Set(
-                    state="oak:state/output",
-                    value=LiteralValue(value="logout"),
+                Emit(
+                    interface="oak:interface/stdout",
+                    bindings=[
+                        ValueBinding(
+                            placeholder="OUTPUT",
+                            value=LiteralValue(value="logout"),
+                        )
+                    ],
                 ),
                 Set(
                     state="oak:state/mode",
                     value=LiteralValue(value="closed"),
                 ),
             ],
+        ),
+    ],
+    interfaces=[
+        Interface(
+            id="oak:interface/stdin",
+            direction="in",
+            schema="oak:schema/command-line",
+            description="The command line the user types.",
+        ),
+        Interface(
+            id="oak:interface/stdout",
+            direction="out",
+            schema="oak:schema/terminal-output",
+            description="The line the shell prints.",
         ),
     ],
 )
