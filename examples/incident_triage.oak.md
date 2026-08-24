@@ -1,13 +1,20 @@
 <instructions>
+$ reads a value; a dotted path starts with its part; a bare $NAME is local to the running process; SET, CALL, and EMIT omit $.
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots, and WHERE lines that constrain each slot.
+State holds values that persist and can change while processes run.
+Each trigger names one arrival reason, an optional state guard, and the process that runs when both match.
+Each process is the exact way to do one task; follow its steps in order, top to bottom.
+Each interface is one information crossing: in arrives, out is emitted, and inout does both.
 Use only evidence present in the incident report.
 </instructions>
 
 <constants>
-ESCALATION_POLICY: "Escalate critical incidents immediately."
+escalation-policy: "Escalate critical incidents immediately."
 </constants>
 
 <schemas>
-<schema id="oak:schema/incident-report" name="Incident Report" purpose="Describe the incident evidence supplied for triage.">
+<schema id="incident-report" name="Incident Report" purpose="Describe the incident evidence supplied for triage.">
 Summary: <SUMMARY>
 Impact: <IMPACT>
 
@@ -16,7 +23,7 @@ WHERE:
 - <IMPACT> is string; is one of `low`, `medium`, `high`; reported impact.
 </schema>
 
-<schema id="oak:schema/triage-decision" name="Triage Decision" purpose="Return one evidence-based incident decision.">
+<schema id="triage-decision" name="Triage Decision" purpose="Return one evidence-based incident decision.">
 Severity: <SEVERITY>
 Rationale: <RATIONALE>
 Next action: <NEXT_ACTION>
@@ -31,39 +38,39 @@ WHERE:
 </schemas>
 
 <state>
-STATUS: "ready"
+status: "ready"
 </state>
 
 <triggers>
-<trigger id="oak:trigger/triage" when="An incident report arrives for triage." process="oak:process/triage" />
+<trigger id="triage-trigger" given='$state.status equals "ready"' when="An incident report arrives for triage." process="triage" />
 </triggers>
 
 <processes>
-<process id="oak:process/triage" name="Triage an incident">
+<process id="triage" name="Triage incident">
 ACT Classify <SUMMARY> with <IMPACT> under <POLICY>, then produce <SEVERITY>, <RATIONALE>, and <NEXT_ACTION>.
   INPUTS:
-    <SUMMARY> = interface oak:interface/report <SUMMARY>
-    <IMPACT> = interface oak:interface/report <IMPACT>
-    <POLICY> = constant oak:constant/escalation-policy
-  OUTPUTS: <SEVERITY>, <RATIONALE>, <NEXT_ACTION>
-IF binding <SEVERITY> equals "critical":
-  SET state oak:state/status = "escalated"
+    SUMMARY = $interface.report.SUMMARY
+    IMPACT = $interface.report.IMPACT
+    POLICY = $constant.escalation-policy
+  OUTPUTS: SEVERITY, RATIONALE, NEXT_ACTION
+IF $SEVERITY equals "critical":
+  SET state.status = "escalated"
 ELSE:
-  SET state oak:state/status = "triaged"
-EMIT interface oak:interface/decision:
-  <SEVERITY> = binding <SEVERITY>
-  <RATIONALE> = binding <RATIONALE>
-  <NEXT_ACTION> = binding <NEXT_ACTION>
-  <POLICY> = constant oak:constant/escalation-policy
+  SET state.status = "triaged"
+EMIT interface.decision:
+  SEVERITY = $SEVERITY
+  RATIONALE = $RATIONALE
+  NEXT_ACTION = $NEXT_ACTION
+  POLICY = $constant.escalation-policy
 </process>
 </processes>
 
 <interfaces>
-<interface id="oak:interface/report" direction="in" schema="oak:schema/incident-report">
+<interface id="report" direction="in" schema="incident-report">
 The report supplied for incident triage.
 </interface>
 
-<interface id="oak:interface/decision" direction="out" schema="oak:schema/triage-decision">
+<interface id="decision" direction="out" schema="triage-decision">
 The triage decision returned to the caller.
 </interface>
 </interfaces>

@@ -7,8 +7,16 @@ from typing import Self
 from pydantic import ConfigDict, Field, model_validator
 
 from oak.base import OakModel
-from oak.node.parts import Constant, Instruction, Interface, Process, Schema, State, Trigger
-from oak.vocabulary import IriId
+from oak.node.parts import (
+    Constant,
+    Instruction,
+    Interface,
+    Process,
+    Schema,
+    State,
+    Trigger,
+)
+from oak.vocabulary import SlugId
 
 
 class Node(OakModel):
@@ -18,11 +26,11 @@ class Node(OakModel):
         json_schema_extra={
             "examples": [
                 {
-                    "id": "oak:node/example",
+                    "id": "example-node",
                     "instructions": [
                         {
                             "part": "instructions",
-                            "id": "oak:instruction/example",
+                            "id": "use-schema",
                             "body": "Use the supplied schema.",
                         }
                     ],
@@ -31,9 +39,9 @@ class Node(OakModel):
         }
     )
 
-    id: IriId = Field(
+    id: SlugId = Field(
         description="The node id, unique across the tree.",
-        examples=["oak:node/example"],
+        examples=["example-node"],
     )
     instructions: list[Instruction] = Field(
         default_factory=list,
@@ -42,7 +50,7 @@ class Node(OakModel):
             [
                 {
                     "part": "instructions",
-                    "id": "oak:instruction/example",
+                    "id": "use-schema",
                     "body": "Use the supplied schema.",
                 }
             ]
@@ -55,8 +63,7 @@ class Node(OakModel):
             [
                 {
                     "part": "constants",
-                    "id": "oak:constant/default-time-zone",
-                    "name": "DEFAULT_TZ",
+                    "id": "default-time-zone",
                     "value": "Z",
                 }
             ]
@@ -69,12 +76,17 @@ class Node(OakModel):
             [
                 {
                     "part": "schemas",
-                    "id": "oak:schema/title",
+                    "id": "title",
                     "template": "<TITLE>",
                     "where": [
                         {
                             "placeholder": "TITLE",
-                            "constraints": [{"kind": "type", "of": "string"}],
+                            "constraints": [
+                                {
+                                    "kind": "type",
+                                    "of": "string",
+                                }
+                            ],
                         }
                     ],
                 }
@@ -88,8 +100,7 @@ class Node(OakModel):
             [
                 {
                     "part": "state",
-                    "id": "oak:state/status",
-                    "name": "STATUS",
+                    "id": "status",
                     "value": "ready",
                 }
             ]
@@ -102,9 +113,9 @@ class Node(OakModel):
             [
                 {
                     "part": "triggers",
-                    "id": "oak:trigger/write",
+                    "id": "write-trigger",
                     "when": "The interpreter arrives to write OAK.",
-                    "process": "oak:process/write",
+                    "process": "write-oak",
                 }
             ]
         ],
@@ -116,7 +127,7 @@ class Node(OakModel):
             [
                 {
                     "part": "processes",
-                    "id": "oak:process/write",
+                    "id": "write-oak",
                     "name": "Write OAK",
                     "steps": [
                         {
@@ -135,9 +146,9 @@ class Node(OakModel):
             [
                 {
                     "part": "interfaces",
-                    "id": "oak:interface/request",
+                    "id": "request",
                     "direction": "in",
-                    "schema": "oak:schema/request",
+                    "schema": "request-shape",
                     "description": "The request supplied to the tree.",
                 }
             ]
@@ -146,7 +157,7 @@ class Node(OakModel):
     children: list[Node] = Field(
         default_factory=list,
         description="The child nodes in authored order.",
-        examples=[[{"id": "oak:node/child"}]],
+        examples=[[{"id": "child"}]],
     )
 
 
@@ -157,17 +168,20 @@ class Root(Node):
         json_schema_extra={
             "examples": [
                 {
-                    "id": "oak:root",
+                    "id": "root",
                     "schemas": [
                         {
                             "part": "schemas",
-                            "id": "oak:schema/knowledge",
+                            "id": "knowledge",
                             "template": "<KNOWLEDGE>",
                             "where": [
                                 {
                                     "placeholder": "KNOWLEDGE",
                                     "constraints": [
-                                        {"kind": "type", "of": "string"}
+                                        {
+                                            "kind": "type",
+                                            "of": "string",
+                                        }
                                     ],
                                 }
                             ],
@@ -176,15 +190,15 @@ class Root(Node):
                     "triggers": [
                         {
                             "part": "triggers",
-                            "id": "oak:trigger/run",
+                            "id": "run-trigger",
                             "when": "The interpreter arrives to transform knowledge.",
-                            "process": "oak:process/run",
+                            "process": "run",
                         }
                     ],
                     "processes": [
                         {
                             "part": "processes",
-                            "id": "oak:process/run",
+                            "id": "run",
                             "name": "Transform knowledge",
                             "steps": [
                                 {
@@ -195,7 +209,7 @@ class Root(Node):
                                             "placeholder": "KNOWLEDGE",
                                             "value": {
                                                 "source": "interface",
-                                                "interface": "oak:interface/knowledge",
+                                                "interface": "knowledge-interface",
                                                 "placeholder": "KNOWLEDGE",
                                             },
                                         }
@@ -204,7 +218,7 @@ class Root(Node):
                                 },
                                 {
                                     "kind": "emit",
-                                    "interface": "oak:interface/knowledge",
+                                    "interface": "knowledge-interface",
                                     "bindings": [
                                         {
                                             "placeholder": "KNOWLEDGE",
@@ -221,9 +235,9 @@ class Root(Node):
                     "interfaces": [
                         {
                             "part": "interfaces",
-                            "id": "oak:interface/knowledge",
+                            "id": "knowledge-interface",
                             "direction": "inout",
-                            "schema": "oak:schema/knowledge",
+                            "schema": "knowledge",
                         }
                     ],
                 }

@@ -16,7 +16,7 @@ class Instruction(Entry):
             "examples": [
                 {
                     "part": "instructions",
-                    "id": "oak:instruction/read-prd",
+                    "id": "read-prd",
                     "body": "Read the product requirements before work.",
                 }
             ]

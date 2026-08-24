@@ -51,13 +51,13 @@ Knowledge can also run: a tree whose state, triggers, and processes form a state
 
 ## Constraints
 
-1. Reject an empty (ID|text) field.
+1. Reject an empty (SlugId|text) field.
 2. Reject a process with no steps.
 3. Reject unknown fields.
 4. Reject an entry outside the seven parts (instructions|constants|schemas|state|triggers|processes|interfaces).
 5. Require one root node.
 6. Require each child of a node to be a node.
-7. Reject duplicate IDs across nodes and entries.
+7. Reject a duplicate SlugId across nodes and entries.
 8. Reject a (missing|wrong-type) reference target.
 9. Omit unset optional fields from the Pydantic dump.
 10. Reject a process value or emit step that conflicts with the interface direction.
@@ -69,6 +69,10 @@ Knowledge can also run: a tree whose state, triggers, and processes form a state
 16. Reject a process call cycle.
 17. Reject a statically dead process branch.
 18. Fail one execution when multiple triggers match one cycle.
+19. Reject a process name outside `ProcessName`.
+20. Reject a trigger guard that reads no state value.
+21. Reject a trigger guard that reads an (interface|local binding).
+22. Reject equal trigger `when` values unless every guard pair is provably disjoint.
 
 ## Structure
 
@@ -88,13 +92,16 @@ Knowledge can also run: a tree whose state, triggers, and processes form a state
 - Composition is the nesting of nodes, not an eighth part.
 - The flat entry registry is derived from the tree during validation, not authored.
 - Cross-references use typed fields, not a generic link field.
-- Require each (node|entry) ID to use `IriId` independent of file placement.
+- Store only the target `SlugId` in each typed reference field.
+- Require each (node|entry) ID to use `SlugId` independent of file placement.
+- Do not prefix a `SlugId` with its part.
+- A `SlugId` collision across parts is a duplicate ID.
 - Every entry shares only `id`.
 - Keep `name` and `purpose` part-specific.
 - Discriminate the closed entry union on `part`.
 - Author the tree root as `Root`.
 - Author each nested node as `Node`.
-- Root validation rejects duplicate IDs, missing reference targets, and wrong target types.
+- Root validation rejects duplicate IDs, overlapping trigger guards, missing reference targets, and wrong target types.
 - Constants and state hold any JSON value.
 - Validation is strict: no type coercion and no unknown fields.
 - The PRD uses one short sentence per idea.
@@ -125,7 +132,7 @@ Example: multi-line TEXT constant using TEXT<< ... >>. Tree symbols mark each le
 
 ```text
 <constants>
-REPO_TREE: TEXT<<
+repo-tree: TEXT<<
 cb-agnostic-prompt-protocol
 ├── assets
 │   ├── constants
@@ -142,12 +149,12 @@ Example: multi-line JSON constant using JSON<< ... >>. Engines parse BODY as Jso
 
 ```text
 <constants>
-DEFAULT_TZ: "Z"
+default-tz: "Z"
 
-API_CONFIG: JSON<<
+api-config: JSON<<
 {
   "api_base_path": "/v1",
-  "default_time_zone": DEFAULT_TZ,
+  "default_time_zone": $constant.default-tz,
   "retries": 3,
   "timeout_ms": 2000
 }
@@ -159,13 +166,13 @@ Example: multi-line CSV constant using CSV<< ... >>. Engines parse BODY as CSV t
 
 ```text
 <constants>
-DEFAULT_TZ: "Z"
+default-tz: "Z"
 
-SERVICE_TABLE: CSV<<
+service-table: CSV<<
 service,region,default_tz,enabled,note
-billing,us-east-1,DEFAULT_TZ,true,"Primary billing region"
+billing,us-east-1,$constant.default-tz,true,"Primary billing region"
 support,ap-southeast-2,"Australia/Brisbane",true,"Escalations use ""follow the sun"""
-reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
+reporting,eu-west-1,$constant.default-tz,false,"EU, West"
 >>
 </constants>
 ```
@@ -213,16 +220,24 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Triggers route intent to the knowledge.
 - A trigger records why the interpreter enters the knowledge.
 - Require each trigger `when` value to use `NonBlankLine`.
+- Give each trigger an optional `given` `Condition`.
+- Treat an absent trigger `given` as true.
+- Reject a trigger `given` without a state read with `trigger_guard_missing_state`.
+- Reject a trigger `given` that reads an (interface|local binding) with `invalid_trigger_guard_value`.
 - Require each trigger to reference one process.
 - A trigger separates use with intent from use by discovery.
 - Triggers are optional.
 - A trigger's process reference must target a process entry.
 - Multiple triggers can reference the same process or different processes.
-- Match every trigger before selecting a process.
-- Run the process when exactly one trigger matches.
-- Run no process when no trigger matches.
-- Fail with `ambiguous_trigger_match` when multiple triggers match.
-- Reject duplicate trigger `when` values with `duplicate_trigger_when`.
+- Match every trigger `when` before selecting a process.
+- Evaluate a trigger `given` only after its `when` matches.
+- Run the process when exactly one trigger matches its `when` and `given`.
+- Run no process when no trigger matches both its `when` and `given`.
+- Fail with `ambiguous_trigger_match` when multiple triggers match both their `when` and `given`.
+- Reject equal trigger `when` values unless every guard pair is provably disjoint, with `overlapping_trigger_guards`.
+- Prove guards disjoint when they compare the same state to unequal static values with `equals`.
+- Prove guards disjoint when `equals` and `not_equals` compare the same state to the same static value.
+- Treat every other equal-`when` guard pair as overlapping.
 - The name trigger is confirmed over signal on 2026-08-21, because it names what makes an outsider enter.
 - Triggers are optional in a node.
 
@@ -234,7 +249,8 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Give each value binding one `Placeholder` and one process value.
 - Give each condition one left value, one operator, and one right value.
 - Require each condition operator to be (equals|not_equals).
-- Require each process to have one or more steps.
+- Require each process to have one `ProcessName` and one or more steps.
+- Author the first `ProcessName` word as the action and the second as its object.
 - Give each act one `NonBlankLine` instruction, an input binding list, and an output `Placeholder` list.
 - Require each act instruction placeholder to occur once in its inputs or outputs.
 - Reject a duplicate act input or output.
@@ -242,16 +258,18 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Require an act to return exactly its declared outputs.
 - Store each act output as an immutable process-local JSON binding.
 - Keep a binding created in an if branch inside that branch.
-- Give each set step one state `IriId` and one value.
+- Give each set step one state `SlugId` and one value.
 - Resolve a state value from the current execution state.
 - Apply a set step to the current execution state.
-- Give each emit step one interface `IriId` and one non-empty binding list.
+- Give each emit step one interface `SlugId` and one non-empty binding list.
 - Require each emit interface to target an (out|inout) interface.
 - Require each emit binding set to equal the interface schema placeholder set.
 - Validate each emitted binding against the interface schema before emission.
 - Give each if step one condition, one non-empty then list, and one optional otherwise list.
 - Execute only the branch selected by the condition.
-- Give each call step one process `IriId`.
+- Use (if|fail) steps for process preconditions.
+- Do not give a process a `given` block.
+- Give each call step one process `SlugId`.
 - Require each call reference to target a process entry.
 - Reject process call cycles with `process_call_cycle`.
 - Run a called process synchronously in the current state and emission transaction.
@@ -278,7 +296,7 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - An inout interface carries information in both directions.
 - Interfaces are optional.
 - Require each interface `direction` to be (in|out|inout).
-- Require each interface `schema` reference to use `IriId`.
+- Require each interface `schema` reference to use `SlugId`.
 - Require each interface `schema` reference to target a schema entry.
 - Give each interface an optional `NonBlankLine` description of the crossing.
 - An interface description states boundary meaning that its schema does not state.
@@ -290,11 +308,20 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - The vocabulary holds the text shapes, the datatypes, the unit catalog, the time forms, and the display forms.
 - The vocabulary is where the core schema and the Rust regex checks run.
 - Every render uses the same vocabulary; OAK is the opinionated default render of it.
-- Define `IriId` as an ASCII scheme, a colon, and one or more non-whitespace characters.
+- Define `SlugId` as lower kebab case without a leading, trailing, or repeated hyphen.
 - Define `NonBlankLine` as one line containing at least one non-whitespace character.
-- Define `ConstantName` as ASCII upper snake case without a leading, trailing, or repeated underscore.
-- Define `Placeholder` as `ConstantName`.
-- Delimit each `Placeholder` with `<` and `>` in template text; any other `<` is literal.
+- Define `ProcessName` as two ASCII alphanumeric words with optional internal hyphens, separated by one U+0020 SPACE, with an uppercase first character.
+- Define `Placeholder` as ASCII upper snake case without a leading, trailing, or repeated underscore.
+- Define `DottedPath` as (`constant.SlugId`|`state.SlugId`|`process.SlugId`|`interface.SlugId`|`interface.SlugId.Placeholder`).
+- Define `ValueReference` as `$` followed by (`constant.SlugId`|`state.SlugId`|`interface.SlugId.Placeholder`|`Placeholder`).
+- `$` reads a value.
+- The first `DottedPath` segment names the part.
+- A bare `$Placeholder` reads one process-local act output.
+- Use `DottedPath` without `$` for each (SET|CALL|EMIT) target.
+- Use (`equals`|`does not equal`) for comparison.
+- Use `=` only for assignment and value binding.
+- Delimit each `Placeholder` with `<` and `>` in schema templates, `Where` lines, and act instructions.
+- Render each process binding target and act output as a bare `Placeholder`.
 - In a template, a line of one U+2026 HORIZONTAL ELLIPSIS tells the interpreter the pattern above it continues; the engine gives it no meaning.
 - Represent each closed token catalog with a (literal|enum).
 - Represent a quantity as a nested model of a Decimal value and a unit enum; the serializer owns its display.
@@ -373,24 +400,34 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Every part appears, empty when the node has no entry for it.
 - Each part holds the node's own entries in authored order.
 - Parts are siblings; no part nests inside another.
-- Render each instruction as its text alone.
-- Render each trigger as one self-closing `trigger` tag with one `id`, one `when`, and one `process` attribute.
-- Render each (constant|state) entry as its name, `: `, and its value as JSON on one line.
+- Render each authored instruction as its text alone after the built-in instructions.
+- When a process or guarded trigger exists, render `$ reads a value; a dotted path starts with its part; a bare $NAME is local to the running process; SET, CALL, and EMIT omit $.` before authored instructions.
+- When constants has entries, render `Constants hold values that do not change while the knowledge runs.` before authored instructions.
+- When schemas has entries, render `Each schema is one information shape: a template with <PLACEHOLDER> slots, and WHERE lines that constrain each slot.` before authored instructions.
+- When state has entries, render `State holds values that persist and can change while processes run.` before authored instructions.
+- When triggers has entries, render `Each trigger names one arrival reason, an optional state guard, and the process that runs when both match.` before authored instructions.
+- When processes has entries, render `Each process is the exact way to do one task; follow its steps in order, top to bottom.` before authored instructions.
+- When interfaces has entries, render `Each interface is one information crossing: in arrives, out is emitted, and inout does both.` before authored instructions.
+- Inject no other built-in instruction text.
+- Render each trigger as one self-closing `trigger` tag with one `id`, one optional `given`, one `when`, and one `process` attribute.
+- Render each (constant|state) entry as its id, `: `, and its value as JSON on one line.
 - Render each process with its id and name, then its typed steps one per line in authored order.
 - Line order carries the step sequence; render no step numbers and no heading.
 - Indent grouped lines by two spaces under their parent line.
-- Render each process value as one of (JSON literal|`constant ` and its id|`state ` and its id|`interface ` and its id and placeholder|`binding ` and its placeholder).
+- Render each process value as one of (JSON literal|`ValueReference`).
 - Render each act with `ACT`, its instruction, optional `INPUTS:`, and optional `OUTPUTS:`.
-- Render each set on one line with `SET state`, its state id, ` = `, and its value.
-- Render each emit with `EMIT interface`, its interface id, and one binding per line.
+- Render each act input and output name as a bare `Placeholder`.
+- Render each set on one line with `SET`, its state `DottedPath`, ` = `, and its value.
+- Render each emit with `EMIT`, its interface `DottedPath`, and one bare `Placeholder` binding per line.
 - Render each if with `IF`, its condition, its indented then steps, and `ELSE:` with its indented otherwise steps when present.
-- Render each call on one line with `CALL process` and its process id.
+- Render no (`GIVEN`|`THEN`) process keyword.
+- Render each call on one line with `CALL` and its process `DottedPath`.
 - Render each fail on one line with `FAIL` and its JSON string message.
 - Render each interface with its id, direction, and schema reference, and its description as its body.
 - Render each child node as one nested `node` block after the seven parts.
 - Separate the parts and each nested `node` block with one blank line.
 - Separate sibling (schema|process|interface) blocks with one blank line.
-- Render each constant name with `ConstantName`.
+- Render each constant and state id with `SlugId`.
 - A process renders with an inner structure.
 - Render each process reference at the step or value that uses it.
 - An interface renders with an inner structure.
@@ -398,7 +435,7 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Preserve template whitespace in each text render.
 - Render `Where` entries in authored order.
 - Render each `Where` as one line: its delimited `Placeholder`, constraints joined by `; `, examples once in brackets as `(e.g. ...)`, then the description.
-- The OAK render loses node ids and keeps schema, trigger, process, and interface entry ids.
+- The OAK render loses node and instruction ids and keeps every other entry id.
 
 #### XML
 
@@ -418,11 +455,12 @@ oak_parts:
 - The xml variant uses XML-like tags as text delimiters.
 - Render text between xml tags verbatim.
 - Escape xml attribute values.
+- Render trigger attributes in (`id`|`given`|`when`|`process`) order.
 - Put each xml opening tag before its text on a separate line.
 - Put each xml closing tag after its text on a separate line.
 - The xml variant uses OAK names and node structure.
-- APS is not the canonical xml variant, because APS requires a process part and a process target that OAK does not.
-- Join instruction bodies inside `<instructions>` with one U+000A LINE FEED.
+- APS is not the canonical xml variant, because OAK has its own parts and typed process model.
+- Join built-in and authored instruction lines inside `<instructions>` with one U+000A LINE FEED.
 
 #### Markdown
 
@@ -442,21 +480,23 @@ oak_parts:
 
 ### JSON-LD
 
-- Render each schema id as `@id`.
-- Render each interface id as `@id`.
-- Render each interface schema reference as `@id`.
-- Render each process value and step reference as `@id`.
+- Render each node and entry `SlugId` as a relative `@id`.
+- Render each typed reference target as a relative `@id`.
+- Require the caller to supply a JSON-LD base IRI ending in `/`.
+- Define `@base` as the caller base in the root context.
+- Resolve each relative `@id` against `@base`.
 - Render `Schema`, `Interface`, `Where`, each constraint kind, each process value source, and each process step kind as `@type`.
+- Render each trigger `given` as `Condition`.
 - Derive each `Where` `@id` as `{schema @id}/where/{Placeholder}`.
 - Render `where`, `constraints`, and `examples` as `@list` containers.
 - Render (interfaces|steps|inputs|outputs|bindings|then|otherwise) as `@list` containers.
 - Define context terms for `template`, `where`, `placeholder`, `constraints`, `examples`, and each constraint field.
-- Define context terms for (direction|schema|interfaces|steps|inputs|outputs|bindings|condition|left|operator|right|then|otherwise|instruction|message|constant|state|interface|binding).
+- Define context terms for (direction|schema|interfaces|steps|inputs|outputs|bindings|condition|given|left|operator|right|then|otherwise|instruction|message|constant|state|interface|binding).
 - Render each `Placeholder` valued (at least|at most) value as the referenced `Where` `@id`.
 - Require the caller to supply the JSON-LD vocabulary IRI.
 - Define `oak` as the caller vocabulary prefix.
 - Render OAK `@type` values as `oak` compact IRIs.
-- Render one context at the root of each JSON-LD document.
+- Render one context with `@base` at the root of each JSON-LD document.
 
 ---
 
@@ -506,7 +546,7 @@ oak
 ├── oak  # the package, what the PRD builds
 │   ├── __init__.py  # authoring API
 │   ├── defaults.py  # render OAK, variant xml, style authored
-│   ├── base.py  # shared config, references, rust-regex engine
+│   ├── base.py  # shared config, SlugId entries, rust-regex engine
 │   ├── node  # layer 1, one complete set of the seven parts
 │   │   ├── __init__.py
 │   │   ├── model.py  # Node and Root: the seven parts, child nodes
@@ -518,7 +558,7 @@ oak
 │   │       ├── constants.py  # Constant
 │   │       ├── schemas.py  # Schema, Where, the constraint union, bind
 │   │       ├── state.py  # State
-│   │       ├── triggers.py  # Trigger
+│   │       ├── triggers.py  # Trigger and its optional state guard
 │   │       ├── processes.py  # Process, values, conditions, and the closed step union
 │   │       └── interfaces.py  # Interface, Direction
 │   ├── vocabulary  # layer 3, how information is conveyed without ambiguity; one file provides one thing
@@ -527,10 +567,12 @@ oak
 │   │   ├── units.py  # the unit catalog, one enum
 │   │   ├── text  # text shapes, one alias each
 │   │   │   ├── __init__.py
-│   │   │   ├── iri_id.py  # IriId
+│   │   │   ├── slug_id.py  # SlugId
 │   │   │   ├── non_blank_line.py  # NonBlankLine
-│   │   │   ├── constant_name.py  # ConstantName
-│   │   │   ├── placeholder.py  # Placeholder, template token extraction
+│   │   │   ├── process_name.py  # ProcessName
+│   │   │   ├── placeholder.py  # Placeholder and template token extraction
+│   │   │   ├── dotted_path.py  # DottedPath
+│   │   │   ├── value_reference.py  # ValueReference
 │   │   │   ├── regex_pattern.py  # RegexPattern, the portable authored subset
 │   │   │   └── ...
 │   │   ├── datatypes  # typed values, one model each
@@ -550,13 +592,14 @@ oak
 │       ├── __init__.py  # render selection, defaults apply
 │       ├── oak  # the default render
 │       │   ├── __init__.py
-│       │   ├── syntax.py  # WHERE wording, constraint text
+│       │   ├── instructions.py  # built-in interpretation instructions
+│       │   ├── syntax.py  # WHERE wording, constraints, paths, and process values
 │       │   ├── arrangement.py  # seven parts, interfaces in the APS input position
 │       │   ├── variants.py  # layer 4, xml tags or markdown fences
 │       │   └── styles.py  # authored, controlled ASD-STE100
-│       └── json_ld.py  # @id, @type, @list, the context
+│       └── json_ld.py  # @base, @id, @type, @list, the context
 ├── build  # uses the package to generate the outputs
-│   ├── examples.py  # validate every model and field example
+│   ├── examples.py  # validate every model, field, and named text example
 │   ├── ebnf.py
 │   ├── prompt.py
 │   └── docs.py

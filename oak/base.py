@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import CoreSchema
 
-from oak.vocabulary import IriId
+from oak.vocabulary import SlugId
 
 
 def _field_title(name: str, _field: object) -> str:
@@ -51,7 +51,7 @@ class Entry(DiscriminatedModel):
 
     discriminator_field = "part"
 
-    id: IriId = Field(
+    id: SlugId = Field(
         description="The entry id, unique across the tree.",
-        examples=["oak:entry/example"],
+        examples=["example"],
     )

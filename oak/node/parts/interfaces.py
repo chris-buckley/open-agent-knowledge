@@ -5,13 +5,13 @@ from typing import Literal
 from pydantic import ConfigDict, Field
 
 from oak.base import Entry
-from oak.vocabulary import IriId, NonBlankLine
+from oak.vocabulary import NonBlankLine, SlugId
 
 Direction = Literal["in", "out", "inout"]
 
 
 class Interface(Entry):
-    """One named crossing of information at the tree boundary."""
+    """One crossing of information at the tree boundary."""
 
     model_config = ConfigDict(
         serialize_by_alias=True,
@@ -19,9 +19,9 @@ class Interface(Entry):
             "examples": [
                 {
                     "part": "interfaces",
-                    "id": "oak:interface/request",
+                    "id": "request",
                     "direction": "in",
-                    "schema": "oak:schema/request",
+                    "schema": "request-shape",
                     "description": "The request supplied to the tree.",
                 }
             ]
@@ -37,11 +37,11 @@ class Interface(Entry):
         description="The direction across the tree boundary.",
         examples=["in", "out", "inout"],
     )
-    schema_id: IriId = Field(
+    schema_id: SlugId = Field(
         alias="schema",
         title="Schema",
         description="The schema entry that defines the information shape.",
-        examples=["oak:schema/request"],
+        examples=["request-shape"],
     )
     description: NonBlankLine | None = Field(
         default=None,

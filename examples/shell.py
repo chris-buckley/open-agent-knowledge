@@ -18,6 +18,7 @@ from oak import (
     Schema,
     Set,
     State,
+    StateValue,
     Trigger,
     Type,
     ValueBinding,
@@ -26,7 +27,7 @@ from oak import (
 )
 
 command_line = Schema(
-    id="oak:schema/command-line",
+    id="command-line",
     name="Command Line",
     purpose="Carry one command the user types.",
     template="<COMMAND>",
@@ -42,7 +43,7 @@ command_line = Schema(
 )
 
 terminal_output = Schema(
-    id="oak:schema/terminal-output",
+    id="terminal-output",
     name="Terminal Output",
     purpose="Carry one line the shell prints.",
     template="<OUTPUT>",
@@ -58,56 +59,81 @@ terminal_output = Schema(
 )
 
 root = Root(
-    id="oak:root",
+    id="root",
     instructions=[
         Instruction(
-            id="oak:instruction/exact-command",
+            id="exact-command",
             body="Treat each command as an exact string.",
         )
     ],
-    schemas=[command_line, terminal_output],
+    schemas=[
+        command_line,
+        terminal_output,
+    ],
     state=[
         State(
-            id="oak:state/mode",
-            name="MODE",
+            id="mode",
             value="open",
         )
     ],
     triggers=[
         Trigger(
-            id="oak:trigger/command",
-            when="A command line arrives while the shell mode is open.",
-            process="oak:process/route",
+            id="command",
+            given=Condition(
+                left=StateValue(
+                    state="mode",
+                ),
+                operator="equals",
+                right=LiteralValue(
+                    value="open",
+                ),
+            ),
+            when="A command line arrives.",
+            process="route",
         )
     ],
     processes=[
         Process(
-            id="oak:process/route",
-            name="Route the current command",
+            id="route",
+            name="Route command",
             steps=[
                 If(
                     condition=Condition(
                         left=InterfaceValue(
-                            interface="oak:interface/stdin",
+                            interface="stdin",
                             placeholder="COMMAND",
                         ),
                         operator="equals",
-                        right=LiteralValue(value="pwd"),
+                        right=LiteralValue(
+                            value="pwd",
+                        ),
                     ),
-                    then=[Call(process="oak:process/pwd")],
+                    then=[
+                        Call(
+                            process="pwd",
+                        )
+                    ],
                     otherwise=[
                         If(
                             condition=Condition(
                                 left=InterfaceValue(
-                                    interface="oak:interface/stdin",
+                                    interface="stdin",
                                     placeholder="COMMAND",
                                 ),
                                 operator="equals",
-                                right=LiteralValue(value="exit"),
+                                right=LiteralValue(
+                                    value="exit",
+                                ),
                             ),
-                            then=[Call(process="oak:process/exit")],
+                            then=[
+                                Call(
+                                    process="exit",
+                                )
+                            ],
                             otherwise=[
-                                Fail(message="Unknown shell command.")
+                                Fail(
+                                    message="Unknown shell command.",
+                                )
                             ],
                         )
                     ],
@@ -115,56 +141,68 @@ root = Root(
             ],
         ),
         Process(
-            id="oak:process/pwd",
+            id="pwd",
             name="Run pwd",
             steps=[
                 Emit(
-                    interface="oak:interface/stdout",
+                    interface="stdout",
                     bindings=[
                         ValueBinding(
                             placeholder="OUTPUT",
-                            value=LiteralValue(value="/oak"),
+                            value=LiteralValue(
+                                value="/oak",
+                            ),
                         )
                     ],
                 )
             ],
         ),
         Process(
-            id="oak:process/exit",
+            id="exit",
             name="Run exit",
             steps=[
                 Emit(
-                    interface="oak:interface/stdout",
+                    interface="stdout",
                     bindings=[
                         ValueBinding(
                             placeholder="OUTPUT",
-                            value=LiteralValue(value="logout"),
+                            value=LiteralValue(
+                                value="logout",
+                            ),
                         )
                     ],
                 ),
                 Set(
-                    state="oak:state/mode",
-                    value=LiteralValue(value="closed"),
+                    state="mode",
+                    value=LiteralValue(
+                        value="closed",
+                    ),
                 ),
             ],
         ),
     ],
     interfaces=[
         Interface(
-            id="oak:interface/stdin",
+            id="stdin",
             direction="in",
-            schema="oak:schema/command-line",
+            schema="command-line",
             description="The command line the user types.",
         ),
         Interface(
-            id="oak:interface/stdout",
+            id="stdout",
             direction="out",
-            schema="oak:schema/terminal-output",
+            schema="terminal-output",
             description="The line the shell prints.",
         ),
     ],
 )
 
-target = pathlib.Path(__file__).with_name("shell.oak.md")
-target.write_text(node_xml(root) + "\n", encoding="utf-8", newline="\n")
+target = pathlib.Path(__file__).with_name(
+    "shell.oak.md"
+)
+target.write_text(
+    node_xml(root) + "\n",
+    encoding="utf-8",
+    newline="\n",
+)
 print(f"wrote {target}")

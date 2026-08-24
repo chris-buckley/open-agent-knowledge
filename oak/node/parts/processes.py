@@ -9,7 +9,7 @@ from pydantic import ConfigDict, Field, JsonValue, model_validator
 from pydantic_core import PydanticCustomError
 
 from oak.base import DiscriminatedModel, Entry, OakModel
-from oak.vocabulary import IriId, NonBlankLine, Placeholder
+from oak.vocabulary import NonBlankLine, Placeholder, ProcessName, SlugId
 from oak.vocabulary.text.placeholder import placeholders_in
 
 
@@ -52,7 +52,7 @@ class ConstantValue(ValueModel):
             "examples": [
                 {
                     "source": "constant",
-                    "constant": "oak:constant/policy",
+                    "constant": "policy",
                 }
             ]
         }
@@ -63,9 +63,9 @@ class ConstantValue(ValueModel):
         description="The process value source discriminator.",
         examples=["constant"],
     )
-    constant: IriId = Field(
+    constant: SlugId = Field(
         description="The constant entry to read.",
-        examples=["oak:constant/policy"],
+        examples=["policy"],
     )
 
 
@@ -77,7 +77,7 @@ class StateValue(ValueModel):
             "examples": [
                 {
                     "source": "state",
-                    "state": "oak:state/status",
+                    "state": "status",
                 }
             ]
         }
@@ -88,9 +88,9 @@ class StateValue(ValueModel):
         description="The process value source discriminator.",
         examples=["state"],
     )
-    state: IriId = Field(
+    state: SlugId = Field(
         description="The state entry to read.",
-        examples=["oak:state/status"],
+        examples=["status"],
     )
 
 
@@ -102,7 +102,7 @@ class InterfaceValue(ValueModel):
             "examples": [
                 {
                     "source": "interface",
-                    "interface": "oak:interface/request",
+                    "interface": "request",
                     "placeholder": "REQUEST",
                 }
             ]
@@ -114,9 +114,9 @@ class InterfaceValue(ValueModel):
         description="The process value source discriminator.",
         examples=["interface"],
     )
-    interface: IriId = Field(
+    interface: SlugId = Field(
         description="The active input interface to read.",
-        examples=["oak:interface/request"],
+        examples=["request"],
     )
     placeholder: Placeholder = Field(
         description="The interface schema placeholder to read.",
@@ -165,7 +165,7 @@ class ValueBinding(OakModel):
                     "placeholder": "REQUEST",
                     "value": {
                         "source": "interface",
-                        "interface": "oak:interface/request",
+                        "interface": "request",
                         "placeholder": "REQUEST",
                     },
                 }
@@ -196,7 +196,7 @@ ConditionOperator = Literal["equals", "not_equals"]
 
 
 class Condition(OakModel):
-    """One comparison that selects an if branch."""
+    """One structural JSON comparison."""
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -204,7 +204,7 @@ class Condition(OakModel):
                 {
                     "left": {
                         "source": "state",
-                        "state": "oak:state/status",
+                        "state": "status",
                     },
                     "operator": "equals",
                     "right": {
@@ -221,7 +221,7 @@ class Condition(OakModel):
         examples=[
             {
                 "source": "state",
-                "state": "oak:state/status",
+                "state": "status",
             }
         ],
     )
@@ -260,7 +260,7 @@ class Act(StepModel):
                             "placeholder": "REQUEST",
                             "value": {
                                 "source": "interface",
-                                "interface": "oak:interface/request",
+                                "interface": "request",
                                 "placeholder": "REQUEST",
                             },
                         }
@@ -289,7 +289,7 @@ class Act(StepModel):
                     "placeholder": "REQUEST",
                     "value": {
                         "source": "interface",
-                        "interface": "oak:interface/request",
+                        "interface": "request",
                         "placeholder": "REQUEST",
                     },
                 }
@@ -306,6 +306,7 @@ class Act(StepModel):
     def placeholders(self) -> Self:
         input_names = [item.placeholder for item in self.inputs]
         output_names = list(self.outputs)
+
         duplicate_inputs = sorted(
             name for name, count in Counter(input_names).items() if count > 1
         )
@@ -315,6 +316,7 @@ class Act(StepModel):
                 "act repeats input placeholders: {placeholders}",
                 {"placeholders": ", ".join(duplicate_inputs)},
             )
+
         duplicate_outputs = sorted(
             name for name, count in Counter(output_names).items() if count > 1
         )
@@ -324,6 +326,7 @@ class Act(StepModel):
                 "act repeats output placeholders: {placeholders}",
                 {"placeholders": ", ".join(duplicate_outputs)},
             )
+
         overlap = sorted(set(input_names) & set(output_names))
         if overlap:
             raise PydanticCustomError(
@@ -331,6 +334,7 @@ class Act(StepModel):
                 "act uses placeholders as both inputs and outputs: {placeholders}",
                 {"placeholders": ", ".join(overlap)},
             )
+
         declared = set(input_names) | set(output_names)
         used = placeholders_in(self.instruction)
         missing = sorted(used - declared)
@@ -355,7 +359,7 @@ class Set(StepModel):
             "examples": [
                 {
                     "kind": "set",
-                    "state": "oak:state/status",
+                    "state": "status",
                     "value": {
                         "source": "literal",
                         "value": "complete",
@@ -370,9 +374,9 @@ class Set(StepModel):
         description="The process step discriminator.",
         examples=["set"],
     )
-    state: IriId = Field(
+    state: SlugId = Field(
         description="The state entry to write.",
-        examples=["oak:state/status"],
+        examples=["status"],
     )
     value: Value = Field(
         description="The process value written to the state entry.",
@@ -393,7 +397,7 @@ class Emit(StepModel):
             "examples": [
                 {
                     "kind": "emit",
-                    "interface": "oak:interface/result",
+                    "interface": "result",
                     "bindings": [
                         {
                             "placeholder": "RESULT",
@@ -413,9 +417,9 @@ class Emit(StepModel):
         description="The process step discriminator.",
         examples=["emit"],
     )
-    interface: IriId = Field(
+    interface: SlugId = Field(
         description="The output interface that carries the schema instance.",
-        examples=["oak:interface/result"],
+        examples=["result"],
     )
     bindings: list[ValueBinding] = Field(
         min_length=1,
@@ -456,7 +460,7 @@ class Call(StepModel):
             "examples": [
                 {
                     "kind": "call",
-                    "process": "oak:process/finalize",
+                    "process": "finalize",
                 }
             ]
         }
@@ -467,9 +471,9 @@ class Call(StepModel):
         description="The process step discriminator.",
         examples=["call"],
     )
-    process: IriId = Field(
+    process: SlugId = Field(
         description="The process entry to invoke synchronously.",
-        examples=["oak:process/finalize"],
+        examples=["finalize"],
     )
 
 
@@ -509,7 +513,7 @@ class If(StepModel):
                     "condition": {
                         "left": {
                             "source": "state",
-                            "state": "oak:state/status",
+                            "state": "status",
                         },
                         "operator": "equals",
                         "right": {
@@ -520,7 +524,7 @@ class If(StepModel):
                     "then": [
                         {
                             "kind": "set",
-                            "state": "oak:state/status",
+                            "state": "status",
                             "value": {
                                 "source": "literal",
                                 "value": "complete",
@@ -549,7 +553,7 @@ class If(StepModel):
             {
                 "left": {
                     "source": "state",
-                    "state": "oak:state/status",
+                    "state": "status",
                 },
                 "operator": "equals",
                 "right": {
@@ -566,7 +570,7 @@ class If(StepModel):
             [
                 {
                     "kind": "set",
-                    "state": "oak:state/status",
+                    "state": "status",
                     "value": {
                         "source": "literal",
                         "value": "complete",
@@ -619,6 +623,7 @@ def _validate_bindings(steps: list[Step], visible: set[str]) -> None:
                     "process reads unbound local binding {binding}",
                     {"binding": value.binding},
                 )
+
         if isinstance(step, Act):
             redefined = sorted(set(step.outputs) & visible)
             if redefined:
@@ -644,6 +649,7 @@ def _sequence_always_fails(steps: list[Step]) -> bool:
                 and _sequence_always_fails(step.otherwise)
             )
             always_fails = then_fails and otherwise_fails
+
         if always_fails:
             if index + 1 < len(steps):
                 raise PydanticCustomError(
@@ -662,7 +668,7 @@ class Process(Entry):
             "examples": [
                 {
                     "part": "processes",
-                    "id": "oak:process/write-oak",
+                    "id": "write-oak",
                     "name": "Write OAK",
                     "steps": [
                         {
@@ -680,9 +686,9 @@ class Process(Entry):
         description="The entry part discriminator.",
         examples=["processes"],
     )
-    name: NonBlankLine = Field(
-        description="The process display name.",
-        examples=["Write OAK"],
+    name: ProcessName = Field(
+        description="The two-word process display name.",
+        examples=["Write OAK", "Route command"],
     )
     steps: list[Step] = Field(
         min_length=1,

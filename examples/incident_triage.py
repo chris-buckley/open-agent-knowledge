@@ -22,6 +22,7 @@ from oak import (
     Schema,
     Set,
     State,
+    StateValue,
     Trigger,
     Type,
     ValueBinding,
@@ -30,7 +31,7 @@ from oak import (
 )
 
 incident_report = Schema(
-    id="oak:schema/incident-report",
+    id="incident-report",
     name="Incident Report",
     purpose="Describe the incident evidence supplied for triage.",
     template="""Summary: <SUMMARY>
@@ -45,14 +46,20 @@ Impact: <IMPACT>""",
         where(
             "IMPACT",
             Type(of="string"),
-            OneOf(values=["low", "medium", "high"]),
+            OneOf(
+                values=[
+                    "low",
+                    "medium",
+                    "high",
+                ]
+            ),
             description="reported impact",
         ),
     ],
 )
 
 triage_decision = Schema(
-    id="oak:schema/triage-decision",
+    id="triage-decision",
     name="Triage Decision",
     purpose="Return one evidence-based incident decision.",
     template="""Severity: <SEVERITY>
@@ -63,7 +70,14 @@ Policy: <POLICY>""",
         where(
             "SEVERITY",
             Type(of="string"),
-            OneOf(values=["low", "medium", "high", "critical"]),
+            OneOf(
+                values=[
+                    "low",
+                    "medium",
+                    "high",
+                    "critical",
+                ]
+            ),
             description="assigned severity",
         ),
         where(
@@ -89,104 +103,136 @@ Policy: <POLICY>""",
 )
 
 root = Root(
-    id="oak:root",
+    id="root",
     instructions=[
         Instruction(
-            id="oak:instruction/evidence",
+            id="evidence",
             body="Use only evidence present in the incident report.",
         )
     ],
     constants=[
         Constant(
-            id="oak:constant/escalation-policy",
-            name="ESCALATION_POLICY",
+            id="escalation-policy",
             value="Escalate critical incidents immediately.",
         )
     ],
-    schemas=[incident_report, triage_decision],
+    schemas=[
+        incident_report,
+        triage_decision,
+    ],
     state=[
         State(
-            id="oak:state/status",
-            name="STATUS",
+            id="status",
             value="ready",
         )
     ],
     triggers=[
         Trigger(
-            id="oak:trigger/triage",
+            id="triage-trigger",
+            given=Condition(
+                left=StateValue(
+                    state="status",
+                ),
+                operator="equals",
+                right=LiteralValue(
+                    value="ready",
+                ),
+            ),
             when="An incident report arrives for triage.",
-            process="oak:process/triage",
+            process="triage",
         )
     ],
     processes=[
         Process(
-            id="oak:process/triage",
-            name="Triage an incident",
+            id="triage",
+            name="Triage incident",
             steps=[
                 Act(
-                    instruction="Classify <SUMMARY> with <IMPACT> under <POLICY>, then produce <SEVERITY>, <RATIONALE>, and <NEXT_ACTION>.",
+                    instruction=(
+                        "Classify <SUMMARY> with <IMPACT> under <POLICY>, "
+                        "then produce <SEVERITY>, <RATIONALE>, and "
+                        "<NEXT_ACTION>."
+                    ),
                     inputs=[
                         ValueBinding(
                             placeholder="SUMMARY",
                             value=InterfaceValue(
-                                interface="oak:interface/report",
+                                interface="report",
                                 placeholder="SUMMARY",
                             ),
                         ),
                         ValueBinding(
                             placeholder="IMPACT",
                             value=InterfaceValue(
-                                interface="oak:interface/report",
+                                interface="report",
                                 placeholder="IMPACT",
                             ),
                         ),
                         ValueBinding(
                             placeholder="POLICY",
                             value=ConstantValue(
-                                constant="oak:constant/escalation-policy"
+                                constant="escalation-policy",
                             ),
                         ),
                     ],
-                    outputs=["SEVERITY", "RATIONALE", "NEXT_ACTION"],
+                    outputs=[
+                        "SEVERITY",
+                        "RATIONALE",
+                        "NEXT_ACTION",
+                    ],
                 ),
                 If(
                     condition=Condition(
-                        left=BindingValue(binding="SEVERITY"),
+                        left=BindingValue(
+                            binding="SEVERITY",
+                        ),
                         operator="equals",
-                        right=LiteralValue(value="critical"),
+                        right=LiteralValue(
+                            value="critical",
+                        ),
                     ),
                     then=[
                         Set(
-                            state="oak:state/status",
-                            value=LiteralValue(value="escalated"),
+                            state="status",
+                            value=LiteralValue(
+                                value="escalated",
+                            ),
                         )
                     ],
                     otherwise=[
                         Set(
-                            state="oak:state/status",
-                            value=LiteralValue(value="triaged"),
+                            state="status",
+                            value=LiteralValue(
+                                value="triaged",
+                            ),
                         )
                     ],
                 ),
                 Emit(
-                    interface="oak:interface/decision",
+                    interface="decision",
                     bindings=[
                         ValueBinding(
                             placeholder="SEVERITY",
-                            value=BindingValue(binding="SEVERITY"),
+                            value=BindingValue(
+                                binding="SEVERITY",
+                            ),
                         ),
                         ValueBinding(
                             placeholder="RATIONALE",
-                            value=BindingValue(binding="RATIONALE"),
+                            value=BindingValue(
+                                binding="RATIONALE",
+                            ),
                         ),
                         ValueBinding(
                             placeholder="NEXT_ACTION",
-                            value=BindingValue(binding="NEXT_ACTION"),
+                            value=BindingValue(
+                                binding="NEXT_ACTION",
+                            ),
                         ),
                         ValueBinding(
                             placeholder="POLICY",
                             value=ConstantValue(
-                                constant="oak:constant/escalation-policy"
+                                constant="escalation-policy",
                             ),
                         ),
                     ],
@@ -196,20 +242,26 @@ root = Root(
     ],
     interfaces=[
         Interface(
-            id="oak:interface/report",
+            id="report",
             direction="in",
-            schema="oak:schema/incident-report",
+            schema="incident-report",
             description="The report supplied for incident triage.",
         ),
         Interface(
-            id="oak:interface/decision",
+            id="decision",
             direction="out",
-            schema="oak:schema/triage-decision",
+            schema="triage-decision",
             description="The triage decision returned to the caller.",
         ),
     ],
 )
 
-target = pathlib.Path(__file__).with_name("incident_triage.oak.md")
-target.write_text(node_xml(root) + "\n", encoding="utf-8", newline="\n")
+target = pathlib.Path(__file__).with_name(
+    "incident_triage.oak.md"
+)
+target.write_text(
+    node_xml(root) + "\n",
+    encoding="utf-8",
+    newline="\n",
+)
 print(f"wrote {target}")

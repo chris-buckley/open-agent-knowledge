@@ -18,7 +18,13 @@ from pydantic import (
 from pydantic_core import PydanticCustomError
 
 from oak.base import DiscriminatedModel, Entry, OakModel
-from oak.vocabulary import DATATYPE_ADAPTERS, Datatype, NonBlankLine, Placeholder, RegexPattern
+from oak.vocabulary import (
+    DATATYPE_ADAPTERS,
+    Datatype,
+    NonBlankLine,
+    Placeholder,
+    RegexPattern,
+)
 from oak.vocabulary.text.placeholder import placeholders_in
 from oak.vocabulary.text.regex_pattern import rust_regex_adapter
 
@@ -44,7 +50,9 @@ class ConstraintModel(DiscriminatedModel):
 class Type(ConstraintModel):
     """The bound value has one datatype from the vocabulary catalog."""
 
-    model_config = ConfigDict(json_schema_extra={"examples": [{"kind": "type", "of": "string"}]})
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"kind": "type", "of": "string"}]}
+    )
 
     kind: Literal["type"] = Field(
         default="type",
@@ -60,14 +68,18 @@ class Type(ConstraintModel):
         DATATYPE_ADAPTERS[self.of].validate_python(value)
 
     def check_example(self, value: Example) -> None:
-        _validate_text(self.of, value) if isinstance(value, str) else self.check(value, {})
+        _validate_text(self.of, value) if isinstance(value, str) else self.check(
+            value, {}
+        )
 
 
 class OneOf(ConstraintModel):
     """The bound value is one of the listed values."""
 
     model_config = ConfigDict(
-        json_schema_extra={"examples": [{"kind": "one_of", "values": ["draft", "final"]}]}
+        json_schema_extra={
+            "examples": [{"kind": "one_of", "values": ["draft", "final"]}]
+        }
     )
 
     kind: Literal["one_of"] = Field(
@@ -90,7 +102,9 @@ class Regex(ConstraintModel):
     """The bound value matches one anchored portable rust-regex pattern."""
 
     model_config = ConfigDict(
-        json_schema_extra={"examples": [{"kind": "regex", "pattern": "^[0-9]+$"}]}
+        json_schema_extra={
+            "examples": [{"kind": "regex", "pattern": "^[0-9]+$"}]
+        }
     )
 
     kind: Literal["regex"] = Field(
@@ -110,7 +124,9 @@ class Regex(ConstraintModel):
 class NonEmpty(ConstraintModel):
     """The bound value has at least one character or item."""
 
-    model_config = ConfigDict(json_schema_extra={"examples": [{"kind": "non_empty"}]})
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"kind": "non_empty"}]}
+    )
 
     kind: Literal["non_empty"] = Field(
         default="non_empty",
@@ -126,7 +142,9 @@ class NonEmpty(ConstraintModel):
 class MaxChars(ConstraintModel):
     """The bound value has at most n characters."""
 
-    model_config = ConfigDict(json_schema_extra={"examples": [{"kind": "max_chars", "n": 160}]})
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"kind": "max_chars", "n": 160}]}
+    )
 
     kind: Literal["max_chars"] = Field(
         default="max_chars",
@@ -146,7 +164,9 @@ class MaxChars(ConstraintModel):
 class Lines(ConstraintModel):
     """The bound value has a positive line-count bound."""
 
-    model_config = ConfigDict(json_schema_extra={"examples": [{"kind": "lines", "max": 1}]})
+    model_config = ConfigDict(
+        json_schema_extra={"examples": [{"kind": "lines", "max": 1}]}
+    )
 
     kind: Literal["lines"] = Field(
         default="lines",
@@ -167,9 +187,15 @@ class Lines(ConstraintModel):
     @model_validator(mode="after")
     def bounds(self) -> Self:
         if self.min is None and self.max is None:
-            raise PydanticCustomError("missing_line_bound", "lines needs min, max, or both")
+            raise PydanticCustomError(
+                "missing_line_bound",
+                "lines needs min, max, or both",
+            )
         if self.min is not None and self.max is not None and self.min > self.max:
-            raise PydanticCustomError("invalid_line_bounds", "lines min exceeds max")
+            raise PydanticCustomError(
+                "invalid_line_bounds",
+                "lines min exceeds max",
+            )
         return self
 
     def check(self, value: object, values: Mapping[str, object]) -> None:
@@ -187,7 +213,13 @@ class ListOf(ConstraintModel):
 
     model_config = ConfigDict(
         json_schema_extra={
-            "examples": [{"kind": "list_of", "item": "integer", "separator": ", "}]
+            "examples": [
+                {
+                    "kind": "list_of",
+                    "item": "integer",
+                    "separator": ", ",
+                }
+            ]
         }
     )
 
@@ -219,6 +251,7 @@ def _bound(value: object, values: Mapping[str, object]) -> int | float:
         resolved = values[value]
     else:
         resolved = value
+
     if isinstance(resolved, bool) or not isinstance(resolved, (int, float)):
         raise ValueError(f"{value!r} is not a number")
     return resolved
@@ -278,8 +311,12 @@ _BOUND_CONSTRAINTS = (AtLeast, AtMost)
 
 def _validation_order(constraints: Iterable[Constraint]) -> list[Constraint]:
     constraints = list(constraints)
-    return [constraint for constraint in constraints if isinstance(constraint, Type)] + [
-        constraint for constraint in constraints if not isinstance(constraint, Type)
+    return [
+        constraint for constraint in constraints if isinstance(constraint, Type)
+    ] + [
+        constraint
+        for constraint in constraints
+        if not isinstance(constraint, Type)
     ]
 
 
@@ -327,7 +364,8 @@ class Where(OakModel):
         return {
             constraint.value
             for constraint in self.constraints
-            if isinstance(constraint, _BOUND_CONSTRAINTS) and isinstance(constraint.value, str)
+            if isinstance(constraint, _BOUND_CONSTRAINTS)
+            and isinstance(constraint.value, str)
         }
 
     @model_validator(mode="after")
@@ -338,6 +376,7 @@ class Where(OakModel):
                 "examples cannot resolve placeholder-valued bounds: {placeholders}",
                 {"placeholders": ", ".join(sorted(self.references))},
             )
+
         for index, example in enumerate(self.examples):
             for constraint in _validation_order(self.constraints):
                 try:
@@ -399,9 +438,17 @@ class SchemaBindingError(ValueError):
 def _error_message(error: ValueError | ValidationError) -> str:
     if isinstance(error, ValidationError):
         messages: list[str] = []
-        for detail in error.errors(include_url=False, include_context=False, include_input=False):
+        for detail in error.errors(
+            include_url=False,
+            include_context=False,
+            include_input=False,
+        ):
             location = ".".join(str(part) for part in detail["loc"])
-            messages.append(f"{location}: {detail['msg']}" if location else detail["msg"])
+            messages.append(
+                f"{location}: {detail['msg']}"
+                if location
+                else detail["msg"]
+            )
         return "; ".join(messages)
     return str(error)
 
@@ -414,14 +461,19 @@ class Schema(Entry):
             "examples": [
                 {
                     "part": "schemas",
-                    "id": "oak:schema/outline",
+                    "id": "outline",
                     "name": "Hierarchical Outline",
                     "purpose": "Generate a numbered outline.",
                     "template": "## <OUTLINE_TITLE>\n",
                     "where": [
                         {
                             "placeholder": "OUTLINE_TITLE",
-                            "constraints": [{"kind": "type", "of": "string"}],
+                            "constraints": [
+                                {
+                                    "kind": "type",
+                                    "of": "string",
+                                }
+                            ],
                         }
                     ],
                 }
@@ -446,7 +498,11 @@ class Schema(Entry):
     )
     template: NonEmptyText = Field(
         description="The literal shape with variable parts written as <PLACEHOLDER>.",
-        examples=["## <OUTLINE_TITLE>\n\n<LEVEL_1_NUMBER> <STATEMENT>\n...\n"],
+        examples=[
+            "## <OUTLINE_TITLE>\n\n"
+            "<LEVEL_1_NUMBER> <STATEMENT>\n"
+            "...\n"
+        ],
     )
     where: list[Where] = Field(
         default_factory=list,
@@ -455,7 +511,12 @@ class Schema(Entry):
             [
                 {
                     "placeholder": "OUTLINE_TITLE",
-                    "constraints": [{"kind": "type", "of": "string"}],
+                    "constraints": [
+                        {
+                            "kind": "type",
+                            "of": "string",
+                        }
+                    ],
                 }
             ]
         ],
@@ -469,7 +530,9 @@ class Schema(Entry):
     @model_validator(mode="after")
     def links(self) -> Self:
         names = [item.placeholder for item in self.where]
-        duplicates = sorted(name for name, count in Counter(names).items() if count > 1)
+        duplicates = sorted(
+            name for name, count in Counter(names).items() if count > 1
+        )
         if duplicates:
             raise PydanticCustomError(
                 "duplicate_where_placeholder",
@@ -491,7 +554,11 @@ class Schema(Entry):
                 },
             )
 
-        references = set().union(*(item.references for item in self.where)) if self.where else set()
+        references = (
+            set().union(*(item.references for item in self.where))
+            if self.where
+            else set()
+        )
         dangling = sorted(references - in_template)
         if dangling:
             raise PydanticCustomError(
@@ -506,12 +573,21 @@ class Schema(Entry):
         failures: list[BindingFailure] = []
         expected = self.placeholders
         supplied = set(values)
+
         failures.extend(
-            BindingFailure("missing_binding", name, "no value bound")
+            BindingFailure(
+                "missing_binding",
+                name,
+                "no value bound",
+            )
             for name in sorted(expected - supplied)
         )
         failures.extend(
-            BindingFailure("unknown_binding", name, "not a placeholder of this schema")
+            BindingFailure(
+                "unknown_binding",
+                name,
+                "not a placeholder of this schema",
+            )
             for name in sorted(supplied - expected)
         )
 
@@ -535,5 +611,6 @@ class Schema(Entry):
                             _error_message(error),
                         )
                     )
+
         if failures:
             raise SchemaBindingError(failures)
