@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import CoreSchema
 
-from oak.vocabulary import SlugId
+from oak.vocabulary.text import SlugId
 
 
 def _field_title(name: str, _field: object) -> str:

@@ -38,15 +38,16 @@ _PART_INSTRUCTIONS = (
     ),
 )
 
+BUILT_IN_INSTRUCTIONS = frozenset(
+    (REFERENCE_INSTRUCTION, *(text for _field, text in _PART_INSTRUCTIONS))
+)
+
 
 def instruction_lines(node: Node) -> list[str]:
     """Return built-in lines followed by authored instructions."""
     lines: list[str] = []
 
-    guarded_trigger = any(
-        trigger.given is not None
-        for trigger in node.triggers
-    )
+    guarded_trigger = any(trigger.given is not None for trigger in node.triggers)
     if node.processes or guarded_trigger:
         lines.append(REFERENCE_INSTRUCTION)
 

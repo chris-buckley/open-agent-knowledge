@@ -1,7 +1,10 @@
-"""The text syntax of schema and process content in the OAK render."""
+"""The text syntax of OAK entry bodies."""
 
+import csv
+import io
 import json
 
+import yaml
 from pydantic import ConfigDict, TypeAdapter
 
 from oak.node.parts.constants import Constant
@@ -147,13 +150,112 @@ def where_line(where: Where) -> str:
     )
 
 
-def value_text(value: object) -> str:
-    """Return one JSON value on one line."""
-    return json.dumps(value, ensure_ascii=False)
+def value_text(
+    value: object,
+    *,
+    indent: int | None = None,
+) -> str:
+    """Return canonical JSON text."""
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        indent=indent,
+    )
 
 
-def named_value_line(entry: Constant | State) -> str:
-    """Return one `id: value` line for a constant or state value."""
+def _block(
+    identifier: str,
+    form: str,
+    body: str,
+) -> str:
+    if any(line == ">>" for line in body.splitlines()):
+        raise ValueError(
+            f"constant {identifier} body contains the closing line >>"
+        )
+
+    separator = "" if body.endswith("\n") else "\n"
+    return (
+        f"{identifier}: {form}<<\n"
+        f"{body}"
+        f"{separator}"
+        ">>"
+    )
+
+
+def _csv_body(value: list[dict[str, object]]) -> str:
+    stream = io.StringIO(newline="")
+    writer = csv.DictWriter(
+        stream,
+        fieldnames=list(value[0]),
+        lineterminator="\n",
+    )
+    writer.writeheader()
+
+    for row in value:
+        writer.writerow(
+            {
+                key: (
+                    json.dumps(cell, ensure_ascii=False)
+                    if not isinstance(cell, str)
+                    else cell
+                )
+                for key, cell in row.items()
+            }
+        )
+
+    return stream.getvalue().rstrip("\n")
+
+
+def constant_text(constant: Constant) -> str:
+    """Return one inline or block constant entry."""
+    if constant.form == "inline":
+        return f"{constant.id}: {value_text(constant.value)}"
+
+    if constant.form == "text":
+        if not isinstance(constant.value, str):
+            raise TypeError("a text constant must contain text")
+        return _block(
+            constant.id,
+            "TEXT",
+            constant.value,
+        )
+
+    if constant.form == "json":
+        return _block(
+            constant.id,
+            "JSON",
+            value_text(constant.value, indent=2),
+        )
+
+    if constant.form == "csv":
+        if not isinstance(constant.value, list):
+            raise TypeError("a CSV constant must contain rows")
+        return _block(
+            constant.id,
+            "CSV",
+            _csv_body(constant.value),
+        )
+
+    if constant.form == "yaml":
+        body = yaml.safe_dump(
+            constant.value,
+            allow_unicode=True,
+            default_flow_style=False,
+            sort_keys=False,
+        ).rstrip("\n")
+        return _block(
+            constant.id,
+            "YAML",
+            body,
+        )
+
+    raise TypeError(
+        f"unsupported constant form {constant.form}"
+    )
+
+
+def named_value_line(entry: State) -> str:
+    """Return one state value line."""
     return f"{entry.id}: {value_text(entry.value)}"
 
 
@@ -169,7 +271,9 @@ def _path(
 
 
 def _reference(path: str) -> str:
-    return _VALUE_REFERENCE_ADAPTER.validate_python(f"${path}")
+    return _VALUE_REFERENCE_ADAPTER.validate_python(
+        f"${path}"
+    )
 
 
 def process_value_text(value: Value) -> str:
@@ -234,10 +338,14 @@ def _step_lines(
     inner = indent + 2
 
     if isinstance(step, Act):
-        lines = [prefix + f"ACT {step.instruction}"]
+        lines = [
+            prefix + f"ACT {step.instruction}"
+        ]
 
         if step.inputs:
-            lines.append(" " * inner + "INPUTS:")
+            lines.append(
+                " " * inner + "INPUTS:"
+            )
             lines.extend(
                 _binding_line(binding, inner + 2)
                 for binding in step.inputs
@@ -281,12 +389,18 @@ def _step_lines(
         ]
 
         for child in step.then:
-            lines.extend(_step_lines(child, inner))
+            lines.extend(
+                _step_lines(child, inner)
+            )
 
         if step.otherwise is not None:
-            lines.append(prefix + "ELSE:")
+            lines.append(
+                prefix + "ELSE:"
+            )
             for child in step.otherwise:
-                lines.extend(_step_lines(child, inner))
+                lines.extend(
+                    _step_lines(child, inner)
+                )
 
         return lines
 
@@ -311,8 +425,12 @@ def _step_lines(
 def process_lines(process: Process) -> list[str]:
     """Return the process steps in authored order."""
     lines: list[str] = []
+
     for step in process.steps:
-        lines.extend(_step_lines(step, 0))
+        lines.extend(
+            _step_lines(step, 0)
+        )
+
     return lines
 
 

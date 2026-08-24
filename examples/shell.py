@@ -1,6 +1,11 @@
 """Author one OAK shell state machine and write its render."""
 
 import pathlib
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from oak import (
     Call,
@@ -22,7 +27,7 @@ from oak import (
     Trigger,
     Type,
     ValueBinding,
-    node_xml,
+    render,
     where,
 )
 
@@ -66,27 +71,15 @@ root = Root(
             body="Treat each command as an exact string.",
         )
     ],
-    schemas=[
-        command_line,
-        terminal_output,
-    ],
-    state=[
-        State(
-            id="mode",
-            value="open",
-        )
-    ],
+    schemas=[command_line, terminal_output],
+    state=[State(id="mode", value="open")],
     triggers=[
         Trigger(
             id="command",
             given=Condition(
-                left=StateValue(
-                    state="mode",
-                ),
+                left=StateValue(state="mode"),
                 operator="equals",
-                right=LiteralValue(
-                    value="open",
-                ),
+                right=LiteralValue(value="open"),
             ),
             when="A command line arrives.",
             process="route",
@@ -104,15 +97,9 @@ root = Root(
                             placeholder="COMMAND",
                         ),
                         operator="equals",
-                        right=LiteralValue(
-                            value="pwd",
-                        ),
+                        right=LiteralValue(value="pwd"),
                     ),
-                    then=[
-                        Call(
-                            process="pwd",
-                        )
-                    ],
+                    then=[Call(process="pwd")],
                     otherwise=[
                         If(
                             condition=Condition(
@@ -121,19 +108,11 @@ root = Root(
                                     placeholder="COMMAND",
                                 ),
                                 operator="equals",
-                                right=LiteralValue(
-                                    value="exit",
-                                ),
+                                right=LiteralValue(value="exit"),
                             ),
-                            then=[
-                                Call(
-                                    process="exit",
-                                )
-                            ],
+                            then=[Call(process="exit")],
                             otherwise=[
-                                Fail(
-                                    message="Unknown shell command.",
-                                )
+                                Fail(message="Unknown shell command.")
                             ],
                         )
                     ],
@@ -149,9 +128,7 @@ root = Root(
                     bindings=[
                         ValueBinding(
                             placeholder="OUTPUT",
-                            value=LiteralValue(
-                                value="/oak",
-                            ),
+                            value=LiteralValue(value="/oak"),
                         )
                     ],
                 )
@@ -166,17 +143,13 @@ root = Root(
                     bindings=[
                         ValueBinding(
                             placeholder="OUTPUT",
-                            value=LiteralValue(
-                                value="logout",
-                            ),
+                            value=LiteralValue(value="logout"),
                         )
                     ],
                 ),
                 Set(
                     state="mode",
-                    value=LiteralValue(
-                        value="closed",
-                    ),
+                    value=LiteralValue(value="closed"),
                 ),
             ],
         ),
@@ -197,11 +170,9 @@ root = Root(
     ],
 )
 
-target = pathlib.Path(__file__).with_name(
-    "shell.oak.md"
-)
+target = pathlib.Path(__file__).with_name("shell.oak.md")
 target.write_text(
-    node_xml(root) + "\n",
+    render(root) + "\n",
     encoding="utf-8",
     newline="\n",
 )

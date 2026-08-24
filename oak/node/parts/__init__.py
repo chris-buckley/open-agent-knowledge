@@ -4,7 +4,7 @@ from typing import Annotated
 
 from pydantic import Field
 
-from oak.node.parts.constants import Constant
+from oak.node.parts.constants import Constant, ConstantForm
 from oak.node.parts.instructions import Instruction
 from oak.node.parts.interfaces import Direction, Interface
 from oak.node.parts.processes import (
@@ -61,6 +61,7 @@ __all__ = [
     "Condition",
     "ConditionOperator",
     "Constant",
+    "ConstantForm",
     "ConstantValue",
     "Constraint",
     "Direction",

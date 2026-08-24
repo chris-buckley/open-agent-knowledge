@@ -1,6 +1,11 @@
 """Author one agent-facing OAK tree and write its render."""
 
 import pathlib
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from oak import (
     Act,
@@ -26,7 +31,7 @@ from oak import (
     Trigger,
     Type,
     ValueBinding,
-    node_xml,
+    render,
     where,
 )
 
@@ -46,13 +51,7 @@ Impact: <IMPACT>""",
         where(
             "IMPACT",
             Type(of="string"),
-            OneOf(
-                values=[
-                    "low",
-                    "medium",
-                    "high",
-                ]
-            ),
+            OneOf(values=["low", "medium", "high"]),
             description="reported impact",
         ),
     ],
@@ -70,14 +69,7 @@ Policy: <POLICY>""",
         where(
             "SEVERITY",
             Type(of="string"),
-            OneOf(
-                values=[
-                    "low",
-                    "medium",
-                    "high",
-                    "critical",
-                ]
-            ),
+            OneOf(values=["low", "medium", "high", "critical"]),
             description="assigned severity",
         ),
         where(
@@ -116,27 +108,15 @@ root = Root(
             value="Escalate critical incidents immediately.",
         )
     ],
-    schemas=[
-        incident_report,
-        triage_decision,
-    ],
-    state=[
-        State(
-            id="status",
-            value="ready",
-        )
-    ],
+    schemas=[incident_report, triage_decision],
+    state=[State(id="status", value="ready")],
     triggers=[
         Trigger(
             id="triage-trigger",
             given=Condition(
-                left=StateValue(
-                    state="status",
-                ),
+                left=StateValue(state="status"),
                 operator="equals",
-                right=LiteralValue(
-                    value="ready",
-                ),
+                right=LiteralValue(value="ready"),
             ),
             when="An incident report arrives for triage.",
             process="triage",
@@ -171,40 +151,28 @@ root = Root(
                         ValueBinding(
                             placeholder="POLICY",
                             value=ConstantValue(
-                                constant="escalation-policy",
+                                constant="escalation-policy"
                             ),
                         ),
                     ],
-                    outputs=[
-                        "SEVERITY",
-                        "RATIONALE",
-                        "NEXT_ACTION",
-                    ],
+                    outputs=["SEVERITY", "RATIONALE", "NEXT_ACTION"],
                 ),
                 If(
                     condition=Condition(
-                        left=BindingValue(
-                            binding="SEVERITY",
-                        ),
+                        left=BindingValue(binding="SEVERITY"),
                         operator="equals",
-                        right=LiteralValue(
-                            value="critical",
-                        ),
+                        right=LiteralValue(value="critical"),
                     ),
                     then=[
                         Set(
                             state="status",
-                            value=LiteralValue(
-                                value="escalated",
-                            ),
+                            value=LiteralValue(value="escalated"),
                         )
                     ],
                     otherwise=[
                         Set(
                             state="status",
-                            value=LiteralValue(
-                                value="triaged",
-                            ),
+                            value=LiteralValue(value="triaged"),
                         )
                     ],
                 ),
@@ -213,26 +181,20 @@ root = Root(
                     bindings=[
                         ValueBinding(
                             placeholder="SEVERITY",
-                            value=BindingValue(
-                                binding="SEVERITY",
-                            ),
+                            value=BindingValue(binding="SEVERITY"),
                         ),
                         ValueBinding(
                             placeholder="RATIONALE",
-                            value=BindingValue(
-                                binding="RATIONALE",
-                            ),
+                            value=BindingValue(binding="RATIONALE"),
                         ),
                         ValueBinding(
                             placeholder="NEXT_ACTION",
-                            value=BindingValue(
-                                binding="NEXT_ACTION",
-                            ),
+                            value=BindingValue(binding="NEXT_ACTION"),
                         ),
                         ValueBinding(
                             placeholder="POLICY",
                             value=ConstantValue(
-                                constant="escalation-policy",
+                                constant="escalation-policy"
                             ),
                         ),
                     ],
@@ -256,11 +218,9 @@ root = Root(
     ],
 )
 
-target = pathlib.Path(__file__).with_name(
-    "incident_triage.oak.md"
-)
+target = pathlib.Path(__file__).with_name("incident_triage.oak.md")
 target.write_text(
-    node_xml(root) + "\n",
+    render(root) + "\n",
     encoding="utf-8",
     newline="\n",
 )

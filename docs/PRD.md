@@ -5,7 +5,7 @@ updated: 2026-08-24
 owner: Christopher Buckley
 defaults:
   render: OAK
-  variant: xml
+  grouping: xml
   style: authored
 open:
   - What fields does every entry share? Deferred on 2026-08-21 while the user reviews the PRD. The title field is out of the sketch until this is decided.
@@ -20,7 +20,7 @@ authoring:
   - Every line fights for its place; remove what loses.
   - Each line maps to (core schema: type|literal|discriminated union|nested model|min or max length|gt or lt|regex|strict|no extra fields|frozen|JSON parse from bytes|core serializer: dump|JSON dump|include or exclude|alias|context|Python engine rule: after validator|field validator|root graph check|exclude_if|field serializer|model serializer to text|JSON Schema|source lint|runtime check|purpose: intent|rationale); a line that maps to none is removed.
   - A line the engine can enforce is enforced in the models in the same pass, because pydantic-core runs the Rust items natively and dispatches the Python callbacks, so every such line is checked on every authoring.
-  - Return the OAK render when no render, variant, or style is named; every default is OAK.
+  - Return the OAK render when no render, grouping, or style is named; every default is OAK.
   - Write no tests; the examples on every model and field validate the build, and tests add tokens and context for models.
   - Keep outputs and renders separate: the build uses the package to generate an output once; a render turns one knowledge tree into a format.
 ---
@@ -80,7 +80,7 @@ Knowledge can also run: a tree whose state, triggers, and processes form a state
 - The name changed from UAOC, Universal Agent Operating Context, to OAK on 2026-08-21, because knowledge is broader than an operating context.
 - OAK is a knowledge standard, not an information standard, because knowledge covers static information and executable instructions.
 - The consumer of the knowledge is named the interpreter, confirmed over actor on 2026-08-21.
-- OAK has four layers: the node, the render, the vocabulary, and the variant.
+- OAK has four layers: the node, the render, the vocabulary, and the grouping.
 - A node is one complete set of the seven parts.
 - The parts are instructions, constants, schemas, state, triggers, processes, and interfaces.
 - The set of parts is closed.
@@ -106,8 +106,18 @@ Knowledge can also run: a tree whose state, triggers, and processes form a state
 - Validation is strict: no type coercion and no unknown fields.
 - The PRD uses one short sentence per idea.
 - Give every model and field a title, a description, and examples; the prompt and the documentation derive from them.
+- Store the `Node` and `Root` example trees only in their model examples.
+- Derive every `Node` and `Root` field example from validated model examples in the build.
 - Validate every example against its model or field in the build, so the examples are the only tests.
-- Parse OAK text into the models, so OAK written without the models is validated afterwards.
+- Parse one (xml|markdown) OAK document into `Root`, then run every model and graph check.
+- Accept OAK as UTF-8 bytes or text.
+- Infer the grouping from the first part delimiter when no grouping is named.
+- Normalize (CRLF|CR) line endings to LF before parsing.
+- Require each parsed node to contain the seven parts once in OAK order.
+- Generate unique `SlugId` values for node and instruction ids because the OAK render loses them.
+- Strip only exact built-in instruction lines before rebuilding authored instructions.
+- Give each parse failure one code, one path, one optional line, and one message.
+- Collect every parse failure before raising `OakParseError`.
 
 ## Instructions
 
@@ -127,6 +137,19 @@ Knowledge can also run: a tree whose state, triggers, and processes form a state
 ## Constants
 
 - Constants are values that stay the same in every use of the knowledge.
+- Give each constant one `form` selected from (inline|text|json|csv|yaml).
+- Default each constant `form` to `inline`.
+- Render an inline constant as one JSON value on one line.
+- Render a block constant with one (`TEXT<<`|`JSON<<`|`CSV<<`|`YAML<<`) opening line and one `>>` closing line.
+- Reject `>>` as a line inside a block body.
+- Require each `TEXT` block value to be text.
+- Parse each `JSON` block as one JSON value.
+- Render each `JSON` block with two-space indentation.
+- Parse each `CSV` block as one header and one or more data rows.
+- Require every CSV row to use the same columns.
+- Require every CSV cell to be a JSON scalar.
+- Parse each `YAML` block with the safe YAML loader, then validate one JSON value.
+- Render each `YAML` block with the safe YAML dumper in authored key order.
 
 Example: multi-line TEXT constant using TEXT<< ... >>. Tree symbols mark each level.
 
@@ -145,7 +168,7 @@ cb-agnostic-prompt-protocol
 </constants>
 ```
 
-Example: multi-line JSON constant using JSON<< ... >>. Engines parse BODY as JsonValue then compile it to canonical JSON (see json_spacing).
+Example: multi-line JSON constant using JSON<< ... >>. The parser stores BODY as one JSON value.
 
 ```text
 <constants>
@@ -154,7 +177,7 @@ default-tz: "Z"
 api-config: JSON<<
 {
   "api_base_path": "/v1",
-  "default_time_zone": $constant.default-tz,
+  "default_time_zone": "Z",
   "retries": 3,
   "timeout_ms": 2000
 }
@@ -162,7 +185,7 @@ api-config: JSON<<
 </constants>
 ```
 
-Example: multi-line CSV constant using CSV<< ... >>. Engines parse BODY as CSV then compile it to canonical JSON rows (see 00 Structure / 02 Linting).
+Example: multi-line CSV constant using CSV<< ... >>. The parser stores each data row as one JSON object.
 
 ```text
 <constants>
@@ -170,9 +193,20 @@ default-tz: "Z"
 
 service-table: CSV<<
 service,region,default_tz,enabled,note
-billing,us-east-1,$constant.default-tz,true,"Primary billing region"
+billing,us-east-1,Z,true,"Primary billing region"
 support,ap-southeast-2,"Australia/Brisbane",true,"Escalations use ""follow the sun"""
-reporting,eu-west-1,$constant.default-tz,false,"EU, West"
+reporting,eu-west-1,Z,false,"EU, West"
+>>
+</constants>
+```
+
+Example: multi-line YAML constant using YAML<< ... >>. The parser stores BODY as one JSON value.
+
+```text
+<constants>
+deployment-config: YAML<<
+region: ap-southeast-2
+replicas: 2
 >>
 </constants>
 ```
@@ -230,6 +264,7 @@ reporting,eu-west-1,$constant.default-tz,false,"EU, West"
 - A trigger's process reference must target a process entry.
 - Multiple triggers can reference the same process or different processes.
 - Match every trigger `when` before selecting a process.
+- Match a trigger `when` by exact string equality.
 - Evaluate a trigger `given` only after its `when` matches.
 - Run the process when exactly one trigger matches its `when` and `given`.
 - Run no process when no trigger matches both its `when` and `given`.
@@ -282,6 +317,16 @@ reporting,eu-west-1,$constant.default-tz,false,"EU, West"
 - Require each binding value to reference a visible prior binding.
 - Commit state writes and interface emissions after successful top-level completion.
 - Discard state writes and interface emissions after failure.
+- Represent one arrival as one `when` value and zero or more input interface bindings.
+- Validate each active input binding against its interface schema before trigger selection.
+- Require the supplied state ids to equal the authored state ids.
+- Execute one arrival cycle with `execute(root, arrival, state, act=...)`.
+- Require an act handler only when an act step runs.
+- Validate each act handler result against the declared output set.
+- Return the selected process, committed state, and ordered emissions after success.
+- Return no process and no emission when no trigger matches.
+- Raise `ExecutionError` with one code and one message on runtime failure.
+- Do not mutate the caller state mapping.
 - Derive interface consumption and emission from typed process steps.
 - Do not give a process separate `consumes` or `emits` lists.
 - Use triggers for repetition instead of recursive process calls.
@@ -324,8 +369,10 @@ reporting,eu-west-1,$constant.default-tz,false,"EU, West"
 - Render each process binding target and act output as a bare `Placeholder`.
 - In a template, a line of one U+2026 HORIZONTAL ELLIPSIS tells the interpreter the pattern above it continues; the engine gives it no meaning.
 - Represent each closed token catalog with a (literal|enum).
+- Define `Datatype` as (string|integer|number|boolean|quantity|datetime|uri|path).
+- Define `Unit` as (%|kg|°C|kg·m/s²).
 - Represent a quantity as a nested model of a Decimal value and a unit enum; the serializer owns its display.
-- Represent a datetime as `AwareDatetime` with an optional `TimeZoneName`.
+- Represent a datetime as a `DateTime` model with one `AwareDatetime` value and one optional `TimeZoneName` zone.
 - Reject a naive datetime; never convert one to UTC.
 - Use U+002E FULL STOP as the decimal separator.
 - Use U+2009 THIN SPACE as the thousands separator.
@@ -337,7 +384,8 @@ reporting,eu-west-1,$constant.default-tz,false,"EU, West"
 - Render each datetime in ISO 8601 form.
 - Render a zero UTC offset as `Z`.
 - Require each local datetime to include a numeric UTC offset.
-- Render an IANA time zone name separately when present.
+- Append an IANA time zone name as `[TimeZoneName]` when present.
+- Keep number, quantity, and datetime display rules in separate display modules.
 
 ## Pydantic
 
@@ -381,14 +429,14 @@ reporting,eu-west-1,$constant.default-tz,false,"EU, West"
 - OAK is the default render.
 - The text render is named OAK and is the default render, because it is the render an interpreter uses directly; APS was its predecessor.
 - The OAK render is prose structured text which optimises for disambiguation for AI Models.
-- OAK renders from the authored tree with a variant and a style.
+- OAK renders from the authored tree with a grouping and a style.
 - These render choices do not change the authored tree.
-- OAK rendering uses variant and style outside the node, adding no part or field.
+- OAK rendering uses grouping and style outside the node, adding no part or field.
 - The default OAK rendering is xml and authored.
-- A variant is the delimiters that group the parts: (xml tags|markdown fences).
-- The variants are xml and markdown.
-- A variant changes delimiters only.
-- Each variant defines how it escapes its delimiters.
+- A grouping is the delimiters that group the parts: (xml tags|markdown fences).
+- The groupings are xml and markdown.
+- A grouping changes delimiters only.
+- Each grouping defines how it escapes its delimiters.
 - A renderer claims APS compatibility only when the tree and text meet APS rules.
 
 #### Arrangement
@@ -410,7 +458,8 @@ reporting,eu-west-1,$constant.default-tz,false,"EU, West"
 - When interfaces has entries, render `Each interface is one information crossing: in arrives, out is emitted, and inout does both.` before authored instructions.
 - Inject no other built-in instruction text.
 - Render each trigger as one self-closing `trigger` tag with one `id`, one optional `given`, one `when`, and one `process` attribute.
-- Render each (constant|state) entry as its id, `: `, and its value as JSON on one line.
+- Render each state entry and each inline constant as its id, `: `, and its value as JSON on one line.
+- Render each block constant with its form opener, body, and closing line.
 - Render each process with its id and name, then its typed steps one per line in authored order.
 - Line order carries the step sequence; render no step numbers and no heading.
 - Indent grouped lines by two spaces under their parent line.
@@ -452,19 +501,26 @@ oak_parts:
     - <interfaces>…</interfaces>
 ```
 
-- The xml variant uses XML-like tags as text delimiters.
+- The xml grouping uses XML-like tags as text delimiters.
 - Render text between xml tags verbatim.
 - Escape xml attribute values.
 - Render trigger attributes in (`id`|`given`|`when`|`process`) order.
 - Put each xml opening tag before its text on a separate line.
 - Put each xml closing tag after its text on a separate line.
-- The xml variant uses OAK names and node structure.
-- APS is not the canonical xml variant, because OAK has its own parts and typed process model.
+- The xml grouping uses OAK names and node structure.
+- APS is not the canonical xml grouping, because OAK has its own parts and typed process model.
 - Join built-in and authored instruction lines inside `<instructions>` with one U+000A LINE FEED.
 
 #### Markdown
 
-- The markdown variant uses headings, lists, and fenced blocks.
+- The markdown grouping uses tilde fences as text delimiters.
+- Open each part with `~~~~part` and close it with `~~~~`.
+- Open each body entry with `~~~entry;attr="value"` and close it with `~~~`.
+- Render a bodiless entry as one bare opening line.
+- Keep each entry body byte-identical between the xml and markdown groupings.
+- Encode each markdown attribute value as one JSON string.
+- Use a node fence longer than every fence inside that node.
+- Increase nested node fence lengths from five tildes as depth requires.
 
 #### Styles
 
@@ -476,7 +532,15 @@ oak_parts:
 - A controlled style preserves meaning, obligation, negation, conditions, and step order.
 - A renderer fails when it cannot validate a requested controlled style.
 - An ASD-STE100 style names its governing edition and validation rules.
-- Apply sentence, paragraph, and list limits through the named ASD-STE100 style when it is defined.
+- Name the implemented controlled style `asd-ste100-9`.
+- The `asd-ste100-9` style targets ASD-STE100 Issue 9, January 2025.
+- Rewrite (in order to|prior to|subsequent to|utilize|commence|terminate) and their implemented inflections with controlled alternatives.
+- Reject controlled text with more than one line.
+- Reject controlled text with more than one sentence.
+- Reject controlled text with more than 20 words.
+- Reject controlled text that still contains a replaced term.
+- Do not claim full ASD-STE100 conformance.
+- Apply the implemented line, sentence, word, and term checks through the named ASD-STE100 style.
 
 ### JSON-LD
 
@@ -503,6 +567,7 @@ oak_parts:
 ## Build
 
 The build uses the package to generate the outputs once; a model writes OAK with the outputs; the models validate what it wrote.
+- Validate text aliases, model examples, field examples, render defaults, both groupings, block constants, controlled style, parsing, execution, and display forms in `build/examples.py`.
 
 ### EBNF
 
@@ -511,15 +576,23 @@ The build uses the package to generate the outputs once; a model writes OAK with
 - Generate each (Rust regex|JSON Schema pattern|EBNF production) from the same restricted text syntax of (literal|character class|sequence|choice|optional|repeat|named reference).
 - Do not derive one output syntax from another output syntax.
 - Do not use EBNF as a validator.
+- Derive the OAK structural productions from the fixed part order.
+- Write the grammar snapshot to `outputs/oak.ebnf`.
 
 ### Prompt
 
 - Emit the authoring prompt as one markdown file of OAK generated from the models: instructions from the constraints, schemas from the models, one process to write OAK (with|without) the models, one trigger for a model that arrives to write OAK.
+- Read the authoring instructions from the PRD Constraints section.
+- Derive one prompt schema from each model title, description, and field description.
+- Write the authoring prompt snapshot to `outputs/prompt.md`.
 
 ### Documentation
 
 - Emit the documentation as a directory tree of markdown generated from the models, one file per model, built from every model and field (title|description|examples).
 - Reject a model or field without a description.
+- Derive a missing `Node` or `Root` field example from each validated model example.
+- Remove stale generated model documents before rebuilding.
+- Write one model document to `outputs/docs` for each model.
 
 ### Tree
 
@@ -545,7 +618,7 @@ oak
 ├── legacy-snapshot-aps  # APS reference, read only
 ├── oak  # the package, what the PRD builds
 │   ├── __init__.py  # authoring API
-│   ├── defaults.py  # render OAK, variant xml, style authored
+│   ├── defaults.py  # render OAK, grouping xml, style authored
 │   ├── base.py  # shared config, SlugId entries, rust-regex engine
 │   ├── node  # layer 1, one complete set of the seven parts
 │   │   ├── __init__.py
@@ -588,6 +661,7 @@ oak
 │   │       ├── datetime.py  # ISO 8601, Z, offset, IANA name
 │   │       └── ...
 │   ├── parse.py  # OAK text to models
+│   ├── execute.py  # one transactional trigger and process cycle
 │   └── render  # layer 2, one module per render
 │       ├── __init__.py  # render selection, defaults apply
 │       ├── oak  # the default render
@@ -595,11 +669,11 @@ oak
 │       │   ├── instructions.py  # built-in interpretation instructions
 │       │   ├── syntax.py  # WHERE wording, constraints, paths, and process values
 │       │   ├── arrangement.py  # seven parts, interfaces in the APS input position
-│       │   ├── variants.py  # layer 4, xml tags or markdown fences
+│       │   ├── groupings.py  # layer 4, xml tags or markdown fences
 │       │   └── styles.py  # authored, controlled ASD-STE100
 │       └── json_ld.py  # @base, @id, @type, @list, the context
 ├── build  # uses the package to generate the outputs
-│   ├── examples.py  # validate every model, field, and named text example
+│   ├── examples.py  # validate examples and each working product path
 │   ├── ebnf.py
 │   ├── prompt.py
 │   └── docs.py
