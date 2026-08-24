@@ -7,7 +7,25 @@ from pydantic import Field
 from oak.node.parts.constants import Constant
 from oak.node.parts.instructions import Instruction
 from oak.node.parts.interfaces import Direction, Interface
-from oak.node.parts.processes import Process
+from oak.node.parts.processes import (
+    Act,
+    BindingValue,
+    Call,
+    Condition,
+    ConditionOperator,
+    ConstantValue,
+    Emit,
+    Fail,
+    If,
+    InterfaceValue,
+    LiteralValue,
+    Process,
+    Set,
+    StateValue,
+    Step,
+    Value,
+    ValueBinding,
+)
 from oak.node.parts.schemas import (
     AtLeast,
     AtMost,
@@ -34,16 +52,27 @@ Part = Annotated[
 ]
 
 __all__ = [
+    "Act",
     "AtLeast",
     "AtMost",
     "BindingFailure",
+    "BindingValue",
+    "Call",
+    "Condition",
+    "ConditionOperator",
     "Constant",
+    "ConstantValue",
     "Constraint",
     "Direction",
+    "Emit",
+    "Fail",
+    "If",
     "Instruction",
     "Interface",
+    "InterfaceValue",
     "Lines",
     "ListOf",
+    "LiteralValue",
     "MaxChars",
     "NonEmpty",
     "OneOf",
@@ -52,9 +81,14 @@ __all__ = [
     "Regex",
     "Schema",
     "SchemaBindingError",
+    "Set",
     "State",
+    "StateValue",
+    "Step",
     "Trigger",
     "Type",
+    "Value",
+    "ValueBinding",
     "Where",
     "where",
 ]

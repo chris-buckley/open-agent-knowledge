@@ -6,15 +6,30 @@ from pydantic_core import PydanticCustomError
 from oak.base import Entry
 from oak.node.model import Node, Root
 from oak.node.parts import (
+    Act,
     AtLeast,
     AtMost,
+    BindingValue,
+    Call,
+    Condition,
     Constant,
+    ConstantValue,
+    Emit,
+    Fail,
+    If,
     Instruction,
     Interface,
+    InterfaceValue,
+    LiteralValue,
     Process,
     Schema,
+    Set,
     State,
+    StateValue,
+    Step,
     Trigger,
+    Value,
+    ValueBinding,
     Where,
 )
 from oak.vocabulary import IriId
@@ -34,6 +49,23 @@ _CONSTRAINT_TYPES = {
     "list_of": "ListOf",
     "at_least": "AtLeast",
     "at_most": "AtMost",
+}
+
+_VALUE_TYPES = {
+    "literal": "LiteralValue",
+    "constant": "ConstantValue",
+    "state": "StateValue",
+    "interface": "InterfaceValue",
+    "binding": "BindingValue",
+}
+
+_STEP_TYPES = {
+    "act": "Act",
+    "set": "Set",
+    "emit": "Emit",
+    "if": "If",
+    "call": "Call",
+    "fail": "Fail",
 }
 
 
@@ -56,9 +88,6 @@ def _context(vocabulary: str) -> dict[str, object]:
         "body": "oak:body",
         "when": "oak:when",
         "process": {"@id": "oak:process", "@type": "@id"},
-        "consumes": {"@id": "oak:consumes", "@type": "@id", "@container": "@list"},
-        "emits": {"@id": "oak:emits", "@type": "@id", "@container": "@list"},
-        "steps": {"@id": "oak:step", "@container": "@list"},
         "value": "oak:value",
         "template": {"@id": "oak:template", "@type": "xsd:string"},
         "where": {"@id": "oak:where", "@container": "@list"},
@@ -76,10 +105,25 @@ def _context(vocabulary: str) -> dict[str, object]:
         "separator": "oak:separator",
         "min": "oak:min",
         "max": "oak:max",
+        "instruction": "oak:instruction",
+        "inputs": {"@id": "oak:inputs", "@container": "@list"},
+        "outputs": {"@id": "oak:outputs", "@container": "@list"},
+        "bindings": {"@id": "oak:bindings", "@container": "@list"},
+        "condition": "oak:condition",
+        "left": "oak:left",
+        "operator": "oak:operator",
+        "right": "oak:right",
+        "then": {"@id": "oak:then", "@container": "@list"},
+        "otherwise": {"@id": "oak:otherwise", "@container": "@list"},
+        "message": "oak:message",
+        "constant": {"@id": "oak:constant", "@type": "@id"},
+        "state": "oak:state",
+        "interface": {"@id": "oak:interface", "@type": "@id"},
+        "binding": {"@id": "oak:binding", "@type": "xsd:string"},
+        "steps": {"@id": "oak:steps", "@container": "@list"},
         "instructions": {"@id": "oak:instructions", "@container": "@list"},
         "constants": {"@id": "oak:constants", "@container": "@list"},
         "schemas": {"@id": "oak:schemas", "@container": "@list"},
-        "state": {"@id": "oak:state", "@container": "@list"},
         "triggers": {"@id": "oak:triggers", "@container": "@list"},
         "processes": {"@id": "oak:processes", "@container": "@list"},
         "interfaces": {"@id": "oak:interfaces", "@container": "@list"},
@@ -104,7 +148,9 @@ def _where(schema: Schema, where: Where) -> dict[str, object]:
         "@id": where_id(schema, where.placeholder),
         "@type": "oak:Where",
         "placeholder": where.placeholder,
-        "constraints": [_constraint(schema, constraint) for constraint in where.constraints],
+        "constraints": [
+            _constraint(schema, constraint) for constraint in where.constraints
+        ],
     }
     if where.examples:
         node["examples"] = list(where.examples)
@@ -118,7 +164,7 @@ def _schema(schema: Schema) -> dict[str, object]:
         "@id": schema.id,
         "@type": "oak:Schema",
         "template": schema.template,
-        "where": [_where(schema, where) for where in schema.where],
+        "where": [_where(schema, item) for item in schema.where],
     }
     if schema.name is not None:
         node["name"] = schema.name
@@ -129,6 +175,69 @@ def _schema(schema: Schema) -> dict[str, object]:
 
 def _json_literal(value: object) -> dict[str, object]:
     return {"@value": value, "@type": "@json"}
+
+
+def _value(value: Value) -> dict[str, object]:
+    node: dict[str, object] = {"@type": f"oak:{_VALUE_TYPES[value.source]}"}
+    if isinstance(value, LiteralValue):
+        node["value"] = _json_literal(value.value)
+    elif isinstance(value, ConstantValue):
+        node["constant"] = {"@id": value.constant}
+    elif isinstance(value, StateValue):
+        node["state"] = {"@id": value.state}
+    elif isinstance(value, InterfaceValue):
+        node["interface"] = {"@id": value.interface}
+        node["placeholder"] = value.placeholder
+    elif isinstance(value, BindingValue):
+        node["binding"] = value.binding
+    else:
+        raise TypeError(f"unsupported process value {type(value).__name__}")
+    return node
+
+
+def _value_binding(binding: ValueBinding) -> dict[str, object]:
+    return {
+        "@type": "oak:ValueBinding",
+        "placeholder": binding.placeholder,
+        "value": _value(binding.value),
+    }
+
+
+def _condition(condition: Condition) -> dict[str, object]:
+    return {
+        "@type": "oak:Condition",
+        "left": _value(condition.left),
+        "operator": condition.operator,
+        "right": _value(condition.right),
+    }
+
+
+def _step(step: Step) -> dict[str, object]:
+    node: dict[str, object] = {"@type": f"oak:{_STEP_TYPES[step.kind]}"}
+    if isinstance(step, Act):
+        node["instruction"] = step.instruction
+        node["inputs"] = [_value_binding(binding) for binding in step.inputs]
+        node["outputs"] = list(step.outputs)
+    elif isinstance(step, Set):
+        node["state"] = {"@id": step.state}
+        node["value"] = _value(step.value)
+    elif isinstance(step, Emit):
+        node["interface"] = {"@id": step.interface}
+        node["bindings"] = [
+            _value_binding(binding) for binding in step.bindings
+        ]
+    elif isinstance(step, If):
+        node["condition"] = _condition(step.condition)
+        node["then"] = [_step(child) for child in step.then]
+        if step.otherwise is not None:
+            node["otherwise"] = [_step(child) for child in step.otherwise]
+    elif isinstance(step, Call):
+        node["process"] = {"@id": step.process}
+    elif isinstance(step, Fail):
+        node["message"] = step.message
+    else:
+        raise TypeError(f"unsupported process step {type(step).__name__}")
+    return node
 
 
 def _entry(entry: Entry) -> dict[str, object]:
@@ -158,19 +267,14 @@ def _entry(entry: Entry) -> dict[str, object]:
             "process": {"@id": entry.process},
         }
     if isinstance(entry, Process):
-        node: dict[str, object] = {
+        return {
             "@id": entry.id,
             "@type": "oak:Process",
             "name": entry.name,
-            "steps": list(entry.steps),
+            "steps": [_step(step) for step in entry.steps],
         }
-        if entry.consumes:
-            node["consumes"] = [{"@id": reference} for reference in entry.consumes]
-        if entry.emits:
-            node["emits"] = [{"@id": reference} for reference in entry.emits]
-        return node
     if isinstance(entry, Interface):
-        node = {
+        node: dict[str, object] = {
             "@id": entry.id,
             "@type": "oak:Interface",
             "direction": entry.direction,

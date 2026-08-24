@@ -118,7 +118,12 @@ class Node(OakModel):
                     "part": "processes",
                     "id": "oak:process/write",
                     "name": "Write OAK",
-                    "steps": ["Write the knowledge."],
+                    "steps": [
+                        {
+                            "kind": "act",
+                            "instruction": "Write the knowledge.",
+                        }
+                    ],
                 }
             ]
         ],
@@ -161,7 +166,9 @@ class Root(Node):
                             "where": [
                                 {
                                     "placeholder": "KNOWLEDGE",
-                                    "constraints": [{"kind": "type", "of": "string"}],
+                                    "constraints": [
+                                        {"kind": "type", "of": "string"}
+                                    ],
                                 }
                             ],
                         }
@@ -179,9 +186,36 @@ class Root(Node):
                             "part": "processes",
                             "id": "oak:process/run",
                             "name": "Transform knowledge",
-                            "consumes": ["oak:interface/knowledge"],
-                            "emits": ["oak:interface/knowledge"],
-                            "steps": ["Transform the knowledge."],
+                            "steps": [
+                                {
+                                    "kind": "act",
+                                    "instruction": "Transform <KNOWLEDGE> into <RESULT>.",
+                                    "inputs": [
+                                        {
+                                            "placeholder": "KNOWLEDGE",
+                                            "value": {
+                                                "source": "interface",
+                                                "interface": "oak:interface/knowledge",
+                                                "placeholder": "KNOWLEDGE",
+                                            },
+                                        }
+                                    ],
+                                    "outputs": ["RESULT"],
+                                },
+                                {
+                                    "kind": "emit",
+                                    "interface": "oak:interface/knowledge",
+                                    "bindings": [
+                                        {
+                                            "placeholder": "KNOWLEDGE",
+                                            "value": {
+                                                "source": "binding",
+                                                "binding": "RESULT",
+                                            },
+                                        }
+                                    ],
+                                },
+                            ],
                         }
                     ],
                     "interfaces": [

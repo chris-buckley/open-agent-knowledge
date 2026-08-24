@@ -1,11 +1,40 @@
-"""The text syntax of schema content in the OAK render."""
+"""The text syntax of schema and process content in the OAK render."""
 
 import json
 
 from oak.node.parts.constants import Constant
 from oak.node.parts.interfaces import Interface
-from oak.node.parts.processes import Process
-from oak.node.parts.schemas import AtLeast, AtMost, Constraint, Lines, ListOf, MaxChars, NonEmpty, OneOf, Regex, Type, Where
+from oak.node.parts.processes import (
+    Act,
+    BindingValue,
+    Call,
+    Condition,
+    ConstantValue,
+    Emit,
+    Fail,
+    If,
+    InterfaceValue,
+    LiteralValue,
+    Process,
+    Set,
+    StateValue,
+    Step,
+    Value,
+    ValueBinding,
+)
+from oak.node.parts.schemas import (
+    AtLeast,
+    AtMost,
+    Constraint,
+    Lines,
+    ListOf,
+    MaxChars,
+    NonEmpty,
+    OneOf,
+    Regex,
+    Type,
+    Where,
+)
 from oak.node.parts.state import State
 from oak.node.parts.triggers import Trigger
 from oak.vocabulary.text.placeholder import token
@@ -41,7 +70,9 @@ def constraint_text(constraint: Constraint) -> str:
         case Type():
             return f"is {constraint.of}"
         case OneOf():
-            return "is one of " + ", ".join(f"`{_scalar(value)}`" for value in constraint.values)
+            return "is one of " + ", ".join(
+                f"`{_scalar(value)}`" for value in constraint.values
+            )
         case Regex():
             return f"matches `{constraint.pattern}`"
         case NonEmpty():
@@ -60,10 +91,14 @@ def constraint_text(constraint: Constraint) -> str:
 
 
 def where_line(where: Where) -> str:
-    """Return one dense line: the delimited placeholder, then its details joined by `; `."""
-    body = WHERE_DETAIL_SEPARATOR.join(constraint_text(constraint) for constraint in where.constraints)
+    """Return one dense line: the delimited placeholder, then its details."""
+    body = WHERE_DETAIL_SEPARATOR.join(
+        constraint_text(constraint) for constraint in where.constraints
+    )
     if where.examples:
-        body += " (e.g. " + ", ".join(f"`{_scalar(example)}`" for example in where.examples) + ")"
+        body += " (e.g. " + ", ".join(
+            f"`{_scalar(example)}`" for example in where.examples
+        ) + ")"
     if where.description is not None:
         body += WHERE_DETAIL_SEPARATOR + where.description
     return WHERE_ENTRY_PREFIX + token(where.placeholder) + " " + body + "."
@@ -84,14 +119,87 @@ def trigger_line(trigger: Trigger) -> str:
     return f"- {trigger.when} -> {trigger.process}"
 
 
+def process_value_text(value: Value) -> str:
+    """Return one dense process value reference."""
+    match value:
+        case LiteralValue():
+            return value_text(value.value)
+        case ConstantValue():
+            return f"constant {value.constant}"
+        case StateValue():
+            return f"state {value.state}"
+        case InterfaceValue():
+            return f"interface {value.interface} {token(value.placeholder)}"
+        case BindingValue():
+            return f"binding {token(value.binding)}"
+    raise TypeError(f"unsupported process value {type(value).__name__}")
+
+
+def condition_text(condition: Condition) -> str:
+    """Return one process condition."""
+    operator = "equals" if condition.operator == "equals" else "does not equal"
+    return (
+        f"{process_value_text(condition.left)} {operator} "
+        f"{process_value_text(condition.right)}"
+    )
+
+
+def _binding_line(binding: ValueBinding, indent: int) -> str:
+    return (
+        " " * indent
+        + f"- {token(binding.placeholder)} = {process_value_text(binding.value)}."
+    )
+
+
+def _step_lines(step: Step, number: int, indent: int) -> list[str]:
+    prefix = " " * indent + f"{number}. "
+    detail_indent = indent + 3
+    child_indent = indent + 6
+
+    if isinstance(step, Act):
+        lines = [prefix + f"ACT {step.instruction}"]
+        if step.inputs:
+            lines.append(" " * detail_indent + "INPUTS:")
+            lines.extend(
+                _binding_line(binding, child_indent) for binding in step.inputs
+            )
+        if step.outputs:
+            outputs = ", ".join(token(output) for output in step.outputs)
+            lines.append(" " * detail_indent + f"OUTPUTS: {outputs}.")
+        return lines
+    if isinstance(step, Set):
+        return [
+            prefix
+            + f"SET state {step.state} = {process_value_text(step.value)}."
+        ]
+    if isinstance(step, Emit):
+        lines = [prefix + f"EMIT interface {step.interface}:"]
+        lines.extend(
+            _binding_line(binding, detail_indent) for binding in step.bindings
+        )
+        return lines
+    if isinstance(step, If):
+        lines = [prefix + f"IF {condition_text(step.condition)}:"]
+        lines.append(" " * detail_indent + "THEN:")
+        for child_number, child in enumerate(step.then, start=1):
+            lines.extend(_step_lines(child, child_number, child_indent))
+        if step.otherwise is not None:
+            lines.append(" " * detail_indent + "ELSE:")
+            for child_number, child in enumerate(step.otherwise, start=1):
+                lines.extend(_step_lines(child, child_number, child_indent))
+        return lines
+    if isinstance(step, Call):
+        return [prefix + f"CALL process {step.process}."]
+    if isinstance(step, Fail):
+        return [prefix + f"FAIL {value_text(step.message)}."]
+    raise TypeError(f"unsupported process step {type(step).__name__}")
+
+
 def process_lines(process: Process) -> list[str]:
-    """Return the process inner lines: references, then numbered steps."""
-    lines = []
-    if process.consumes:
-        lines.append("consumes: " + ", ".join(process.consumes))
-    if process.emits:
-        lines.append("emits: " + ", ".join(process.emits))
-    lines.extend(f"{number}. {step}" for number, step in enumerate(process.steps, start=1))
+    """Return the process inner lines: one heading and one numbered step tree."""
+    lines = ["STEPS:"]
+    for number, step in enumerate(process.steps, start=1):
+        lines.extend(_step_lines(step, number, 0))
     return lines
 
 

@@ -9,7 +9,6 @@ defaults:
   style: authored
 open:
   - What fields does every entry share? Deferred on 2026-08-21 while the user reviews the PRD. The title field is out of the sketch until this is decided.
-  - How does OAK resolve two triggers that match one arrival? Deferred on 2026-08-21 until trigger execution is defined.
 authoring:
   - These rules govern every line after the first `---` that follows the Purpose section; the Purpose prose above it is exempt.
   - This document is the complete ground truth for OAK; it evolves and is never partial.
@@ -61,7 +60,15 @@ Knowledge can also run: a tree whose state, triggers, and processes form a state
 7. Reject duplicate IDs across nodes and entries.
 8. Reject a (missing|wrong-type) reference target.
 9. Omit unset optional fields from the Pydantic dump.
-10. Reject a process interface reference that conflicts with the interface direction.
+10. Reject a process value or emit step that conflicts with the interface direction.
+11. Reject an act whose instruction placeholders differ from its inputs and outputs.
+12. Reject a process that reads an unbound local binding.
+13. Reject a process that redefines a visible local binding.
+14. Reject an interface value whose placeholder is absent from the interface schema.
+15. Reject an emit step whose bindings differ from the interface schema placeholders.
+16. Reject a process call cycle.
+17. Reject a statically dead process branch.
+18. Fail one execution when multiple triggers match one cycle.
 
 ## Structure
 
@@ -211,24 +218,56 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Triggers are optional.
 - A trigger's process reference must target a process entry.
 - Multiple triggers can reference the same process or different processes.
+- Match every trigger before selecting a process.
+- Run the process when exactly one trigger matches.
+- Run no process when no trigger matches.
+- Fail with `ambiguous_trigger_match` when multiple triggers match.
+- Reject duplicate trigger `when` values with `duplicate_trigger_when`.
 - The name trigger is confirmed over signal on 2026-08-21, because it names what makes an outsider enter.
 - Triggers are optional in a node.
 
 ## Processes
 
 - Processes are exact ways to do a task.
-- Require each process step to use `NonBlankLine`.
-- Give each process a `consumes` list of interface `IriId` references.
-- Give each process an `emits` list of interface `IriId` references.
-- Require each process interface reference to target an interface entry.
-- Require a process to consume only an (in|inout) interface.
-- Require a process to emit only an (out|inout) interface.
-- A process can use constants.
-- A process can use schemas.
-- A process can put constant values into schemas.
-- A process can act on information inside the knowledge.
-- A process reached through a trigger gives the ordered steps for that entry.
-- Processes can run without interface references.
+- Represent each process step as one discriminated union of (act|set|emit|if|call|fail) on a required `kind`.
+- Represent each process value as one discriminated union of (literal|constant|state|interface|binding) on a required `source`.
+- Give each value binding one `Placeholder` and one process value.
+- Give each condition one left value, one operator, and one right value.
+- Require each condition operator to be (equals|not_equals).
+- Require each process to have one or more steps.
+- Give each act one `NonBlankLine` instruction, an input binding list, and an output `Placeholder` list.
+- Require each act instruction placeholder to occur once in its inputs or outputs.
+- Reject a duplicate act input or output.
+- Reject an act placeholder used as both input and output.
+- Require an act to return exactly its declared outputs.
+- Store each act output as an immutable process-local JSON binding.
+- Keep a binding created in an if branch inside that branch.
+- Give each set step one state `IriId` and one value.
+- Resolve a state value from the current execution state.
+- Apply a set step to the current execution state.
+- Give each emit step one interface `IriId` and one non-empty binding list.
+- Require each emit interface to target an (out|inout) interface.
+- Require each emit binding set to equal the interface schema placeholder set.
+- Validate each emitted binding against the interface schema before emission.
+- Give each if step one condition, one non-empty then list, and one optional otherwise list.
+- Execute only the branch selected by the condition.
+- Give each call step one process `IriId`.
+- Require each call reference to target a process entry.
+- Reject process call cycles with `process_call_cycle`.
+- Run a called process synchronously in the current state and emission transaction.
+- Give each fail step one `NonBlankLine` message.
+- Stop the execution with `process_failed` when a fail step runs.
+- Require each constant value reference to target a constant entry.
+- Require each state value reference to target a state entry.
+- Require each interface value reference to target an (in|inout) interface.
+- Require each interface value placeholder to exist in the interface schema.
+- Require each binding value to reference a visible prior binding.
+- Commit state writes and interface emissions after successful top-level completion.
+- Discard state writes and interface emissions after failure.
+- Derive interface consumption and emission from typed process steps.
+- Do not give a process separate `consumes` or `emits` lists.
+- Use triggers for repetition instead of recursive process calls.
+- Processes can run without interfaces.
 - Processes do not have to be referenced by triggers.
 
 ## Interfaces
@@ -337,13 +376,20 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Render each instruction as its text alone.
 - Render each trigger as its text, one ` -> `, then its process id.
 - Render each (constant|state) entry as its name, `: `, and its value as JSON on one line.
-- Render each process with its id and name, one `consumes:` and one `emits:` line when present, then its steps as a numbered list.
+- Render each process with its id and name, one `STEPS:` line, and its typed steps as a numbered tree.
+- Render each process value as one of (JSON literal|`constant ` and its id|`state ` and its id|`interface ` and its id and placeholder|`binding ` and its placeholder).
+- Render each act with `ACT`, its instruction, optional `INPUTS:`, and optional `OUTPUTS:`.
+- Render each set on one line with `SET state`, its state id, ` = `, and its value.
+- Render each emit with `EMIT interface`, its interface id, and one binding per line.
+- Render each if with `IF`, its condition, `THEN:`, and `ELSE:` when present.
+- Render each call on one line with `CALL process` and its process id.
+- Render each fail on one line with `FAIL` and its JSON string message.
 - Render each interface with its id, direction, and schema reference, and its description as its body.
 - Render each child node as one nested `node` block after the seven parts.
 - Separate the parts and each nested `node` block with one blank line.
 - Render each constant name with `ConstantName`.
 - A process renders with an inner structure.
-- Render process interface references inside the process structure.
+- Render each process reference at the step or value that uses it.
 - An interface renders with an inner structure.
 - Render each schema template followed by one blank line and `WHERE:`.
 - Preserve template whitespace in each text render.
@@ -385,7 +431,7 @@ oak_parts:
 - Style is a render choice, not an interpretation instruction, because one tree must render in many styles.
 - The authored style preserves the authored wording.
 - A controlled style is a named and versioned renderer profile.
-- A controlled style rewrites only instruction bodies, trigger text, and process steps.
+- A controlled style rewrites only instruction bodies, trigger text, act instructions, and fail messages.
 - A controlled style preserves meaning, obligation, negation, conditions, and step order.
 - A renderer fails when it cannot validate a requested controlled style.
 - An ASD-STE100 style names its governing edition and validation rules.
@@ -396,13 +442,13 @@ oak_parts:
 - Render each schema id as `@id`.
 - Render each interface id as `@id`.
 - Render each interface schema reference as `@id`.
-- Render each process (consumes|emits) reference as `@id`.
-- Render `Schema`, `Interface`, `Where`, and each constraint kind as `@type`.
+- Render each process value and step reference as `@id`.
+- Render `Schema`, `Interface`, `Where`, each constraint kind, each process value source, and each process step kind as `@type`.
 - Derive each `Where` `@id` as `{schema @id}/where/{Placeholder}`.
 - Render `where`, `constraints`, and `examples` as `@list` containers.
-- Render (interfaces|consumes|emits) as `@list` containers.
+- Render (interfaces|steps|inputs|outputs|bindings|then|otherwise) as `@list` containers.
 - Define context terms for `template`, `where`, `placeholder`, `constraints`, `examples`, and each constraint field.
-- Define context terms for (direction|schema|consumes|emits|interfaces).
+- Define context terms for (direction|schema|interfaces|steps|inputs|outputs|bindings|condition|left|operator|right|then|otherwise|instruction|message|constant|state|interface|binding).
 - Render each `Placeholder` valued (at least|at most) value as the referenced `Where` `@id`.
 - Require the caller to supply the JSON-LD vocabulary IRI.
 - Define `oak` as the caller vocabulary prefix.
@@ -449,8 +495,10 @@ oak
 │   ├── PRD.md
 │   └── types.md  # Pydantic types the core schema validates
 ├── examples  # authored trees, one per file; the render sits next to its author
-│   ├── outline.py  # authors one tree, writes outline.oak.md
-│   └── outline.oak.md  # * the OAK render of outline.py
+│   ├── incident_triage.py  # authors one agent-facing tree
+│   ├── incident_triage.oak.md  # * the OAK render of incident_triage.py
+│   ├── shell.py  # authors one closed state machine
+│   └── shell.oak.md  # * the OAK render of shell.py
 ├── legacy-snapshot-aps  # APS reference, read only
 ├── oak  # the package, what the PRD builds
 │   ├── __init__.py  # authoring API
@@ -468,7 +516,7 @@ oak
 │   │       ├── schemas.py  # Schema, Where, the constraint union, bind
 │   │       ├── state.py  # State
 │   │       ├── triggers.py  # Trigger
-│   │       ├── processes.py  # Process
+│   │       ├── processes.py  # Process, values, conditions, and the closed step union
 │   │       └── interfaces.py  # Interface, Direction
 │   ├── vocabulary  # layer 3, how information is conveyed without ambiguity; one file provides one thing
 │   │   ├── __init__.py
