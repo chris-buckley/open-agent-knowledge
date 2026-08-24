@@ -9,8 +9,8 @@ from oak.node.parts import (
     AtLeast,
     AtMost,
     Constant,
-    Input,
     Instruction,
+    Interface,
     Process,
     Schema,
     State,
@@ -56,6 +56,8 @@ def _context(vocabulary: str) -> dict[str, object]:
         "body": "oak:body",
         "when": "oak:when",
         "process": {"@id": "oak:process", "@type": "@id"},
+        "consumes": {"@id": "oak:consumes", "@type": "@id", "@container": "@list"},
+        "emits": {"@id": "oak:emits", "@type": "@id", "@container": "@list"},
         "steps": {"@id": "oak:step", "@container": "@list"},
         "value": "oak:value",
         "template": {"@id": "oak:template", "@type": "xsd:string"},
@@ -64,6 +66,8 @@ def _context(vocabulary: str) -> dict[str, object]:
         "constraints": {"@id": "oak:constraint", "@container": "@list"},
         "examples": {"@id": "oak:example", "@container": "@list"},
         "description": "oak:description",
+        "direction": "oak:direction",
+        "schema": {"@id": "oak:schema", "@type": "@id"},
         "of": "oak:of",
         "values": {"@id": "oak:values", "@container": "@list"},
         "pattern": "oak:pattern",
@@ -78,7 +82,7 @@ def _context(vocabulary: str) -> dict[str, object]:
         "state": {"@id": "oak:state", "@container": "@list"},
         "triggers": {"@id": "oak:triggers", "@container": "@list"},
         "processes": {"@id": "oak:processes", "@container": "@list"},
-        "input": "oak:input",
+        "interfaces": {"@id": "oak:interfaces", "@container": "@list"},
         "children": {"@id": "oak:children", "@container": "@list"},
     }
 
@@ -154,25 +158,44 @@ def _entry(entry: Entry) -> dict[str, object]:
             "process": {"@id": entry.process},
         }
     if isinstance(entry, Process):
-        return {
+        node: dict[str, object] = {
             "@id": entry.id,
             "@type": "oak:Process",
             "name": entry.name,
             "steps": list(entry.steps),
         }
-    if isinstance(entry, Input):
-        return {"@id": entry.id, "@type": "oak:Input", "body": entry.body}
+        if entry.consumes:
+            node["consumes"] = [{"@id": reference} for reference in entry.consumes]
+        if entry.emits:
+            node["emits"] = [{"@id": reference} for reference in entry.emits]
+        return node
+    if isinstance(entry, Interface):
+        node = {
+            "@id": entry.id,
+            "@type": "oak:Interface",
+            "direction": entry.direction,
+            "schema": {"@id": entry.schema_id},
+        }
+        if entry.description is not None:
+            node["description"] = entry.description
+        return node
     raise TypeError(f"unsupported entry {type(entry).__name__}")
 
 
 def _node(node: Node) -> dict[str, object]:
     data: dict[str, object] = {"@id": node.id, "@type": "oak:Node"}
-    for field in ("instructions", "constants", "schemas", "state", "triggers", "processes"):
+    for field in (
+        "instructions",
+        "constants",
+        "schemas",
+        "state",
+        "triggers",
+        "processes",
+        "interfaces",
+    ):
         entries = getattr(node, field)
         if entries:
             data[field] = [_entry(entry) for entry in entries]
-    if node.input is not None:
-        data["input"] = _entry(node.input)
     if node.children:
         data["children"] = [_node(child) for child in node.children]
     return data

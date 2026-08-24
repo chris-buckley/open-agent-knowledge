@@ -10,8 +10,8 @@ from oak.node.parts import (
     AtLeast,
     AtMost,
     Constant,
-    Input,
     Instruction,
+    Interface,
     Lines,
     ListOf,
     MaxChars,
@@ -43,7 +43,7 @@ MODELS = (
     State,
     Trigger,
     Process,
-    Input,
+    Interface,
     Node,
     Root,
 )
@@ -60,7 +60,9 @@ def validate_examples() -> None:
             try:
                 model.model_validate(example)
             except Exception as error:
-                raise RuntimeError(f"{model.__name__} model example {index} is invalid: {error}") from error
+                raise RuntimeError(
+                    f"{model.__name__} model example {index} is invalid: {error}"
+                ) from error
 
         for name, field in model.model_fields.items():
             if not field.description:
@@ -68,10 +70,10 @@ def validate_examples() -> None:
             if not field.examples:
                 raise RuntimeError(f"{model.__name__}.{name} has no examples")
             annotation = (
-        Annotated[field.annotation, *field.metadata]
-        if field.metadata
-        else field.annotation
-    )
+                Annotated[field.annotation, *field.metadata]
+                if field.metadata
+                else field.annotation
+            )
             example_model = create_model(
                 f"{model.__name__}{name.title()}Example",
                 __base__=OakModel,

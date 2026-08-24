@@ -176,7 +176,9 @@ class Lines(ConstraintModel):
         if not isinstance(value, str):
             raise ValueError(f"{value!r} is not text")
         count = len(value.splitlines())
-        if (self.min is not None and count < self.min) or (self.max is not None and count > self.max):
+        if (self.min is not None and count < self.min) or (
+            self.max is not None and count > self.max
+        ):
             raise ValueError(f"{count} lines is outside {self.min} to {self.max}")
 
 
@@ -184,7 +186,9 @@ class ListOf(ConstraintModel):
     """The bound value is items of one datatype joined by one separator."""
 
     model_config = ConfigDict(
-        json_schema_extra={"examples": [{"kind": "list_of", "item": "integer", "separator": ", "}]}
+        json_schema_extra={
+            "examples": [{"kind": "list_of", "item": "integer", "separator": ", "}]
+        }
     )
 
     kind: Literal["list_of"] = Field(
@@ -403,7 +407,7 @@ def _error_message(error: ValueError | ValidationError) -> str:
 
 
 class Schema(Entry):
-    """One output contract: a template and one Where per placeholder."""
+    """One reusable information shape: a template and one Where per placeholder."""
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -437,11 +441,11 @@ class Schema(Entry):
     )
     purpose: NonBlankLine | None = Field(
         default=None,
-        description="What the output is for.",
+        description="What the information shape is for.",
         examples=["Generate a semantic multilevel numbered outline."],
     )
     template: NonEmptyText = Field(
-        description="The literal output with variable parts written as <PLACEHOLDER>.",
+        description="The literal shape with variable parts written as <PLACEHOLDER>.",
         examples=["## <OUTLINE_TITLE>\n\n<LEVEL_1_NUMBER> <STATEMENT>\n...\n"],
     )
     where: list[Where] = Field(
@@ -481,7 +485,10 @@ class Schema(Entry):
             raise PydanticCustomError(
                 "placeholder_where_mismatch",
                 "template and where placeholders differ; missing: {missing}; unused: {unused}",
-                {"missing": ", ".join(missing) or "none", "unused": ", ".join(unknown) or "none"},
+                {
+                    "missing": ", ".join(missing) or "none",
+                    "unused": ", ".join(unknown) or "none",
+                },
             )
 
         references = set().union(*(item.references for item in self.where)) if self.where else set()

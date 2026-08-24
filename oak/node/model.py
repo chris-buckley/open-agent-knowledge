@@ -7,7 +7,7 @@ from typing import Self
 from pydantic import ConfigDict, Field, model_validator
 
 from oak.base import OakModel
-from oak.node.parts import Constant, Input, Instruction, Process, Schema, State, Trigger
+from oak.node.parts import Constant, Instruction, Interface, Process, Schema, State, Trigger
 from oak.vocabulary import IriId
 
 
@@ -123,15 +123,19 @@ class Node(OakModel):
             ]
         ],
     )
-    input: Input | None = Field(
-        default=None,
-        description="The node input contract.",
+    interfaces: list[Interface] = Field(
+        default_factory=list,
+        description="The node interfaces in authored order.",
         examples=[
-            {
-                "part": "input",
-                "id": "oak:input/request",
-                "body": "A request to write OAK.",
-            }
+            [
+                {
+                    "part": "interfaces",
+                    "id": "oak:interface/request",
+                    "direction": "in",
+                    "schema": "oak:schema/request",
+                    "description": "The request supplied to the tree.",
+                }
+            ]
         ],
     )
     children: list[Node] = Field(
@@ -149,20 +153,43 @@ class Root(Node):
             "examples": [
                 {
                     "id": "oak:root",
+                    "schemas": [
+                        {
+                            "part": "schemas",
+                            "id": "oak:schema/knowledge",
+                            "template": "<KNOWLEDGE>",
+                            "where": [
+                                {
+                                    "placeholder": "KNOWLEDGE",
+                                    "constraints": [{"kind": "type", "of": "string"}],
+                                }
+                            ],
+                        }
+                    ],
                     "triggers": [
                         {
                             "part": "triggers",
-                            "id": "oak:trigger/write",
-                            "when": "The interpreter arrives to write OAK.",
-                            "process": "oak:process/write",
+                            "id": "oak:trigger/run",
+                            "when": "The interpreter arrives to transform knowledge.",
+                            "process": "oak:process/run",
                         }
                     ],
                     "processes": [
                         {
                             "part": "processes",
-                            "id": "oak:process/write",
-                            "name": "Write OAK",
-                            "steps": ["Write the knowledge."],
+                            "id": "oak:process/run",
+                            "name": "Transform knowledge",
+                            "consumes": ["oak:interface/knowledge"],
+                            "emits": ["oak:interface/knowledge"],
+                            "steps": ["Transform the knowledge."],
+                        }
+                    ],
+                    "interfaces": [
+                        {
+                            "part": "interfaces",
+                            "id": "oak:interface/knowledge",
+                            "direction": "inout",
+                            "schema": "oak:schema/knowledge",
                         }
                     ],
                 }

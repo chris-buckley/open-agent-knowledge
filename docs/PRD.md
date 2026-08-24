@@ -46,7 +46,7 @@ Practical applications include, but are not limited to:
 - Conversations
 - Shell simulations (bash, PowerShell) that run as state machines
 
-Knowledge can also run: a tree whose state, triggers, and processes form a state machine is the machine itself, and an interpreter runs it continuously, reading state, matching triggers, and applying processes. Such a tree may need no input from the outside at all; it simply runs.
+Knowledge can also run: a tree whose state, triggers, and processes form a state machine is the machine itself, and an interpreter runs it continuously, reading state, matching triggers, and applying processes. Such a tree may declare no interfaces; it simply runs.
 
 ---
 
@@ -55,12 +55,13 @@ Knowledge can also run: a tree whose state, triggers, and processes form a state
 1. Reject an empty (ID|text) field.
 2. Reject a process with no steps.
 3. Reject unknown fields.
-4. Reject an entry outside the seven parts (instructions|constants|schemas|state|triggers|processes|input).
+4. Reject an entry outside the seven parts (instructions|constants|schemas|state|triggers|processes|interfaces).
 5. Require one root node.
 6. Require each child of a node to be a node.
 7. Reject duplicate IDs across nodes and entries.
 8. Reject a (missing|wrong-type) reference target.
 9. Omit unset optional fields from the Pydantic dump.
+10. Reject a process interface reference that conflicts with the interface direction.
 
 ## Structure
 
@@ -70,9 +71,10 @@ Knowledge can also run: a tree whose state, triggers, and processes form a state
 - The consumer of the knowledge is named the interpreter, confirmed over actor on 2026-08-21.
 - OAK has four layers: the node, the render, the vocabulary, and the variant.
 - A node is one complete set of the seven parts.
-- The parts are instructions, constants, schemas, state, triggers, processes, and input.
+- The parts are instructions, constants, schemas, state, triggers, processes, and interfaces.
 - The set of parts is closed.
-- An entry is one item in a part: one instruction, one constant, one schema, one state value, one trigger, one process, or the input.
+- Each part holds zero or more entries.
+- An entry is one item in a part: one instruction, one constant, one schema, one state value, one trigger, one process, or one interface.
 - Each entry belongs to exactly one part, so every entry validates at authoring time.
 - A tree is nodes nested in nodes, and entries can reference each other.
 - Knowledge is authored as a nested tree, because nesting gives one root, one parent, and no containment cycle structurally.
@@ -163,8 +165,9 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 
 ## Schemas
 
-- Schemas hold every output contract an interpreter may render and every structure it may capture.
-- Define each output contract once in schemas, so each output is (verifiable|stable|machine-checkable).
+- Schemas define reusable information shapes.
+- A schema is independent of boundary, direction, and process.
+- Define each information shape once in schemas, so each use is (verifiable|stable|machine-checkable).
 - Give each schema an optional `name`, an optional `purpose`, one `template`, and one `where` list.
 - Store each template as one verbatim string.
 - Keep `where` as an ordered list.
@@ -215,18 +218,32 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 
 - Processes are exact ways to do a task.
 - Require each process step to use `NonBlankLine`.
+- Give each process a `consumes` list of interface `IriId` references.
+- Give each process an `emits` list of interface `IriId` references.
+- Require each process interface reference to target an interface entry.
+- Require a process to consume only an (in|inout) interface.
+- Require a process to emit only an (out|inout) interface.
 - A process can use constants.
 - A process can use schemas.
 - A process can put constant values into schemas.
 - A process can act on information inside the knowledge.
 - A process reached through a trigger gives the ordered steps for that entry.
+- Processes can run without interface references.
 - Processes do not have to be referenced by triggers.
 
-## Input
+## Interfaces
 
-- Input is the contract for what the knowledge expects to receive.
-- Input is defined before the knowledge is used.
-- Give input one `NonBlankLine` body.
+- An interface declares one information crossing at the tree boundary.
+- An in interface carries information into the tree.
+- An out interface carries information out of the tree.
+- An inout interface carries information in both directions.
+- Interfaces are optional.
+- Require each interface `direction` to be (in|out|inout).
+- Require each interface `schema` reference to use `IriId`.
+- Require each interface `schema` reference to target a schema entry.
+- Give each interface an optional `NonBlankLine` description of the crossing.
+- An interface description states boundary meaning that its schema does not state.
+- Interfaces do not define information shapes.
 
 ## Vocabulary
 
@@ -271,6 +288,7 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Build each regex pattern once at module import from its owning text syntax.
 - Build each reusable string shape with `Annotated[str, StringConstraints(pattern=...)]`.
 - Keep defaults and aliases at the field declaration and only constraints in the `Annotated` alias.
+- Author the interface schema reference as `schema` through a field alias.
 - Keep each token catalog at module scope, or annotate it `ClassVar` on a model.
 - Set `regex_engine` to `rust-regex` on the shared OAK base model in `oak/base.py`.
 - Pass each regex pattern as a string, because a compiled pattern forces `python-re`.
@@ -308,9 +326,9 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 
 #### Arrangement
 
-- The OAK render has seven parts in this order: instructions, constants, schemas, state, triggers, processes, input.
-- The OAK render has one arrangement, the seven parts in APS order, because OAK is the next iteration of APS.
-- OAK is the next iteration of APS; it keeps the APS part order and uses its own names.
+- The OAK render has seven parts in this order: instructions, constants, schemas, state, triggers, processes, interfaces.
+- The OAK render has one arrangement.
+- OAK is the next iteration of APS; it uses the APS part order with interfaces in the input position.
 - Each top-level part MUST appear at most once.
 - Every part appears, empty when the node has no entry for it.
 - Each part holds the node's own entries in authored order.
@@ -318,17 +336,19 @@ reporting,eu-west-1,DEFAULT_TZ,false,"EU, West"
 - Render each instruction or trigger as its text alone.
 - Render each constant name with `ConstantName`.
 - A process renders with an inner structure.
+- Render process interface references inside the process structure.
+- An interface renders with an inner structure.
 - Render each schema template followed by one blank line and `WHERE:`.
 - Preserve template whitespace in each text render.
 - Render `Where` entries in authored order.
 - Render each `Where` as one line: its delimited `Placeholder`, constraints joined by `; `, examples once in brackets as `(e.g. ...)`, then the description.
-- The OAK render loses node ids and keeps schema entry ids.
+- The OAK render loses node ids and keeps schema, process, and interface entry ids.
 
 #### XML
 
 ```yaml
 oak_parts:
-  order: [instructions, constants, schemas, state, triggers, processes, input]
+  order: [instructions, constants, schemas, state, triggers, processes, interfaces]
   tags:
     - <instructions>…</instructions>
     - <constants>…</constants>
@@ -336,7 +356,7 @@ oak_parts:
     - <state>…</state>
     - <triggers>…</triggers>
     - <processes>…</processes>
-    - <input>…</input>
+    - <interfaces>…</interfaces>
 ```
 
 - The xml variant uses XML-like tags as text delimiters.
@@ -368,10 +388,15 @@ oak_parts:
 ### JSON-LD
 
 - Render each schema id as `@id`.
-- Render `Schema`, `Where`, and each constraint kind as `@type`.
+- Render each interface id as `@id`.
+- Render each interface schema reference as `@id`.
+- Render each process (consumes|emits) reference as `@id`.
+- Render `Schema`, `Interface`, `Where`, and each constraint kind as `@type`.
 - Derive each `Where` `@id` as `{schema @id}/where/{Placeholder}`.
 - Render `where`, `constraints`, and `examples` as `@list` containers.
+- Render (interfaces|consumes|emits) as `@list` containers.
 - Define context terms for `template`, `where`, `placeholder`, `constraints`, `examples`, and each constraint field.
+- Define context terms for (direction|schema|consumes|emits|interfaces).
 - Render each `Placeholder` valued (at least|at most) value as the referenced `Where` `@id`.
 - Require the caller to supply the JSON-LD vocabulary IRI.
 - Define `oak` as the caller vocabulary prefix.
@@ -438,7 +463,7 @@ oak
 │   │       ├── state.py  # State
 │   │       ├── triggers.py  # Trigger
 │   │       ├── processes.py  # Process
-│   │       └── input.py  # Input
+│   │       └── interfaces.py  # Interface, Direction
 │   ├── vocabulary  # layer 3, how information is conveyed without ambiguity; one file provides one thing
 │   │   ├── __init__.py
 │   │   ├── syntax.py  # restricted text syntax tree; generates Rust regex, JSON Schema pattern, EBNF
@@ -469,7 +494,7 @@ oak
 │       ├── oak  # the default render
 │       │   ├── __init__.py
 │       │   ├── syntax.py  # WHERE wording, constraint text
-│       │   ├── arrangement.py  # seven parts in APS order
+│       │   ├── arrangement.py  # seven parts, interfaces in the APS input position
 │       │   ├── variants.py  # layer 4, xml tags or markdown fences
 │       │   └── styles.py  # authored, controlled ASD-STE100
 │       └── json_ld.py  # @id, @type, @list, the context

@@ -62,12 +62,14 @@ WHEN you infer repository rules, you MUST know these concepts:
 
 ```csv
 name,meaning
-operating context,"the complete information and rules supplied to an agent: instructions, constants, schemas, state, triggers, processes, input"
+schema,"one reusable information shape independent of boundary, direction, and process"
+interface,"one identified information crossing at a tree boundary; it selects a direction and a schema"
+operating context,"the complete information and rules supplied to an agent: instructions, constants, schemas, state, triggers, processes, interfaces"
 OAK,"Open Agent Knowledge, the universal knowledge standard this repository defines, formerly UAOC"
 interpreter,"the human, agent, or program that interprets OAK knowledge before using it"
 node,"one complete set of the seven parts; a tree is nodes nested in nodes"
-part,"one of the seven parts of a node (instructions|constants|schemas|state|triggers|processes|input); the set is closed"
-entry,"one item in a part: one instruction, one constant, one schema, one state value, one trigger, one process, or the input"
+part,"one of the seven parts of a node (instructions|constants|schemas|state|triggers|processes|interfaces); the set is closed"
+entry,"one item in a part: one instruction, one constant, one schema, one state value, one trigger, one process, or one interface"
 vocabulary,"how information is conveyed without ambiguity inside every render: text shapes, datatypes, units, time, and display forms; where the core schema and Rust regex checks run"
 variant,"the delimiters that group the parts in the OAK render (xml tags|markdown fences)"
 trigger,"the entry that signposts knowledge to the outside; it records why an interpreter enters and, when matched, guides which instructions, schemas, and processes apply"
@@ -183,7 +185,7 @@ WHEN you communicate with the user, you MUST:
 - Write as one human talks to another, overly simple and concise.
 - Use exact names, paths, and commands.
 - State uncertainty plainly.
-- Do not use em dashes, bold, or italics.
+- Do not use em dash, bold, or italics.
 - Do not use jargon. Defined repository concepts are permitted as the concept list grows.
 - Do not use filler, praise, or repetition.
 
