@@ -1,40 +1,93 @@
-"""ValueReference: `$` followed by a readable dotted path or local placeholder."""
+"""ValueReference: one readable target or process-local binding prefixed by $."""
 
+import re
 from typing import Annotated
 
-from pydantic import StringConstraints
+from pydantic import AfterValidator, StringConstraints
+from pydantic_core import PydanticCustomError
 
-from oak.vocabulary.syntax import Choice, LiteralText, Rule, Sequence
 from oak.vocabulary.text.placeholder import PLACEHOLDER_SYNTAX
 from oak.vocabulary.text.slug_id import SLUG_ID_SYNTAX
-
-VALUE_REFERENCE_SYNTAX = Rule(
-    "value_reference",
-    Sequence(
-        (
-            LiteralText("$"),
-            Choice(
-                (
-                    Sequence(
-                        (LiteralText("constant."), SLUG_ID_SYNTAX.reference())
-                    ),
-                    Sequence((LiteralText("state."), SLUG_ID_SYNTAX.reference())),
-                    Sequence(
-                        (
-                            LiteralText("interface."),
-                            SLUG_ID_SYNTAX.reference(),
-                            LiteralText("."),
-                            PLACEHOLDER_SYNTAX.reference(),
-                        )
-                    ),
-                    PLACEHOLDER_SYNTAX.reference(),
-                )
-            ),
-        )
-    ),
+from oak.vocabulary.text.target_path import (
+    TargetPath,
+    is_relative_target,
+    split_target,
 )
+
+VALUE_REFERENCE_PATTERN = (
+    r"^\$(?:"
+    + PLACEHOLDER_SYNTAX.body
+    + r"|(?:[^#\r\n]+\.oak\.md#)?constant\."
+    + SLUG_ID_SYNTAX.body
+    + r"|state\."
+    + SLUG_ID_SYNTAX.body
+    + r"|interface\."
+    + SLUG_ID_SYNTAX.body
+    + r"\."
+    + PLACEHOLDER_SYNTAX.body
+    + r")$"
+)
+VALUE_REFERENCE_EBNF = (
+    "value_reference = \"$\", "
+    "( placeholder | constant_target | state_target | "
+    "interface_value_path ) ;"
+)
+
+_BARE_RE = re.compile(
+    rf"^\${PLACEHOLDER_SYNTAX.body}$"
+)
+_STATE_RE = re.compile(
+    rf"^\$state\.{SLUG_ID_SYNTAX.body}$"
+)
+_INTERFACE_RE = re.compile(
+    rf"^\$interface\.{SLUG_ID_SYNTAX.body}\."
+    rf"{PLACEHOLDER_SYNTAX.body}$"
+)
+
+
+def _value_reference(value: str) -> str:
+    if _BARE_RE.fullmatch(value):
+        return value
+
+    if _STATE_RE.fullmatch(value):
+        return value
+
+    if _INTERFACE_RE.fullmatch(value):
+        return value
+
+    source = value[1:]
+
+    try:
+        TargetPath.__metadata__[-1].func(source)
+    except Exception:
+        raise PydanticCustomError(
+            "invalid_document_path",
+            "value reference is invalid",
+        ) from None
+
+    _, part, _ = split_target(source)
+    if part != "constant":
+        raise PydanticCustomError(
+            "wrong_reference_target_type",
+            "relative value reference must target a constant",
+        )
+
+    if (
+        is_relative_target(source)
+        or source.startswith("constant.")
+    ):
+        return value
+
+    raise PydanticCustomError(
+        "invalid_document_path",
+        "value reference is invalid",
+    )
+
 
 ValueReference = Annotated[
     str,
-    StringConstraints(pattern=VALUE_REFERENCE_SYNTAX.pattern),
+    StringConstraints(
+        pattern=VALUE_REFERENCE_PATTERN,
+    ),
+    AfterValidator(_value_reference),
 ]

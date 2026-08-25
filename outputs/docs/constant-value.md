@@ -1,40 +1,34 @@
-# ConstantValue
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+ConstantValue: One value read from a local or relative constant entry.
+~~~~
 
-One value read from a constant entry.
+~~~~constants
+example-1: "$constant.policy"
 
-## Examples
+grammar: TEXT<<
+surface_value_constant = ? $<CONSTANT> ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "source": "constant",
-    "constant": "policy"
-  }
-]
-```
+~~~~schemas
+~~~schema;id="value-constant";name="ConstantValue";purpose="One value read from a local or relative constant entry."
+$<CONSTANT>
 
-## Fields
+WHERE:
+- <CONSTANT> is string; is non-empty; The local or relative constant target to read..
+~~~
+~~~~
 
-### Source
+~~~~state
+~~~~
 
-`source`
+~~~~triggers
+~~~~
 
-The process value source discriminator.
+~~~~processes
+~~~~
 
-```json
-[
-  "constant"
-]
-```
-
-### Constant
-
-`constant`
-
-The constant entry to read.
-
-```json
-[
-  "policy"
-]
-```
+~~~~interfaces
+~~~~

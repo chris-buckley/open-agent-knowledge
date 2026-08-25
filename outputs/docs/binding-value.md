@@ -1,40 +1,34 @@
-# BindingValue
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+BindingValue: One value read from a visible process-local binding.
+~~~~
 
-One value read from a prior process-local binding.
+~~~~constants
+example-1: "$RESULT"
 
-## Examples
+grammar: TEXT<<
+surface_value_binding = ? $<BINDING> ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "source": "binding",
-    "binding": "RESULT"
-  }
-]
-```
+~~~~schemas
+~~~schema;id="value-binding";name="BindingValue";purpose="One value read from a visible process-local binding."
+$<BINDING>
 
-## Fields
+WHERE:
+- <BINDING> is string; is non-empty; The visible process-local binding to read..
+~~~
+~~~~
 
-### Source
+~~~~state
+~~~~
 
-`source`
+~~~~triggers
+~~~~
 
-The process value source discriminator.
+~~~~processes
+~~~~
 
-```json
-[
-  "binding"
-]
-```
-
-### Binding
-
-`binding`
-
-The visible process-local binding to read.
-
-```json
-[
-  "RESULT"
-]
-```
+~~~~interfaces
+~~~~

@@ -1,6 +1,5 @@
-oak_document = xml_node | markdown_node ;
-xml_node = xml_parts, { blank_line, "<node>", lf, xml_node, lf, "</node>" } ;
-xml_parts = xml_instructions_part, blank_line, xml_constants_part, blank_line, xml_schemas_part, blank_line, xml_state_part, blank_line, xml_triggers_part, blank_line, xml_processes_part, blank_line, xml_interfaces_part ;
+oak_document = xml_document | markdown_document ;
+xml_document = xml_instructions_part, blank_line, xml_constants_part, blank_line, xml_schemas_part, blank_line, xml_state_part, blank_line, xml_triggers_part, blank_line, xml_processes_part, blank_line, xml_interfaces_part ;
 xml_instructions_part = "<instructions>", lf, text_body, "</instructions>" ;
 xml_constants_part = "<constants>", lf, text_body, "</constants>" ;
 xml_schemas_part = "<schemas>", lf, text_body, "</schemas>" ;
@@ -8,8 +7,7 @@ xml_state_part = "<state>", lf, text_body, "</state>" ;
 xml_triggers_part = "<triggers>", lf, text_body, "</triggers>" ;
 xml_processes_part = "<processes>", lf, text_body, "</processes>" ;
 xml_interfaces_part = "<interfaces>", lf, text_body, "</interfaces>" ;
-markdown_node = markdown_parts, { blank_line, markdown_node_block } ;
-markdown_parts = markdown_instructions_part, blank_line, markdown_constants_part, blank_line, markdown_schemas_part, blank_line, markdown_state_part, blank_line, markdown_triggers_part, blank_line, markdown_processes_part, blank_line, markdown_interfaces_part ;
+markdown_document = markdown_instructions_part, blank_line, markdown_constants_part, blank_line, markdown_schemas_part, blank_line, markdown_state_part, blank_line, markdown_triggers_part, blank_line, markdown_processes_part, blank_line, markdown_interfaces_part ;
 markdown_instructions_part = "~~~~instructions", lf, text_body, "~~~~" ;
 markdown_constants_part = "~~~~constants", lf, text_body, "~~~~" ;
 markdown_schemas_part = "~~~~schemas", lf, text_body, "~~~~" ;
@@ -17,8 +15,9 @@ markdown_state_part = "~~~~state", lf, text_body, "~~~~" ;
 markdown_triggers_part = "~~~~triggers", lf, text_body, "~~~~" ;
 markdown_processes_part = "~~~~processes", lf, text_body, "~~~~" ;
 markdown_interfaces_part = "~~~~interfaces", lf, text_body, "~~~~" ;
-markdown_node_block = markdown_node_fence, "node", lf, markdown_node, lf, markdown_node_fence ;
-markdown_node_fence = "~~~~~", { "~" } ;
+xml_body_entry = "<", entry_tag, attributes, ">", lf, text_body, "</", entry_tag, ">" ;
+markdown_body_entry = "~~~", entry_tag, markdown_attributes, lf, text_body, "~~~" ;
+entry_tag = "schema" | "trigger" | "process" | "interface" ;
 constant = inline_constant | text_constant | json_constant | csv_constant | yaml_constant ;
 inline_constant = slug_id, ": ", json_value ;
 text_constant = slug_id, ": TEXT<<", lf, text_body, ">>" ;
@@ -28,6 +27,8 @@ yaml_constant = slug_id, ": YAML<<", lf, yaml_body, lf, ">>" ;
 json_value = ? one JSON value ? ;
 csv_body = ? one CSV header and one or more data rows ? ;
 yaml_body = ? one YAML value ? ;
+attributes = ? zero or more XML-like string attributes ? ;
+markdown_attributes = ? zero or more semicolon JSON-string attributes ? ;
 text_body = { text_line, lf } ;
 text_line = ? any character except CR or LF ? ;
 blank_line = lf, lf ;
@@ -37,6 +38,118 @@ slug_id = ? [a-z] ?, { ? [a-z0-9] ? }, { "-", ? [a-z0-9] ?, { ? [a-z0-9] ? } } ;
 non_blank_line = { ? [^\r\n] ? }, ? [^\s] ?, { ? [^\r\n] ? } ;
 process_name = ? [A-Z] ?, { ? [A-Za-z0-9] ? }, { "-", ? [A-Za-z0-9] ?, { ? [A-Za-z0-9] ? } }, " ", ? [A-Za-z0-9] ?, { ? [A-Za-z0-9] ? }, { "-", ? [A-Za-z0-9] ?, { ? [A-Za-z0-9] ? } } ;
 placeholder = ? [A-Z] ?, { ? [A-Z0-9] ? }, { "_", ? [A-Z0-9] ?, { ? [A-Z0-9] ? } } ;
-dotted_path = ( "constant.", slug_id | "state.", slug_id | "process.", slug_id | "interface.", slug_id | "interface.", slug_id, ".", placeholder ) ;
-value_reference = "$", ( "constant.", slug_id | "state.", slug_id | "interface.", slug_id, ".", placeholder | placeholder ) ;
+dotted_path = ( "constant" | "schema" | "state" | "process" | "interface" ), ".", slug_id, [ ".", placeholder ] ;
+value_reference = "$", ( placeholder | constant_target | state_target | interface_value_path ) ;
+entry_part = "instruction" | "constant" | "schema" | "state" | "trigger" | "process" | "interface" ;
+entry_path = entry_part, ".", slug_id ;
+relative_document_path = ? one relative POSIX path ending in .oak.md ? ;
+target_path = entry_path | relative_document_path, "#", entry_path ;
 regex_pattern = "^", { ( "." | "[", [ "^" ], ( ? [^\r\n\\\[\]\-&~] ?, "-", ? [^\r\n\\\[\]\-&~] ? | ( "\\", ? [\\.^$|?*+(){}\[\]/-] ? | "\\", ? [nrt] ? ) | ? [^\r\n\\\[\]\-&~] ? ), { ( ? [^\r\n\\\[\]\-&~] ?, "-", ? [^\r\n\\\[\]\-&~] ? | ( "\\", ? [\\.^$|?*+(){}\[\]/-] ? | "\\", ? [nrt] ? ) | ? [^\r\n\\\[\]\-&~] ? ) }, "]" | "\\", ? [\\.^$|?*+(){}\[\]/-] ? | "\\", ? [nrt] ? | ? [^\r\n\\.^$*+?{}\[\]()|] ? ), [ ( "*" | "+" | "?" | "{", ? [0-9] ?, { ? [0-9] ? }, "}" | "{", ? [0-9] ?, { ? [0-9] ? }, ",}" | "{", ? [0-9] ?, { ? [0-9] ? }, ",", ? [0-9] ?, { ? [0-9] ? }, "}" ) ] }, "$" ;
+
+surface_constraint_type = ? is <OF> ? ;
+surface_constraint_one_of = ? is one of <VALUES> ? ;
+surface_constraint_regex = ? matches `<PATTERN>` ? ;
+surface_constraint_non_empty = ? is non-empty ? ;
+surface_constraint_max_chars = ? is at most <N> characters ? ;
+surface_constraint_lines = ? has <MIN> to <MAX> lines ? ;
+surface_constraint_list_of = ? is a list of <ITEM> joined by `<SEPARATOR>` ? ;
+surface_constraint_at_least = ? is at least <VALUE> ? ;
+surface_constraint_at_most = ? is at most <VALUE> ? ;
+surface_where = ? - <PLACEHOLDER> <CONSTRAINTS> <EXAMPLES> <DESCRIPTION>. ? ;
+surface_instruction = ? <BODY> ? ;
+surface_constant_inline = ? <ID>: <VALUE> ? ;
+surface_constant_text = ? <ID>: TEXT<<
+<VALUE>
+>> ? ;
+surface_constant_json = ? <ID>: JSON<<
+<VALUE>
+>> ? ;
+surface_constant_csv = ? <ID>: CSV<<
+<VALUE>
+>> ? ;
+surface_constant_yaml = ? <ID>: YAML<<
+<VALUE>
+>> ? ;
+surface_schema = ? <schema id="<ID>" name="<NAME>" purpose="<PURPOSE>">
+<TEMPLATE>
+
+WHERE:
+<WHERE>
+</schema> ? ;
+surface_state = ? <ID>: <VALUE> ? ;
+surface_value_literal = ? <VALUE> ? ;
+surface_value_constant = ? $<CONSTANT> ? ;
+surface_value_state = ? $<STATE> ? ;
+surface_value_interface = ? $<INTERFACE>.<PLACEHOLDER> ? ;
+surface_value_binding = ? $<BINDING> ? ;
+surface_value_binding_line = ? <PLACEHOLDER> = <VALUE> ? ;
+surface_condition_compare = ? <LEFT> <OPERATOR> <RIGHT> ? ;
+surface_condition_all = ? ALL:
+  <CONDITIONS> ? ;
+surface_condition_any = ? ANY:
+  <CONDITIONS> ? ;
+surface_condition_not = ? NOT:
+  <CONDITION> ? ;
+surface_act_native = ? ACT <INSTRUCTION>
+  INPUTS:
+    <INPUTS>
+  OUTPUTS: <OUTPUTS> ? ;
+surface_act_tool = ? ACT TOOL "<TOOL>": <INSTRUCTION>
+  INPUTS:
+    <INPUTS>
+  OUTPUTS: <OUTPUTS> ? ;
+surface_step_set = ? SET <STATE> = <VALUE> ? ;
+surface_step_emit = ? EMIT <INTERFACE>:
+  <BINDINGS> ? ;
+surface_step_if = ? IF <CONDITION>:
+THEN:
+  <THEN>
+ELSE:
+  <OTHERWISE> ? ;
+surface_step_call = ? CALL <PROCESS> ? ;
+surface_step_fail = ? FAIL <MESSAGE> ? ;
+surface_step_assert = ? ASSERT <CONDITION>
+MESSAGE <MESSAGE> ? ;
+surface_step_foreach = ? FOREACH <BINDING> IN <VALUE>:
+  <STEPS> ? ;
+surface_step_par = ? PAR:
+  <STEPS> ? ;
+surface_step_join = ? JOIN ? ;
+surface_process = ? <process id="<ID>" name="<NAME>">
+<STEPS>
+</process> ? ;
+surface_trigger = ? <trigger id="<ID>">
+GIVEN: <GIVEN>
+WHEN: <WHEN>
+THEN: <THEN>
+</trigger> ? ;
+surface_interface = ? <interface id="<ID>" direction="<DIRECTION>" schema="<SCHEMA_ID>">
+<DESCRIPTION>
+</interface> ? ;
+surface_node = ? <instructions>
+<INSTRUCTIONS>
+</instructions>
+
+<constants>
+<CONSTANTS>
+</constants>
+
+<schemas>
+<SCHEMAS>
+</schemas>
+
+<state>
+<STATE>
+</state>
+
+<triggers>
+<TRIGGERS>
+</triggers>
+
+<processes>
+<PROCESSES>
+</processes>
+
+<interfaces>
+<INTERFACES>
+</interfaces> ? ;

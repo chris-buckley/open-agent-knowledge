@@ -1,27 +1,36 @@
-"""Root graph checks for ids, typed references, guards, and process flow."""
+"""Standalone checks for ids, references, guards, tools, and process flow."""
+
+from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from itertools import combinations
-from typing import TypeVar
+from typing import Protocol, TypeVar
 
 from pydantic_core import PydanticCustomError
 
 from oak.base import Entry
-from oak.node.model import Node
 from oak.node.parts import (
     Act,
+    All,
+    Any,
+    Assert,
     BindingValue,
     Call,
+    Compare,
     Condition,
     Constant,
     ConstantValue,
     Emit,
     Fail,
+    Foreach,
     If,
     Interface,
     InterfaceValue,
+    Join,
     LiteralValue,
+    Not,
+    Par,
     Process,
     Schema,
     SchemaBindingError,
@@ -31,21 +40,31 @@ from oak.node.parts import (
     Step,
     Trigger,
     Value,
+    condition_values,
+    step_values,
 )
+from oak.vocabulary.text.target_path import (
+    is_relative_target,
+    target_id,
+)
+
+if False:
+    from oak.node.model import Node
 
 TargetEntry = TypeVar("TargetEntry", bound=Entry)
 _STATIC_MISSING = object()
 
 
-def iter_nodes(root: Node) -> Iterator[Node]:
-    """Yield the root and every child node in authored order."""
-    yield root
-    for child in root.children:
-        yield from iter_nodes(child)
+class ToolContractLike(Protocol):
+    """The tool contract fields used by graph validation."""
+
+    inputs: frozenset[str]
+    outputs: frozenset[str]
+    parallel: bool
 
 
 def iter_entries(node: Node) -> Iterator[Entry]:
-    """Yield one node's entries in OAK part order."""
+    """Yield one document's entries in OAK part order."""
     yield from node.instructions
     yield from node.constants
     yield from node.schemas
@@ -55,47 +74,88 @@ def iter_entries(node: Node) -> Iterator[Entry]:
     yield from node.interfaces
 
 
+def entry_registry(node: Node) -> dict[str, Entry]:
+    """Return one document's unique local entry registry."""
+    registry: dict[str, Entry] = {}
+    duplicates: set[str] = set()
+
+    for entry in iter_entries(node):
+        if entry.id in registry:
+            duplicates.add(entry.id)
+        else:
+            registry[entry.id] = entry
+
+    if duplicates:
+        raise PydanticCustomError(
+            "duplicate_id",
+            "document repeats ids: {ids}",
+            {
+                "ids": ", ".join(
+                    sorted(duplicates)
+                )
+            },
+        )
+
+    return registry
+
+
 def _target(
-    registry: dict[str, Node | Entry],
+    registry: Mapping[str, Entry],
     source: Entry,
-    target_id: str,
+    path: str,
     expected: type[TargetEntry],
-) -> TargetEntry:
+) -> TargetEntry | None:
+    if is_relative_target(path):
+        return None
+
+    identifier = target_id(path)
+    target = registry.get(identifier)
     source_type = type(source).__name__.lower()
     target_type = expected.__name__.lower()
-    target = registry.get(target_id)
 
     if target is None:
         raise PydanticCustomError(
             "missing_reference_target",
-            "{source_type} {source} targets missing {target_type} {target}",
+            (
+                "{source_type} {source} targets missing "
+                "{target_type} {target}"
+            ),
             {
                 "source_type": source_type,
                 "source": source.id,
                 "target_type": target_type,
-                "target": target_id,
+                "target": path,
             },
         )
 
     if not isinstance(target, expected):
         raise PydanticCustomError(
             "wrong_reference_target_type",
-            "{source_type} {source} targets {target}, which is not a {target_type}",
+            (
+                "{source_type} {source} targets {target}, "
+                "which is not a {target_type}"
+            ),
             {
                 "source_type": source_type,
                 "source": source.id,
-                "target": target_id,
+                "target": path,
                 "target_type": target_type,
             },
         )
+
     return target
 
 
 def _interface_schema(
-    registry: dict[str, Node | Entry],
+    registry: Mapping[str, Entry],
     interface: Interface,
-) -> Schema:
-    return _target(registry, interface, interface.schema_id, Schema)
+) -> Schema | None:
+    return _target(
+        registry,
+        interface,
+        interface.schema_id,
+        Schema,
+    )
 
 
 def _direction_error(
@@ -105,7 +165,10 @@ def _direction_error(
 ) -> None:
     raise PydanticCustomError(
         "interface_direction_mismatch",
-        "process {process} cannot {action} interface {interface} with direction {direction}",
+        (
+            "process {process} cannot {action} interface "
+            "{interface} with direction {direction}"
+        ),
         {
             "process": process.id,
             "action": action,
@@ -116,73 +179,88 @@ def _direction_error(
 
 
 def _validate_value(
-    registry: dict[str, Node | Entry],
-    process: Process,
-    value: Value,
-) -> None:
-    if isinstance(value, ConstantValue):
-        _target(registry, process, value.constant, Constant)
-    elif isinstance(value, StateValue):
-        _target(registry, process, value.state, State)
-    elif isinstance(value, InterfaceValue):
-        interface = _target(
-            registry,
-            process,
-            value.interface,
-            Interface,
-        )
-        if interface.direction not in ("in", "inout"):
-            _direction_error(process, "read", interface)
-
-        schema = _interface_schema(registry, interface)
-        if value.placeholder not in schema.placeholders:
-            raise PydanticCustomError(
-                "unknown_interface_placeholder",
-                "process {process} reads placeholder {placeholder} absent from interface {interface} schema {schema}",
-                {
-                    "process": process.id,
-                    "placeholder": value.placeholder,
-                    "interface": interface.id,
-                    "schema": schema.id,
-                },
-            )
-
-
-def _validate_guard_value(
-    registry: dict[str, Node | Entry],
-    trigger: Trigger,
-    value: Value,
-) -> None:
-    if isinstance(value, ConstantValue):
-        _target(registry, trigger, value.constant, Constant)
-    elif isinstance(value, StateValue):
-        _target(registry, trigger, value.state, State)
-    elif isinstance(value, (InterfaceValue, BindingValue)):
-        raise PydanticCustomError(
-            "invalid_trigger_guard_value",
-            "trigger {trigger} guard cannot read an interface or local binding",
-            {"trigger": trigger.id},
-        )
-
-
-def _static_value(
-    registry: dict[str, Node | Entry],
+    registry: Mapping[str, Entry],
     source: Entry,
     value: Value,
-) -> object:
-    if isinstance(value, LiteralValue):
-        return value.value
+) -> None:
     if isinstance(value, ConstantValue):
-        return _target(
+        _target(
             registry,
             source,
             value.constant,
             Constant,
-        ).value
-    return _STATIC_MISSING
+        )
+        return
+
+    if isinstance(value, StateValue):
+        _target(
+            registry,
+            source,
+            value.state,
+            State,
+        )
+        return
+
+    if not isinstance(value, InterfaceValue):
+        return
+
+    interface = _target(
+        registry,
+        source,
+        value.interface,
+        Interface,
+    )
+    if interface is None:
+        return
+
+    if interface.direction not in ("in", "inout"):
+        if isinstance(source, Process):
+            _direction_error(
+                source,
+                "read",
+                interface,
+            )
+        else:
+            raise PydanticCustomError(
+                "interface_direction_mismatch",
+                (
+                    "{source} cannot read interface {interface} "
+                    "with direction {direction}"
+                ),
+                {
+                    "source": source.id,
+                    "interface": interface.id,
+                    "direction": interface.direction,
+                },
+            )
+
+    schema = _interface_schema(
+        registry,
+        interface,
+    )
+    if (
+        schema is not None
+        and value.placeholder not in schema.placeholders
+    ):
+        raise PydanticCustomError(
+            "unknown_interface_placeholder",
+            (
+                "{source} reads placeholder {placeholder} absent "
+                "from interface {interface} schema {schema}"
+            ),
+            {
+                "source": source.id,
+                "placeholder": value.placeholder,
+                "interface": interface.id,
+                "schema": schema.id,
+            },
+        )
 
 
-def _json_equal(left: object, right: object) -> bool:
+def _json_equal(
+    left: object,
+    right: object,
+) -> bool:
     if isinstance(left, bool) or isinstance(right, bool):
         return (
             isinstance(left, bool)
@@ -190,33 +268,75 @@ def _json_equal(left: object, right: object) -> bool:
             and left == right
         )
 
-    if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+    if (
+        isinstance(left, (int, float))
+        and isinstance(right, (int, float))
+    ):
         return left == right
 
     if isinstance(left, list) and isinstance(right, list):
-        return len(left) == len(right) and all(
-            _json_equal(left_item, right_item)
-            for left_item, right_item in zip(left, right, strict=True)
+        return (
+            len(left) == len(right)
+            and all(
+                _json_equal(
+                    left_item,
+                    right_item,
+                )
+                for left_item, right_item in zip(
+                    left,
+                    right,
+                    strict=True,
+                )
+            )
         )
 
     if isinstance(left, dict) and isinstance(right, dict):
-        return left.keys() == right.keys() and all(
-            _json_equal(left[key], right[key])
-            for key in left
+        return (
+            left.keys() == right.keys()
+            and all(
+                _json_equal(
+                    left[key],
+                    right[key],
+                )
+                for key in left
+            )
         )
 
-    return type(left) is type(right) and left == right
+    return (
+        type(left) is type(right)
+        and left == right
+    )
 
 
-def _condition_result(
-    registry: dict[str, Node | Entry],
-    process: Process,
-    step: If,
-) -> bool | None:
-    left = step.condition.left
-    right = step.condition.right
+def _static_value(
+    registry: Mapping[str, Entry],
+    source: Entry,
+    value: Value,
+) -> object:
+    if isinstance(value, LiteralValue):
+        return value.value
 
-    if (
+    if isinstance(value, ConstantValue):
+        constant = _target(
+            registry,
+            source,
+            value.constant,
+            Constant,
+        )
+        return (
+            constant.value
+            if constant is not None
+            else _STATIC_MISSING
+        )
+
+    return _STATIC_MISSING
+
+
+def _same_dynamic_value(
+    left: Value,
+    right: Value,
+) -> bool:
+    return (
         type(left) is type(right)
         and isinstance(
             left,
@@ -228,125 +348,223 @@ def _condition_result(
             ),
         )
         and left == right
-    ):
-        equal = True
-    else:
-        left_value = _static_value(registry, process, left)
-        right_value = _static_value(registry, process, right)
-        if (
-            left_value is _STATIC_MISSING
-            or right_value is _STATIC_MISSING
-        ):
-            return None
-        equal = _json_equal(left_value, right_value)
-
-    return (
-        equal
-        if step.condition.operator == "equals"
-        else not equal
     )
 
 
-def _guard_constraint(
-    registry: dict[str, Node | Entry],
-    trigger: Trigger,
-    condition: Condition,
-) -> tuple[str, str, object] | None:
-    left = condition.left
-    right = condition.right
+def _ordered_pair(
+    left: object,
+    right: object,
+) -> tuple[int | float | str, int | float | str] | None:
+    if (
+        isinstance(left, bool)
+        or isinstance(right, bool)
+    ):
+        return None
 
-    if isinstance(left, StateValue):
-        static = _static_value(registry, trigger, right)
-        if static is not _STATIC_MISSING:
-            return left.state, condition.operator, static
+    if (
+        isinstance(left, (int, float))
+        and isinstance(right, (int, float))
+    ):
+        return left, right
 
-    if isinstance(right, StateValue):
-        static = _static_value(registry, trigger, left)
-        if static is not _STATIC_MISSING:
-            return right.state, condition.operator, static
+    if isinstance(left, str) and isinstance(right, str):
+        return left, right
 
     return None
 
 
-def _guards_disjoint(
-    registry: dict[str, Node | Entry],
-    left: Trigger,
-    right: Trigger,
+def _compare_static(
+    operator: str,
+    left: object,
+    right: object,
 ) -> bool:
-    if left.given is None or right.given is None:
-        return False
-
-    left_constraint = _guard_constraint(
-        registry,
-        left,
-        left.given,
-    )
-    right_constraint = _guard_constraint(
-        registry,
-        right,
-        right.given,
-    )
-    if left_constraint is None or right_constraint is None:
-        return False
-
-    left_state, left_operator, left_value = left_constraint
-    right_state, right_operator, right_value = right_constraint
-    if left_state != right_state:
-        return False
-
-    equal_values = _json_equal(left_value, right_value)
-    if left_operator == right_operator == "equals":
-        return not equal_values
-
-    return left_operator != right_operator and equal_values
-
-
-def _validate_trigger_guards(
-    registry: dict[str, Node | Entry],
-    triggers: list[Trigger],
-) -> None:
-    by_when: dict[str, list[Trigger]] = defaultdict(list)
-
-    for trigger in triggers:
-        _target(
-            registry,
-            trigger,
-            trigger.process,
-            Process,
+    if operator == "equals":
+        return _json_equal(
+            left,
+            right,
         )
-        if trigger.given is not None:
-            _validate_guard_value(
-                registry,
-                trigger,
-                trigger.given.left,
-            )
-            _validate_guard_value(
-                registry,
-                trigger,
-                trigger.given.right,
-            )
-        by_when[trigger.when].append(trigger)
 
-    for when, group in by_when.items():
-        for left, right in combinations(group, 2):
-            if not _guards_disjoint(registry, left, right):
-                raise PydanticCustomError(
-                    "overlapping_trigger_guards",
-                    "triggers {left} and {right} share when {when} without provably disjoint guards",
-                    {
-                        "left": left.id,
-                        "right": right.id,
-                        "when": when,
-                    },
+    if operator == "not_equals":
+        return not _json_equal(
+            left,
+            right,
+        )
+
+    pair = _ordered_pair(
+        left,
+        right,
+    )
+    if pair is None:
+        raise PydanticCustomError(
+            "ordered_comparison_type_mismatch",
+            (
+                "ordered comparison needs two numbers "
+                "or two strings"
+            ),
+        )
+
+    ordered_left, ordered_right = pair
+
+    if operator == "less_than":
+        return ordered_left < ordered_right
+
+    if operator == "less_than_or_equal":
+        return ordered_left <= ordered_right
+
+    if operator == "greater_than":
+        return ordered_left > ordered_right
+
+    if operator == "greater_than_or_equal":
+        return ordered_left >= ordered_right
+
+    raise TypeError(
+        f"unsupported comparison operator {operator}"
+    )
+
+
+def condition_result(
+    registry: Mapping[str, Entry],
+    source: Entry,
+    condition: Condition,
+) -> bool | None:
+    """Return one statically known condition result when possible."""
+    if isinstance(condition, Compare):
+        if _same_dynamic_value(
+            condition.left,
+            condition.right,
+        ):
+            equal = True
+            return (
+                equal
+                if condition.operator == "equals"
+                else (
+                    not equal
+                    if condition.operator == "not_equals"
+                    else None
                 )
+            )
+
+        left = _static_value(
+            registry,
+            source,
+            condition.left,
+        )
+        right = _static_value(
+            registry,
+            source,
+            condition.right,
+        )
+
+        if (
+            left is _STATIC_MISSING
+            or right is _STATIC_MISSING
+        ):
+            return None
+
+        return _compare_static(
+            condition.operator,
+            left,
+            right,
+        )
+
+    if isinstance(condition, All):
+        unknown = False
+
+        for child in condition.conditions:
+            result = condition_result(
+                registry,
+                source,
+                child,
+            )
+            if result is False:
+                return False
+            if result is None:
+                unknown = True
+
+        return None if unknown else True
+
+    if isinstance(condition, Any):
+        unknown = False
+
+        for child in condition.conditions:
+            result = condition_result(
+                registry,
+                source,
+                child,
+            )
+            if result is True:
+                return True
+            if result is None:
+                unknown = True
+
+        return None if unknown else False
+
+    if isinstance(condition, Not):
+        result = condition_result(
+            registry,
+            source,
+            condition.condition,
+        )
+        return (
+            None
+            if result is None
+            else not result
+        )
+
+    raise TypeError(
+        f"unsupported condition {type(condition).__name__}"
+    )
+
+
+def _validate_condition(
+    registry: Mapping[str, Entry],
+    source: Entry,
+    condition: Condition,
+) -> None:
+    for value in condition_values(condition):
+        _validate_value(
+            registry,
+            source,
+            value,
+        )
+
+    if not isinstance(condition, Compare):
+        return
+
+    left = _static_value(
+        registry,
+        source,
+        condition.left,
+    )
+    right = _static_value(
+        registry,
+        source,
+        condition.right,
+    )
+
+    if (
+        condition.operator
+        not in ("equals", "not_equals")
+        and left is not _STATIC_MISSING
+        and right is not _STATIC_MISSING
+        and _ordered_pair(left, right) is None
+    ):
+        raise PydanticCustomError(
+            "ordered_comparison_type_mismatch",
+            (
+                "ordered comparison needs two numbers "
+                "or two strings"
+            ),
+        )
 
 
 def _static_emit_values(
-    registry: dict[str, Node | Entry],
+    registry: Mapping[str, Entry],
     process: Process,
     step: Emit,
 ) -> dict[str, object] | None:
     values: dict[str, object] = {}
+
     for binding in step.bindings:
         value = _static_value(
             registry,
@@ -356,75 +574,90 @@ def _static_emit_values(
         if value is _STATIC_MISSING:
             return None
         values[binding.placeholder] = value
+
     return values
 
 
 def _validate_steps(
-    registry: dict[str, Node | Entry],
+    registry: Mapping[str, Entry],
     process: Process,
     steps: list[Step],
 ) -> None:
     for step in steps:
-        if isinstance(step, Act):
-            for binding in step.inputs:
-                _validate_value(
-                    registry,
-                    process,
-                    binding.value,
-                )
+        for value in step_values(step):
+            _validate_value(
+                registry,
+                process,
+                value,
+            )
 
-        elif isinstance(step, Set):
+        if isinstance(step, Set):
             _target(
                 registry,
                 process,
                 step.state,
                 State,
             )
-            _validate_value(
-                registry,
-                process,
-                step.value,
-            )
+            continue
 
-        elif isinstance(step, Emit):
+        if isinstance(step, Emit):
             interface = _target(
                 registry,
                 process,
                 step.interface,
                 Interface,
             )
-            if interface.direction not in ("out", "inout"):
-                _direction_error(process, "emit", interface)
+            if interface is None:
+                continue
 
-            schema = _interface_schema(registry, interface)
+            if interface.direction not in ("out", "inout"):
+                _direction_error(
+                    process,
+                    "emit",
+                    interface,
+                )
+
+            schema = _interface_schema(
+                registry,
+                interface,
+            )
+            if schema is None:
+                continue
+
             authored = {
                 binding.placeholder
                 for binding in step.bindings
             }
             expected = schema.placeholders
+
             if authored != expected:
                 raise PydanticCustomError(
                     "emit_schema_binding_mismatch",
-                    "process {process} emit bindings differ from interface {interface} schema; missing: {missing}; unused: {unused}",
+                    (
+                        "process {process} emit bindings differ "
+                        "from interface {interface} schema; "
+                        "missing: {missing}; unused: {unused}"
+                    ),
                     {
                         "process": process.id,
                         "interface": interface.id,
                         "missing": (
-                            ", ".join(sorted(expected - authored))
+                            ", ".join(
+                                sorted(
+                                    expected - authored
+                                )
+                            )
                             or "none"
                         ),
                         "unused": (
-                            ", ".join(sorted(authored - expected))
+                            ", ".join(
+                                sorted(
+                                    authored - expected
+                                )
+                            )
                             or "none"
                         ),
                     },
-                )
-
-            for binding in step.bindings:
-                _validate_value(
-                    registry,
-                    process,
-                    binding.value,
                 )
 
             static_values = _static_emit_values(
@@ -432,48 +665,65 @@ def _validate_steps(
                 process,
                 step,
             )
-            if static_values is not None:
-                try:
-                    schema.bind(static_values)
-                except SchemaBindingError as error:
-                    raise PydanticCustomError(
-                        "invalid_static_schema_binding",
-                        "process {process} emits an invalid static binding through interface {interface}: {reason}",
-                        {
-                            "process": process.id,
-                            "interface": interface.id,
-                            "reason": str(error),
-                        },
-                    ) from None
+            if static_values is None:
+                continue
 
-        elif isinstance(step, If):
-            _validate_value(
+            try:
+                schema.bind(static_values)
+            except SchemaBindingError as error:
+                raise PydanticCustomError(
+                    "invalid_static_schema_binding",
+                    (
+                        "process {process} emits an invalid "
+                        "static binding through interface "
+                        "{interface}: {reason}"
+                    ),
+                    {
+                        "process": process.id,
+                        "interface": interface.id,
+                        "reason": str(error),
+                    },
+                ) from None
+
+            continue
+
+        if isinstance(step, If):
+            _validate_condition(
                 registry,
                 process,
-                step.condition.left,
+                step.condition,
             )
-            _validate_value(
+            result = condition_result(
                 registry,
                 process,
-                step.condition.right,
+                step.condition,
             )
 
-            result = _condition_result(
-                registry,
-                process,
-                step,
-            )
             if result is False:
                 raise PydanticCustomError(
                     "dead_process_branch",
-                    "process {process} has an if then branch that cannot run",
-                    {"process": process.id},
+                    (
+                        "process {process} has an IF THEN "
+                        "branch that cannot run"
+                    ),
+                    {
+                        "process": process.id,
+                    },
                 )
-            if result is True and step.otherwise is not None:
+
+            if (
+                result is True
+                and step.otherwise is not None
+            ):
                 raise PydanticCustomError(
                     "dead_process_branch",
-                    "process {process} has an if otherwise branch that cannot run",
-                    {"process": process.id},
+                    (
+                        "process {process} has an ELSE "
+                        "branch that cannot run"
+                    ),
+                    {
+                        "process": process.id,
+                    },
                 )
 
             _validate_steps(
@@ -488,36 +738,125 @@ def _validate_steps(
                     step.otherwise,
                 )
 
-        elif isinstance(step, Call):
+            continue
+
+        if isinstance(step, Assert):
+            _validate_condition(
+                registry,
+                process,
+                step.condition,
+            )
+            result = condition_result(
+                registry,
+                process,
+                step.condition,
+            )
+
+            if result is False:
+                raise PydanticCustomError(
+                    "assertion_always_fails",
+                    (
+                        "process {process} has an assertion "
+                        "that is statically false"
+                    ),
+                    {
+                        "process": process.id,
+                    },
+                )
+
+            if result is True:
+                raise PydanticCustomError(
+                    "redundant_assertion",
+                    (
+                        "process {process} has an assertion "
+                        "that is statically true"
+                    ),
+                    {
+                        "process": process.id,
+                    },
+                )
+
+            continue
+
+        if isinstance(step, Foreach):
+            _validate_steps(
+                registry,
+                process,
+                step.steps,
+            )
+            continue
+
+        if isinstance(step, Par):
+            for child in step.steps:
+                if isinstance(child, Act):
+                    for binding in child.inputs:
+                        _validate_value(
+                            registry,
+                            process,
+                            binding.value,
+                        )
+            continue
+
+        if isinstance(step, Call):
             _target(
                 registry,
                 process,
                 step.process,
                 Process,
             )
-
-        elif isinstance(step, Fail):
             continue
 
-        else:
-            raise TypeError(
-                f"unsupported process step {type(step).__name__}"
+        if isinstance(
+            step,
+            (
+                Act,
+                Fail,
+                Join,
+            ),
+        ):
+            continue
+
+        raise TypeError(
+            f"unsupported process step {type(step).__name__}"
+        )
+
+
+def _calls(
+    steps: list[Step],
+) -> Iterator[str]:
+    for step in steps:
+        if (
+            isinstance(step, Call)
+            and not is_relative_target(step.process)
+        ):
+            yield target_id(
+                step.process
+            )
+            continue
+
+        if isinstance(step, If):
+            yield from _calls(
+                step.then
+            )
+            if step.otherwise is not None:
+                yield from _calls(
+                    step.otherwise
+                )
+            continue
+
+        if isinstance(step, Foreach):
+            yield from _calls(
+                step.steps
             )
 
 
-def _calls(steps: list[Step]) -> Iterator[str]:
-    for step in steps:
-        if isinstance(step, Call):
-            yield step.process
-        elif isinstance(step, If):
-            yield from _calls(step.then)
-            if step.otherwise is not None:
-                yield from _calls(step.otherwise)
-
-
-def _validate_call_graph(processes: list[Process]) -> None:
+def _validate_call_graph(
+    processes: list[Process],
+) -> None:
     graph = {
-        process.id: list(_calls(process.steps))
+        process.id: list(
+            _calls(process.steps)
+        )
         for process in processes
     }
     state: dict[str, int] = {}
@@ -528,16 +867,27 @@ def _validate_call_graph(processes: list[Process]) -> None:
         stack.append(process_id)
 
         for target in graph[process_id]:
-            target_state = state.get(target, 0)
+            target_state = state.get(
+                target,
+                0,
+            )
+
             if target_state == 0:
                 visit(target)
             elif target_state == 1:
                 start = stack.index(target)
-                cycle = stack[start:] + [target]
+                cycle = (
+                    stack[start:]
+                    + [target]
+                )
                 raise PydanticCustomError(
                     "process_call_cycle",
                     "process call cycle: {cycle}",
-                    {"cycle": " -> ".join(cycle)},
+                    {
+                        "cycle": " -> ".join(
+                            cycle
+                        )
+                    },
                 )
 
         stack.pop()
@@ -548,47 +898,544 @@ def _validate_call_graph(processes: list[Process]) -> None:
             visit(process.id)
 
 
-def validate_graph(root: Node) -> None:
-    """Reject duplicate ids, invalid references, guards, and process graphs."""
-    registry: dict[str, Node | Entry] = {}
-    duplicates: set[str] = set()
-    nodes = list(iter_nodes(root))
+def _invert_operator(
+    operator: str,
+) -> str | None:
+    return {
+        "equals": "not_equals",
+        "not_equals": "equals",
+        "less_than": "greater_than_or_equal",
+        "less_than_or_equal": "greater_than",
+        "greater_than": "less_than_or_equal",
+        "greater_than_or_equal": "less_than",
+    }.get(operator)
 
-    for node in nodes:
-        for item in (node, *iter_entries(node)):
-            if item.id in registry:
-                duplicates.add(item.id)
-            else:
-                registry[item.id] = item
 
-    if duplicates:
-        raise PydanticCustomError(
-            "duplicate_id",
-            "tree repeats ids: {ids}",
-            {"ids": ", ".join(sorted(duplicates))},
+def _reverse_operator(
+    operator: str,
+) -> str:
+    return {
+        "equals": "equals",
+        "not_equals": "not_equals",
+        "less_than": "greater_than",
+        "less_than_or_equal": "greater_than_or_equal",
+        "greater_than": "less_than",
+        "greater_than_or_equal": "less_than_or_equal",
+    }[operator]
+
+
+def _guard_atom(
+    registry: Mapping[str, Entry],
+    trigger: Trigger,
+    condition: Compare,
+) -> tuple[str, str, object] | None:
+    if isinstance(condition.left, StateValue):
+        static = _static_value(
+            registry,
+            trigger,
+            condition.right,
+        )
+        if static is not _STATIC_MISSING:
+            return (
+                target_id(
+                    condition.left.state
+                ),
+                condition.operator,
+                static,
+            )
+
+    if isinstance(condition.right, StateValue):
+        static = _static_value(
+            registry,
+            trigger,
+            condition.left,
+        )
+        if static is not _STATIC_MISSING:
+            return (
+                target_id(
+                    condition.right.state
+                ),
+                _reverse_operator(
+                    condition.operator
+                ),
+                static,
+            )
+
+    return None
+
+
+def _guard_atoms(
+    registry: Mapping[str, Entry],
+    trigger: Trigger,
+    condition: Condition,
+) -> list[tuple[str, str, object]] | None:
+    if isinstance(condition, Compare):
+        atom = _guard_atom(
+            registry,
+            trigger,
+            condition,
+        )
+        return (
+            [atom]
+            if atom is not None
+            else None
         )
 
-    triggers = [
-        trigger
-        for node in nodes
-        for trigger in node.triggers
-    ]
-    _validate_trigger_guards(registry, triggers)
+    if isinstance(condition, All):
+        result: list[
+            tuple[str, str, object]
+        ] = []
 
-    for node in nodes:
-        for interface in node.interfaces:
-            _interface_schema(registry, interface)
+        for child in condition.conditions:
+            child_atoms = _guard_atoms(
+                registry,
+                trigger,
+                child,
+            )
+            if child_atoms is None:
+                return None
+            result.extend(child_atoms)
 
-    processes = [
-        process
-        for node in nodes
-        for process in node.processes
-    ]
-    for process in processes:
+        return result
+
+    if isinstance(condition, Not):
+        if not isinstance(
+            condition.condition,
+            Compare,
+        ):
+            return None
+
+        atom = _guard_atom(
+            registry,
+            trigger,
+            condition.condition,
+        )
+        if atom is None:
+            return None
+
+        state, operator, value = atom
+        inverse = _invert_operator(
+            operator
+        )
+        if inverse is None:
+            return None
+
+        return [
+            (
+                state,
+                inverse,
+                value,
+            )
+        ]
+
+    return None
+
+
+def _atom_accepts(
+    atom: tuple[str, str, object],
+    candidate: object,
+) -> bool | None:
+    _, operator, value = atom
+
+    try:
+        return _compare_static(
+            operator,
+            candidate,
+            value,
+        )
+    except PydanticCustomError:
+        return None
+
+
+def _range_bounds(
+    atoms: list[tuple[str, str, object]],
+) -> tuple[
+    tuple[object, bool] | None,
+    tuple[object, bool] | None,
+] | None:
+    lower: tuple[object, bool] | None = None
+    upper: tuple[object, bool] | None = None
+
+    for _, operator, value in atoms:
+        if operator in (
+            "greater_than",
+            "greater_than_or_equal",
+        ):
+            inclusive = (
+                operator
+                == "greater_than_or_equal"
+            )
+            if lower is None:
+                lower = (
+                    value,
+                    inclusive,
+                )
+                continue
+
+            pair = _ordered_pair(
+                lower[0],
+                value,
+            )
+            if pair is None:
+                return None
+
+            current, candidate = pair
+            if (
+                candidate > current
+                or (
+                    candidate == current
+                    and not inclusive
+                    and lower[1]
+                )
+            ):
+                lower = (
+                    value,
+                    inclusive,
+                )
+            continue
+
+        if operator in (
+            "less_than",
+            "less_than_or_equal",
+        ):
+            inclusive = (
+                operator
+                == "less_than_or_equal"
+            )
+            if upper is None:
+                upper = (
+                    value,
+                    inclusive,
+                )
+                continue
+
+            pair = _ordered_pair(
+                upper[0],
+                value,
+            )
+            if pair is None:
+                return None
+
+            current, candidate = pair
+            if (
+                candidate < current
+                or (
+                    candidate == current
+                    and not inclusive
+                    and upper[1]
+                )
+            ):
+                upper = (
+                    value,
+                    inclusive,
+                )
+
+    return lower, upper
+
+
+def _atoms_conflict(
+    left: list[tuple[str, str, object]],
+    right: list[tuple[str, str, object]],
+) -> bool:
+    states = {
+        atom[0]
+        for atom in left
+    } & {
+        atom[0]
+        for atom in right
+    }
+
+    for state in states:
+        combined = [
+            atom
+            for atom in (
+                left + right
+            )
+            if atom[0] == state
+        ]
+        equals = [
+            atom[2]
+            for atom in combined
+            if atom[1] == "equals"
+        ]
+
+        if equals:
+            first = equals[0]
+            if any(
+                not _json_equal(
+                    first,
+                    value,
+                )
+                for value in equals[1:]
+            ):
+                return True
+
+            accepted = [
+                _atom_accepts(
+                    atom,
+                    first,
+                )
+                for atom in combined
+            ]
+            if any(
+                value is False
+                for value in accepted
+            ):
+                return True
+
+        bounds = _range_bounds(
+            combined
+        )
+        if bounds is None:
+            continue
+
+        lower, upper = bounds
+        if (
+            lower is None
+            or upper is None
+        ):
+            continue
+
+        pair = _ordered_pair(
+            lower[0],
+            upper[0],
+        )
+        if pair is None:
+            continue
+
+        lower_value, upper_value = pair
+        if lower_value > upper_value:
+            return True
+
+        if (
+            lower_value == upper_value
+            and not (
+                lower[1]
+                and upper[1]
+            )
+        ):
+            return True
+
+    return False
+
+
+def _guards_disjoint(
+    registry: Mapping[str, Entry],
+    left: Trigger,
+    right: Trigger,
+) -> bool:
+    if (
+        left.given is True
+        or right.given is True
+    ):
+        return False
+
+    left_atoms = _guard_atoms(
+        registry,
+        left,
+        left.given,
+    )
+    right_atoms = _guard_atoms(
+        registry,
+        right,
+        right.given,
+    )
+
+    if (
+        left_atoms is None
+        or right_atoms is None
+    ):
+        return False
+
+    return _atoms_conflict(
+        left_atoms,
+        right_atoms,
+    )
+
+
+def _validate_triggers(
+    registry: Mapping[str, Entry],
+    triggers: list[Trigger],
+) -> None:
+    by_when: dict[
+        str,
+        list[Trigger],
+    ] = defaultdict(list)
+
+    for trigger in triggers:
+        _target(
+            registry,
+            trigger,
+            trigger.then,
+            Process,
+        )
+
+        if trigger.given is not True:
+            _validate_condition(
+                registry,
+                trigger,
+                trigger.given,
+            )
+
+        by_when[trigger.when].append(
+            trigger
+        )
+
+    for when, group in by_when.items():
+        for left, right in combinations(
+            group,
+            2,
+        ):
+            if not _guards_disjoint(
+                registry,
+                left,
+                right,
+            ):
+                raise PydanticCustomError(
+                    "overlapping_trigger_guards",
+                    (
+                        "triggers {left} and {right} share "
+                        "WHEN {when} without provably "
+                        "disjoint guards"
+                    ),
+                    {
+                        "left": left.id,
+                        "right": right.id,
+                        "when": when,
+                    },
+                )
+
+
+def _walk_steps(
+    steps: list[Step],
+    *,
+    parallel: bool = False,
+) -> Iterator[tuple[Step, bool]]:
+    for step in steps:
+        yield step, parallel
+
+        if isinstance(step, If):
+            yield from _walk_steps(
+                step.then,
+                parallel=parallel,
+            )
+            if step.otherwise is not None:
+                yield from _walk_steps(
+                    step.otherwise,
+                    parallel=parallel,
+                )
+            continue
+
+        if isinstance(step, Foreach):
+            yield from _walk_steps(
+                step.steps,
+                parallel=parallel,
+            )
+            continue
+
+        if isinstance(step, Par):
+            yield from _walk_steps(
+                step.steps,
+                parallel=True,
+            )
+
+
+def validate_tools(
+    node: Node,
+    tools: Mapping[
+        str,
+        ToolContractLike,
+    ],
+) -> None:
+    """Validate exact tool names, contracts, and parallel permission."""
+    for process in node.processes:
+        for step, parallel in _walk_steps(
+            process.steps
+        ):
+            if (
+                not isinstance(step, Act)
+                or step.tool is None
+            ):
+                continue
+
+            contract = tools.get(
+                step.tool
+            )
+            if contract is None:
+                raise PydanticCustomError(
+                    "unknown_tool",
+                    "process {process} names unknown tool {tool}",
+                    {
+                        "process": process.id,
+                        "tool": step.tool,
+                    },
+                )
+
+            authored_inputs = frozenset(
+                binding.placeholder
+                for binding in step.inputs
+            )
+            authored_outputs = frozenset(
+                step.outputs
+            )
+
+            if (
+                authored_inputs
+                != contract.inputs
+                or authored_outputs
+                != contract.outputs
+            ):
+                raise PydanticCustomError(
+                    "tool_contract_mismatch",
+                    (
+                        "process {process} act contract "
+                        "differs from tool {tool}"
+                    ),
+                    {
+                        "process": process.id,
+                        "tool": step.tool,
+                    },
+                )
+
+            if (
+                parallel
+                and not contract.parallel
+            ):
+                raise PydanticCustomError(
+                    "tool_parallelism_unknown",
+                    (
+                        "process {process} uses tool {tool} "
+                        "in PAR without parallel permission"
+                    ),
+                    {
+                        "process": process.id,
+                        "tool": step.tool,
+                    },
+                )
+
+
+def validate_graph(node: Node) -> None:
+    """Reject invalid ids, local references, guards, and process flow."""
+    registry = entry_registry(node)
+
+    for interface in node.interfaces:
+        _interface_schema(
+            registry,
+            interface,
+        )
+
+    _validate_triggers(
+        registry,
+        node.triggers,
+    )
+
+    for process in node.processes:
         _validate_steps(
             registry,
             process,
             process.steps,
         )
 
-    _validate_call_graph(processes)
+    _validate_call_graph(
+        node.processes
+    )

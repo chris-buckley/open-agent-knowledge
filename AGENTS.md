@@ -63,19 +63,25 @@ WHEN you infer repository rules, you MUST know these concepts:
 ```csv
 name,meaning
 schema,"one reusable information shape independent of boundary, direction, and process"
-interface,"one identified information crossing at a tree boundary; it selects a direction and a schema"
+interface,"one identified information crossing at a document boundary; it selects a direction and a schema"
 operating context,"the complete information and rules supplied to an agent: instructions, constants, schemas, state, triggers, processes, interfaces"
 OAK,"Open Agent Knowledge, the universal knowledge standard this repository defines, formerly UAOC"
 interpreter,"the human, agent, or program that interprets OAK knowledge before using it"
-node,"one complete set of the seven parts; a tree is nodes nested in nodes"
+document,"one OAK file that contains exactly one node"
+node,"one complete set of the seven parts; it has no id and contains no node"
+document graph,"OAK documents connected by target paths"
+tree,"the legacy name for a document graph; it never means nested nodes"
 part,"one of the seven parts of a node (instructions|constants|schemas|state|triggers|processes|interfaces); the set is closed"
 entry,"one item in a part: one instruction, one constant, one schema, one state value, one trigger, one process, or one interface"
+target path,"one local part-qualified entry path or one relative document path followed by # and a part-qualified entry path"
+authoring surface,"the OAK text an interpreter or human writes; Pydantic is the programmatic authoring and validation form"
+surface descriptor,"one declarative authored text variant that drives rendering, parsing, EBNF, prompt generation, and documentation generation"
 vocabulary,"how information is conveyed without ambiguity inside every render: text shapes, datatypes, units, time, and display forms; where the core schema and Rust regex checks run"
-grouping,"the delimiters that group the parts in the OAK render (xml tags|markdown fences)"
-trigger,"the entry that signposts knowledge to the outside; it records why an interpreter enters and, when matched, guides which instructions, schemas, and processes apply"
+grouping,"the delimiters that group the parts and body entries of one OAK document (xml tags|markdown fences)"
+trigger,"the entry that signposts knowledge to the outside; it contains GIVEN, WHEN, and THEN and selects one process"
 APS,"Agnostic Prompt Standard, the legacy standard that OAK succeeds; its skill snapshot is in `legacy-snapshot-aps`"
-package,"the Pydantic models, defaults, parser, and renderers the PRD builds; it is the `oak` directory"
-render,"a representation of one node or tree (OAK|JSON-LD|YAML-LD|file system|SQL|CSV); OAK is the opinionated default, the successor of APS"
+package,"the Pydantic models, defaults, parser, resolver, executor, surface descriptors, and renderers the PRD builds; it is the `oak` directory"
+render,"a representation of one OAK document (OAK|JSON-LD); OAK is the opinionated default, the successor of APS"
 build,"the directory that uses the package to generate the outputs; it is the `build` directory"
 output,"an artefact the build generates from the package once (EBNF|authoring prompt|documentation tree); it is in the `outputs` directory"
 text syntax,"the restricted syntax tree in `oak/vocabulary/syntax.py` from which the build generates each Rust regex, JSON Schema pattern, and EBNF production"
@@ -112,8 +118,19 @@ WHEN you name the consumer of OAK knowledge, you MUST:
 
 WHEN you name what OAK produces, you MUST:
 
-- Use render for a format of one knowledge tree.
+- Use render for a format of one OAK document.
 - Use output for an artefact the build generates.
+
+WHEN you design or extend the package authoring surface, you MUST:
+
+- Prefer short helper functions with plain literal arguments over nested constructor keywords.
+- Prefer one discoverable dot-access namespace per closed set (`Constraint.NON_EMPTY`, `Constraint.max_chars(240)`) over loose imports.
+- Keep every helper typed, and validate through the models.
+- Keep the render output byte-identical when only the authoring surface changes.
+- Hoist each reused static value into one `UPPER_SNAKE` module constant at the top of the authoring file.
+- Prefix each entry-id constant with its part (`PROCESS_ROUTE`, `TRIGGER_COMMAND`, `STATE_MODE`), mirroring the target path grammar.
+- Define each multi-line entry as one named module-level value and list only the names inside the node, so the node reads as a table of contents.
+- Postfix each entry variable name with its part (`command_line_schema`, `route_command_process`, `on_command_trigger`, `stdin_interface`).
 
 WHEN you change `docs/PRD.md`, you MUST:
 

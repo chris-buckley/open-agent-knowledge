@@ -3,12 +3,11 @@
 from typing import Literal, Self
 
 from pydantic import ConfigDict, Field, JsonValue, model_validator
-from pydantic_core import PydanticCustomError
 
 from oak.base import Entry
+from oak.rules import rule_error
 
 ConstantForm = Literal["inline", "text", "json", "csv", "yaml"]
-CsvCell = str | int | float | bool | None
 
 
 class Constant(Entry):
@@ -84,7 +83,7 @@ class Constant(Entry):
     @model_validator(mode="after")
     def valid_form(self) -> Self:
         if self.form == "text" and not isinstance(self.value, str):
-            raise PydanticCustomError(
+            raise rule_error(
                 "invalid_text_constant",
                 "a text constant value must be a string",
             )
@@ -93,38 +92,46 @@ class Constant(Entry):
             return self
 
         if not isinstance(self.value, list) or not self.value:
-            raise PydanticCustomError(
+            raise rule_error(
                 "invalid_csv_constant",
                 "a CSV constant value must be a non-empty list of rows",
             )
 
         if not all(isinstance(row, dict) for row in self.value):
-            raise PydanticCustomError(
+            raise rule_error(
                 "invalid_csv_constant",
                 "each CSV constant row must be an object",
             )
 
-        columns = list(self.value[0])
+        rows = self.value
+        first = rows[0]
+        if not isinstance(first, dict):
+            return self
+
+        columns = list(first)
         if not columns:
-            raise PydanticCustomError(
+            raise rule_error(
                 "invalid_csv_constant",
                 "a CSV constant must have at least one column",
             )
 
         expected = set(columns)
-        for index, row in enumerate(self.value):
+        for index, row in enumerate(rows):
+            if not isinstance(row, dict):
+                continue
+
             if set(row) != expected:
-                raise PydanticCustomError(
+                raise rule_error(
                     "csv_column_mismatch",
                     "CSV row {index} has different columns",
                     {"index": index},
                 )
 
             if any(
-                not isinstance(cell, (str, int, float, bool, type(None)))
+                isinstance(cell, (list, dict))
                 for cell in row.values()
             ):
-                raise PydanticCustomError(
+                raise rule_error(
                     "invalid_csv_cell",
                     "CSV row {index} contains a non-scalar cell",
                     {"index": index},

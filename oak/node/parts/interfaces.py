@@ -1,17 +1,22 @@
 """The interfaces part."""
 
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import ConfigDict, Field
+from pydantic import AfterValidator, ConfigDict, Field
 
 from oak.base import Entry
-from oak.vocabulary import NonBlankLine, SlugId
+from oak.vocabulary import NonBlankLine, TargetPath
+from oak.vocabulary.text.target_path import typed_target
 
 Direction = Literal["in", "out", "inout"]
+SchemaTarget = Annotated[
+    TargetPath,
+    AfterValidator(lambda value: typed_target(value, "schema")),
+]
 
 
 class Interface(Entry):
-    """One crossing of information at the tree boundary."""
+    """One crossing of information at the active document boundary."""
 
     model_config = ConfigDict(
         serialize_by_alias=True,
@@ -21,9 +26,15 @@ class Interface(Entry):
                     "part": "interfaces",
                     "id": "request",
                     "direction": "in",
-                    "schema": "request-shape",
-                    "description": "The request supplied to the tree.",
-                }
+                    "schema": "schema.request-shape",
+                    "description": "The request supplied to the document.",
+                },
+                {
+                    "part": "interfaces",
+                    "id": "shared-request",
+                    "direction": "in",
+                    "schema": "../shared/contracts.oak.md#schema.request-shape",
+                },
             ]
         },
     )
@@ -34,17 +45,17 @@ class Interface(Entry):
         examples=["interfaces"],
     )
     direction: Direction = Field(
-        description="The direction across the tree boundary.",
+        description="The direction across the document boundary.",
         examples=["in", "out", "inout"],
     )
-    schema_id: SlugId = Field(
+    schema_id: SchemaTarget = Field(
         alias="schema",
         title="Schema",
-        description="The schema entry that defines the information shape.",
-        examples=["request-shape"],
+        description="The local or relative schema target that defines the shape.",
+        examples=["schema.request-shape"],
     )
     description: NonBlankLine | None = Field(
         default=None,
-        description="What the tree boundary crossing means.",
-        examples=["The request supplied to the tree."],
+        description="What the document boundary crossing means.",
+        examples=["The request supplied to the document."],
     )

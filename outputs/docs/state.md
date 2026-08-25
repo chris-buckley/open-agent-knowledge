@@ -1,57 +1,35 @@
-# State
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+State: One JSON value that can change while the interpreter runs.
+~~~~
 
-One JSON value that can change while the interpreter runs.
+~~~~constants
+example-1: "status: \"ready\""
 
-## Examples
+grammar: TEXT<<
+surface_state = ? <ID>: <VALUE> ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "id": "status",
-    "part": "state",
-    "value": "ready"
-  }
-]
-```
+~~~~schemas
+~~~schema;id="state";name="State";purpose="One JSON value that can change while the interpreter runs."
+<ID>: <VALUE>
 
-## Fields
+WHERE:
+- <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <VALUE> is string; is non-empty; The JSON value that can change..
+~~~
+~~~~
 
-### Id
+~~~~state
+~~~~
 
-`id`
+~~~~triggers
+~~~~
 
-The entry id, unique across the tree.
+~~~~processes
+~~~~
 
-```json
-[
-  "example"
-]
-```
-
-### Part
-
-`part`
-
-The entry part discriminator.
-
-```json
-[
-  "state"
-]
-```
-
-### Value
-
-`value`
-
-The JSON value that can change.
-
-```json
-[
-  "ready",
-  0,
-  {
-    "complete": false
-  }
-]
-```
+~~~~interfaces
+~~~~

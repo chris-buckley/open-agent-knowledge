@@ -1,53 +1,34 @@
-# Instruction
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+Instruction: One rule the interpreter must follow.
+~~~~
 
-One rule the interpreter must follow.
+~~~~constants
+example-1: "Read the product requirements before work."
 
-## Examples
+grammar: TEXT<<
+surface_instruction = ? <BODY> ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "id": "read-prd",
-    "part": "instructions",
-    "body": "Read the product requirements before work."
-  }
-]
-```
+~~~~schemas
+~~~schema;id="instruction";name="Instruction";purpose="One rule the interpreter must follow."
+<BODY>
 
-## Fields
+WHERE:
+- <BODY> is string; is non-empty; One directive or declarative rule..
+~~~
+~~~~
 
-### Id
+~~~~state
+~~~~
 
-`id`
+~~~~triggers
+~~~~
 
-The entry id, unique across the tree.
+~~~~processes
+~~~~
 
-```json
-[
-  "example"
-]
-```
-
-### Part
-
-`part`
-
-The entry part discriminator.
-
-```json
-[
-  "instructions"
-]
-```
-
-### Body
-
-`body`
-
-One directive or declarative rule.
-
-```json
-[
-  "Read the product requirements before work."
-]
-```
+~~~~interfaces
+~~~~

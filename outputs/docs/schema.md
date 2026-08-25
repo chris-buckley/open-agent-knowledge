@@ -1,114 +1,51 @@
-# Schema
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+Schema: One reusable information shape with one Where per placeholder.
+Define each schema placeholder once in WHERE.
+Make the template and WHERE placeholder sets equal.
+Reference only another placeholder in the same schema.
+~~~~
 
-One reusable information shape: a template and one Where per placeholder.
+~~~~constants
+example-1: "<schema id=\"outline\" name=\"Hierarchical Outline\" purpose=\"Generate a numbered outline.\">\n## <OUTLINE_TITLE>\n\n\nWHERE:\n- <OUTLINE_TITLE> is string.\n</schema>"
 
-## Examples
+grammar: TEXT<<
+surface_schema = ? <schema id="<ID>" name="<NAME>" purpose="<PURPOSE>">
+<TEMPLATE>
 
-```json
-[
-  {
-    "id": "outline",
-    "part": "schemas",
-    "name": "Hierarchical Outline",
-    "purpose": "Generate a numbered outline.",
-    "template": "## <OUTLINE_TITLE>\n",
-    "where": [
-      {
-        "placeholder": "OUTLINE_TITLE",
-        "constraints": [
-          {
-            "kind": "type",
-            "of": "string"
-          }
-        ]
-      }
-    ]
-  }
-]
-```
+WHERE:
+<WHERE>
+</schema> ? ;
+>>
+~~~~
 
-## Fields
+~~~~schemas
+~~~schema;id="schema";name="Schema";purpose="One reusable information shape with one Where per placeholder."
+<schema id="<ID>" name="<NAME>" purpose="<PURPOSE>">
+<TEMPLATE>
 
-### Id
+WHERE:
+<WHERE>
+</schema>
 
-`id`
+WHERE:
+- <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <NAME> is string; is non-empty; The display name..
+- <PURPOSE> is string; is non-empty; What the information shape is for..
+- <TEMPLATE> is string; is non-empty; The literal shape with variable parts written as <PLACEHOLDER>..
+- <WHERE> is string; is non-empty; One Where per distinct template placeholder, in authored order..
+~~~
+~~~~
 
-The entry id, unique across the tree.
+~~~~state
+~~~~
 
-```json
-[
-  "example"
-]
-```
+~~~~triggers
+~~~~
 
-### Part
+~~~~processes
+~~~~
 
-`part`
-
-The entry part discriminator.
-
-```json
-[
-  "schemas"
-]
-```
-
-### Name
-
-`name`
-
-The display name.
-
-```json
-[
-  "Hierarchical Outline"
-]
-```
-
-### Purpose
-
-`purpose`
-
-What the information shape is for.
-
-```json
-[
-  "Generate a semantic multilevel numbered outline."
-]
-```
-
-### Template
-
-`template`
-
-The literal shape with variable parts written as <PLACEHOLDER>.
-
-```json
-[
-  "## <OUTLINE_TITLE>\n\n<LEVEL_1_NUMBER> <STATEMENT>\n...\n"
-]
-```
-
-### Where
-
-`where`
-
-One Where per distinct template placeholder, in authored order.
-
-```json
-[
-  [
-    {
-      "placeholder": "OUTLINE_TITLE",
-      "constraints": [
-        {
-          "kind": "type",
-          "of": "string"
-        }
-      ],
-      "examples": [],
-      "description": null
-    }
-  ]
-]
-```
+~~~~interfaces
+~~~~

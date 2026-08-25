@@ -27,7 +27,7 @@ class OakModel(BaseModel):
 
 
 class DiscriminatedModel(OakModel):
-    """A direct authoring model whose emitted JSON Schema requires its tag."""
+    """A direct authoring model whose JSON Schema requires its tag."""
 
     discriminator_field: ClassVar[str]
 
@@ -52,6 +52,6 @@ class Entry(DiscriminatedModel):
     discriminator_field = "part"
 
     id: SlugId = Field(
-        description="The entry id, unique across the tree.",
+        description="The entry id, unique in its OAK document.",
         examples=["example"],
     )

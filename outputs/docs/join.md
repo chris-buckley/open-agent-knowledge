@@ -1,24 +1,24 @@
 ~~~~instructions
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-StateValue: One value read from local state.
-Read and write state only in the active OAK document.
+Join: The barrier immediately after one parallel group.
+Put JOIN immediately after one PAR.
+Put no step between PAR and JOIN.
 ~~~~
 
 ~~~~constants
-example-1: "$state.status"
+example-1: "JOIN"
 
 grammar: TEXT<<
-surface_value_state = ? $<STATE> ? ;
+surface_step_join = ? JOIN ? ;
 >>
 ~~~~
 
 ~~~~schemas
-~~~schema;id="value-state";name="StateValue";purpose="One value read from local state."
-$<STATE>
+~~~schema;id="step-join";name="Join";purpose="The barrier immediately after one parallel group."
+JOIN
 
 WHERE:
-- <STATE> is string; is non-empty; The local state target to read..
 ~~~
 ~~~~
 

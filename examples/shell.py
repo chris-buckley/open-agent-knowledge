@@ -1,15 +1,19 @@
 """Author one OAK shell state machine and write its render."""
 
-import pathlib
+from pathlib import Path
 import sys
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from typing import cast
+
+from pydantic import BaseModel
+
 from oak import (
     Call,
-    Condition,
+    Compare,
     Emit,
     Fail,
     If,
@@ -17,163 +21,157 @@ from oak import (
     Interface,
     InterfaceValue,
     LiteralValue,
+    Node,
     NonEmpty,
     Process,
-    Root,
     Schema,
     Set,
     State,
     StateValue,
+    Step,
     Trigger,
     Type,
+    Value,
     ValueBinding,
     render,
+    resolve,
     where,
 )
 
-command_line = Schema(
+
+class Constraint:
+    """Every constraint kind behind one discoverable name."""
+
+    STRING = Type(of="string")
+    NON_EMPTY = NonEmpty()
+
+
+def value(item) -> Value:
+    return cast(Value, item) if isinstance(item, BaseModel) else LiteralValue(value=item)
+
+
+def iface(target, placeholder):
+    return InterfaceValue(interface=target, placeholder=placeholder)
+
+
+def state(target):
+    return StateValue(state=target)
+
+
+def eq(left, right):
+    return Compare(left=value(left), operator="equals", right=value(right))
+
+
+def if_(condition, then, otherwise=None):
+    return If(condition=condition, then=then, otherwise=otherwise)
+
+
+def call(target):
+    return Call(process=target)
+
+
+def fail(message):
+    return Fail(message=message)
+
+
+def set_(target, item):
+    return Set(state=target, value=value(item))
+
+
+def emit(target, **bindings):
+    return Emit(
+        interface=target,
+        bindings=[ValueBinding(placeholder=key, value=value(item)) for key, item in bindings.items()],
+    )
+
+
+def match_(subject, *cases, otherwise) -> list[Step]:
+    steps: list[Step] = list(otherwise)
+    for literal, branch in reversed(cases):
+        steps = [if_(eq(subject, literal), then=branch, otherwise=steps)]
+    return steps
+
+
+SCHEMA_COMMAND_LINE = "schema.command-line"
+SCHEMA_TERMINAL_OUTPUT = "schema.terminal-output"
+INTERFACE_STDIN = "interface.stdin"
+INTERFACE_STDOUT = "interface.stdout"
+STATE_MODE = "state.mode"
+PROCESS_ROUTE = "process.route"
+PROCESS_PWD = "process.pwd"
+PROCESS_EXIT = "process.exit"
+PLACEHOLDER_COMMAND = "COMMAND"
+CMD_PWD = "pwd"
+CMD_EXIT = "exit"
+MODE_OPEN = "open"
+MODE_CLOSED = "closed"
+
+command_line_schema = Schema(
     id="command-line",
     name="Command Line",
     purpose="Carry one command the user types.",
     template="<COMMAND>",
-    where=[
-        where(
-            "COMMAND",
-            Type(of="string"),
-            NonEmpty(),
-            examples=["pwd", "exit"],
-            description="the exact command string",
-        )
-    ],
+    where=[where(PLACEHOLDER_COMMAND, Constraint.STRING, Constraint.NON_EMPTY, examples=[CMD_PWD, CMD_EXIT], description="the exact command string")],
 )
 
-terminal_output = Schema(
+terminal_output_schema = Schema(
     id="terminal-output",
     name="Terminal Output",
     purpose="Carry one line the shell prints.",
     template="<OUTPUT>",
-    where=[
-        where(
-            "OUTPUT",
-            Type(of="string"),
-            NonEmpty(),
-            examples=["/oak", "logout"],
-            description="the printed line",
-        )
-    ],
+    where=[where("OUTPUT", Constraint.STRING, Constraint.NON_EMPTY, examples=["/oak", "logout"], description="the printed line")],
 )
 
-root = Root(
-    id="root",
-    instructions=[
-        Instruction(
-            id="exact-command",
-            body="Treat each command as an exact string.",
-        )
-    ],
-    schemas=[command_line, terminal_output],
-    state=[State(id="mode", value="open")],
-    triggers=[
-        Trigger(
-            id="command",
-            given=Condition(
-                left=StateValue(state="mode"),
-                operator="equals",
-                right=LiteralValue(value="open"),
-            ),
-            when="A command line arrives.",
-            process="route",
-        )
-    ],
-    processes=[
-        Process(
-            id="route",
-            name="Route command",
-            steps=[
-                If(
-                    condition=Condition(
-                        left=InterfaceValue(
-                            interface="stdin",
-                            placeholder="COMMAND",
-                        ),
-                        operator="equals",
-                        right=LiteralValue(value="pwd"),
-                    ),
-                    then=[Call(process="pwd")],
-                    otherwise=[
-                        If(
-                            condition=Condition(
-                                left=InterfaceValue(
-                                    interface="stdin",
-                                    placeholder="COMMAND",
-                                ),
-                                operator="equals",
-                                right=LiteralValue(value="exit"),
-                            ),
-                            then=[Call(process="exit")],
-                            otherwise=[
-                                Fail(message="Unknown shell command.")
-                            ],
-                        )
-                    ],
-                )
-            ],
-        ),
-        Process(
-            id="pwd",
-            name="Run pwd",
-            steps=[
-                Emit(
-                    interface="stdout",
-                    bindings=[
-                        ValueBinding(
-                            placeholder="OUTPUT",
-                            value=LiteralValue(value="/oak"),
-                        )
-                    ],
-                )
-            ],
-        ),
-        Process(
-            id="exit",
-            name="Run exit",
-            steps=[
-                Emit(
-                    interface="stdout",
-                    bindings=[
-                        ValueBinding(
-                            placeholder="OUTPUT",
-                            value=LiteralValue(value="logout"),
-                        )
-                    ],
-                ),
-                Set(
-                    state="mode",
-                    value=LiteralValue(value="closed"),
-                ),
-            ],
-        ),
-    ],
-    interfaces=[
-        Interface(
-            id="stdin",
-            direction="in",
-            schema="command-line",
-            description="The command line the user types.",
-        ),
-        Interface(
-            id="stdout",
-            direction="out",
-            schema="terminal-output",
-            description="The line the shell prints.",
-        ),
-    ],
+route_command_process = Process(
+    id="route",
+    name="Route command",
+    steps=match_(
+        iface(INTERFACE_STDIN, PLACEHOLDER_COMMAND),
+        (CMD_PWD, [call(PROCESS_PWD)]),
+        (CMD_EXIT, [call(PROCESS_EXIT)]),
+        otherwise=[fail("Unknown shell command.")],
+    ),
 )
 
-target = pathlib.Path(__file__).with_name("shell.oak.md")
-target.write_text(
-    render(root) + "\n",
-    encoding="utf-8",
-    newline="\n",
+run_pwd_process = Process(id="pwd", name="Run pwd", steps=[emit(INTERFACE_STDOUT, OUTPUT="/oak")])
+
+run_exit_process = Process(
+    id="exit",
+    name="Run exit",
+    steps=[emit(INTERFACE_STDOUT, OUTPUT="logout"), set_(STATE_MODE, MODE_CLOSED)],
 )
+
+on_command_trigger = Trigger(
+    id="command",
+    given=eq(state(STATE_MODE), MODE_OPEN),
+    when="A command line arrives.",
+    then=PROCESS_ROUTE,
+)
+
+stdin_interface = Interface(
+    id="stdin",
+    direction="in",
+    schema=SCHEMA_COMMAND_LINE,
+    description="The command line the user types.",
+)
+
+stdout_interface = Interface(
+    id="stdout",
+    direction="out",
+    schema=SCHEMA_TERMINAL_OUTPUT,
+    description="The line the shell prints.",
+)
+
+node = Node(
+    instructions=[Instruction(id="exact-command", body="Treat each command as an exact string.")],
+    schemas=[command_line_schema, terminal_output_schema],
+    state=[State(id="mode", value=MODE_OPEN)],
+    triggers=[on_command_trigger],
+    processes=[route_command_process, run_pwd_process, run_exit_process],
+    interfaces=[stdin_interface, stdout_interface],
+)
+
+target = Path(__file__).with_name("shell.oak.md")
+resolve(node, source=target.as_posix())
+target.write_text(render(node) + "\n", encoding="utf-8", newline="\n")
 print(f"wrote {target}")

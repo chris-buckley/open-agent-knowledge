@@ -1,13 +1,21 @@
-"""The internal Pydantic authoring snapshot."""
+"""The internal Pydantic programmatic snapshot."""
 
-from oak.node.model import Root
+from oak.node.model import Node
 
 
-def dump(root: Root) -> dict[str, object]:
+def dump(node: Node) -> dict[str, object]:
     """Return JSON-safe authored data with unset fields omitted."""
-    return root.model_dump(mode="json", exclude_unset=True)
+    return node.model_dump(
+        mode="json",
+        by_alias=True,
+        exclude_unset=True,
+    )
 
 
-def dump_json(root: Root, *, indent: int | None = 2) -> str:
+def dump_json(node: Node, *, indent: int | None = 2) -> str:
     """Return JSON authored data with unset fields omitted."""
-    return root.model_dump_json(exclude_unset=True, indent=indent)
+    return node.model_dump_json(
+        by_alias=True,
+        exclude_unset=True,
+        indent=indent,
+    )

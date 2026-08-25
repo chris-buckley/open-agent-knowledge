@@ -1,5 +1,5 @@
-"""Layer 1: one complete set of the seven parts."""
+"""Layer 1: one complete idless set of the seven parts."""
 
-from oak.node.model import Node, Root
+from oak.node.model import Node
 
-__all__ = ["Node", "Root"]
+__all__ = ["Node"]

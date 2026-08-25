@@ -1,44 +1,34 @@
-# LiteralValue
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+LiteralValue: One authored JSON value.
+~~~~
 
-One authored JSON value.
+~~~~constants
+example-1: "\"critical\""
 
-## Examples
+grammar: TEXT<<
+surface_value_literal = ? <VALUE> ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "source": "literal",
-    "value": "critical"
-  }
-]
-```
+~~~~schemas
+~~~schema;id="value-literal";name="LiteralValue";purpose="One authored JSON value."
+<VALUE>
 
-## Fields
+WHERE:
+- <VALUE> is string; is non-empty; The authored JSON value..
+~~~
+~~~~
 
-### Source
+~~~~state
+~~~~
 
-`source`
+~~~~triggers
+~~~~
 
-The process value source discriminator.
+~~~~processes
+~~~~
 
-```json
-[
-  "literal"
-]
-```
-
-### Value
-
-`value`
-
-The authored JSON value.
-
-```json
-[
-  "critical",
-  3,
-  {
-    "ready": true
-  }
-]
-```
+~~~~interfaces
+~~~~

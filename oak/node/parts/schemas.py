@@ -15,9 +15,9 @@ from pydantic import (
     ValidationError,
     model_validator,
 )
-from pydantic_core import PydanticCustomError
 
 from oak.base import DiscriminatedModel, Entry, OakModel
+from oak.rules import rule_error
 from oak.vocabulary import (
     DATATYPE_ADAPTERS,
     Datatype,
@@ -33,11 +33,20 @@ Scalar = str | int | FiniteFloat | bool
 Example = NonBlankLine | int | FiniteFloat | bool
 Bound = int | FiniteFloat | Placeholder
 
-_JSON_STRING_DATATYPES = frozenset({"string", "datetime", "uri", "path"})
+_JSON_STRING_DATATYPES = frozenset(
+    {"string", "datetime", "uri", "path"}
+)
 
 
-def _validate_text(datatype: Datatype, value: str) -> object:
-    source = json.dumps(value) if datatype in _JSON_STRING_DATATYPES else value
+def _validate_text(
+    datatype: Datatype,
+    value: str,
+) -> object:
+    source = (
+        json.dumps(value)
+        if datatype in _JSON_STRING_DATATYPES
+        else value
+    )
     return DATATYPE_ADAPTERS[datatype].validate_json(source)
 
 
@@ -51,7 +60,14 @@ class Type(ConstraintModel):
     """The bound value has one datatype from the vocabulary catalog."""
 
     model_config = ConfigDict(
-        json_schema_extra={"examples": [{"kind": "type", "of": "string"}]}
+        json_schema_extra={
+            "examples": [
+                {
+                    "kind": "type",
+                    "of": "string",
+                }
+            ]
+        }
     )
 
     kind: Literal["type"] = Field(
@@ -64,13 +80,18 @@ class Type(ConstraintModel):
         examples=["string", "integer", "uri"],
     )
 
-    def check(self, value: object, values: Mapping[str, object]) -> None:
+    def check(
+        self,
+        value: object,
+        values: Mapping[str, object],
+    ) -> None:
         DATATYPE_ADAPTERS[self.of].validate_python(value)
 
     def check_example(self, value: Example) -> None:
-        _validate_text(self.of, value) if isinstance(value, str) else self.check(
-            value, {}
-        )
+        if isinstance(value, str):
+            _validate_text(self.of, value)
+        else:
+            self.check(value, {})
 
 
 class OneOf(ConstraintModel):
@@ -78,7 +99,12 @@ class OneOf(ConstraintModel):
 
     model_config = ConfigDict(
         json_schema_extra={
-            "examples": [{"kind": "one_of", "values": ["draft", "final"]}]
+            "examples": [
+                {
+                    "kind": "one_of",
+                    "values": ["draft", "final"],
+                }
+            ]
         }
     )
 
@@ -93,9 +119,15 @@ class OneOf(ConstraintModel):
         examples=[["draft", "final"]],
     )
 
-    def check(self, value: object, values: Mapping[str, object]) -> None:
+    def check(
+        self,
+        value: object,
+        values: Mapping[str, object],
+    ) -> None:
         if value not in self.values:
-            raise ValueError(f"{value!r} is not one of {self.values!r}")
+            raise ValueError(
+                f"{value!r} is not one of {self.values!r}"
+            )
 
 
 class Regex(ConstraintModel):
@@ -103,7 +135,12 @@ class Regex(ConstraintModel):
 
     model_config = ConfigDict(
         json_schema_extra={
-            "examples": [{"kind": "regex", "pattern": "^[0-9]+$"}]
+            "examples": [
+                {
+                    "kind": "regex",
+                    "pattern": "^[0-9]+$",
+                }
+            ]
         }
     )
 
@@ -117,7 +154,11 @@ class Regex(ConstraintModel):
         examples=["^[0-9]+$"],
     )
 
-    def check(self, value: object, values: Mapping[str, object]) -> None:
+    def check(
+        self,
+        value: object,
+        values: Mapping[str, object],
+    ) -> None:
         rust_regex_adapter(self.pattern).validate_python(value)
 
 
@@ -125,7 +166,13 @@ class NonEmpty(ConstraintModel):
     """The bound value has at least one character or item."""
 
     model_config = ConfigDict(
-        json_schema_extra={"examples": [{"kind": "non_empty"}]}
+        json_schema_extra={
+            "examples": [
+                {
+                    "kind": "non_empty",
+                }
+            ]
+        }
     )
 
     kind: Literal["non_empty"] = Field(
@@ -134,8 +181,15 @@ class NonEmpty(ConstraintModel):
         examples=["non_empty"],
     )
 
-    def check(self, value: object, values: Mapping[str, object]) -> None:
-        if not isinstance(value, (str, list)) or len(value) == 0:
+    def check(
+        self,
+        value: object,
+        values: Mapping[str, object],
+    ) -> None:
+        if (
+            not isinstance(value, (str, list))
+            or len(value) == 0
+        ):
             raise ValueError(f"{value!r} is empty")
 
 
@@ -143,7 +197,14 @@ class MaxChars(ConstraintModel):
     """The bound value has at most n characters."""
 
     model_config = ConfigDict(
-        json_schema_extra={"examples": [{"kind": "max_chars", "n": 160}]}
+        json_schema_extra={
+            "examples": [
+                {
+                    "kind": "max_chars",
+                    "n": 160,
+                }
+            ]
+        }
     )
 
     kind: Literal["max_chars"] = Field(
@@ -156,16 +217,29 @@ class MaxChars(ConstraintModel):
         examples=[160],
     )
 
-    def check(self, value: object, values: Mapping[str, object]) -> None:
+    def check(
+        self,
+        value: object,
+        values: Mapping[str, object],
+    ) -> None:
         if not isinstance(value, str) or len(value) > self.n:
-            raise ValueError(f"{value!r} exceeds {self.n} characters")
+            raise ValueError(
+                f"{value!r} exceeds {self.n} characters"
+            )
 
 
 class Lines(ConstraintModel):
-    """The bound value has a positive line-count bound."""
+    """The bound value has one positive line-count bound."""
 
     model_config = ConfigDict(
-        json_schema_extra={"examples": [{"kind": "lines", "max": 1}]}
+        json_schema_extra={
+            "examples": [
+                {
+                    "kind": "lines",
+                    "max": 1,
+                }
+            ]
+        }
     )
 
     kind: Literal["lines"] = Field(
@@ -187,25 +261,43 @@ class Lines(ConstraintModel):
     @model_validator(mode="after")
     def bounds(self) -> Self:
         if self.min is None and self.max is None:
-            raise PydanticCustomError(
+            raise rule_error(
                 "missing_line_bound",
                 "lines needs min, max, or both",
             )
-        if self.min is not None and self.max is not None and self.min > self.max:
-            raise PydanticCustomError(
+
+        if (
+            self.min is not None
+            and self.max is not None
+            and self.min > self.max
+        ):
+            raise rule_error(
                 "invalid_line_bounds",
                 "lines min exceeds max",
             )
+
         return self
 
-    def check(self, value: object, values: Mapping[str, object]) -> None:
+    def check(
+        self,
+        value: object,
+        values: Mapping[str, object],
+    ) -> None:
         if not isinstance(value, str):
             raise ValueError(f"{value!r} is not text")
+
         count = len(value.splitlines())
-        if (self.min is not None and count < self.min) or (
-            self.max is not None and count > self.max
+        if (
+            self.min is not None
+            and count < self.min
+        ) or (
+            self.max is not None
+            and count > self.max
         ):
-            raise ValueError(f"{count} lines is outside {self.min} to {self.max}")
+            raise ValueError(
+                f"{count} lines is outside "
+                f"{self.min} to {self.max}"
+            )
 
 
 class ListOf(ConstraintModel):
@@ -237,23 +329,37 @@ class ListOf(ConstraintModel):
         examples=[", "],
     )
 
-    def check(self, value: object, values: Mapping[str, object]) -> None:
+    def check(
+        self,
+        value: object,
+        values: Mapping[str, object],
+    ) -> None:
         if not isinstance(value, str):
             raise ValueError(f"{value!r} is not text")
+
         for item in value.split(self.separator):
             _validate_text(self.item, item)
 
 
-def _bound(value: object, values: Mapping[str, object]) -> int | float:
-    if isinstance(value, str):
-        if value not in values:
-            raise ValueError(f"{value} has no bound value")
-        resolved = values[value]
-    else:
-        resolved = value
+def _bound(
+    value: object,
+    values: Mapping[str, object],
+) -> int | float:
+    resolved = (
+        values.get(value)
+        if isinstance(value, str)
+        else value
+    )
 
-    if isinstance(resolved, bool) or not isinstance(resolved, (int, float)):
+    if isinstance(value, str) and value not in values:
+        raise ValueError(f"{value} has no bound value")
+
+    if (
+        isinstance(resolved, bool)
+        or not isinstance(resolved, (int, float))
+    ):
         raise ValueError(f"{value!r} is not a number")
+
     return resolved
 
 
@@ -261,7 +367,14 @@ class AtLeast(ConstraintModel):
     """The bound value is at least a number or another placeholder value."""
 
     model_config = ConfigDict(
-        json_schema_extra={"examples": [{"kind": "at_least", "value": 1}]}
+        json_schema_extra={
+            "examples": [
+                {
+                    "kind": "at_least",
+                    "value": 1,
+                }
+            ]
+        }
     )
 
     kind: Literal["at_least"] = Field(
@@ -274,16 +387,29 @@ class AtLeast(ConstraintModel):
         examples=[1, "LINE_FROM"],
     )
 
-    def check(self, value: object, values: Mapping[str, object]) -> None:
+    def check(
+        self,
+        value: object,
+        values: Mapping[str, object],
+    ) -> None:
         if _bound(value, values) < _bound(self.value, values):
-            raise ValueError(f"{value!r} is below {self.value!r}")
+            raise ValueError(
+                f"{value!r} is below {self.value!r}"
+            )
 
 
 class AtMost(ConstraintModel):
     """The bound value is at most a number or another placeholder value."""
 
     model_config = ConfigDict(
-        json_schema_extra={"examples": [{"kind": "at_most", "value": 160}]}
+        json_schema_extra={
+            "examples": [
+                {
+                    "kind": "at_most",
+                    "value": 160,
+                }
+            ]
+        }
     )
 
     kind: Literal["at_most"] = Field(
@@ -296,27 +422,45 @@ class AtMost(ConstraintModel):
         examples=[160, "LINE_TO"],
     )
 
-    def check(self, value: object, values: Mapping[str, object]) -> None:
+    def check(
+        self,
+        value: object,
+        values: Mapping[str, object],
+    ) -> None:
         if _bound(value, values) > _bound(self.value, values):
-            raise ValueError(f"{value!r} is above {self.value!r}")
+            raise ValueError(
+                f"{value!r} is above {self.value!r}"
+            )
 
 
 Constraint = Annotated[
-    Type | OneOf | Regex | NonEmpty | MaxChars | Lines | ListOf | AtLeast | AtMost,
+    Type
+    | OneOf
+    | Regex
+    | NonEmpty
+    | MaxChars
+    | Lines
+    | ListOf
+    | AtLeast
+    | AtMost,
     Field(discriminator="kind"),
 ]
 
 _BOUND_CONSTRAINTS = (AtLeast, AtMost)
 
 
-def _validation_order(constraints: Iterable[Constraint]) -> list[Constraint]:
+def _validation_order(
+    constraints: Iterable[Constraint],
+) -> list[Constraint]:
     constraints = list(constraints)
     return [
-        constraint for constraint in constraints if isinstance(constraint, Type)
+        item
+        for item in constraints
+        if isinstance(item, Type)
     ] + [
-        constraint
-        for constraint in constraints
-        if not isinstance(constraint, Type)
+        item
+        for item in constraints
+        if not isinstance(item, Type)
     ]
 
 
@@ -328,7 +472,12 @@ class Where(OakModel):
             "examples": [
                 {
                     "placeholder": "OUTLINE_TITLE",
-                    "constraints": [{"kind": "type", "of": "string"}],
+                    "constraints": [
+                        {
+                            "kind": "type",
+                            "of": "string",
+                        }
+                    ],
                     "description": "title for the outline",
                 }
             ]
@@ -343,13 +492,25 @@ class Where(OakModel):
         min_length=1,
         description="The constraints every bound value must satisfy.",
         examples=[
-            [{"kind": "type", "of": "string"}],
-            [{"kind": "regex", "pattern": "^[0-9]+$"}],
+            [
+                {
+                    "kind": "type",
+                    "of": "string",
+                }
+            ],
+            [
+                {
+                    "kind": "regex",
+                    "pattern": "^[0-9]+$",
+                }
+            ],
         ],
     )
     examples: list[Example] = Field(
         default_factory=list,
-        description="Values that satisfy every locally resolvable constraint.",
+        description=(
+            "Values that satisfy every locally resolvable constraint."
+        ),
         examples=[["1.1", "1.2"]],
     )
     description: NonBlankLine | None = Field(
@@ -364,30 +525,53 @@ class Where(OakModel):
         return {
             constraint.value
             for constraint in self.constraints
-            if isinstance(constraint, _BOUND_CONSTRAINTS)
+            if isinstance(
+                constraint,
+                _BOUND_CONSTRAINTS,
+            )
             and isinstance(constraint.value, str)
         }
 
     @model_validator(mode="after")
     def valid_examples(self) -> Self:
         if self.examples and self.references:
-            raise PydanticCustomError(
+            raise rule_error(
                 "unresolved_where_example",
-                "examples cannot resolve placeholder-valued bounds: {placeholders}",
-                {"placeholders": ", ".join(sorted(self.references))},
+                (
+                    "examples cannot resolve placeholder-valued "
+                    "bounds: {placeholders}"
+                ),
+                {
+                    "placeholders": ", ".join(
+                        sorted(self.references)
+                    )
+                },
             )
 
         for index, example in enumerate(self.examples):
-            for constraint in _validation_order(self.constraints):
+            for constraint in _validation_order(
+                self.constraints
+            ):
                 try:
                     if isinstance(constraint, Type):
                         constraint.check_example(example)
                     else:
-                        constraint.check(example, {self.placeholder: example})
-                except (ValueError, ValidationError) as error:
-                    raise PydanticCustomError(
+                        constraint.check(
+                            example,
+                            {
+                                self.placeholder: example,
+                            },
+                        )
+                except (
+                    ValueError,
+                    ValidationError,
+                ) as error:
+                    raise rule_error(
                         "invalid_where_example",
-                        "example {index} for {placeholder} fails {kind}: {reason}",
+                        (
+                            "example {index} for {placeholder} "
+                            "fails {kind}: {reason}"
+                        ),
                         {
                             "index": index,
                             "placeholder": self.placeholder,
@@ -395,6 +579,7 @@ class Where(OakModel):
                             "reason": _error_message(error),
                         },
                     ) from None
+
         return self
 
 
@@ -404,7 +589,7 @@ def where(
     examples: Iterable[Example] = (),
     description: NonBlankLine | None = None,
 ) -> Where:
-    """Author one Where without repeating field names around its constraints."""
+    """Author one Where without repeated field names."""
     return Where(
         placeholder=placeholder,
         constraints=list(constraints),
@@ -422,7 +607,11 @@ class BindingFailure:
     message: str
 
     def __str__(self) -> str:
-        return f"[{self.code}] {self.placeholder}: {self.message}"
+        return (
+            f"[{self.code}] "
+            f"{self.placeholder}: "
+            f"{self.message}"
+        )
 
 
 class SchemaBindingError(ValueError):
@@ -430,31 +619,49 @@ class SchemaBindingError(ValueError):
 
     code = "schema_binding_invalid"
 
-    def __init__(self, failures: Iterable[BindingFailure]) -> None:
+    def __init__(
+        self,
+        failures: Iterable[BindingFailure],
+    ) -> None:
         self.failures = tuple(failures)
-        super().__init__("\n".join(str(failure) for failure in self.failures))
+        super().__init__(
+            "\n".join(
+                str(failure)
+                for failure in self.failures
+            )
+        )
 
 
-def _error_message(error: ValueError | ValidationError) -> str:
+def _error_message(
+    error: ValueError | ValidationError,
+) -> str:
     if isinstance(error, ValidationError):
-        messages: list[str] = []
+        messages = []
+
         for detail in error.errors(
             include_url=False,
             include_context=False,
             include_input=False,
         ):
-            location = ".".join(str(part) for part in detail["loc"])
-            messages.append(
-                f"{location}: {detail['msg']}"
-                if location
-                else detail["msg"]
+            location = ".".join(
+                str(part)
+                for part in detail["loc"]
             )
+            messages.append(
+                (
+                    f"{location}: {detail['msg']}"
+                    if location
+                    else detail["msg"]
+                )
+            )
+
         return "; ".join(messages)
+
     return str(error)
 
 
 class Schema(Entry):
-    """One reusable information shape: a template and one Where per placeholder."""
+    """One reusable information shape with one Where per placeholder."""
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -494,19 +701,27 @@ class Schema(Entry):
     purpose: NonBlankLine | None = Field(
         default=None,
         description="What the information shape is for.",
-        examples=["Generate a semantic multilevel numbered outline."],
+        examples=[
+            "Generate a semantic multilevel numbered outline."
+        ],
     )
     template: NonEmptyText = Field(
-        description="The literal shape with variable parts written as <PLACEHOLDER>.",
+        description=(
+            "The literal shape with variable parts written "
+            "as <PLACEHOLDER>."
+        ),
         examples=[
             "## <OUTLINE_TITLE>\n\n"
-            "<LEVEL_1_NUMBER> <STATEMENT>\n"
-            "...\n"
+            "<STATEMENT>\n"
+            "…\n"
         ],
     )
     where: list[Where] = Field(
         default_factory=list,
-        description="One Where per distinct template placeholder, in authored order.",
+        description=(
+            "One Where per distinct template placeholder, "
+            "in authored order."
+        ),
         examples=[
             [
                 {
@@ -529,47 +744,87 @@ class Schema(Entry):
 
     @model_validator(mode="after")
     def links(self) -> Self:
-        names = [item.placeholder for item in self.where]
+        names = [
+            item.placeholder
+            for item in self.where
+        ]
         duplicates = sorted(
-            name for name, count in Counter(names).items() if count > 1
+            name
+            for name, count in Counter(names).items()
+            if count > 1
         )
+
         if duplicates:
-            raise PydanticCustomError(
+            raise rule_error(
                 "duplicate_where_placeholder",
                 "where repeats {placeholders}",
-                {"placeholders": ", ".join(duplicates)},
+                {
+                    "placeholders": ", ".join(
+                        duplicates
+                    )
+                },
             )
 
         in_template = self.placeholders
         in_where = set(names)
-        missing = sorted(in_template - in_where)
-        unknown = sorted(in_where - in_template)
+        missing = sorted(
+            in_template - in_where
+        )
+        unknown = sorted(
+            in_where - in_template
+        )
+
         if missing or unknown:
-            raise PydanticCustomError(
+            raise rule_error(
                 "placeholder_where_mismatch",
-                "template and where placeholders differ; missing: {missing}; unused: {unused}",
+                (
+                    "template and where placeholders differ; "
+                    "missing: {missing}; unused: {unused}"
+                ),
                 {
-                    "missing": ", ".join(missing) or "none",
-                    "unused": ", ".join(unknown) or "none",
+                    "missing": (
+                        ", ".join(missing)
+                        or "none"
+                    ),
+                    "unused": (
+                        ", ".join(unknown)
+                        or "none"
+                    ),
                 },
             )
 
         references = (
-            set().union(*(item.references for item in self.where))
+            set().union(
+                *(
+                    item.references
+                    for item in self.where
+                )
+            )
             if self.where
             else set()
         )
-        dangling = sorted(references - in_template)
+        dangling = sorted(
+            references - in_template
+        )
+
         if dangling:
-            raise PydanticCustomError(
+            raise rule_error(
                 "unknown_constraint_placeholder",
                 "constraints reference {placeholders}",
-                {"placeholders": ", ".join(dangling)},
+                {
+                    "placeholders": ", ".join(
+                        dangling
+                    )
+                },
             )
+
         return self
 
-    def bind(self, values: Mapping[str, object]) -> None:
-        """Validate one complete placeholder binding and report every failure."""
+    def bind(
+        self,
+        values: Mapping[str, object],
+    ) -> None:
+        """Validate one complete placeholder binding."""
         failures: list[BindingFailure] = []
         expected = self.placeholders
         supplied = set(values)
@@ -580,7 +835,9 @@ class Schema(Entry):
                 name,
                 "no value bound",
             )
-            for name in sorted(expected - supplied)
+            for name in sorted(
+                expected - supplied
+            )
         )
         failures.extend(
             BindingFailure(
@@ -588,25 +845,46 @@ class Schema(Entry):
                 name,
                 "not a placeholder of this schema",
             )
-            for name in sorted(supplied - expected)
+            for name in sorted(
+                supplied - expected
+            )
         )
 
         for item in self.where:
             if item.placeholder not in values:
                 continue
-            for constraint in _validation_order(item.constraints):
+
+            for constraint in _validation_order(
+                item.constraints
+            ):
                 if (
-                    isinstance(constraint, _BOUND_CONSTRAINTS)
-                    and isinstance(constraint.value, str)
+                    isinstance(
+                        constraint,
+                        _BOUND_CONSTRAINTS,
+                    )
+                    and isinstance(
+                        constraint.value,
+                        str,
+                    )
                     and constraint.value not in values
                 ):
                     continue
+
                 try:
-                    constraint.check(values[item.placeholder], values)
-                except (ValueError, ValidationError) as error:
+                    constraint.check(
+                        values[item.placeholder],
+                        values,
+                    )
+                except (
+                    ValueError,
+                    ValidationError,
+                ) as error:
                     failures.append(
                         BindingFailure(
-                            f"constraint_{constraint.kind}",
+                            (
+                                "constraint_"
+                                f"{constraint.kind}"
+                            ),
                             item.placeholder,
                             _error_message(error),
                         )

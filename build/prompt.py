@@ -1,9 +1,7 @@
-"""Generate the OAK authoring prompt."""
+"""Generate the single-shot OAK authoring prompt."""
 
 from __future__ import annotations
 
-import json
-import re
 from pathlib import Path
 import sys
 
@@ -11,102 +9,75 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from oak import Act, Instruction, Process, Root, Schema, Trigger, render
+from build.ebnf import grammar
+from build.surfaces import all_surface_schemas, surface_example
+from oak import (
+    Act,
+    BindingValue,
+    Constant,
+    Emit,
+    Instruction,
+    Interface,
+    Node,
+    NonEmpty,
+    Process,
+    Schema,
+    Trigger,
+    Type,
+    ValueBinding,
+    render,
+    where,
+)
+from oak.rules import RULES
+from oak.surface import SURFACES
 
-from build.examples import MODELS, model_examples, model_schema
+from oak.rules import RULES as RULE_SOURCE
+from oak.surface import SURFACES as SURFACE_SOURCE
 
-PRD = ROOT / "docs" / "PRD.md"
 TARGET = ROOT / "outputs" / "prompt.md"
-_CONSTRAINT = re.compile(r"^[0-9]+\. (.+)$")
-_BOUNDARY = re.compile(r"(?<!^)(?=[A-Z])")
+
+_SOURCE_RULES = (
+    "Treat the complete supplied host context as the source, regardless of modality.",
+    "Map directives, policies, interpretation rules, and required behaviour to instructions.",
+    "Map stable values needed during use to constants.",
+    "Map reusable information shapes and output contracts to schemas.",
+    "Map values that can change while the knowledge runs to state.",
+    "Map arrival reasons, state guards, and selected processes to triggers.",
+    "Map ordered ways to perform tasks to processes.",
+    "Map verifiable document-boundary crossings to interfaces.",
+    "Leave a part empty when the source provides no justified entry.",
+    "Do not invent state, triggers, processes, interfaces, or relative paths.",
+    "Write exactly one valid OAK document containing one node.",
+    "Emit the final OAK document as the sole response.",
+)
 
 
-def _slug(name: str) -> str:
-    return _BOUNDARY.sub("-", name).lower()
-
-
-def _constraints() -> list[str]:
-    source = PRD.read_text(encoding="utf-8")
-    try:
-        body = source.split("## Constraints\n", 1)[1].split("\n## ", 1)[0]
-    except IndexError as error:
-        raise RuntimeError("docs/PRD.md has no Constraints section") from error
-
-    result = []
-    for line in body.splitlines():
-        match = _CONSTRAINT.fullmatch(line)
-        if match:
-            result.append(match.group(1))
-
-    if not result:
-        raise RuntimeError("docs/PRD.md has no numbered constraints")
-    return result
-
-
-def _safe(text: str) -> str:
-    return text.replace("<", "\\u003C").replace(">", "\\u003E")
-
-
-def _model_schema(model: type) -> Schema:
-    schema = model_schema(model)
-    title = schema.get("title")
-    description = schema.get("description")
-
-    if not isinstance(title, str) or not title:
-        raise RuntimeError(f"{model.__name__} has no title")
-    if not isinstance(description, str) or not description:
-        raise RuntimeError(f"{model.__name__} has no description")
-
-    fields = []
-    for name, field in model.model_fields.items():
-        if not field.description:
-            raise RuntimeError(f"{model.__name__}.{name} has no description")
-        fields.append(
-            f"{field.title or name.replace('_', ' ').title()}: "
-            f"{field.description}"
-        )
-
-    examples = json.dumps(
-        model_examples(model),
-        ensure_ascii=False,
-        indent=2,
+def tree() -> Node:
+    """Return the model-authored single-shot prompt document."""
+    result_schema = Schema(
+        id="oak-result",
+        name="OAK Result",
+        purpose="Carry the one valid OAK document written from the supplied source.",
+        template="<OAK>",
+        where=[where("OAK", Type(of="string"), NonEmpty(), description="the complete valid OAK document")],
     )
-    template = "\n".join(
-        (
-            title,
-            description,
-            "Fields:",
-            *(f"- {item}" for item in fields),
-            "Examples:",
-            examples,
-        )
-    )
-
-    return Schema(
-        id=_slug(model.__name__),
-        name=title,
-        purpose=description,
-        template=_safe(template),
-    )
-
-
-def tree() -> Root:
-    """Return the model-authored prompt tree."""
-    return Root(
-        id="oak-authoring-prompt",
-        instructions=[
-            Instruction(
-                id=f"constraint-{index}",
-                body=text,
-            )
-            for index, text in enumerate(_constraints(), 1)
+    instructions = [
+        *[Instruction(id=f"source-rule-{index}", body=text) for index, text in enumerate(_SOURCE_RULES, 1)],
+        *[Instruction(id=f"authoring-rule-{index}", body=rule.instruction) for index, rule in enumerate(RULES, 1)],
+    ]
+    return Node(
+        instructions=instructions,
+        constants=[
+            Constant(id="oak-ebnf", form="text", value=grammar().rstrip("\n")),
+            Constant(id="canonical-oak", form="text", value=surface_example(next(surface for surface in SURFACES if surface.id == "node"))),
         ],
-        schemas=[_model_schema(model) for model in MODELS],
+        schemas=[*all_surface_schemas(), result_schema],
         triggers=[
             Trigger(
                 id="write-oak-trigger",
-                when="A model arrives to write OAK.",
-                process="write-oak",
+                given=True,
+                when="Any source material is supplied with this prompt.",
+                then="process.write-oak",
             )
         ],
         processes=[
@@ -115,27 +86,41 @@ def tree() -> Root:
                 name="Write OAK",
                 steps=[
                     Act(
-                        instruction="Write OAK from the supplied models."
-                    )
+                        instruction="Derive <DRAFT> from the complete supplied source.",
+                        outputs=["DRAFT"],
+                    ),
+                    Act(
+                        instruction="Validate <DRAFT> against every supplied OAK contract and produce <OAK>.",
+                        inputs=[ValueBinding(placeholder="DRAFT", value=BindingValue(binding="DRAFT"))],
+                        outputs=["OAK"],
+                    ),
+                    Emit(
+                        interface="interface.result",
+                        bindings=[ValueBinding(placeholder="OAK", value=BindingValue(binding="OAK"))],
+                    ),
                 ],
+            )
+        ],
+        interfaces=[
+            Interface(
+                id="result",
+                direction="out",
+                schema="schema.oak-result",
+                description="The sole OAK document returned to the caller.",
             )
         ],
     )
 
 
 def prompt() -> str:
-    """Return the generated authoring prompt."""
-    return render(tree()) + "\n"
+    """Return the generated single-shot prompt."""
+    return render(tree(), grouping="markdown") + "\n"
 
 
 def write() -> Path:
     """Write the generated authoring prompt snapshot."""
     TARGET.parent.mkdir(parents=True, exist_ok=True)
-    TARGET.write_text(
-        prompt(),
-        encoding="utf-8",
-        newline="\n",
-    )
+    TARGET.write_text(prompt(), encoding="utf-8", newline="\n")
     return TARGET
 
 

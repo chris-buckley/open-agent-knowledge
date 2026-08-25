@@ -1,41 +1,34 @@
-# AtLeast
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+AtLeast: The bound value is at least a number or another placeholder value.
+~~~~
 
-The bound value is at least a number or another placeholder value.
+~~~~constants
+example-1: "is at least 1"
 
-## Examples
+grammar: TEXT<<
+surface_constraint_at_least = ? is at least <VALUE> ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "kind": "at_least",
-    "value": 1
-  }
-]
-```
+~~~~schemas
+~~~schema;id="constraint-at-least";name="AtLeast";purpose="The bound value is at least a number or another placeholder value."
+is at least <VALUE>
 
-## Fields
+WHERE:
+- <VALUE> is string; is non-empty; A number or a placeholder of the same schema..
+~~~
+~~~~
 
-### Kind
+~~~~state
+~~~~
 
-`kind`
+~~~~triggers
+~~~~
 
-The constraint discriminator.
+~~~~processes
+~~~~
 
-```json
-[
-  "at_least"
-]
-```
-
-### Value
-
-`value`
-
-A number or a placeholder of the same schema.
-
-```json
-[
-  1,
-  "LINE_FROM"
-]
-```
+~~~~interfaces
+~~~~

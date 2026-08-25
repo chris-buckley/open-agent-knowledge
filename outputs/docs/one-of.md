@@ -1,46 +1,34 @@
-# OneOf
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+OneOf: The bound value is one of the listed values.
+~~~~
 
-The bound value is one of the listed values.
+~~~~constants
+example-1: "is one of `draft`, `final`"
 
-## Examples
+grammar: TEXT<<
+surface_constraint_one_of = ? is one of <VALUES> ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "kind": "one_of",
-    "values": [
-      "draft",
-      "final"
-    ]
-  }
-]
-```
+~~~~schemas
+~~~schema;id="constraint-one-of";name="OneOf";purpose="The bound value is one of the listed values."
+is one of <VALUES>
 
-## Fields
+WHERE:
+- <VALUES> is string; is non-empty; The allowed values..
+~~~
+~~~~
 
-### Kind
+~~~~state
+~~~~
 
-`kind`
+~~~~triggers
+~~~~
 
-The constraint discriminator.
+~~~~processes
+~~~~
 
-```json
-[
-  "one_of"
-]
-```
-
-### Values
-
-`values`
-
-The allowed values.
-
-```json
-[
-  [
-    "draft",
-    "final"
-  ]
-]
-```
+~~~~interfaces
+~~~~

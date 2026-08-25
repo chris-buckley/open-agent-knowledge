@@ -1,24 +1,25 @@
 ~~~~instructions
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-StateValue: One value read from local state.
-Read and write state only in the active OAK document.
+Not: One child condition whose result is inverted.
 ~~~~
 
 ~~~~constants
-example-1: "$state.status"
+example-1: "NOT:\n  $state.status equals \"closed\""
 
 grammar: TEXT<<
-surface_value_state = ? $<STATE> ? ;
+surface_condition_not = ? NOT:
+  <CONDITION> ? ;
 >>
 ~~~~
 
 ~~~~schemas
-~~~schema;id="value-state";name="StateValue";purpose="One value read from local state."
-$<STATE>
+~~~schema;id="condition-not";name="Not";purpose="One child condition whose result is inverted."
+NOT:
+  <CONDITION>
 
 WHERE:
-- <STATE> is string; is non-empty; The local state target to read..
+- <CONDITION> is string; is non-empty; The child condition to invert..
 ~~~
 ~~~~
 

@@ -1,11 +1,12 @@
 <instructions>
-$ reads a value; a dotted path starts with its part; a bare $NAME is local to the running process; SET, CALL, and EMIT omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and THEN omit $.
+Conditions are typed trees; ALL, ANY, and NOT compose comparisons; ASSERT fails a false condition; FOREACH is sequential; PAR outputs become visible only at JOIN.
 Constants hold values that do not change while the knowledge runs.
-Each schema is one information shape: a template with <PLACEHOLDER> slots, and WHERE lines that constrain each slot.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 State holds values that persist and can change while processes run.
-Each trigger names one arrival reason, an optional state guard, and the process that runs when both match.
-Each process is the exact way to do one task; follow its steps in order, top to bottom.
-Each interface is one information crossing: in arrives, out is emitted, and inout does both.
+Each trigger contains GIVEN, WHEN, and THEN; WHEN matches first, GIVEN guards it, and THEN selects a process.
+Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
+Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both.
 Use only evidence present in the incident report.
 </instructions>
 
@@ -42,7 +43,11 @@ status: "ready"
 </state>
 
 <triggers>
-<trigger id="triage-trigger" given='$state.status equals "ready"' when="An incident report arrives for triage." process="triage" />
+<trigger id="triage-trigger">
+GIVEN: $state.status equals "ready"
+WHEN: "An incident report arrives for triage."
+THEN: process.triage
+</trigger>
 </triggers>
 
 <processes>
@@ -53,10 +58,16 @@ ACT Classify <SUMMARY> with <IMPACT> under <POLICY>, then produce <SEVERITY>, <R
     IMPACT = $interface.report.IMPACT
     POLICY = $constant.escalation-policy
   OUTPUTS: SEVERITY, RATIONALE, NEXT_ACTION
+ASSERT:
+  ALL:
+    $SEVERITY does not equal ""
+    $RATIONALE does not equal ""
+  MESSAGE "The triage result must not be empty."
 IF $SEVERITY equals "critical":
-  SET state.status = "escalated"
-ELSE:
-  SET state.status = "triaged"
+  THEN:
+    SET state.status = "escalated"
+  ELSE:
+    SET state.status = "triaged"
 EMIT interface.decision:
   SEVERITY = $SEVERITY
   RATIONALE = $RATIONALE
@@ -66,11 +77,11 @@ EMIT interface.decision:
 </processes>
 
 <interfaces>
-<interface id="report" direction="in" schema="incident-report">
+<interface id="report" direction="in" schema="schema.incident-report">
 The report supplied for incident triage.
 </interface>
 
-<interface id="decision" direction="out" schema="triage-decision">
+<interface id="decision" direction="out" schema="schema.triage-decision">
 The triage decision returned to the caller.
 </interface>
 </interfaces>

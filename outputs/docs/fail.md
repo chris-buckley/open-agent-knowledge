@@ -1,40 +1,34 @@
-# Fail
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+Fail: One explicit process failure.
+~~~~
 
-One explicit process failure.
+~~~~constants
+example-1: "FAIL \"The result is empty.\""
 
-## Examples
+grammar: TEXT<<
+surface_step_fail = ? FAIL <MESSAGE> ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "kind": "fail",
-    "message": "The result is empty."
-  }
-]
-```
+~~~~schemas
+~~~schema;id="step-fail";name="Fail";purpose="One explicit process failure."
+FAIL <MESSAGE>
 
-## Fields
+WHERE:
+- <MESSAGE> is string; is non-empty; The failure message..
+~~~
+~~~~
 
-### Kind
+~~~~state
+~~~~
 
-`kind`
+~~~~triggers
+~~~~
 
-The process step discriminator.
+~~~~processes
+~~~~
 
-```json
-[
-  "fail"
-]
-```
-
-### Message
-
-`message`
-
-The failure message.
-
-```json
-[
-  "The result is empty."
-]
-```
+~~~~interfaces
+~~~~

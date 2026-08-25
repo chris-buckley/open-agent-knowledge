@@ -1,69 +1,42 @@
-# Emit
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+Emit: One schema instance emitted through one local output interface.
+Bind each emitted placeholder once.
+Bind every interface schema placeholder exactly once when emitting.
+Read and emit interfaces only in the active OAK document.
+Read only in or inout interfaces and emit only out or inout interfaces.
+Make every statically known emission satisfy its interface schema.
+~~~~
 
-One schema instance emitted through one output interface.
+~~~~constants
+example-1: "EMIT interface.result:\n  RESULT = $RESULT"
 
-## Examples
+grammar: TEXT<<
+surface_step_emit = ? EMIT <INTERFACE>:
+  <BINDINGS> ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "kind": "emit",
-    "interface": "result",
-    "bindings": [
-      {
-        "placeholder": "RESULT",
-        "value": {
-          "source": "binding",
-          "binding": "RESULT"
-        }
-      }
-    ]
-  }
-]
-```
+~~~~schemas
+~~~schema;id="step-emit";name="Emit";purpose="One schema instance emitted through one local output interface."
+EMIT <INTERFACE>:
+  <BINDINGS>
 
-## Fields
+WHERE:
+- <INTERFACE> is string; is non-empty; The local output interface target..
+- <BINDINGS> is string; is non-empty; One value binding for each interface schema placeholder..
+~~~
+~~~~
 
-### Kind
+~~~~state
+~~~~
 
-`kind`
+~~~~triggers
+~~~~
 
-The process step discriminator.
+~~~~processes
+~~~~
 
-```json
-[
-  "emit"
-]
-```
-
-### Interface
-
-`interface`
-
-The output interface that carries the schema instance.
-
-```json
-[
-  "result"
-]
-```
-
-### Bindings
-
-`bindings`
-
-One value binding for each interface schema placeholder.
-
-```json
-[
-  [
-    {
-      "placeholder": "RESULT",
-      "value": {
-        "source": "binding",
-        "binding": "RESULT"
-      }
-    }
-  ]
-]
-```
+~~~~interfaces
+~~~~

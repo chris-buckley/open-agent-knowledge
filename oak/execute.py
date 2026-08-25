@@ -1,35 +1,39 @@
-"""Transactional trigger selection and process execution."""
+"""Transactional trigger selection and process execution across one resolved graph."""
 
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
+from concurrent.futures import Future, ThreadPoolExecutor
 from copy import deepcopy
-from typing import TypeVar
+from dataclasses import dataclass
+from typing import Annotated
 
-from pydantic import (
-    ConfigDict,
-    Field,
-    JsonValue,
-    TypeAdapter,
-    ValidationError,
-)
+from pydantic import AfterValidator, ConfigDict, Field, JsonValue, TypeAdapter, ValidationError
 
-from oak.base import Entry, OakModel
-from oak.node.graph import iter_entries, iter_nodes
-from oak.node.model import Node, Root
+from oak.base import OakModel
+from oak.node import Node
+from oak.node.graph import validate_tools
 from oak.node.parts import (
     Act,
+    All,
+    Any,
+    Assert,
     BindingValue,
     Call,
+    Compare,
     Condition,
     Constant,
     ConstantValue,
     Emit,
     Fail,
+    Foreach,
     If,
     Interface,
     InterfaceValue,
+    Join,
     LiteralValue,
+    Not,
+    Par,
     Process,
     Schema,
     SchemaBindingError,
@@ -40,35 +44,28 @@ from oak.node.parts import (
     Trigger,
     Value,
 )
-from oak.vocabulary import (
-    NonBlankLine,
-    Placeholder,
-    SlugId,
-)
+from oak.resolve import DocumentLoader, ResolvedGraph, resolve
+from oak.vocabulary import NonBlankLine, Placeholder, TargetPath
+from oak.vocabulary.text.target_path import target_id, typed_target
 
-_STRICT = ConfigDict(
-    strict=True,
-    regex_engine="rust-regex",
-)
-_STATE_ADAPTER = TypeAdapter(
-    dict[SlugId, JsonValue],
-    config=_STRICT,
-)
-_BINDING_ADAPTER = TypeAdapter(
-    dict[Placeholder, JsonValue],
-    config=_STRICT,
-)
-_JSON_ADAPTER = TypeAdapter(
-    JsonValue,
-    config=_STRICT,
-)
+_STRICT = ConfigDict(strict=True, regex_engine="rust-regex")
+_STATE_ADAPTER = TypeAdapter(dict[TargetPath, JsonValue], config=_STRICT)
+_BINDING_ADAPTER = TypeAdapter(dict[Placeholder, JsonValue], config=_STRICT)
+_JSON_ADAPTER = TypeAdapter(JsonValue, config=_STRICT)
+InterfaceArrivalTarget = Annotated[TargetPath, AfterValidator(lambda value: typed_target(value, "interface"))]
 
-ActHandler = Callable[
-    [Act, Mapping[str, JsonValue]],
-    Mapping[str, JsonValue],
-]
+ActHandler = Callable[[Act, Mapping[str, JsonValue]], Mapping[str, JsonValue]]
+ToolHandler = Callable[[Act, Mapping[str, JsonValue]], Mapping[str, JsonValue]]
 
-Target = TypeVar("Target")
+
+@dataclass(frozen=True, slots=True)
+class ToolContract:
+    """One exact host tool contract and handler."""
+
+    handler: ToolHandler
+    inputs: frozenset[str]
+    outputs: frozenset[str]
+    parallel: bool = False
 
 
 class Arrival(OakModel):
@@ -80,7 +77,7 @@ class Arrival(OakModel):
                 {
                     "when": "A command line arrives.",
                     "interfaces": {
-                        "stdin": {
+                        "interface.stdin": {
                             "COMMAND": "pwd",
                         }
                     },
@@ -90,22 +87,13 @@ class Arrival(OakModel):
     )
 
     when: NonBlankLine = Field(
-        description="The arrival reason matched against trigger text.",
+        description="The arrival reason matched against trigger WHEN text.",
         examples=["A command line arrives."],
     )
-    interfaces: dict[
-        SlugId,
-        dict[Placeholder, JsonValue],
-    ] = Field(
+    interfaces: dict[InterfaceArrivalTarget, dict[Placeholder, JsonValue]] = Field(
         default_factory=dict,
-        description="The active input bindings by interface id.",
-        examples=[
-            {
-                "stdin": {
-                    "COMMAND": "pwd",
-                }
-            }
-        ],
+        description="The active input bindings by root-relative interface target.",
+        examples=[{"interface.stdin": {"COMMAND": "pwd"}}],
     )
 
 
@@ -116,26 +104,20 @@ class Emission(OakModel):
         json_schema_extra={
             "examples": [
                 {
-                    "interface": "stdout",
-                    "values": {
-                        "OUTPUT": "/oak",
-                    },
+                    "interface": "interface.stdout",
+                    "values": {"OUTPUT": "/oak"},
                 }
             ]
         }
     )
 
-    interface: SlugId = Field(
-        description="The output interface id.",
-        examples=["stdout"],
+    interface: InterfaceArrivalTarget = Field(
+        description="The root-relative output interface target.",
+        examples=["interface.stdout"],
     )
     values: dict[Placeholder, JsonValue] = Field(
         description="The validated schema bindings.",
-        examples=[
-            {
-                "OUTPUT": "/oak",
-            }
-        ],
+        examples=[{"OUTPUT": "/oak"}],
     )
 
 
@@ -146,16 +128,12 @@ class ExecutionResult(OakModel):
         json_schema_extra={
             "examples": [
                 {
-                    "process": "pwd",
-                    "state": {
-                        "mode": "open",
-                    },
+                    "process": "process.pwd",
+                    "state": {"state.mode": "open"},
                     "emissions": [
                         {
-                            "interface": "stdout",
-                            "values": {
-                                "OUTPUT": "/oak",
-                            },
+                            "interface": "interface.stdout",
+                            "values": {"OUTPUT": "/oak"},
                         }
                     ],
                 }
@@ -163,593 +141,352 @@ class ExecutionResult(OakModel):
         }
     )
 
-    process: SlugId | None = Field(
+    process: TargetPath | None = Field(
         default=None,
-        description="The selected process, or null when none matched.",
-        examples=["pwd"],
+        description="The selected root-relative process target, or null.",
+        examples=["process.pwd"],
     )
-    state: dict[SlugId, JsonValue] = Field(
-        description="The state after successful completion.",
-        examples=[
-            {
-                "mode": "open",
-            }
-        ],
+    state: dict[TargetPath, JsonValue] = Field(
+        description="The committed state by root-relative target.",
+        examples=[{"state.mode": "open"}],
     )
     emissions: list[Emission] = Field(
         default_factory=list,
-        description="The emissions in execution order.",
-        examples=[
-            [
-                {
-                    "interface": "stdout",
-                    "values": {
-                        "OUTPUT": "/oak",
-                    },
-                }
-            ]
-        ],
+        description="The committed emissions in execution order.",
+        examples=[[{"interface": "interface.stdout", "values": {"OUTPUT": "/oak"}}]],
     )
 
 
 class ExecutionError(RuntimeError):
-    """One runtime failure that discards the transaction."""
+    """One runtime failure that discards staged OAK effects."""
 
     def __init__(
         self,
         code: str,
         message: str,
+        *,
+        suppressed: tuple[str, ...] = (),
     ) -> None:
         self.code = code
         self.message = message
-        super().__init__(
-            f"[{code}] {message}"
-        )
+        self.suppressed = suppressed
+        suffix = "" if not suppressed else "; suppressed: " + " | ".join(suppressed)
+        super().__init__(f"[{code}] {message}{suffix}")
 
 
-def _registry(
-    root: Root,
-) -> dict[str, Node | Entry]:
-    registry: dict[str, Node | Entry] = {}
-
-    for node in iter_nodes(root):
-        registry[node.id] = node
-        for entry in iter_entries(node):
-            registry[entry.id] = entry
-
-    return registry
-
-
-def _target(
-    registry: dict[str, Node | Entry],
-    identifier: str,
-    expected: type[Target],
-) -> Target:
-    target = registry.get(identifier)
-
-    if not isinstance(target, expected):
-        raise ExecutionError(
-            "invalid_runtime_target",
-            (
-                f"{identifier} is not a "
-                f"{expected.__name__.lower()}"
-            ),
-        )
-
-    return target
-
-
-def _json_equal(
-    left: object,
-    right: object,
-) -> bool:
+def _json_equal(left: object, right: object) -> bool:
     if isinstance(left, bool) or isinstance(right, bool):
-        return (
-            isinstance(left, bool)
-            and isinstance(right, bool)
-            and left == right
-        )
-
-    if isinstance(left, (int, float)) and isinstance(
-        right,
-        (int, float),
-    ):
+        return isinstance(left, bool) and isinstance(right, bool) and left == right
+    if isinstance(left, (int, float)) and isinstance(right, (int, float)):
         return left == right
-
     if isinstance(left, list) and isinstance(right, list):
-        return (
-            len(left) == len(right)
-            and all(
-                _json_equal(
-                    left_item,
-                    right_item,
-                )
-                for left_item, right_item in zip(
-                    left,
-                    right,
-                    strict=True,
-                )
-            )
-        )
-
+        return len(left) == len(right) and all(_json_equal(a, b) for a, b in zip(left, right, strict=True))
     if isinstance(left, dict) and isinstance(right, dict):
-        return (
-            left.keys() == right.keys()
-            and all(
-                _json_equal(
-                    left[key],
-                    right[key],
-                )
-                for key in left
-            )
-        )
-
-    return (
-        type(left) is type(right)
-        and left == right
-    )
+        return left.keys() == right.keys() and all(_json_equal(left[key], right[key]) for key in left)
+    return type(left) is type(right) and left == right
 
 
-def _schema_for(
-    registry: dict[str, Node | Entry],
-    interface: Interface,
-) -> Schema:
-    return _target(
-        registry,
-        interface.schema_id,
-        Schema,
-    )
-
-
-def _resolve(
-    registry: dict[str, Node | Entry],
+def _resolve_value(
+    graph: ResolvedGraph,
+    document: str,
     value: Value,
     state: dict[str, JsonValue],
-    interfaces: dict[
-        str,
-        dict[str, JsonValue],
-    ],
-    bindings: dict[str, JsonValue],
+    interfaces: Mapping[tuple[str, str], Mapping[str, JsonValue]],
+    bindings: Mapping[str, JsonValue],
 ) -> JsonValue:
     if isinstance(value, LiteralValue):
         return deepcopy(value.value)
-
     if isinstance(value, ConstantValue):
-        constant = _target(
-            registry,
-            value.constant,
-            Constant,
-        )
+        _target_document, constant = graph.entry(document, value.constant, Constant)
         return deepcopy(constant.value)
-
     if isinstance(value, StateValue):
-        if value.state not in state:
-            raise ExecutionError(
-                "missing_state_value",
-                f"state {value.state} is absent",
-            )
-        return deepcopy(
-            state[value.state]
-        )
-
+        identifier = target_id(value.state)
+        key = graph.display_target(document, "state", identifier)
+        if key not in state:
+            raise ExecutionError("missing_state_value", f"state {key} is absent")
+        return deepcopy(state[key])
     if isinstance(value, InterfaceValue):
-        interface_values = interfaces.get(
-            value.interface
-        )
-
-        if (
-            interface_values is None
-            or value.placeholder not in interface_values
-        ):
-            raise ExecutionError(
-                "missing_interface_value",
-                (
-                    f"interface {value.interface} "
-                    f"has no {value.placeholder} value"
-                ),
-            )
-
-        return deepcopy(
-            interface_values[value.placeholder]
-        )
-
+        identifier = target_id(value.interface)
+        values = interfaces.get((document, identifier))
+        if values is None or value.placeholder not in values:
+            raise ExecutionError("missing_interface_value", f"interface {identifier} has no {value.placeholder} value")
+        return deepcopy(values[value.placeholder])
     if isinstance(value, BindingValue):
         if value.binding not in bindings:
-            raise ExecutionError(
-                "missing_process_binding",
-                f"binding {value.binding} is absent",
-            )
+            raise ExecutionError("missing_process_binding", f"binding {value.binding} is absent")
+        return deepcopy(bindings[value.binding])
+    raise TypeError(type(value).__name__)
 
-        return deepcopy(
-            bindings[value.binding]
-        )
 
-    raise TypeError(
-        f"unsupported process value {type(value).__name__}"
-    )
+def _ordered(operator: str, left: object, right: object) -> bool:
+    if isinstance(left, bool) or isinstance(right, bool):
+        raise ExecutionError("ordered_comparison_type_mismatch", "ordered comparison needs two numbers or two strings")
+    if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+        a, b = left, right
+    elif isinstance(left, str) and isinstance(right, str):
+        a, b = left, right
+    else:
+        raise ExecutionError("ordered_comparison_type_mismatch", "ordered comparison needs two numbers or two strings")
+    return {
+        "less_than": a < b,
+        "less_than_or_equal": a <= b,
+        "greater_than": a > b,
+        "greater_than_or_equal": a >= b,
+    }[operator]
 
 
 def _condition(
-    registry: dict[str, Node | Entry],
+    graph: ResolvedGraph,
+    document: str,
     condition: Condition,
     state: dict[str, JsonValue],
-    interfaces: dict[
-        str,
-        dict[str, JsonValue],
-    ],
-    bindings: dict[str, JsonValue],
+    interfaces: Mapping[tuple[str, str], Mapping[str, JsonValue]],
+    bindings: Mapping[str, JsonValue],
 ) -> bool:
-    equal = _json_equal(
-        _resolve(
-            registry,
-            condition.left,
-            state,
-            interfaces,
-            bindings,
-        ),
-        _resolve(
-            registry,
-            condition.right,
-            state,
-            interfaces,
-            bindings,
-        ),
-    )
+    if isinstance(condition, Compare):
+        left = _resolve_value(graph, document, condition.left, state, interfaces, bindings)
+        right = _resolve_value(graph, document, condition.right, state, interfaces, bindings)
+        if condition.operator == "equals":
+            return _json_equal(left, right)
+        if condition.operator == "not_equals":
+            return not _json_equal(left, right)
+        return _ordered(condition.operator, left, right)
+    if isinstance(condition, All):
+        for child in condition.conditions:
+            if not _condition(graph, document, child, state, interfaces, bindings):
+                return False
+        return True
+    if isinstance(condition, Any):
+        for child in condition.conditions:
+            if _condition(graph, document, child, state, interfaces, bindings):
+                return True
+        return False
+    if isinstance(condition, Not):
+        return not _condition(graph, document, condition.condition, state, interfaces, bindings)
+    raise TypeError(type(condition).__name__)
 
-    return (
-        equal
-        if condition.operator == "equals"
-        else not equal
-    )
 
-
-def _validate_arrival(
-    registry: dict[str, Node | Entry],
-    arrival: Arrival,
-) -> dict[str, dict[str, JsonValue]]:
-    active: dict[
-        str,
-        dict[str, JsonValue],
-    ] = {}
-
-    for identifier, values in arrival.interfaces.items():
-        interface = _target(
-            registry,
-            identifier,
-            Interface,
+def _invoke(
+    step: Act,
+    values: Mapping[str, JsonValue],
+    act: ActHandler | None,
+    tools: Mapping[str, ToolContract],
+) -> dict[str, JsonValue]:
+    handler: ActHandler | ToolHandler | None
+    if step.tool is None:
+        handler = act
+        if handler is None:
+            raise ExecutionError("act_handler_missing", "an interpreter-native act needs an act handler")
+    else:
+        contract = tools.get(step.tool)
+        if contract is None:
+            raise ExecutionError("unknown_tool", f"tool {step.tool} is absent")
+        handler = contract.handler
+    try:
+        authored = handler(step, values)
+        outputs = _BINDING_ADAPTER.validate_python(dict(authored))
+    except ExecutionError:
+        raise
+    except Exception as error:
+        raise ExecutionError("act_failed" if step.tool is None else "tool_failed", str(error)) from None
+    expected = set(step.outputs)
+    supplied = set(outputs)
+    if supplied != expected:
+        raise ExecutionError(
+            "act_output_mismatch",
+            "act outputs differ; missing: "
+            + (", ".join(sorted(expected - supplied)) or "none")
+            + "; unused: "
+            + (", ".join(sorted(supplied - expected)) or "none"),
         )
+    return deepcopy(outputs)
 
-        if interface.direction not in ("in", "inout"):
-            raise ExecutionError(
-                "interface_direction_mismatch",
-                (
-                    f"interface {identifier} "
-                    "cannot receive input"
-                ),
-            )
 
-        schema = _schema_for(
-            registry,
-            interface,
-        )
-
-        try:
-            schema.bind(values)
-        except SchemaBindingError as error:
-            raise ExecutionError(
-                "invalid_interface_binding",
-                f"interface {identifier}: {error}",
-            ) from None
-
-        active[identifier] = deepcopy(values)
-
-    return active
+def _parallel(
+    graph: ResolvedGraph,
+    document: str,
+    step: Par,
+    state: dict[str, JsonValue],
+    interfaces: Mapping[tuple[str, str], Mapping[str, JsonValue]],
+    bindings: Mapping[str, JsonValue],
+    tools: Mapping[str, ToolContract],
+) -> list[dict[str, JsonValue]]:
+    acts = [child for child in step.steps if isinstance(child, Act)]
+    prepared = [
+        {
+            binding.placeholder: _resolve_value(graph, document, binding.value, state, interfaces, bindings)
+            for binding in child.inputs
+        }
+        for child in acts
+    ]
+    futures: list[Future[dict[str, JsonValue]]] = []
+    with ThreadPoolExecutor(max_workers=len(acts)) as executor:
+        for child, values in zip(acts, prepared, strict=True):
+            futures.append(executor.submit(_invoke, child, values, None, tools))
+        results: list[dict[str, JsonValue] | None] = []
+        failures: list[str] = []
+        for future in futures:
+            try:
+                results.append(future.result())
+            except Exception as error:
+                results.append(None)
+                failures.append(str(error))
+    if failures:
+        raise ExecutionError("parallel_failed", failures[0], suppressed=tuple(failures[1:]))
+    return [result for result in results if result is not None]
 
 
 def _run_steps(
-    registry: dict[str, Node | Entry],
+    graph: ResolvedGraph,
+    document: str,
     steps: list[Step],
     state: dict[str, JsonValue],
-    interfaces: dict[
-        str,
-        dict[str, JsonValue],
-    ],
+    interfaces: Mapping[tuple[str, str], Mapping[str, JsonValue]],
     emissions: list[Emission],
     bindings: dict[str, JsonValue],
-    handler: ActHandler | None,
+    act: ActHandler | None,
+    tools: Mapping[str, ToolContract],
 ) -> None:
+    pending: list[dict[str, JsonValue]] | None = None
     for step in steps:
         if isinstance(step, Act):
-            if handler is None:
-                raise ExecutionError(
-                    "act_handler_missing",
-                    "an act step needs an act handler",
-                )
-
-            inputs = {
-                binding.placeholder: _resolve(
-                    registry,
-                    binding.value,
-                    state,
-                    interfaces,
-                    bindings,
-                )
+            values = {
+                binding.placeholder: _resolve_value(graph, document, binding.value, state, interfaces, bindings)
                 for binding in step.inputs
             }
-
-            try:
-                authored = handler(
-                    step,
-                    inputs,
-                )
-                outputs = (
-                    _BINDING_ADAPTER.validate_python(
-                        dict(authored)
-                    )
-                )
-            except ExecutionError:
-                raise
-            except Exception as error:
-                raise ExecutionError(
-                    "act_failed",
-                    str(error),
-                ) from None
-
-            expected = set(step.outputs)
-            supplied = set(outputs)
-
-            if supplied != expected:
-                missing = (
-                    ", ".join(
-                        sorted(expected - supplied)
-                    )
-                    or "none"
-                )
-                unused = (
-                    ", ".join(
-                        sorted(supplied - expected)
-                    )
-                    or "none"
-                )
-
-                raise ExecutionError(
-                    "act_output_mismatch",
-                    (
-                        "act outputs differ; "
-                        f"missing: {missing}; "
-                        f"unused: {unused}"
-                    ),
-                )
-
-            bindings.update(
-                deepcopy(outputs)
-            )
-
+            bindings.update(_invoke(step, values, act, tools))
         elif isinstance(step, Set):
-            value = _resolve(
-                registry,
-                step.value,
-                state,
-                interfaces,
-                bindings,
+            identifier = target_id(step.state)
+            key = graph.display_target(document, "state", identifier)
+            state[key] = _JSON_ADAPTER.validate_python(
+                _resolve_value(graph, document, step.value, state, interfaces, bindings)
             )
-            state[step.state] = (
-                _JSON_ADAPTER.validate_python(
-                    value
-                )
-            )
-
         elif isinstance(step, Emit):
-            interface = _target(
-                registry,
-                step.interface,
-                Interface,
-            )
-            schema = _schema_for(
-                registry,
-                interface,
-            )
-
+            identifier = target_id(step.interface)
+            _interface_document, interface = graph.entry(document, step.interface, Interface)
+            _schema_document, schema = graph.entry(document, interface.schema_id, Schema)
             values = {
-                binding.placeholder: _resolve(
-                    registry,
-                    binding.value,
-                    state,
-                    interfaces,
-                    bindings,
-                )
+                binding.placeholder: _resolve_value(graph, document, binding.value, state, interfaces, bindings)
                 for binding in step.bindings
             }
-
             try:
                 schema.bind(values)
             except SchemaBindingError as error:
-                raise ExecutionError(
-                    "invalid_emission",
-                    (
-                        f"interface {step.interface}: "
-                        f"{error}"
-                    ),
-                ) from None
-
+                raise ExecutionError("invalid_emission", f"interface {identifier}: {error}") from None
             emissions.append(
                 Emission(
-                    interface=step.interface,
+                    interface=graph.display_target(document, "interface", identifier),
                     values=deepcopy(values),
                 )
             )
-
         elif isinstance(step, If):
-            selected = (
-                step.then
-                if _condition(
-                    registry,
-                    step.condition,
-                    state,
-                    interfaces,
-                    bindings,
-                )
-                else step.otherwise
-            )
-
+            selected = step.then if _condition(graph, document, step.condition, state, interfaces, bindings) else step.otherwise
             if selected is not None:
-                _run_steps(
-                    registry,
-                    selected,
-                    state,
-                    interfaces,
-                    emissions,
-                    dict(bindings),
-                    handler,
-                )
-
+                _run_steps(graph, document, selected, state, interfaces, emissions, dict(bindings), act, tools)
         elif isinstance(step, Call):
-            process = _target(
-                registry,
-                step.process,
-                Process,
-            )
-            _run_steps(
-                registry,
-                process.steps,
-                state,
-                interfaces,
-                emissions,
-                {},
-                handler,
-            )
-
+            target_document, process = graph.entry(document, step.process, Process)
+            _run_steps(graph, target_document, process.steps, state, interfaces, emissions, {}, act, tools)
         elif isinstance(step, Fail):
-            raise ExecutionError(
-                "process_failed",
-                step.message,
-            )
-
+            raise ExecutionError("process_failed", step.message)
+        elif isinstance(step, Assert):
+            if not _condition(graph, document, step.condition, state, interfaces, bindings):
+                raise ExecutionError("assertion_failed", step.message or "process assertion failed")
+        elif isinstance(step, Foreach):
+            items = _resolve_value(graph, document, step.value, state, interfaces, bindings)
+            if not isinstance(items, list):
+                raise ExecutionError("foreach_source_not_list", "FOREACH value is not a JSON list")
+            for item in items:
+                local = dict(bindings)
+                local[step.binding] = deepcopy(item)
+                _run_steps(graph, document, step.steps, state, interfaces, emissions, local, act, tools)
+        elif isinstance(step, Par):
+            pending = _parallel(graph, document, step, state, interfaces, bindings, tools)
+        elif isinstance(step, Join):
+            if pending is None:
+                raise ExecutionError("join_without_par", "JOIN has no pending PAR")
+            for result in pending:
+                bindings.update(result)
+            pending = None
         else:
-            raise TypeError(
-                (
-                    "unsupported process step "
-                    f"{type(step).__name__}"
-                )
-            )
+            raise TypeError(type(step).__name__)
+    if pending is not None:
+        raise ExecutionError("parallel_join_missing", "PAR has no JOIN")
+
+
+def _active_interfaces(graph: ResolvedGraph, arrival: Arrival) -> dict[tuple[str, str], dict[str, JsonValue]]:
+    active: dict[tuple[str, str], dict[str, JsonValue]] = {}
+    for target, values in arrival.interfaces.items():
+        document, interface = graph.entry(graph.root, target, Interface)
+        if interface.direction not in ("in", "inout"):
+            raise ExecutionError("interface_direction_mismatch", f"interface {target} cannot receive input")
+        _schema_document, schema = graph.entry(document, interface.schema_id, Schema)
+        try:
+            schema.bind(values)
+        except SchemaBindingError as error:
+            raise ExecutionError("invalid_interface_binding", f"interface {target}: {error}") from None
+        active[(document, interface.id)] = deepcopy(values)
+    return active
+
+
+def _authored_state(graph: ResolvedGraph) -> dict[str, JsonValue]:
+    return {
+        graph.display_target(document, "state", entry.id): deepcopy(entry.value)
+        for document, node in graph.documents.items()
+        for entry in node.state
+    }
 
 
 def execute(
-    root: Root,
+    node: Node,
     arrival: Arrival,
     state: Mapping[str, JsonValue],
     *,
     act: ActHandler | None = None,
+    tools: Mapping[str, ToolContract] | None = None,
+    source: str | None = None,
+    load: DocumentLoader | None = None,
+    root: str | None = None,
 ) -> ExecutionResult:
-    """Run one arrival cycle and return committed effects."""
-    registry = _registry(root)
-
-    authored_state = {
-        entry.id
-        for entry in registry.values()
-        if isinstance(entry, State)
-    }
-
+    """Run one arrival cycle and commit state and emissions on success."""
+    graph = resolve(node, source=source, load=load, root=root)
+    tool_registry = tools or {}
+    for document in graph.documents.values():
+        try:
+            validate_tools(document, tool_registry)
+        except Exception as error:
+            code = getattr(error, "type", None) or getattr(error, "code", None) or "tool_validation_failed"
+            raise ExecutionError(str(code), str(error)) from None
     try:
-        working_state = (
-            _STATE_ADAPTER.validate_python(
-                dict(state)
-            )
-        )
+        working_state = _STATE_ADAPTER.validate_python(dict(state))
     except ValidationError as error:
-        raise ExecutionError(
-            "invalid_execution_state",
-            str(error),
-        ) from None
-
+        raise ExecutionError("invalid_execution_state", str(error)) from None
+    expected_state = set(_authored_state(graph))
     supplied_state = set(working_state)
-    if supplied_state != authored_state:
-        missing = (
-            ", ".join(
-                sorted(
-                    authored_state - supplied_state
-                )
-            )
-            or "none"
-        )
-        unknown = (
-            ", ".join(
-                sorted(
-                    supplied_state - authored_state
-                )
-            )
-            or "none"
-        )
-
+    if supplied_state != expected_state:
         raise ExecutionError(
             "execution_state_mismatch",
-            (
-                "state differs; "
-                f"missing: {missing}; "
-                f"unknown: {unknown}"
-            ),
+            "state differs; missing: "
+            + (", ".join(sorted(expected_state - supplied_state)) or "none")
+            + "; unknown: "
+            + (", ".join(sorted(supplied_state - expected_state)) or "none"),
         )
-
-    active_interfaces = _validate_arrival(
-        registry,
-        arrival,
-    )
+    active = _active_interfaces(graph, arrival)
     matches: list[Trigger] = []
-
-    for node in iter_nodes(root):
-        for trigger in node.triggers:
-            if trigger.when != arrival.when:
-                continue
-
-            if (
-                trigger.given is None
-                or _condition(
-                    registry,
-                    trigger.given,
-                    working_state,
-                    active_interfaces,
-                    {},
-                )
-            ):
-                matches.append(trigger)
-
+    root_registry = graph.registries[graph.root]
+    for trigger in node.triggers:
+        if trigger.when != arrival.when:
+            continue
+        if trigger.given is True or _condition(graph, graph.root, trigger.given, working_state, active, {}):
+            matches.append(trigger)
     if len(matches) > 1:
-        identifiers = ", ".join(
-            trigger.id
-            for trigger in matches
-        )
-        raise ExecutionError(
-            "ambiguous_trigger_match",
-            (
-                "arrival matches triggers "
-                f"{identifiers}"
-            ),
-        )
-
+        raise ExecutionError("ambiguous_trigger_match", "arrival matches triggers " + ", ".join(item.id for item in matches))
     if not matches:
-        return ExecutionResult(
-            state=working_state,
-        )
-
-    process = _target(
-        registry,
-        matches[0].process,
-        Process,
-    )
+        return ExecutionResult(state=working_state)
+    process_document, process = graph.entry(graph.root, matches[0].then, Process)
     emissions: list[Emission] = []
-
-    _run_steps(
-        registry,
-        process.steps,
-        working_state,
-        active_interfaces,
-        emissions,
-        {},
-        act,
-    )
-
+    _run_steps(graph, process_document, process.steps, working_state, active, emissions, {}, act, tool_registry)
     return ExecutionResult(
-        process=process.id,
+        process=graph.display_target(process_document, "process", process.id),
         state=working_state,
         emissions=emissions,
     )

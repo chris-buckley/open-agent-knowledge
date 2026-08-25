@@ -7,6 +7,7 @@ from oak.vocabulary.text import (
     ProcessName,
     RegexPattern,
     SlugId,
+    TargetPath,
     ValueReference,
 )
 from oak.vocabulary.units import Unit
@@ -24,6 +25,7 @@ __all__ = [
     "RegexPattern",
     "SlugId",
     "THIN_SPACE",
+    "TargetPath",
     "Unit",
     "ValueReference",
     "datetime_text",
@@ -33,10 +35,18 @@ __all__ = [
 
 
 def __getattr__(name: str) -> object:
-    if name in {"DATATYPE_ADAPTERS", "Datatype", "DateTime", "Quantity"}:
+    if name in {
+        "DATATYPE_ADAPTERS",
+        "Datatype",
+        "DateTime",
+        "Quantity",
+    }:
         from oak.vocabulary import datatypes
 
-        return getattr(datatypes, name)
+        return getattr(
+            datatypes,
+            name,
+        )
 
     if name in {
         "DECIMAL_SEPARATOR",
@@ -47,6 +57,9 @@ def __getattr__(name: str) -> object:
     }:
         from oak.vocabulary import display
 
-        return getattr(display, name)
+        return getattr(
+            display,
+            name,
+        )
 
     raise AttributeError(name)

@@ -1,53 +1,35 @@
-# ListOf
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+ListOf: The bound value is items of one datatype joined by one separator.
+~~~~
 
-The bound value is items of one datatype joined by one separator.
+~~~~constants
+example-1: "is a list of integer joined by `, `"
 
-## Examples
+grammar: TEXT<<
+surface_constraint_list_of = ? is a list of <ITEM> joined by `<SEPARATOR>` ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "kind": "list_of",
-    "item": "integer",
-    "separator": ", "
-  }
-]
-```
+~~~~schemas
+~~~schema;id="constraint-list-of";name="ListOf";purpose="The bound value is items of one datatype joined by one separator."
+is a list of <ITEM> joined by `<SEPARATOR>`
 
-## Fields
+WHERE:
+- <ITEM> is string; is non-empty; The datatype of every item..
+- <SEPARATOR> is string; is non-empty; The text between items..
+~~~
+~~~~
 
-### Kind
+~~~~state
+~~~~
 
-`kind`
+~~~~triggers
+~~~~
 
-The constraint discriminator.
+~~~~processes
+~~~~
 
-```json
-[
-  "list_of"
-]
-```
-
-### Item
-
-`item`
-
-The datatype of every item.
-
-```json
-[
-  "integer"
-]
-```
-
-### Separator
-
-`separator`
-
-The text between items.
-
-```json
-[
-  ", "
-]
-```
+~~~~interfaces
+~~~~

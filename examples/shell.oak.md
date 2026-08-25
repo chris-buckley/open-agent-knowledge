@@ -1,10 +1,10 @@
 <instructions>
-$ reads a value; a dotted path starts with its part; a bare $NAME is local to the running process; SET, CALL, and EMIT omit $.
-Each schema is one information shape: a template with <PLACEHOLDER> slots, and WHERE lines that constrain each slot.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and THEN omit $.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 State holds values that persist and can change while processes run.
-Each trigger names one arrival reason, an optional state guard, and the process that runs when both match.
-Each process is the exact way to do one task; follow its steps in order, top to bottom.
-Each interface is one information crossing: in arrives, out is emitted, and inout does both.
+Each trigger contains GIVEN, WHEN, and THEN; WHEN matches first, GIVEN guards it, and THEN selects a process.
+Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
+Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both.
 Treat each command as an exact string.
 </instructions>
 
@@ -32,18 +32,24 @@ mode: "open"
 </state>
 
 <triggers>
-<trigger id="command" given='$state.mode equals "open"' when="A command line arrives." process="route" />
+<trigger id="command">
+GIVEN: $state.mode equals "open"
+WHEN: "A command line arrives."
+THEN: process.route
+</trigger>
 </triggers>
 
 <processes>
 <process id="route" name="Route command">
 IF $interface.stdin.COMMAND equals "pwd":
-  CALL process.pwd
-ELSE:
-  IF $interface.stdin.COMMAND equals "exit":
-    CALL process.exit
+  THEN:
+    CALL process.pwd
   ELSE:
-    FAIL "Unknown shell command."
+    IF $interface.stdin.COMMAND equals "exit":
+      THEN:
+        CALL process.exit
+      ELSE:
+        FAIL "Unknown shell command."
 </process>
 
 <process id="pwd" name="Run pwd">
@@ -59,11 +65,11 @@ SET state.mode = "closed"
 </processes>
 
 <interfaces>
-<interface id="stdin" direction="in" schema="command-line">
+<interface id="stdin" direction="in" schema="schema.command-line">
 The command line the user types.
 </interface>
 
-<interface id="stdout" direction="out" schema="terminal-output">
+<interface id="stdout" direction="out" schema="schema.terminal-output">
 The line the shell prints.
 </interface>
 </interfaces>

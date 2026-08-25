@@ -1,84 +1,39 @@
-# Where
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+Where: One placeholder, its constraints, examples, and description.
+Make every WHERE example satisfy its local constraints.
+Do not give examples to a WHERE entry with placeholder-valued bounds.
+~~~~
 
-One placeholder, its constraints, examples, and description.
+~~~~constants
+example-1: "- <OUTLINE_TITLE> is string; title for the outline."
 
-## Examples
+grammar: TEXT<<
+surface_where = ? - <PLACEHOLDER> <CONSTRAINTS> <EXAMPLES> <DESCRIPTION>. ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "placeholder": "OUTLINE_TITLE",
-    "constraints": [
-      {
-        "kind": "type",
-        "of": "string"
-      }
-    ],
-    "description": "title for the outline"
-  }
-]
-```
+~~~~schemas
+~~~schema;id="where";name="Where";purpose="One placeholder, its constraints, examples, and description."
+- <PLACEHOLDER> <CONSTRAINTS> <EXAMPLES> <DESCRIPTION>.
 
-## Fields
+WHERE:
+- <PLACEHOLDER> is string; is non-empty; The bare placeholder name..
+- <CONSTRAINTS> is string; is non-empty; The constraints every bound value must satisfy..
+- <EXAMPLES> is string; is non-empty; Values that satisfy every locally resolvable constraint..
+- <DESCRIPTION> is string; is non-empty; What the placeholder holds, in one line..
+~~~
+~~~~
 
-### Placeholder
+~~~~state
+~~~~
 
-`placeholder`
+~~~~triggers
+~~~~
 
-The bare placeholder name.
+~~~~processes
+~~~~
 
-```json
-[
-  "OUTLINE_TITLE"
-]
-```
-
-### Constraints
-
-`constraints`
-
-The constraints every bound value must satisfy.
-
-```json
-[
-  [
-    {
-      "kind": "type",
-      "of": "string"
-    }
-  ],
-  [
-    {
-      "kind": "regex",
-      "pattern": "^[0-9]+$"
-    }
-  ]
-]
-```
-
-### Examples
-
-`examples`
-
-Values that satisfy every locally resolvable constraint.
-
-```json
-[
-  [
-    "1.1",
-    "1.2"
-  ]
-]
-```
-
-### Description
-
-`description`
-
-What the placeholder holds, in one line.
-
-```json
-[
-  "title for the outline"
-]
-```
+~~~~interfaces
+~~~~

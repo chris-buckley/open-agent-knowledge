@@ -1,14 +1,12 @@
 ---
 title: OAK Product Requirements
 status: draft
-updated: 2026-08-24
+updated: 2026-08-25
 owner: Christopher Buckley
 defaults:
   render: OAK
   grouping: xml
   style: authored
-open:
-  - What fields does every entry share? Deferred on 2026-08-21 while the user reviews the PRD. The title field is out of the sketch until this is decided.
 authoring:
   - These rules govern every line after the first `---` that follows the Purpose section; the Purpose prose above it is exempt.
   - This document is the complete ground truth for OAK; it evolves and is never partial.
@@ -18,34 +16,22 @@ authoring:
   - Compress alternatives as (a|b|c).
   - Write only confirmed information.
   - Every line fights for its place; remove what loses.
-  - Each line maps to (core schema: type|literal|discriminated union|nested model|min or max length|gt or lt|regex|strict|no extra fields|frozen|JSON parse from bytes|core serializer: dump|JSON dump|include or exclude|alias|context|Python engine rule: after validator|field validator|root graph check|exclude_if|field serializer|model serializer to text|JSON Schema|source lint|runtime check|purpose: intent|rationale); a line that maps to none is removed.
+  - Each line maps to (core schema: type|literal|discriminated union|nested model|min or max length|gt or lt|regex|strict|no extra fields|frozen|JSON parse from bytes|core serializer: dump|JSON dump|include or exclude|alias|context|Python engine rule: after validator|field validator|document graph check|exclude_if|field serializer|model serializer to text|JSON Schema|source lint|runtime check|purpose: intent|rationale); a line that maps to none is removed.
   - A line the engine can enforce is enforced in the models in the same pass, because pydantic-core runs the Rust items natively and dispatches the Python callbacks, so every such line is checked on every authoring.
   - Return the OAK render when no render, grouping, or style is named; every default is OAK.
   - Write no tests; the examples on every model and field validate the build, and tests add tokens and context for models.
-  - Keep outputs and renders separate: the build uses the package to generate an output once; a render turns one knowledge tree into a format.
+  - Keep outputs and renders separate: the build uses the package to generate an output once; a render turns one OAK document into a format.
 ---
 
 # OAK Product Requirements
 
 ## Purpose
 
-Open Agent Knowledge (OAK) is a knowledge standard. OAK gives one standard vocabulary for knowledge by defining the smallest nodes of knowledge in a schema. Nodes compose into larger structures that OAK can compile into many different outputs. OAK is the next iteration of the [Agnostic Prompt Standard (APS)](https://github.com/chris-buckley/agnostic-prompt-standard).
+Open Agent Knowledge (OAK) is a knowledge standard. OAK gives one standard vocabulary for knowledge by defining the smallest useful node of knowledge in a schema. One OAK document contains one node, and target paths compose documents into a document graph that OAK can compile into different outputs. OAK is the next iteration of the [Agnostic Prompt Standard (APS)](https://github.com/chris-buckley/agnostic-prompt-standard).
 
-Practical applications include, but are not limited to:
-- Prompts for Agents (AI Models)
-- Standard Operating Procedures (SOPs)
-- Product Requirements Document
-- React components
-- Static information
-- Entire projects
-- Operating systems
-- Knowledge base
-- Library documentation
-- Encoded file systems
-- Conversations
-- Shell simulations (bash, PowerShell) that run as state machines
+Practical applications include prompts for agents, standard operating procedures, product requirements, components, static information, projects, operating systems, knowledge bases, library documentation, encoded file systems, conversations, and shell simulations.
 
-Knowledge can also run: a tree whose state, triggers, and processes form a state machine is the machine itself, and an interpreter runs it continuously, reading state, matching triggers, and applying processes. Such a tree may declare no interfaces; it simply runs.
+Knowledge can run: one document whose state, triggers, and processes form a state machine is the machine itself, and an interpreter runs it continuously by reading state, matching triggers, and applying processes. Such a document may declare no interfaces.
 
 ---
 
@@ -55,10 +41,10 @@ Knowledge can also run: a tree whose state, triggers, and processes form a state
 2. Reject a process with no steps.
 3. Reject unknown fields.
 4. Reject an entry outside the seven parts (instructions|constants|schemas|state|triggers|processes|interfaces).
-5. Require one root node.
-6. Require each child of a node to be a node.
-7. Reject a duplicate SlugId across nodes and entries.
-8. Reject a (missing|wrong-type) reference target.
+5. Require one node in each OAK document.
+6. Reject a node id or contained node.
+7. Reject a duplicate SlugId across entries in one document.
+8. Reject a (missing|wrong-type) local reference target.
 9. Omit unset optional fields from the Pydantic dump.
 10. Reject a process value or emit step that conflicts with the interface direction.
 11. Reject an act whose instruction placeholders differ from its inputs and outputs.
@@ -66,55 +52,70 @@ Knowledge can also run: a tree whose state, triggers, and processes form a state
 13. Reject a process that redefines a visible local binding.
 14. Reject an interface value whose placeholder is absent from the interface schema.
 15. Reject an emit step whose bindings differ from the interface schema placeholders.
-16. Reject a process call cycle.
-17. Reject a statically dead process branch.
+16. Reject a local or resolved process call cycle.
+17. Reject a statically dead process branch or unreachable step.
 18. Fail one execution when multiple triggers match one cycle.
 19. Reject a process name outside `ProcessName`.
-20. Reject a trigger guard that reads no state value.
+20. Reject a non-true trigger guard that reads no state value.
 21. Reject a trigger guard that reads an (interface|local binding).
 22. Reject equal trigger `when` values unless every guard pair is provably disjoint.
+23. Reject an (ALL|ANY) condition with fewer than two children.
+24. Reject an ordered comparison outside two numbers or two strings.
+25. Reject an assertion that is statically (false|true).
+26. Reject a foreach source that is statically not a list or a loop binding that is already visible.
+27. Reject a par child that is not an exact named-tool act or that repeats an output binding.
+28. Reject a par without one immediately following join or a join without one immediately preceding par.
+29. Reject a relative state or interface operation.
+30. Reject an unresolved relative target when explicit resolution is requested.
+31. Reject an unknown tool or a named-tool act that conflicts with its supplied registry contract.
+32. Reject a par tool whose supplied registry does not confirm parallel use.
 
 ## Structure
 
 - The name is OAK, short for Open Agent Knowledge.
-- The name changed from UAOC, Universal Agent Operating Context, to OAK on 2026-08-21, because knowledge is broader than an operating context.
-- OAK is a knowledge standard, not an information standard, because knowledge covers static information and executable instructions.
-- The consumer of the knowledge is named the interpreter, confirmed over actor on 2026-08-21.
+- OAK is a knowledge standard because knowledge covers static information and executable instructions.
+- The consumer of OAK knowledge is the interpreter.
 - OAK has four layers: the node, the render, the vocabulary, and the grouping.
+- One OAK document contains exactly one node.
 - A node is one complete set of the seven parts.
+- A node has no id and contains no node.
+- The document path identifies the node.
 - The parts are instructions, constants, schemas, state, triggers, processes, and interfaces.
 - The set of parts is closed.
 - Each part holds zero or more entries.
-- An entry is one item in a part: one instruction, one constant, one schema, one state value, one trigger, one process, or one interface.
-- Each entry belongs to exactly one part, so every entry validates at authoring time.
-- A tree is nodes nested in nodes, and entries can reference each other.
-- Knowledge is authored as a nested tree, because nesting gives one root, one parent, and no containment cycle structurally.
-- Composition is the nesting of nodes, not an eighth part.
-- The flat entry registry is derived from the tree during validation, not authored.
-- Cross-references use typed fields, not a generic link field.
-- Store only the target `SlugId` in each typed reference field.
-- Require each (node|entry) ID to use `SlugId` independent of file placement.
-- Do not prefix a `SlugId` with its part.
-- A `SlugId` collision across parts is a duplicate ID.
+- Each entry belongs to exactly one part.
 - Every entry shares only `id`.
 - Keep `name` and `purpose` part-specific.
 - Discriminate the closed entry union on `part`.
-- Author the tree root as `Root`.
-- Author each nested node as `Node`.
-- Root validation rejects duplicate IDs, overlapping trigger guards, missing reference targets, and wrong target types.
+- A document graph is OAK documents connected by target paths.
+- Composition is target-path connection, not an eighth part.
+- Derive each local entry registry from one node during validation.
+- Cross-references use typed fields, not a generic link field.
+- Define a local target as `part.SlugId`.
+- Define a relative target as `relative/path.oak.md#part.SlugId`.
+- Resolve each relative path from the referencing document directory.
+- Keep the authored relative path for diagnostics.
+- Allow relative targets for (schema|constant|process) references.
+- Keep state reads, state writes, interface reads, and interface emissions in the active document.
+- Require each entry id to use `SlugId` independent of file placement.
+- Do not prefix an entry id with its part.
+- A `SlugId` collision across parts is a duplicate id.
+- Validate one document without loading an external target.
+- Validate every reachable external target when the caller supplies an explicit source path and loader.
+- Do not scan directories, guess filenames, use the working directory as a registry, or fetch the network during resolution.
+- Pydantic v2 is the programmatic authoring and validation form.
+- OAK text is the human and interpreter authoring surface.
 - Constants and state hold any JSON value.
 - Validation is strict: no type coercion and no unknown fields.
-- The PRD uses one short sentence per idea.
-- Give every model and field a title, a description, and examples; the prompt and the documentation derive from them.
-- Store the `Node` and `Root` example trees only in their model examples.
-- Derive every `Node` and `Root` field example from validated model examples in the build.
-- Validate every example against its model or field in the build, so the examples are the only tests.
-- Parse one (xml|markdown) OAK document into `Root`, then run every model and graph check.
+- Give every model and field a title, a description, and examples.
+- Give every concrete authored text variant one surface descriptor.
+- Give every non-core authoring rule one stable error code and instruction record.
+- Parse one (xml|markdown) OAK document into `Node`, then run every model and standalone graph check.
 - Accept OAK as UTF-8 bytes or text.
 - Infer the grouping from the first part delimiter when no grouping is named.
 - Normalize (CRLF|CR) line endings to LF before parsing.
-- Require each parsed node to contain the seven parts once in OAK order.
-- Generate unique `SlugId` values for node and instruction ids because the OAK render loses them.
+- Require each parsed document to contain the seven parts once in OAK order.
+- Generate unique instruction ids because the OAK render loses them.
 - Strip only exact built-in instruction lines before rebuilding authored instructions.
 - Give each parse failure one code, one path, one optional line, and one message.
 - Collect every parse failure before raising `OakParseError`.
@@ -122,564 +123,453 @@ Knowledge can also run: a tree whose state, triggers, and processes form a state
 ## Instructions
 
 - Instructions are rules the interpreter of the knowledge must follow.
-- Instructions include interpretation rules.
-- Instructions include rule following.
-- Instructions include methods for how to go about something.
-- Instructions include safety measures.
-- Instructions include policy.
+- Instructions include interpretation rules, methods, safety measures, and policy.
 - Instructions MUST use one directive per line.
-- Each line MUST be a single imperative or declarative that changes system behavior.
+- Each line MUST be a single imperative or declarative that changes system behaviour.
 - Require each instruction body to use `NonBlankLine`.
-- Instructions that interpretation references render first in the instructions part.
-- Interpretation rules belong to instructions because they govern every entry.
-- A node's interpretation instructions apply before a process reached through a trigger.
+- Render built-in interpretation instructions before authored instructions.
+- A node's instructions apply before a process reached through a trigger.
 
 ## Constants
 
 - Constants are values that stay the same in every use of the knowledge.
 - Give each constant one `form` selected from (inline|text|json|csv|yaml).
-- Default each constant `form` to `inline`.
+- Default each constant form to `inline`.
 - Render an inline constant as one JSON value on one line.
 - Render a block constant with one (`TEXT<<`|`JSON<<`|`CSV<<`|`YAML<<`) opening line and one `>>` closing line.
 - Reject `>>` as a line inside a block body.
-- Require each `TEXT` block value to be text.
-- Parse each `JSON` block as one JSON value.
-- Render each `JSON` block with two-space indentation.
-- Parse each `CSV` block as one header and one or more data rows.
+- Require each text block value to be text.
+- Parse each JSON block as one JSON value.
+- Render each JSON block with two-space indentation.
+- Parse each CSV block as one header and one or more data rows.
 - Require every CSV row to use the same columns.
 - Require every CSV cell to be a JSON scalar.
-- Parse each `YAML` block with the safe YAML loader, then validate one JSON value.
-- Render each `YAML` block with the safe YAML dumper in authored key order.
-
-Example: multi-line TEXT constant using TEXT<< ... >>. Tree symbols mark each level.
-
-```text
-<constants>
-repo-tree: TEXT<<
-cb-agnostic-prompt-protocol
-├── assets
-│   ├── constants
-│   │   └── constants-json-block-v1.0.0.example.md
-│   └── formats
-│       ├── format-code-map-v1.0.0.example.md
-│       └── format-error-v1.0.0.example.md
-└── SKILL.md
->>
-</constants>
-```
-
-Example: multi-line JSON constant using JSON<< ... >>. The parser stores BODY as one JSON value.
-
-```text
-<constants>
-default-tz: "Z"
-
-api-config: JSON<<
-{
-  "api_base_path": "/v1",
-  "default_time_zone": "Z",
-  "retries": 3,
-  "timeout_ms": 2000
-}
->>
-</constants>
-```
-
-Example: multi-line CSV constant using CSV<< ... >>. The parser stores each data row as one JSON object.
-
-```text
-<constants>
-default-tz: "Z"
-
-service-table: CSV<<
-service,region,default_tz,enabled,note
-billing,us-east-1,Z,true,"Primary billing region"
-support,ap-southeast-2,"Australia/Brisbane",true,"Escalations use ""follow the sun"""
-reporting,eu-west-1,Z,false,"EU, West"
->>
-</constants>
-```
-
-Example: multi-line YAML constant using YAML<< ... >>. The parser stores BODY as one JSON value.
-
-```text
-<constants>
-deployment-config: YAML<<
-region: ap-southeast-2
-replicas: 2
->>
-</constants>
-```
+- Parse each YAML block with the safe YAML loader, then validate one JSON value.
+- Render each YAML block with the safe YAML dumper in authored key order.
 
 ## Schemas
 
 - Schemas define reusable information shapes.
 - A schema is independent of boundary, direction, and process.
-- Define each information shape once in schemas, so each use is (verifiable|stable|machine-checkable).
-- Give each schema an optional `name`, an optional `purpose`, one `template`, and one `where` list.
+- Give each schema an optional `name`, an optional `purpose`, one `template`, and one ordered `where` list.
 - Store each template as one verbatim string.
-- Keep `where` as an ordered list.
-- Give each `Where` one `Placeholder`, one non-empty constraint list, optional examples, and an optional description.
-- Author each `Where` with one `Placeholder` followed by its constraints.
-- Represent each constraint as one discriminated union of (type|one of|regex|non-empty|max chars|lines|list of|at least|at most) on a required `kind`.
-- Default each constraint `kind` in direct Pydantic authoring.
-- Keep each constraint `kind` required in JSON Schema.
-- Select each `type` value and each `list of` item from the vocabulary datatypes.
+- Give each `Where` one placeholder, one non-empty constraint list, optional examples, and an optional description.
+- Represent each constraint as one discriminated union of (type|one of|regex|non-empty|max chars|lines|list of|at least|at most) on `kind`.
+- Default each constraint kind in direct Pydantic authoring.
+- Keep each constraint kind required in JSON Schema.
+- Select each type and list item from the vocabulary datatypes.
 - Give each (at least|at most) a value that is (number|Placeholder).
-- Extract each distinct `Placeholder` from the template.
-- Reject a duplicate `Placeholder` in `where`.
-- Reject a schema when its template `Placeholder` set and `where` `Placeholder` set differ.
-- Reject an (at least|at most) whose `Placeholder` value is absent from the same schema.
-- Reject examples on a `Where` with a `Placeholder` valued bound.
-- Reject a `lines` constraint when (both bounds are absent|the minimum exceeds the maximum).
-- Require each `lines` bound to be positive.
+- Extract each distinct placeholder from the template.
+- Reject a duplicate placeholder in `where`.
+- Reject a schema when its template and `where` placeholder sets differ.
+- Reject a placeholder-valued bound absent from the same schema.
+- Reject examples on a `Where` with a placeholder-valued bound.
+- Reject a lines constraint when both bounds are absent or the minimum exceeds the maximum.
+- Require each lines bound to be positive.
 - Restrict authored regex patterns to anchors, atoms, character classes, escapes, and quantifiers.
 - Reject a regex constraint that rust-regex cannot compile.
-- Name each rejection with one error code, such as `placeholder_where_mismatch`.
-- Apply every `Where` constraint to each value bound to its `Placeholder`.
-- Resolve each `Placeholder` valued (at least|at most) within the same schema instance.
+- Apply every `Where` constraint to each bound value.
+- Resolve placeholder-valued bounds within the same schema instance.
 - Apply datatype validation before each bound comparison.
-- Validate regex values with rust-regex.
 - Accept placeholder bindings from the interpreter instead of recovering them from rendered text.
-- Raise `SchemaBindingError` when a schema binding fails.
-- Give each binding failure one code, one `Placeholder`, and one message.
-- Collect every binding failure before raising.
+- Raise `SchemaBindingError` with every binding failure.
+- Give each binding failure one code, one placeholder, and one message.
 
 ## State
 
-- State holds values that change while the interpreter uses the knowledge.
+- State holds JSON values that change while the interpreter uses the knowledge.
+- Keep authored state ids fixed for one document.
+- Stage state writes until successful top-level process completion.
 
 ## Triggers
 
-- Triggers route intent to the knowledge.
-- A trigger records why the interpreter enters the knowledge.
-- Require each trigger `when` value to use `NonBlankLine`.
-- Give each trigger an optional `given` `Condition`.
-- Treat an absent trigger `given` as true.
-- Reject a trigger `given` without a state read with `trigger_guard_missing_state`.
-- Reject a trigger `given` that reads an (interface|local binding) with `invalid_trigger_guard_value`.
-- Require each trigger to reference one process.
-- A trigger separates use with intent from use by discovery.
+- Triggers route intent to knowledge.
+- A trigger contains one `given`, one `when`, and one `then`.
+- Give `given` either true or one recursive condition.
+- Default direct Pydantic trigger authoring to `given=true`.
+- Render `GIVEN` in every trigger.
+- Require each `when` value to use `NonBlankLine`.
+- Give `then` one local or relative process target.
+- Match trigger `when` by exact string equality.
+- Evaluate `given` only after `when` matches.
+- Evaluate a condition tree in authored order with short-circuiting.
+- Run no process when no trigger matches.
+- Run the `then` process when exactly one trigger matches.
+- Fail with `ambiguous_trigger_match` when multiple triggers match.
+- Prove equal-when guards disjoint only from compatible state equality, exclusion, and range constraints.
+- Treat every unproved equal-when guard pair as overlapping.
+- Reject a non-true trigger guard without a state read with `trigger_guard_missing_state`.
+- Reject a trigger guard that reads an interface or local binding with `invalid_trigger_guard_value`.
 - Triggers are optional.
-- A trigger's process reference must target a process entry.
-- Multiple triggers can reference the same process or different processes.
-- Match every trigger `when` before selecting a process.
-- Match a trigger `when` by exact string equality.
-- Evaluate a trigger `given` only after its `when` matches.
-- Run the process when exactly one trigger matches its `when` and `given`.
-- Run no process when no trigger matches both its `when` and `given`.
-- Fail with `ambiguous_trigger_match` when multiple triggers match both their `when` and `given`.
-- Reject equal trigger `when` values unless every guard pair is provably disjoint, with `overlapping_trigger_guards`.
-- Prove guards disjoint when they compare the same state to unequal static values with `equals`.
-- Prove guards disjoint when `equals` and `not_equals` compare the same state to the same static value.
-- Treat every other equal-`when` guard pair as overlapping.
-- The name trigger is confirmed over signal on 2026-08-21, because it names what makes an outsider enter.
-- Triggers are optional in a node.
 
 ## Processes
 
-- Processes are exact ways to do a task.
-- Represent each process step as one discriminated union of (act|set|emit|if|call|fail) on a required `kind`.
-- Represent each process value as one discriminated union of (literal|constant|state|interface|binding) on a required `source`.
-- Give each value binding one `Placeholder` and one process value.
-- Give each condition one left value, one operator, and one right value.
-- Require each condition operator to be (equals|not_equals).
-- Require each process to have one `ProcessName` and one or more steps.
-- Author the first `ProcessName` word as the action and the second as its object.
-- Give each act one `NonBlankLine` instruction, an input binding list, and an output `Placeholder` list.
+- Processes are exact ordered ways to do a task.
+- Represent each process step as one discriminated union of (act|set|emit|if|call|fail|assert|foreach|par|join) on `kind`.
+- Represent each process value as one discriminated union of (literal|constant|state|interface|binding) on `source`.
+- Give each value binding one placeholder and one process value.
+- Give each process one `ProcessName` and one or more steps.
+- Author the first process-name word as the action and the second as its object.
+- Execute process steps in authored order.
+- Give each act one instruction, one input binding list, one output placeholder list, and one optional exact tool name.
+- Treat an act without a tool as interpreter-native work.
+- Preserve a named tool string verbatim.
 - Require each act instruction placeholder to occur once in its inputs or outputs.
 - Reject a duplicate act input or output.
 - Reject an act placeholder used as both input and output.
 - Require an act to return exactly its declared outputs.
 - Store each act output as an immutable process-local JSON binding.
-- Keep a binding created in an if branch inside that branch.
-- Give each set step one state `SlugId` and one value.
-- Resolve a state value from the current execution state.
-- Apply a set step to the current execution state.
-- Give each emit step one interface `SlugId` and one non-empty binding list.
+- Give each condition one of (compare|all|any|not).
+- Give each compare one left value, one operator, and one right value.
+- Require each compare operator to be (equals|not equals|less than|at most|greater than|at least).
+- Compare JSON equality structurally without coercion.
+- Treat booleans as distinct from numbers.
+- Order only two numbers or two strings.
+- Compare strings by Unicode code-point order.
+- Give each all or any at least two conditions.
+- Give each not exactly one condition.
+- Give each set one local state target and one value.
+- Give each emit one local interface target and one non-empty binding list.
 - Require each emit interface to target an (out|inout) interface.
 - Require each emit binding set to equal the interface schema placeholder set.
-- Validate each emitted binding against the interface schema before emission.
-- Give each if step one condition, one non-empty then list, and one optional otherwise list.
-- Execute only the branch selected by the condition.
-- Use (if|fail) steps for process preconditions.
-- Do not give a process a `given` block.
-- Give each call step one process `SlugId`.
-- Require each call reference to target a process entry.
-- Reject process call cycles with `process_call_cycle`.
+- Validate each emitted binding before staging its emission.
+- Give each if one condition, one non-empty then list, and one optional non-empty else list.
+- Execute only the selected if branch.
+- Keep a binding created in an if branch inside that branch.
+- Give each call one local or relative process target.
 - Run a called process synchronously in the current state and emission transaction.
-- Give each fail step one `NonBlankLine` message.
-- Stop the execution with `process_failed` when a fail step runs.
-- Require each constant value reference to target a constant entry.
-- Require each state value reference to target a state entry.
-- Require each interface value reference to target an (in|inout) interface.
-- Require each interface value placeholder to exist in the interface schema.
-- Require each binding value to reference a visible prior binding.
+- Give each fail one `NonBlankLine` message.
+- Stop execution with `process_failed` when fail runs.
+- Give each assert one condition and one optional message.
+- Stop execution with `assertion_failed` when assert is false.
+- Give each foreach one loop binding, one list-valued process value, and one non-empty step list.
+- Iterate foreach in list index order.
+- Skip the foreach body for an empty list.
+- Give each foreach iteration a fresh child binding scope.
+- Keep each loop binding and iteration output inside its iteration.
+- Give each par one or more exact named-tool acts.
+- Resolve every par input before launching any child.
+- Give every par child the same immutable visible-binding snapshot.
+- Launch par children in authored order and permit completion in any order.
+- Keep par outputs pending and invisible before join.
+- Require join immediately after par.
+- Wait for every par child at join.
+- Promote successful par outputs in authored child order.
+- Promote no par output when any child fails.
+- Report the first par failure in authored order and retain later failures as suppressed diagnostics.
+- Give a called process a fresh local binding scope.
+- Share state and emissions across called processes in one top-level transaction.
 - Commit state writes and interface emissions after successful top-level completion.
 - Discard state writes and interface emissions after failure.
+- Do not claim rollback for external tool effects.
 - Represent one arrival as one `when` value and zero or more input interface bindings.
-- Validate each active input binding against its interface schema before trigger selection.
-- Require the supplied state ids to equal the authored state ids.
-- Execute one arrival cycle with `execute(root, arrival, state, act=...)`.
-- Require an act handler only when an act step runs.
-- Validate each act handler result against the declared output set.
-- Return the selected process, committed state, and ordered emissions after success.
+- Validate each active input binding before trigger selection.
+- Require the supplied state target set to equal the resolved authored state target set.
+- Execute one cycle with `execute(document, arrival, state, act=..., tools=...)`.
+- Require an interpreter-native act handler only when an unnamed act runs.
+- Validate each act or tool result against its declared output set.
+- Return the selected process target, committed state, and ordered emissions after success.
 - Return no process and no emission when no trigger matches.
 - Raise `ExecutionError` with one code and one message on runtime failure.
 - Do not mutate the caller state mapping.
-- Derive interface consumption and emission from typed process steps.
-- Do not give a process separate `consumes` or `emits` lists.
-- Use triggers for repetition instead of recursive process calls.
-- Processes can run without interfaces.
-- Processes do not have to be referenced by triggers.
+- Use triggers and foreach for repetition instead of recursive process calls.
+- Processes can run without interfaces or triggers.
+- Refuse (expression strings|try|recover|retry|timeout|with|capture|return|unset|tell|snap|milestone).
 
 ## Interfaces
 
-- An interface declares one information crossing at the tree boundary.
-- An in interface carries information into the tree.
-- An out interface carries information out of the tree.
+- An interface declares one information crossing at the active document boundary.
+- An in interface carries information into the document.
+- An out interface carries information out of the document.
 - An inout interface carries information in both directions.
-- Interfaces are optional.
-- Require each interface `direction` to be (in|out|inout).
-- Require each interface `schema` reference to use `SlugId`.
-- Require each interface `schema` reference to target a schema entry.
-- Give each interface an optional `NonBlankLine` description of the crossing.
-- An interface description states boundary meaning that its schema does not state.
+- Require each interface direction to be (in|out|inout).
+- Give each interface one local or relative schema target.
+- Give each interface an optional `NonBlankLine` description.
+- Use an interface description only for boundary meaning absent from its schema.
 - Interfaces do not define information shapes.
+- Interfaces are optional.
 
 ## Vocabulary
 
-- The vocabulary is how information is conveyed without ambiguity inside every render.
-- The vocabulary holds the text shapes, the datatypes, the unit catalog, the time forms, and the display forms.
-- The vocabulary is where the core schema and the Rust regex checks run.
-- Every render uses the same vocabulary; OAK is the opinionated default render of it.
+- The vocabulary conveys information without ambiguity inside every render.
+- The vocabulary holds text shapes, datatypes, units, time forms, and display forms.
 - Define `SlugId` as lower kebab case without a leading, trailing, or repeated hyphen.
 - Define `NonBlankLine` as one line containing at least one non-whitespace character.
 - Define `ProcessName` as two ASCII alphanumeric words with optional internal hyphens, separated by one U+0020 SPACE, with an uppercase first character.
 - Define `Placeholder` as ASCII upper snake case without a leading, trailing, or repeated underscore.
-- Define `DottedPath` as (`constant.SlugId`|`state.SlugId`|`process.SlugId`|`interface.SlugId`|`interface.SlugId.Placeholder`).
-- Define `ValueReference` as `$` followed by (`constant.SlugId`|`state.SlugId`|`interface.SlugId.Placeholder`|`Placeholder`).
-- `$` reads a value.
-- The first `DottedPath` segment names the part.
-- A bare `$Placeholder` reads one process-local act output.
-- Use `DottedPath` without `$` for each (SET|CALL|EMIT) target.
-- Use (`equals`|`does not equal`) for comparison.
-- Use `=` only for assignment and value binding.
-- Delimit each `Placeholder` with `<` and `>` in schema templates, `Where` lines, and act instructions.
-- Render each process binding target and act output as a bare `Placeholder`.
-- In a template, a line of one U+2026 HORIZONTAL ELLIPSIS tells the interpreter the pattern above it continues; the engine gives it no meaning.
-- Represent each closed token catalog with a (literal|enum).
+- Define `EntryPath` as `part.SlugId` for one singular part name.
+- Define `RelativeDocumentPath` as a relative POSIX path ending in `.oak.md` without a scheme, query, or fragment.
+- Define `TargetPath` as (`EntryPath`|`RelativeDocumentPath#EntryPath`).
+- Define `DottedPath` as one local (constant|schema|state|process|interface) target or one local interface placeholder path.
+- Define `ValueReference` as `$` followed by one (constant target|local state target|local interface placeholder path|Placeholder).
+- `$` reads a process value.
+- Use `TargetPath` without `$` for each (SET|CALL|EMIT|THEN|schema) target.
+- Delimit each placeholder with `<` and `>` in schema templates, `Where` lines, and act instructions.
+- Render each binding target and act output as a bare placeholder.
 - Define `Datatype` as (string|integer|number|boolean|quantity|datetime|uri|path).
 - Define `Unit` as (%|kg|°C|kg·m/s²).
-- Represent a quantity as a nested model of a Decimal value and a unit enum; the serializer owns its display.
-- Represent a datetime as a `DateTime` model with one `AwareDatetime` value and one optional `TimeZoneName` zone.
-- Reject a naive datetime; never convert one to UTC.
+- Represent a quantity as one Decimal value and one unit enum.
+- Represent a datetime as one aware datetime and one optional IANA time zone name.
+- Reject a naive datetime and never convert one to UTC.
 - Use U+002E FULL STOP as the decimal separator.
 - Use U+2009 THIN SPACE as the thousands separator.
 - Render each quantity as a number, one U+0020 SPACE, and one unit.
-- Render percent with U+0025 PERCENT SIGN as its unit.
-- Render compound units with U+00B7 MIDDLE DOT.
-- Select each unit from the shared unit catalog.
-- Render temperature in °C.
 - Render each datetime in ISO 8601 form.
 - Render a zero UTC offset as `Z`.
 - Require each local datetime to include a numeric UTC offset.
-- Append an IANA time zone name as `[TimeZoneName]` when present.
-- Keep number, quantity, and datetime display rules in separate display modules.
+- Append an IANA time zone name in brackets when present.
 
 ## Pydantic
 
-- Pydantic v2 is the authoring form, not a render.
-- Pydantic v2 is the description language for the vocabulary and the parts.
-- Pydantic v2 is the authoring tool, and every render derives from the authored tree.
-- Use the narrowest (type|literal|discriminated union|min length|max length|numeric bound|nested model) that states each rule.
-- Use regex only when the complete value is the shape of one string.
+- Pydantic v2 is the programmatic authoring and executable validation form, not a render.
+- Use the narrowest type, literal, discriminated union, bound, and nested model that states each rule.
+- Use regex only when the complete value is one string shape.
 - Anchor every regex pattern to the whole string.
 - Use source lint for text conventions embedded in prose.
-- Use a root graph check only for rules across (nodes|entries).
-- Do not add a field only for a render token; validate the token in the renderer through a module-level `TypeAdapter`.
-- Define each authored text syntax once in its own module under `oak/vocabulary/text/`.
-- Define each OAK render text syntax once in `oak/render/oak/`.
-- Build each regex pattern once at module import from its owning text syntax.
-- Build each reusable string shape with `Annotated[str, StringConstraints(pattern=...)]`.
-- Keep defaults and aliases at the field declaration and only constraints in the `Annotated` alias.
-- Author the interface schema reference as `schema` through a field alias.
-- Keep each token catalog at module scope, or annotate it `ClassVar` on a model.
-- Set `regex_engine` to `rust-regex` on the shared OAK base model in `oak/base.py`.
-- Pass each regex pattern as a string, because a compiled pattern forces `python-re`.
-- Use `[0-9]` and `[A-Za-z]` for ASCII classes, because Rust regex treats `\d` and `\w` as Unicode.
+- Use a standalone document graph check only for rules across entries.
+- Use the explicit resolver for rules across documents.
+- Do not add a field only for a render token.
+- Define each authored text syntax once under `oak/vocabulary/text`.
+- Define each concrete authored render variant once in `oak/surface.py`.
+- Classify every model field in each surface as (rendered|fixed|omitted|generated).
+- Build rendering, parsing, EBNF, prompt generation, and documentation generation from the same surfaces.
+- Keep each validator-backed authoring rule in `oak/rules.py` with its stable error code.
+- Build each reusable string shape with `Annotated` and `StringConstraints` or one reusable after validator.
+- Keep defaults and aliases at the field declaration.
+- Set `regex_engine` to `rust-regex` on the shared OAK base model.
 - Validate every default value.
 - Build each `TypeAdapter` once at module import.
-- Emit the `Placeholder` pattern in JSON Schema.
-- Emit each discriminated union as `oneOf` branches selected by its `kind`.
+- Emit each discriminated union as tagged branches in JSON Schema.
 - Emit forbidden extra fields as `additionalProperties: false`.
-- Restrict each regex pattern emitted in JSON Schema to syntax accepted by both rust-regex and ECMA-262.
+- Treat generated JSON Schema as a structural projection, not a replacement for Python or graph checks.
 
 ## Render
 
-- One knowledge tree can render to many formats.
-- A render is a representation of one node or tree.
+- One OAK document can render to many formats.
 - The renders are OAK and JSON-LD.
 - JSON-LD is the interchange render.
-- The Pydantic dump is an internal authoring snapshot.
-- Each projection defines what it preserves, what it loses, and how it orders content.
+- The Pydantic dump is an internal programmatic snapshot.
+- Each render defines what it preserves, loses, and orders.
 
 ### OAK
 
 - OAK is the default render.
-- The text render is named OAK and is the default render, because it is the render an interpreter uses directly; APS was its predecessor.
-- The OAK render is prose structured text which optimises for disambiguation for AI Models.
-- OAK renders from the authored tree with a grouping and a style.
-- These render choices do not change the authored tree.
-- OAK rendering uses grouping and style outside the node, adding no part or field.
+- OAK is prose structured text optimized for interpreter disambiguation.
+- OAK renders from one node with one grouping and one style.
+- Grouping and style do not change the node.
 - The default OAK rendering is xml and authored.
-- A grouping is the delimiters that group the parts: (xml tags|markdown fences).
-- The groupings are xml and markdown.
+- The groupings are (xml|markdown).
 - A grouping changes delimiters only.
-- Each grouping defines how it escapes its delimiters.
-- A renderer claims APS compatibility only when the tree and text meet APS rules.
+- Each grouping escapes its attributes.
 
 #### Arrangement
 
-- The OAK render has seven parts in this order: instructions, constants, schemas, state, triggers, processes, interfaces.
-- The OAK render has one arrangement.
-- OAK is the next iteration of APS; it uses the APS part order with interfaces in the input position.
-- Each top-level part MUST appear at most once.
-- Every part appears, empty when the node has no entry for it.
-- Each part holds the node's own entries in authored order.
-- Parts are siblings; no part nests inside another.
-- Render each authored instruction as its text alone after the built-in instructions.
-- When a process or guarded trigger exists, render `$ reads a value; a dotted path starts with its part; a bare $NAME is local to the running process; SET, CALL, and EMIT omit $.` before authored instructions.
-- When constants has entries, render `Constants hold values that do not change while the knowledge runs.` before authored instructions.
-- When schemas has entries, render `Each schema is one information shape: a template with <PLACEHOLDER> slots, and WHERE lines that constrain each slot.` before authored instructions.
-- When state has entries, render `State holds values that persist and can change while processes run.` before authored instructions.
-- When triggers has entries, render `Each trigger names one arrival reason, an optional state guard, and the process that runs when both match.` before authored instructions.
-- When processes has entries, render `Each process is the exact way to do one task; follow its steps in order, top to bottom.` before authored instructions.
-- When interfaces has entries, render `Each interface is one information crossing: in arrives, out is emitted, and inout does both.` before authored instructions.
-- Inject no other built-in instruction text.
-- Render each trigger as one self-closing `trigger` tag with one `id`, one optional `given`, one `when`, and one `process` attribute.
-- Render each state entry and each inline constant as its id, `: `, and its value as JSON on one line.
+- Render the seven parts in this order: instructions, constants, schemas, state, triggers, processes, interfaces.
+- Render every part once, empty when it has no entry.
+- Render entries in authored order.
+- Keep parts as siblings.
+- Render each authored instruction as its text after built-in instructions.
+- Generate built-in instructions only for authored features present in the node.
+- Render each trigger as one body entry with `id`, `GIVEN`, `WHEN`, and `THEN`.
+- Render each state and inline constant as its id, `: `, and one JSON value.
 - Render each block constant with its form opener, body, and closing line.
-- Render each process with its id and name, then its typed steps one per line in authored order.
-- Line order carries the step sequence; render no step numbers and no heading.
-- Indent grouped lines by two spaces under their parent line.
-- Render each process value as one of (JSON literal|`ValueReference`).
-- Render each act with `ACT`, its instruction, optional `INPUTS:`, and optional `OUTPUTS:`.
-- Render each act input and output name as a bare `Placeholder`.
-- Render each set on one line with `SET`, its state `DottedPath`, ` = `, and its value.
-- Render each emit with `EMIT`, its interface `DottedPath`, and one bare `Placeholder` binding per line.
-- Render each if with `IF`, its condition, its indented then steps, and `ELSE:` with its indented otherwise steps when present.
-- Render no (`GIVEN`|`THEN`) process keyword.
-- Render each call on one line with `CALL` and its process `DottedPath`.
-- Render each fail on one line with `FAIL` and its JSON string message.
-- Render each interface with its id, direction, and schema reference, and its description as its body.
-- Render each child node as one nested `node` block after the seven parts.
-- Separate the parts and each nested `node` block with one blank line.
-- Separate sibling (schema|process|interface) blocks with one blank line.
-- Render each constant and state id with `SlugId`.
-- A process renders with an inner structure.
-- Render each process reference at the step or value that uses it.
-- An interface renders with an inner structure.
-- Render each schema template followed by one blank line and `WHERE:`.
-- Preserve template whitespace in each text render.
+- Render each process with its id and name followed by typed steps.
+- Let line order carry step sequence.
+- Indent nested condition and step bodies by two spaces.
+- Render each process value as one JSON literal or `ValueReference`.
+- Render an unnamed act with `ACT` and a named act with `ACT TOOL` and one JSON string tool name.
+- Render (SET|CALL|EMIT) targets as `TargetPath` without `$`.
+- Render if with `IF`, its condition, `THEN`, and optional `ELSE`.
+- Render assert with `ASSERT`, its condition, and optional `MESSAGE`.
+- Render foreach with `FOREACH binding IN value` and its steps.
+- Render par with `PAR`, named-tool acts, and one following `JOIN`.
+- Render fail with `FAIL` and one JSON string.
+- Render each interface with id, direction, schema target, and optional description.
+- Separate parts and sibling body entries with one blank line.
+- Append exactly two LF characters between a schema template and `WHERE` so trailing template whitespace round-trips.
+- Preserve schema template whitespace.
 - Render `Where` entries in authored order.
-- Render each `Where` as one line: its delimited `Placeholder`, constraints joined by `; `, examples once in brackets as `(e.g. ...)`, then the description.
-- The OAK render loses node and instruction ids and keeps every other entry id.
+- The OAK render loses instruction ids and loses no other authored field.
 
 #### XML
 
-```yaml
-oak_parts:
-  order: [instructions, constants, schemas, state, triggers, processes, interfaces]
-  tags:
-    - <instructions>…</instructions>
-    - <constants>…</constants>
-    - <schemas>…</schemas>
-    - <state>…</state>
-    - <triggers>…</triggers>
-    - <processes>…</processes>
-    - <interfaces>…</interfaces>
-```
-
-- The xml grouping uses XML-like tags as text delimiters.
-- Render text between xml tags verbatim.
-- Escape xml attribute values.
-- Render trigger attributes in (`id`|`given`|`when`|`process`) order.
-- Put each xml opening tag before its text on a separate line.
-- Put each xml closing tag after its text on a separate line.
-- The xml grouping uses OAK names and node structure.
-- APS is not the canonical xml grouping, because OAK has its own parts and typed process model.
-- Join built-in and authored instruction lines inside `<instructions>` with one U+000A LINE FEED.
+- Use XML-like tags as text delimiters.
+- Render text between tags verbatim.
+- Escape attribute values.
+- Put each opening and closing tag on its own line.
+- Use OAK names and the single-node structure.
 
 #### Markdown
 
-- The markdown grouping uses tilde fences as text delimiters.
+- Use tilde fences as text delimiters.
 - Open each part with `~~~~part` and close it with `~~~~`.
 - Open each body entry with `~~~entry;attr="value"` and close it with `~~~`.
-- Render a bodiless entry as one bare opening line.
-- Keep each entry body byte-identical between the xml and markdown groupings.
-- Encode each markdown attribute value as one JSON string.
-- Use a node fence longer than every fence inside that node.
-- Increase nested node fence lengths from five tildes as depth requires.
+- Encode each attribute value as one JSON string.
+- Keep each entry body byte-identical between groupings.
 
 #### Styles
 
-- Apply a style to natural language wording and display formatting only.
-- Style is a render choice, not an interpretation instruction, because one tree must render in many styles.
-- The authored style preserves the authored wording.
+- Apply a style only to natural-language wording and display formatting.
+- The authored style preserves authored wording.
 - A controlled style is a named and versioned renderer profile.
-- A controlled style rewrites only instruction bodies, trigger text, act instructions, and fail messages.
+- A controlled style rewrites only instruction bodies, trigger text, act instructions, and fail or assert messages.
 - A controlled style preserves meaning, obligation, negation, conditions, and step order.
-- A renderer fails when it cannot validate a requested controlled style.
-- An ASD-STE100 style names its governing edition and validation rules.
 - Name the implemented controlled style `asd-ste100-9`.
-- The `asd-ste100-9` style targets ASD-STE100 Issue 9, January 2025.
-- Rewrite (in order to|prior to|subsequent to|utilize|commence|terminate) and their implemented inflections with controlled alternatives.
-- Reject controlled text with more than one line.
-- Reject controlled text with more than one sentence.
-- Reject controlled text with more than 20 words.
-- Reject controlled text that still contains a replaced term.
-- Do not claim full ASD-STE100 conformance.
-- Apply the implemented line, sentence, word, and term checks through the named ASD-STE100 style.
+- Target ASD-STE100 Issue 9, January 2025 without claiming full conformance.
+- Reject controlled text with more than one line, one sentence, or 20 words.
+- Reject controlled text that still contains an implemented prohibited term.
 
 ### JSON-LD
 
-- Render each node and entry `SlugId` as a relative `@id`.
-- Render each typed reference target as a relative `@id`.
-- Require the caller to supply a JSON-LD base IRI ending in `/`.
-- Define `@base` as the caller base in the root context.
-- Resolve each relative `@id` against `@base`.
-- Render `Schema`, `Interface`, `Where`, each constraint kind, each process value source, and each process step kind as `@type`.
-- Render each trigger `given` as `Condition`.
-- Derive each `Where` `@id` as `{schema @id}/where/{Placeholder}`.
-- Render `where`, `constraints`, and `examples` as `@list` containers.
-- Render (interfaces|steps|inputs|outputs|bindings|then|otherwise) as `@list` containers.
-- Define context terms for `template`, `where`, `placeholder`, `constraints`, `examples`, and each constraint field.
-- Define context terms for (direction|schema|interfaces|steps|inputs|outputs|bindings|condition|given|left|operator|right|then|otherwise|instruction|message|constant|state|interface|binding).
-- Render each `Placeholder` valued (at least|at most) value as the referenced `Where` `@id`.
+- Require the caller to supply one absolute document IRI without a fragment.
+- Render the document IRI as the node `@id`.
+- Render each local entry target as a fragment `@id`.
+- Render each relative target against the document base.
 - Require the caller to supply the JSON-LD vocabulary IRI.
-- Define `oak` as the caller vocabulary prefix.
-- Render OAK `@type` values as `oak` compact IRIs.
-- Render one context with `@base` at the root of each JSON-LD document.
+- Define one root context with `@base` and the `oak` prefix.
+- Render each entry, `Where`, constraint, condition, process value, and step kind as `@type`.
+- Render `where`, `constraints`, `examples`, `steps`, `inputs`, `outputs`, `bindings`, `conditions`, `thenSteps`, and `otherwise` as ordered lists.
+- Render trigger `then` as an id-valued process target.
+- Render if `thenSteps` and `otherwise` as ordered step lists.
+- Derive each `Where` id as `#schema.SlugId/where/Placeholder`.
+- Render literal JSON values with `@type: @json`.
+- Keep context processing, structural validation, and graph target checks as separate boundaries.
 
 ---
 
 ## Build
 
-The build uses the package to generate the outputs once; a model writes OAK with the outputs; the models validate what it wrote.
-- Validate text aliases, model examples, field examples, render defaults, both groupings, block constants, controlled style, parsing, execution, and display forms in `build/examples.py`.
+- The build uses the package to generate outputs once.
+- A model writes OAK with the outputs, and the package validates what it writes.
+- Keep one surface descriptor registry as the source of every authored text variant.
+- Keep one authoring rule registry as the source of every generated validator instruction.
+- Validate text aliases, metadata examples, surfaces, renders, parsing, resolution, execution, JSON-LD, styles, display forms, and outputs in `build/examples.py`.
 
 ### EBNF
 
-- OAK when authoring the build of OAK emits a EBNF grammar for OAK itself, which is a meta-grammar for OAK.
-- Emit one EBNF production for each named text alias.
-- Generate each (Rust regex|JSON Schema pattern|EBNF production) from the same restricted text syntax of (literal|character class|sequence|choice|optional|repeat|named reference).
-- Do not derive one output syntax from another output syntax.
+- Emit one EBNF grammar for OAK to `outputs/oak.ebnf`.
+- Emit one production for each named text alias.
+- Emit both grouping productions for every surface descriptor.
+- Derive document structure from the fixed part order.
+- Do not emit recursive node productions.
 - Do not use EBNF as a validator.
-- Derive the OAK structural productions from the fixed part order.
-- Write the grammar snapshot to `outputs/oak.ebnf`.
 
 ### Prompt
 
-- Emit the authoring prompt as one markdown file of OAK generated from the models: instructions from the constraints, schemas from the models, one process to write OAK (with|without) the models, one trigger for a model that arrives to write OAK.
-- Read the authoring instructions from the PRD Constraints section.
-- Derive one prompt schema from each model title, description, and field description.
-- Write the authoring prompt snapshot to `outputs/prompt.md`.
+- Emit one single-shot authoring prompt to `outputs/prompt.md` as markdown-grouped OAK.
+- Treat the complete host-supplied modality context as the source.
+- Generate source-to-part instructions from one rule registry.
+- Include every authoring rule, every surface schema, the EBNF, and one canonical OAK example.
+- Declare no universal input interface.
+- Declare one OAK result schema, one out interface, one trigger, and one process.
+- Derive a draft, validate it, and emit the valid OAK document as the sole response.
 
 ### Documentation
 
-- Emit the documentation as a directory tree of markdown generated from the models, one file per model, built from every model and field (title|description|examples).
-- Reject a model or field without a description.
-- Derive a missing `Node` or `Root` field example from each validated model example.
-- Remove stale generated model documents before rebuilding.
-- Write one model document to `outputs/docs` for each model.
+- Emit one markdown-grouped OAK document per authorable model under `outputs/docs`.
+- Generate each page from the model metadata, matching authoring rules, surface descriptors, grammar productions, and canonical rendered examples.
+- Represent each rendered example as an OAK constant, never as a JSON object dump.
+- Project each surface render shape into one OAK schema.
+- Project each rendered field into one `Where` line from its title and description.
+- Remove stale generated pages before rebuilding.
+
+### Examples
+
+- Author each human example as OAK text held in its Python wrapper.
+- Parse, resolve, and render each example before writing its sibling `.oak.md` snapshot.
+- Keep each wrapper flat, dense, functional, and short.
+
+### Freshness
+
+1. Require the authorable model set to equal the documented model set.
+2. Require every concrete surface variant to select exactly one descriptor.
+3. Require every rendered field to be covered exactly once by its descriptor.
+4. Require every omitted, fixed, and generated field to be classified.
+5. Require every validated model example to render through a descriptor.
+6. Require every rendered example to parse back to the same preserved model data.
+7. Require every documentation page to parse as one OAK document.
+8. Require every parsed documentation page to reproduce its committed render.
+9. Require prompt and documentation generation to share the same surface and rule objects.
+10. Require the generated output path set and contents to equal the committed snapshot.
 
 ### Tree
 
-- The tree below represents the build as the PRD above is written.
-- The tree evolves with every line above it.
-- A comment that starts with `*` marks a file the build generates.
-- An entry `...` marks a group that grows as the PRD adds lines.
-
 ```t
 oak
-├── .agent  # skills the agent reads, not PRD driven
+├── .agent
 ├── .gitignore
-├── AGENTS.md  # repository rules
-├── CLAUDE.md  # pointer to AGENTS.md
-├── docs  # ground truth
+├── AGENTS.md
+├── CLAUDE.md
+├── docs
 │   ├── PRD.md
-│   └── types.md  # Pydantic types the core schema validates
-├── examples  # authored trees, one per file; the render sits next to its author
-│   ├── incident_triage.py  # authors one agent-facing tree
-│   ├── incident_triage.oak.md  # * the OAK render of incident_triage.py
-│   ├── shell.py  # authors one shell state machine
-│   └── shell.oak.md  # * the OAK render of shell.py
-├── legacy-snapshot-aps  # APS reference, read only
-├── oak  # the package, what the PRD builds
-│   ├── __init__.py  # authoring API
-│   ├── defaults.py  # render OAK, grouping xml, style authored
-│   ├── base.py  # shared config, SlugId entries, rust-regex engine
-│   ├── node  # layer 1, one complete set of the seven parts
+│   └── types.md
+├── examples
+│   ├── incident_triage.py
+│   ├── incident_triage.oak.md
+│   ├── shell.py
+│   └── shell.oak.md
+├── legacy-snapshot-aps
+├── oak
+│   ├── __init__.py
+│   ├── base.py
+│   ├── defaults.py
+│   ├── execute.py
+│   ├── parse.py
+│   ├── resolve.py
+│   ├── rules.py
+│   ├── surface.py
+│   ├── node
 │   │   ├── __init__.py
-│   │   ├── model.py  # Node and Root: the seven parts, child nodes
-│   │   ├── graph.py  # root graph checks
-│   │   ├── dump.py  # Pydantic dump
-│   │   └── parts  # one module per part, its entry model
-│   │       ├── __init__.py  # the closed set, one discriminated union
-│   │       ├── instructions.py  # Instruction
-│   │       ├── constants.py  # Constant
-│   │       ├── schemas.py  # Schema, Where, the constraint union, bind
-│   │       ├── state.py  # State
-│   │       ├── triggers.py  # Trigger and its optional state guard
-│   │       ├── processes.py  # Process, values, conditions, and the closed step union
-│   │       └── interfaces.py  # Interface, Direction
-│   ├── vocabulary  # layer 3, how information is conveyed without ambiguity; one file provides one thing
-│   │   ├── __init__.py
-│   │   ├── syntax.py  # restricted text syntax tree; generates Rust regex, JSON Schema pattern, EBNF
-│   │   ├── units.py  # the unit catalog, one enum
-│   │   ├── text  # text shapes, one alias each
-│   │   │   ├── __init__.py
-│   │   │   ├── slug_id.py  # SlugId
-│   │   │   ├── non_blank_line.py  # NonBlankLine
-│   │   │   ├── process_name.py  # ProcessName
-│   │   │   ├── placeholder.py  # Placeholder and template token extraction
-│   │   │   ├── dotted_path.py  # DottedPath
-│   │   │   ├── value_reference.py  # ValueReference
-│   │   │   ├── regex_pattern.py  # RegexPattern, the portable authored subset
-│   │   │   └── ...
-│   │   ├── datatypes  # typed values, one model each
-│   │   │   ├── __init__.py
-│   │   │   ├── names.py  # Datatype, the name catalog, one validator each
-│   │   │   ├── quantity.py  # Decimal value and unit enum
-│   │   │   ├── datetime.py  # AwareDatetime and optional TimeZoneName
-│   │   │   └── ...
-│   │   └── display  # display forms, one rule set each
+│   │   ├── dump.py
+│   │   ├── graph.py
+│   │   ├── model.py
+│   │   └── parts
 │   │       ├── __init__.py
-│   │       ├── number.py  # decimal point, thousands separator
-│   │       ├── quantity.py  # number, space, unit; percent; middle dot
-│   │       ├── datetime.py  # ISO 8601, Z, offset, IANA name
-│   │       └── ...
-│   ├── parse.py  # OAK text to models
-│   ├── execute.py  # one transactional trigger and process cycle
-│   └── render  # layer 2, one module per render
-│       ├── __init__.py  # render selection, defaults apply
-│       ├── oak  # the default render
-│       │   ├── __init__.py
-│       │   ├── instructions.py  # built-in interpretation instructions
-│       │   ├── syntax.py  # WHERE wording, constraints, paths, and process values
-│       │   ├── arrangement.py  # seven parts, interfaces in the APS input position
-│       │   ├── groupings.py  # layer 4, xml tags or markdown fences
-│       │   └── styles.py  # authored, controlled ASD-STE100
-│       └── json_ld.py  # @base, @id, @type, @list, the context
-├── build  # uses the package to generate the outputs
-│   ├── examples.py  # validate examples and each working product path
+│   │       ├── constants.py
+│   │       ├── instructions.py
+│   │       ├── interfaces.py
+│   │       ├── processes.py
+│   │       ├── schemas.py
+│   │       ├── state.py
+│   │       └── triggers.py
+│   ├── render
+│   │   ├── __init__.py
+│   │   ├── json_ld.py
+│   │   └── oak
+│   │       ├── __init__.py
+│   │       ├── arrangement.py
+│   │       ├── groupings.py
+│   │       ├── instructions.py
+│   │       ├── styles.py
+│   │       └── syntax.py
+│   └── vocabulary
+│       ├── __init__.py
+│       ├── syntax.py
+│       ├── units.py
+│       ├── datatypes
+│       │   └── ...
+│       ├── display
+│       │   └── ...
+│       └── text
+│           ├── __init__.py
+│           ├── dotted_path.py
+│           ├── non_blank_line.py
+│           ├── placeholder.py
+│           ├── process_name.py
+│           ├── regex_pattern.py
+│           ├── slug_id.py
+│           ├── target_path.py
+│           └── value_reference.py
+├── build
+│   ├── docs.py
 │   ├── ebnf.py
+│   ├── examples.py
 │   ├── prompt.py
-│   └── docs.py
-├── outputs  # snapshot of the oak build
-│   ├── oak.ebnf  # * the OAK meta-grammar
-│   ├── prompt.md  # * the authoring prompt, one markdown file of OAK
-│   └── docs  # * markdown tree, one file per model
+│   └── surfaces.py
+├── outputs
+│   ├── oak.ebnf
+│   ├── prompt.md
+│   └── docs
+│       └── ...
 └── pyproject.toml
 ```

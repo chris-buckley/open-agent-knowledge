@@ -1,7 +1,7 @@
 [project]
 name = "oak"
 version = "0.0.0"
-description = "Open Agent Knowledge, a knowledge standard authored as Pydantic v2 models"
+description = "Open Agent Knowledge, a knowledge standard authored as OAK text or Pydantic v2 models"
 requires-python = ">=3.11"
 dependencies = [
   "pydantic[email,timezone]>=2.13,<3",

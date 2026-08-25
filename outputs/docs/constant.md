@@ -1,114 +1,99 @@
-# Constant
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+Constant: One value that stays the same during use.
+Use the same columns in every CSV row.
+Use only JSON scalar values in CSV cells.
+Give each CSV constant one non-empty list of object rows.
+Give each TEXT constant one string value.
+~~~~
 
-One value that stays the same during use.
+~~~~constants
+example-1: "default-time-zone: \"Z\""
 
-## Examples
+example-2: "repository-tree: TEXT<<\noak\n└── SKILL.md\n>>"
 
-```json
-[
-  {
-    "id": "default-time-zone",
-    "part": "constants",
-    "value": "Z"
-  },
-  {
-    "id": "repository-tree",
-    "part": "constants",
-    "form": "text",
-    "value": "oak\n└── SKILL.md"
-  },
-  {
-    "id": "api-config",
-    "part": "constants",
-    "form": "json",
-    "value": {
-      "retries": 3,
-      "timeout_ms": 2000
-    }
-  },
-  {
-    "id": "service-table",
-    "part": "constants",
-    "form": "csv",
-    "value": [
-      {
-        "service": "billing",
-        "enabled": true
-      }
-    ]
-  },
-  {
-    "id": "deployment-config",
-    "part": "constants",
-    "form": "yaml",
-    "value": {
-      "region": "ap-southeast-2",
-      "replicas": 2
-    }
-  }
-]
-```
+example-3: "api-config: JSON<<\n{\n  \"retries\": 3,\n  \"timeout_ms\": 2000\n}\n>>"
 
-## Fields
+example-4: "service-table: CSV<<\nservice,enabled\nbilling,true\n>>"
 
-### Id
+example-5: "deployment-config: YAML<<\nregion: ap-southeast-2\nreplicas: 2\n>>"
 
-`id`
+grammar: TEXT<<
+surface_constant_inline = ? <ID>: <VALUE> ? ;
+surface_constant_text = ? <ID>: TEXT<<
+<VALUE>
+>> ? ;
+surface_constant_json = ? <ID>: JSON<<
+<VALUE>
+>> ? ;
+surface_constant_csv = ? <ID>: CSV<<
+<VALUE>
+>> ? ;
+surface_constant_yaml = ? <ID>: YAML<<
+<VALUE>
+>> ? ;
+>>
+~~~~
 
-The entry id, unique across the tree.
+~~~~schemas
+~~~schema;id="constant-inline";name="Constant constant-inline";purpose="One value that stays the same during use."
+<ID>: <VALUE>
 
-```json
-[
-  "example"
-]
-```
+WHERE:
+- <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <VALUE> is string; is non-empty; The value that stays the same..
+~~~
 
-### Part
+~~~schema;id="constant-text";name="Constant constant-text";purpose="One value that stays the same during use."
+<ID>: TEXT<<
+<VALUE>
+>>
 
-`part`
+WHERE:
+- <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <VALUE> is string; is non-empty; The value that stays the same..
+~~~
 
-The entry part discriminator.
+~~~schema;id="constant-json";name="Constant constant-json";purpose="One value that stays the same during use."
+<ID>: JSON<<
+<VALUE>
+>>
 
-```json
-[
-  "constants"
-]
-```
+WHERE:
+- <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <VALUE> is string; is non-empty; The value that stays the same..
+~~~
 
-### Form
+~~~schema;id="constant-csv";name="Constant constant-csv";purpose="One value that stays the same during use."
+<ID>: CSV<<
+<VALUE>
+>>
 
-`form`
+WHERE:
+- <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <VALUE> is string; is non-empty; The value that stays the same..
+~~~
 
-The OAK constant form.
+~~~schema;id="constant-yaml";name="Constant constant-yaml";purpose="One value that stays the same during use."
+<ID>: YAML<<
+<VALUE>
+>>
 
-```json
-[
-  "inline",
-  "text",
-  "json",
-  "csv",
-  "yaml"
-]
-```
+WHERE:
+- <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <VALUE> is string; is non-empty; The value that stays the same..
+~~~
+~~~~
 
-### Value
+~~~~state
+~~~~
 
-`value`
+~~~~triggers
+~~~~
 
-The value that stays the same.
+~~~~processes
+~~~~
 
-```json
-[
-  "Z",
-  "oak\n└── SKILL.md",
-  {
-    "enabled": true
-  },
-  [
-    {
-      "service": "billing",
-      "enabled": true
-    }
-  ]
-]
-```
+~~~~interfaces
+~~~~

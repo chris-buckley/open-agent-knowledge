@@ -1,41 +1,34 @@
-# AtMost
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+AtMost: The bound value is at most a number or another placeholder value.
+~~~~
 
-The bound value is at most a number or another placeholder value.
+~~~~constants
+example-1: "is at most 160"
 
-## Examples
+grammar: TEXT<<
+surface_constraint_at_most = ? is at most <VALUE> ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "kind": "at_most",
-    "value": 160
-  }
-]
-```
+~~~~schemas
+~~~schema;id="constraint-at-most";name="AtMost";purpose="The bound value is at most a number or another placeholder value."
+is at most <VALUE>
 
-## Fields
+WHERE:
+- <VALUE> is string; is non-empty; A number or a placeholder of the same schema..
+~~~
+~~~~
 
-### Kind
+~~~~state
+~~~~
 
-`kind`
+~~~~triggers
+~~~~
 
-The constraint discriminator.
+~~~~processes
+~~~~
 
-```json
-[
-  "at_most"
-]
-```
-
-### Value
-
-`value`
-
-A number or a placeholder of the same schema.
-
-```json
-[
-  160,
-  "LINE_TO"
-]
-```
+~~~~interfaces
+~~~~

@@ -1,27 +1,33 @@
-# NonEmpty
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+NonEmpty: The bound value has at least one character or item.
+~~~~
 
-The bound value has at least one character or item.
+~~~~constants
+example-1: "is non-empty"
 
-## Examples
+grammar: TEXT<<
+surface_constraint_non_empty = ? is non-empty ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "kind": "non_empty"
-  }
-]
-```
+~~~~schemas
+~~~schema;id="constraint-non-empty";name="NonEmpty";purpose="The bound value has at least one character or item."
+is non-empty
 
-## Fields
+WHERE:
+~~~
+~~~~
 
-### Kind
+~~~~state
+~~~~
 
-`kind`
+~~~~triggers
+~~~~
 
-The constraint discriminator.
+~~~~processes
+~~~~
 
-```json
-[
-  "non_empty"
-]
-```
+~~~~interfaces
+~~~~

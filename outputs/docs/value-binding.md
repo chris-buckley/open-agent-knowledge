@@ -1,51 +1,35 @@
-# ValueBinding
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+ValueBinding: One placeholder bound to one process value.
+~~~~
 
-One placeholder bound to one process value.
+~~~~constants
+example-1: "REQUEST = $interface.request.REQUEST"
 
-## Examples
+grammar: TEXT<<
+surface_value_binding_line = ? <PLACEHOLDER> = <VALUE> ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "placeholder": "REQUEST",
-    "value": {
-      "source": "interface",
-      "interface": "request",
-      "placeholder": "REQUEST"
-    }
-  }
-]
-```
+~~~~schemas
+~~~schema;id="value-binding-line";name="ValueBinding";purpose="One placeholder bound to one process value."
+<PLACEHOLDER> = <VALUE>
 
-## Fields
+WHERE:
+- <PLACEHOLDER> is string; is non-empty; The placeholder receiving the process value..
+- <VALUE> is string; is non-empty; The process value bound to the placeholder..
+~~~
+~~~~
 
-### Placeholder
+~~~~state
+~~~~
 
-`placeholder`
+~~~~triggers
+~~~~
 
-The placeholder receiving the process value.
+~~~~processes
+~~~~
 
-```json
-[
-  "REQUEST"
-]
-```
-
-### Value
-
-`value`
-
-The process value bound to the placeholder.
-
-```json
-[
-  {
-    "source": "literal",
-    "value": "ready"
-  },
-  {
-    "source": "binding",
-    "binding": "RESULT"
-  }
-]
-```
+~~~~interfaces
+~~~~

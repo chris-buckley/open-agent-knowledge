@@ -1,40 +1,36 @@
-# Call
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+Call: One synchronous local or relative process invocation.
+Keep the resolved process call graph acyclic.
+Keep the local process call graph acyclic.
+~~~~
 
-One synchronous process invocation.
+~~~~constants
+example-1: "CALL process.finalize"
 
-## Examples
+grammar: TEXT<<
+surface_step_call = ? CALL <PROCESS> ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "kind": "call",
-    "process": "finalize"
-  }
-]
-```
+~~~~schemas
+~~~schema;id="step-call";name="Call";purpose="One synchronous local or relative process invocation."
+CALL <PROCESS>
 
-## Fields
+WHERE:
+- <PROCESS> is string; is non-empty; The local or relative process target to invoke..
+~~~
+~~~~
 
-### Kind
+~~~~state
+~~~~
 
-`kind`
+~~~~triggers
+~~~~
 
-The process step discriminator.
+~~~~processes
+~~~~
 
-```json
-[
-  "call"
-]
-```
-
-### Process
-
-`process`
-
-The process entry to invoke synchronously.
-
-```json
-[
-  "finalize"
-]
-```
+~~~~interfaces
+~~~~

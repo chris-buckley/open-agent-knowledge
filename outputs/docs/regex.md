@@ -1,40 +1,34 @@
-# Regex
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+Regex: The bound value matches one anchored portable rust-regex pattern.
+~~~~
 
-The bound value matches one anchored portable rust-regex pattern.
+~~~~constants
+example-1: "matches `^[0-9]+$`"
 
-## Examples
+grammar: TEXT<<
+surface_constraint_regex = ? matches `<PATTERN>` ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "kind": "regex",
-    "pattern": "^[0-9]+$"
-  }
-]
-```
+~~~~schemas
+~~~schema;id="constraint-regex";name="Regex";purpose="The bound value matches one anchored portable rust-regex pattern."
+matches `<PATTERN>`
 
-## Fields
+WHERE:
+- <PATTERN> is string; is non-empty; The whole-value portable pattern..
+~~~
+~~~~
 
-### Kind
+~~~~state
+~~~~
 
-`kind`
+~~~~triggers
+~~~~
 
-The constraint discriminator.
+~~~~processes
+~~~~
 
-```json
-[
-  "regex"
-]
-```
-
-### Pattern
-
-`pattern`
-
-The whole-value portable pattern.
-
-```json
-[
-  "^[0-9]+$"
-]
-```
+~~~~interfaces
+~~~~

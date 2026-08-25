@@ -1,136 +1,95 @@
-# Node
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+Node: One complete idless set of the seven OAK parts.
+Use each entry id once in one OAK document.
+Target an entry that exists in the current OAK document.
+Target the part required by the typed reference field.
+~~~~
 
-One complete set of the seven parts with nested child nodes.
+~~~~constants
+example-1: "<instructions>\nUse the supplied schema.\n</instructions>\n\n<constants>\n</constants>\n\n<schemas>\n</schemas>\n\n<state>\n</state>\n\n<triggers>\n</triggers>\n\n<processes>\n</processes>\n\n<interfaces>\n</interfaces>"
 
-## Examples
+grammar: TEXT<<
+surface_node = ? <instructions>
+<INSTRUCTIONS>
+</instructions>
 
-```json
-[
-  {
-    "id": "example-node",
-    "instructions": [
-      {
-        "id": "use-schema",
-        "part": "instructions",
-        "body": "Use the supplied schema."
-      }
-    ]
-  }
-]
-```
+<constants>
+<CONSTANTS>
+</constants>
 
-## Fields
+<schemas>
+<SCHEMAS>
+</schemas>
 
-### Id
+<state>
+<STATE>
+</state>
 
-`id`
+<triggers>
+<TRIGGERS>
+</triggers>
 
-The node id, unique across the tree.
+<processes>
+<PROCESSES>
+</processes>
 
-```json
-[
-  "example-node"
-]
-```
+<interfaces>
+<INTERFACES>
+</interfaces> ? ;
+>>
+~~~~
 
-### Instructions
+~~~~schemas
+~~~schema;id="node";name="Node";purpose="One complete idless set of the seven OAK parts."
+<instructions>
+<INSTRUCTIONS>
+</instructions>
 
-`instructions`
+<constants>
+<CONSTANTS>
+</constants>
 
-The node instructions in authored order.
+<schemas>
+<SCHEMAS>
+</schemas>
 
-```json
-[
-  [
-    {
-      "id": "use-schema",
-      "part": "instructions",
-      "body": "Use the supplied schema."
-    }
-  ]
-]
-```
+<state>
+<STATE>
+</state>
 
-### Constants
+<triggers>
+<TRIGGERS>
+</triggers>
 
-`constants`
+<processes>
+<PROCESSES>
+</processes>
 
-The node constants in authored order.
+<interfaces>
+<INTERFACES>
+</interfaces>
 
-```json
-[
-  []
-]
-```
+WHERE:
+- <INSTRUCTIONS> is string; is non-empty; The node instructions in authored order..
+- <CONSTANTS> is string; is non-empty; The node constants in authored order..
+- <SCHEMAS> is string; is non-empty; The node schemas in authored order..
+- <STATE> is string; is non-empty; The node state values in authored order..
+- <TRIGGERS> is string; is non-empty; The node triggers in authored order..
+- <PROCESSES> is string; is non-empty; The node processes in authored order..
+- <INTERFACES> is string; is non-empty; The node interfaces in authored order..
+~~~
+~~~~
 
-### Schemas
+~~~~state
+~~~~
 
-`schemas`
+~~~~triggers
+~~~~
 
-The node schemas in authored order.
+~~~~processes
+~~~~
 
-```json
-[
-  []
-]
-```
-
-### State
-
-`state`
-
-The node state values in authored order.
-
-```json
-[
-  []
-]
-```
-
-### Triggers
-
-`triggers`
-
-The node triggers in authored order.
-
-```json
-[
-  []
-]
-```
-
-### Processes
-
-`processes`
-
-The node processes in authored order.
-
-```json
-[
-  []
-]
-```
-
-### Interfaces
-
-`interfaces`
-
-The node interfaces in authored order.
-
-```json
-[
-  []
-]
-```
-
-### Children
-
-`children`
-
-The child nodes in authored order.
-
-```json
-[
-  []
-]
-```
+~~~~interfaces
+~~~~

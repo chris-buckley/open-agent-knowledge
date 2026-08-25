@@ -1,99 +1,48 @@
-# Trigger
+~~~~instructions
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+Trigger: One GIVEN, WHEN, and THEN signpost to a process.
+Do not read an interface or local binding in a trigger guard.
+Make equal trigger WHEN values provably disjoint.
+Give every non-true trigger guard at least one state read.
+~~~~
 
-One arrival reason, optional state guard, and selected process.
+~~~~constants
+example-1: "<trigger id=\"write-oak-trigger\">\nGIVEN: true\nWHEN: \"Source material arrives to write OAK.\"\nTHEN: process.write-oak\n</trigger>"
 
-## Examples
+grammar: TEXT<<
+surface_trigger = ? <trigger id="<ID>">
+GIVEN: <GIVEN>
+WHEN: <WHEN>
+THEN: <THEN>
+</trigger> ? ;
+>>
+~~~~
 
-```json
-[
-  {
-    "id": "write-oak-trigger",
-    "part": "triggers",
-    "given": {
-      "left": {
-        "source": "state",
-        "state": "status"
-      },
-      "operator": "equals",
-      "right": {
-        "source": "literal",
-        "value": "ready"
-      }
-    },
-    "when": "The interpreter arrives to write OAK.",
-    "process": "write-oak"
-  }
-]
-```
+~~~~schemas
+~~~schema;id="trigger";name="Trigger";purpose="One GIVEN, WHEN, and THEN signpost to a process."
+<trigger id="<ID>">
+GIVEN: <GIVEN>
+WHEN: <WHEN>
+THEN: <THEN>
+</trigger>
 
-## Fields
+WHERE:
+- <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <GIVEN> is string; is non-empty; True or the recursive state guard checked after WHEN..
+- <WHEN> is string; is non-empty; Why the interpreter enters the knowledge..
+- <THEN> is string; is non-empty; The local or relative process target selected by the trigger..
+~~~
+~~~~
 
-### Id
+~~~~state
+~~~~
 
-`id`
+~~~~triggers
+~~~~
 
-The entry id, unique across the tree.
+~~~~processes
+~~~~
 
-```json
-[
-  "example"
-]
-```
-
-### Part
-
-`part`
-
-The entry part discriminator.
-
-```json
-[
-  "triggers"
-]
-```
-
-### Given
-
-`given`
-
-The optional state condition checked after when matches.
-
-```json
-[
-  {
-    "left": {
-      "source": "state",
-      "state": "status"
-    },
-    "operator": "equals",
-    "right": {
-      "source": "literal",
-      "value": "ready"
-    }
-  }
-]
-```
-
-### When
-
-`when`
-
-Why the interpreter enters the knowledge.
-
-```json
-[
-  "The interpreter arrives to write OAK."
-]
-```
-
-### Process
-
-`process`
-
-The process entry selected by the trigger.
-
-```json
-[
-  "write-oak"
-]
-```
+~~~~interfaces
+~~~~
