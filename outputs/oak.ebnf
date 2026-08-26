@@ -106,7 +106,10 @@ THEN:
   <THEN>
 ELSE:
   <OTHERWISE> ? ;
-surface_step_call = ? CALL <PROCESS> ? ;
+surface_step_call = ? CALL <PROCESS>:
+  INPUTS:
+    <INPUTS>
+  OUTPUTS: <OUTPUTS> ? ;
 surface_step_fail = ? FAIL <MESSAGE> ? ;
 surface_step_assert = ? ASSERT <CONDITION>
 MESSAGE <MESSAGE> ? ;
@@ -115,7 +118,7 @@ surface_step_foreach = ? FOREACH <BINDING> IN <VALUE>:
 surface_step_par = ? PAR:
   <STEPS> ? ;
 surface_step_join = ? JOIN ? ;
-surface_process = ? <process id="<ID>" name="<NAME>">
+surface_process = ? <process id="<ID>" name="<NAME>" input="<INPUT>" output="<OUTPUT>">
 <STEPS>
 </process> ? ;
 surface_trigger = ? <trigger id="<ID>">

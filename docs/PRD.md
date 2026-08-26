@@ -1,7 +1,7 @@
 ---
 title: OAK Product Requirements
 status: draft
-updated: 2026-08-25
+updated: 2026-08-26
 owner: Christopher Buckley
 defaults:
   render: OAK
@@ -69,6 +69,9 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 30. Reject an unresolved relative target when explicit resolution is requested.
 31. Reject an unknown tool or a named-tool act that conflicts with its supplied registry contract.
 32. Reject a par tool whose supplied registry does not confirm parallel use.
+33. Reject a trigger-selected process with an input schema.
+34. Reject a process that cannot supply every output schema placeholder after successful completion.
+35. Reject a call whose input set differs from the called process input schema or whose output set differs from its output schema.
 
 ## Structure
 
@@ -208,7 +211,10 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Represent each process step as one discriminated union of (act|set|emit|if|call|fail|assert|foreach|par|join) on `kind`.
 - Represent each process value as one discriminated union of (literal|constant|state|interface|binding) on `source`.
 - Give each value binding one placeholder and one process value.
-- Give each process one `ProcessName` and one or more steps.
+- Give each process one `ProcessName`, optional input and output schema targets, and one or more steps.
+- Use each input schema placeholder as one initial process-local binding.
+- Require every output schema placeholder to be visible after successful process completion.
+- Require each trigger-selected process to declare no input schema.
 - Author the first process-name word as the action and the second as its object.
 - Execute process steps in authored order.
 - Give each act one instruction, one input binding list, one output placeholder list, and one optional exact tool name.
@@ -236,7 +242,9 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Give each if one condition, one non-empty then list, and one optional non-empty else list.
 - Execute only the selected if branch.
 - Keep a binding created in an if branch inside that branch.
-- Give each call one local or relative process target.
+- Give each call one local or relative process target, one input binding list, and one output placeholder list.
+- Require each call input binding set to equal the called process input schema placeholder set.
+- Require each call output set to equal the called process output schema placeholder set.
 - Run a called process synchronously in the current state and emission transaction.
 - Give each fail one `NonBlankLine` message.
 - Stop execution with `process_failed` when fail runs.
@@ -258,6 +266,9 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Promote no par output when any child fails.
 - Report the first par failure in authored order and retain later failures as suppressed diagnostics.
 - Give a called process a fresh local binding scope.
+- Seed a called process binding scope with its validated call inputs.
+- Validate the called process outputs against its output schema before promotion.
+- Promote each validated called process output as one immutable caller-local binding.
 - Share state and emissions across called processes in one top-level transaction.
 - Commit state writes and interface emissions after successful top-level completion.
 - Discard state writes and interface emissions after failure.
@@ -373,12 +384,14 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Render each trigger as one body entry with `id`, `GIVEN`, `WHEN`, and `THEN`.
 - Render each state and inline constant as its id, `: `, and one JSON value.
 - Render each block constant with its form opener, body, and closing line.
-- Render each process with its id and name followed by typed steps.
+- Render each process with its id, name, optional input and output schema targets, and typed steps.
 - Let line order carry step sequence.
 - Indent nested condition and step bodies by two spaces.
 - Render each process value as one JSON literal or `ValueReference`.
 - Render an unnamed act with `ACT` and a named act with `ACT TOOL` and one JSON string tool name.
 - Render (SET|CALL|EMIT) targets as `TargetPath` without `$`.
+- Render a call without bindings on one line.
+- Render a call with bindings as `CALL target:`, an optional `INPUTS` block, and an optional `OUTPUTS` line.
 - Render if with `IF`, its condition, `THEN`, and optional `ELSE`.
 - Render assert with `ASSERT`, its condition, and optional `MESSAGE`.
 - Render foreach with `FOREACH binding IN value` and its steps.
@@ -430,6 +443,8 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Render each entry, `Where`, constraint, condition, process value, and step kind as `@type`.
 - Render `where`, `constraints`, `examples`, `steps`, `inputs`, `outputs`, `bindings`, `conditions`, `thenSteps`, and `otherwise` as ordered lists.
 - Render trigger `then` as an id-valued process target.
+- Render process input and output as id-valued schema targets.
+- Render call process as an id-valued process target.
 - Render if `thenSteps` and `otherwise` as ordered step lists.
 - Derive each `Where` id as `#schema.SlugId/where/Placeholder`.
 - Render literal JSON values with `@type: @json`.
@@ -572,4 +587,3 @@ oak
 │   └── docs
 │       └── ...
 └── pyproject.toml
-```

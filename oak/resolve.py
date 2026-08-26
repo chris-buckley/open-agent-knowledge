@@ -5,8 +5,9 @@ from __future__ import annotations
 import posixpath
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from dataclasses import dataclass
-from pathlib import PurePosixPath
 from typing import TypeVar
+
+from pydantic_core import PydanticCustomError
 
 from oak.base import Entry
 from oak.node import Node
@@ -30,10 +31,14 @@ from oak.node.parts import (
     Process,
     Schema,
     Set,
-    State,
     Step,
     Trigger,
     Value,
+)
+from oak.node.parts.processes import (
+    process_visible_bindings,
+    validate_call_contract,
+    validate_process_contract,
 )
 from oak.parse import OakParseError, parse
 from oak.vocabulary.text.target_path import is_relative_target, split_target
@@ -135,6 +140,7 @@ def _step_references(step: Step) -> Iterator[tuple[str, type[Entry]]]:
         for child in step.steps:
             yield from _step_references(child)
     elif isinstance(step, Call):
+        yield from _value_targets(binding.value for binding in step.inputs)
         yield step.process, Process
 
 
@@ -142,6 +148,11 @@ def iter_targets(node: Node) -> Iterator[tuple[str, type[Entry]]]:
     """Yield every resolvable typed target in one document."""
     for interface in node.interfaces:
         yield interface.schema_id, Schema
+    for process in node.processes:
+        if process.input is not None:
+            yield process.input, Schema
+        if process.output is not None:
+            yield process.output, Schema
     for trigger in node.triggers:
         yield trigger.then, Process
         if trigger.given is not True:
@@ -204,6 +215,64 @@ def _validate_targets(graph: ResolvedGraph) -> None:
     for source, node in graph.documents.items():
         for target, expected in iter_targets(node):
             graph.entry(source, target, expected)
+
+
+def _schema_names(graph: ResolvedGraph, document: str, target: str | None) -> set[str]:
+    if target is None:
+        return set()
+    _schema_document, schema = graph.entry(document, target, Schema)
+    return schema.placeholders
+
+
+def _walk_calls(steps: list[Step]) -> Iterator[Call]:
+    for step in steps:
+        if isinstance(step, Call):
+            yield step
+        elif isinstance(step, If):
+            yield from _walk_calls(step.then)
+            if step.otherwise is not None:
+                yield from _walk_calls(step.otherwise)
+        elif isinstance(step, Foreach):
+            yield from _walk_calls(step.steps)
+        elif isinstance(step, Par):
+            yield from _walk_calls(step.steps)
+
+
+def _contract_error(source: str, target: str, error: PydanticCustomError) -> None:
+    _raise(str(error.type), source, target, str(error))
+
+
+def _validate_contracts(graph: ResolvedGraph) -> None:
+    for document, node in graph.documents.items():
+        for process in node.processes:
+            try:
+                validate_process_contract(
+                    process,
+                    _schema_names(graph, document, process.input),
+                    _schema_names(graph, document, process.output),
+                )
+            except PydanticCustomError as error:
+                _contract_error(document, f"process.{process.id}", error)
+        for trigger in node.triggers:
+            target_document, process = graph.entry(document, trigger.then, Process)
+            if process.input is not None:
+                _raise(
+                    "trigger_process_input",
+                    document,
+                    trigger.then,
+                    f"trigger {trigger.id} selects process {process.id} with an input schema",
+                )
+        for process in node.processes:
+            for call in _walk_calls(process.steps):
+                target_document, target = graph.entry(document, call.process, Process)
+                try:
+                    validate_call_contract(
+                        call,
+                        _schema_names(graph, target_document, target.input),
+                        _schema_names(graph, target_document, target.output),
+                    )
+                except PydanticCustomError as error:
+                    _contract_error(document, call.process, error)
 
 
 def _call_edges(graph: ResolvedGraph) -> dict[tuple[str, str], list[tuple[str, str]]]:
@@ -281,5 +350,6 @@ def resolve(
             pending.append(document)
     graph = ResolvedGraph(source, documents, registries)
     _validate_targets(graph)
+    _validate_contracts(graph)
     _validate_call_cycles(graph)
     return graph

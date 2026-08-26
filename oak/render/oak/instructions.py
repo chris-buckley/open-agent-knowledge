@@ -1,6 +1,9 @@
 """Built-in interpretation instructions for the OAK render."""
 
+from collections.abc import Iterator
+
 from oak.node.model import Node
+from oak.node.parts.processes import Call, Foreach, If, Par, Step
 
 REFERENCE_INSTRUCTION = (
     "$ reads a value; local targets start with their part; relative targets "
@@ -22,26 +25,49 @@ CONTROL_INSTRUCTION = (
     "ASSERT fails a false condition; FOREACH is sequential; PAR outputs become visible only at JOIN."
 )
 
+CONTRACT_INSTRUCTION = (
+    "Process input schemas seed local bindings, process output schemas validate successful outputs, "
+    "and CALL binds inputs and promotes declared outputs."
+)
+
 BUILT_IN_INSTRUCTIONS = frozenset(
     (
         REFERENCE_INSTRUCTION,
         CONTROL_INSTRUCTION,
+        CONTRACT_INSTRUCTION,
         *(text for _field, text in _PART_INSTRUCTIONS),
     )
 )
 
 
+def _walk_steps(steps: list[Step]) -> Iterator[Step]:
+    for step in steps:
+        yield step
+        if isinstance(step, If):
+            yield from _walk_steps(step.then)
+            if step.otherwise is not None:
+                yield from _walk_steps(step.otherwise)
+        elif isinstance(step, (Foreach, Par)):
+            yield from _walk_steps(step.steps)
+
+
 def instruction_lines(node: Node) -> list[str]:
     """Return built-in lines followed by authored instructions."""
     lines: list[str] = []
+    steps = tuple(
+        step
+        for process in node.processes
+        for step in _walk_steps(process.steps)
+    )
     if node.processes or node.triggers:
         lines.append(REFERENCE_INSTRUCTION)
-    if any(
-        step.kind in {"assert", "foreach", "par", "join"}
-        for process in node.processes
-        for step in process.steps
-    ):
+    if any(step.kind in {"assert", "foreach", "par", "join"} for step in steps):
         lines.append(CONTROL_INSTRUCTION)
+    if (
+        any(process.input is not None or process.output is not None for process in node.processes)
+        or any(isinstance(step, Call) and (step.inputs or step.outputs) for step in steps)
+    ):
+        lines.append(CONTRACT_INSTRUCTION)
     for field, instruction in _PART_INSTRUCTIONS:
         if getattr(node, field):
             lines.append(instruction)

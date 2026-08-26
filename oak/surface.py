@@ -99,7 +99,6 @@ def _fields(
             if name in roles:
                 raise RuntimeError(f"{model.__name__}.{name} is classified twice")
             roles[name] = role
-
     missing = set(model.model_fields) - set(roles)
     unknown = set(roles) - set(model.model_fields)
     if missing or unknown:
@@ -107,7 +106,6 @@ def _fields(
             f"{model.__name__} surface fields differ; "
             f"missing={sorted(missing)} unknown={sorted(unknown)}"
         )
-
     return tuple(
         SurfaceField(
             name=name,
@@ -182,13 +180,13 @@ SURFACES = (
     _surface("step-set", Set, "SET <STATE> = <VALUE>", rendered=("state", "value"), fixed=("kind",)),
     _surface("step-emit", Emit, "EMIT <INTERFACE>:\n  <BINDINGS>", rendered=("interface", "bindings"), fixed=("kind",)),
     _surface("step-if", If, "IF <CONDITION>:\nTHEN:\n  <THEN>\nELSE:\n  <OTHERWISE>", rendered=("condition", "then", "otherwise"), fixed=("kind",)),
-    _surface("step-call", Call, "CALL <PROCESS>", rendered=("process",), fixed=("kind",)),
+    _surface("step-call", Call, "CALL <PROCESS>:\n  INPUTS:\n    <INPUTS>\n  OUTPUTS: <OUTPUTS>", rendered=("process", "inputs", "outputs"), fixed=("kind",)),
     _surface("step-fail", Fail, "FAIL <MESSAGE>", rendered=("message",), fixed=("kind",)),
     _surface("step-assert", Assert, "ASSERT <CONDITION>\nMESSAGE <MESSAGE>", rendered=("condition", "message"), fixed=("kind",)),
     _surface("step-foreach", Foreach, "FOREACH <BINDING> IN <VALUE>:\n  <STEPS>", rendered=("binding", "value", "steps"), fixed=("kind",)),
     _surface("step-par", Par, "PAR:\n  <STEPS>", rendered=("steps",), fixed=("kind",)),
     _surface("step-join", Join, "JOIN", fixed=("kind",)),
-    _surface("process", Process, '<process id="<ID>" name="<NAME>">\n<STEPS>\n</process>', rendered=("id", "name", "steps"), fixed=("part",), part="processes", tag="process"),
+    _surface("process", Process, '<process id="<ID>" name="<NAME>" input="<INPUT>" output="<OUTPUT>">\n<STEPS>\n</process>', rendered=("id", "name", "input", "output", "steps"), fixed=("part",), part="processes", tag="process"),
     _surface("trigger", Trigger, '<trigger id="<ID>">\nGIVEN: <GIVEN>\nWHEN: <WHEN>\nTHEN: <THEN>\n</trigger>', rendered=("id", "given", "when", "then"), fixed=("part",), part="triggers", tag="trigger"),
     _surface("interface", Interface, '<interface id="<ID>" direction="<DIRECTION>" schema="<SCHEMA_ID>">\n<DESCRIPTION>\n</interface>', rendered=("id", "direction", "schema_id", "description"), fixed=("part",), part="interfaces", tag="interface"),
     _surface("node", Node, "<instructions>\n<INSTRUCTIONS>\n</instructions>\n\n<constants>\n<CONSTANTS>\n</constants>\n\n<schemas>\n<SCHEMAS>\n</schemas>\n\n<state>\n<STATE>\n</state>\n\n<triggers>\n<TRIGGERS>\n</triggers>\n\n<processes>\n<PROCESSES>\n</processes>\n\n<interfaces>\n<INTERFACES>\n</interfaces>", rendered=("instructions", "constants", "schemas", "state", "triggers", "processes", "interfaces")),

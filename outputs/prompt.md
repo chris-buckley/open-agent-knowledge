@@ -20,6 +20,7 @@ Emit the final OAK document as the sole response.
 Do not use one act placeholder as both input and output.
 Make act instruction placeholders equal its inputs and outputs.
 Remove or repair an assertion that is statically false.
+Match each call's inputs and outputs to the called process schemas.
 Give each ALL or ANY condition at least two children.
 Keep the resolved process call graph acyclic.
 Use the same columns in every CSV row.
@@ -58,10 +59,12 @@ Put only exact named-tool acts inside PAR.
 Make the template and WHERE placeholder sets equal.
 Do not redefine a visible immutable process binding.
 Keep the local process call graph acyclic.
+Make every process output schema placeholder visible after successful completion.
 Remove an assertion that is statically true.
 Match a named tool's declared input and output contract.
 Use a tool in PAR only when its supplied registry confirms parallel use.
 Give every non-true trigger guard at least one state read.
+Select only a process without an input schema from a trigger.
 Read only a visible prior process-local binding.
 Reference only another placeholder in the same schema.
 Read a placeholder present in the interface schema.
@@ -181,7 +184,10 @@ THEN:
   <THEN>
 ELSE:
   <OTHERWISE> ? ;
-surface_step_call = ? CALL <PROCESS> ? ;
+surface_step_call = ? CALL <PROCESS>:
+  INPUTS:
+    <INPUTS>
+  OUTPUTS: <OUTPUTS> ? ;
 surface_step_fail = ? FAIL <MESSAGE> ? ;
 surface_step_assert = ? ASSERT <CONDITION>
 MESSAGE <MESSAGE> ? ;
@@ -190,7 +196,7 @@ surface_step_foreach = ? FOREACH <BINDING> IN <VALUE>:
 surface_step_par = ? PAR:
   <STEPS> ? ;
 surface_step_join = ? JOIN ? ;
-surface_process = ? <process id="<ID>" name="<NAME>">
+surface_process = ? <process id="<ID>" name="<NAME>" input="<INPUT>" output="<OUTPUT>">
 <STEPS>
 </process> ? ;
 surface_trigger = ? <trigger id="<ID>">
@@ -541,11 +547,16 @@ WHERE:
 - <OTHERWISE> is string; is non-empty; The steps run when the condition is false..
 ~~~
 
-~~~schema;id="step-call";name="Call";purpose="One synchronous local or relative process invocation."
-CALL <PROCESS>
+~~~schema;id="step-call";name="Call";purpose="One synchronous process invocation with schema-bound inputs and outputs."
+CALL <PROCESS>:
+  INPUTS:
+    <INPUTS>
+  OUTPUTS: <OUTPUTS>
 
 WHERE:
 - <PROCESS> is string; is non-empty; The local or relative process target to invoke..
+- <INPUTS> is string; is non-empty; The called process input bindings in authored order..
+- <OUTPUTS> is string; is non-empty; The called process outputs promoted to this process..
 ~~~
 
 ~~~schema;id="step-fail";name="Fail";purpose="One explicit process failure."
@@ -589,13 +600,15 @@ WHERE:
 ~~~
 
 ~~~schema;id="process";name="Process";purpose="One named ordered way to do a task."
-<process id="<ID>" name="<NAME>">
+<process id="<ID>" name="<NAME>" input="<INPUT>" output="<OUTPUT>">
 <STEPS>
 </process>
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <NAME> is string; is non-empty; The two-word process display name..
+- <INPUT> is string; is non-empty; The optional schema that defines initial local bindings..
+- <OUTPUT> is string; is non-empty; The optional schema that defines successful local outputs..
 - <STEPS> is string; is non-empty; The typed process steps in authored order..
 ~~~
 

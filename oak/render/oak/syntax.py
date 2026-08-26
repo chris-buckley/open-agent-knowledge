@@ -238,6 +238,20 @@ def _act_lines(step: Act, indent: int) -> list[str]:
     return lines
 
 
+def _call_lines(step: Call, indent: int) -> list[str]:
+    prefix = " " * indent
+    inner = indent + 2
+    if not step.inputs and not step.outputs:
+        return [prefix + "CALL " + step.process]
+    lines = [prefix + "CALL " + step.process + ":"]
+    if step.inputs:
+        lines.append(" " * inner + "INPUTS:")
+        lines.extend(_binding_line(binding, inner + 2) for binding in step.inputs)
+    if step.outputs:
+        lines.append(" " * inner + "OUTPUTS: " + ", ".join(step.outputs))
+    return lines
+
+
 def _step_lines(step: Step, indent: int) -> list[str]:
     prefix = " " * indent
     inner = indent + 2
@@ -263,7 +277,7 @@ def _step_lines(step: Step, indent: int) -> list[str]:
                 lines.extend(_step_lines(child, inner + 2))
         return lines
     if isinstance(step, Call):
-        return [prefix + "CALL " + step.process]
+        return _call_lines(step, indent)
     if isinstance(step, Fail):
         return [prefix + "FAIL " + value_text(step.message)]
     if isinstance(step, Assert):

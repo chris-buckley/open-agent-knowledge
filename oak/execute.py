@@ -38,7 +38,6 @@ from oak.node.parts import (
     Schema,
     SchemaBindingError,
     Set,
-    State,
     StateValue,
     Step,
     Trigger,
@@ -336,6 +335,51 @@ def _parallel(
     return [result for result in results if result is not None]
 
 
+def _schema(
+    graph: ResolvedGraph,
+    document: str,
+    target: str | None,
+) -> Schema | None:
+    if target is None:
+        return None
+    _schema_document, schema = graph.entry(document, target, Schema)
+    return schema
+
+
+def _run_process(
+    graph: ResolvedGraph,
+    document: str,
+    process: Process,
+    inputs: Mapping[str, JsonValue],
+    state: dict[str, JsonValue],
+    interfaces: Mapping[tuple[str, str], Mapping[str, JsonValue]],
+    emissions: list[Emission],
+    act: ActHandler | None,
+    tools: Mapping[str, ToolContract],
+) -> dict[str, JsonValue]:
+    input_schema = _schema(graph, document, process.input)
+    if input_schema is None:
+        if inputs:
+            raise ExecutionError("invalid_process_input", f"process {process.id} has no input schema")
+    else:
+        try:
+            input_schema.bind(inputs)
+        except SchemaBindingError as error:
+            raise ExecutionError("invalid_process_input", f"process {process.id}: {error}") from None
+    bindings = deepcopy(dict(inputs))
+    _run_steps(graph, document, process.steps, state, interfaces, emissions, bindings, act, tools)
+    output_schema = _schema(graph, document, process.output)
+    if output_schema is None:
+        return {}
+    names = [item.placeholder for item in output_schema.where]
+    outputs = {name: deepcopy(bindings[name]) for name in names if name in bindings}
+    try:
+        output_schema.bind(outputs)
+    except SchemaBindingError as error:
+        raise ExecutionError("invalid_process_output", f"process {process.id}: {error}") from None
+    return outputs
+
+
 def _run_steps(
     graph: ResolvedGraph,
     document: str,
@@ -384,8 +428,24 @@ def _run_steps(
             if selected is not None:
                 _run_steps(graph, document, selected, state, interfaces, emissions, dict(bindings), act, tools)
         elif isinstance(step, Call):
+            values = {
+                binding.placeholder: _resolve_value(graph, document, binding.value, state, interfaces, bindings)
+                for binding in step.inputs
+            }
             target_document, process = graph.entry(document, step.process, Process)
-            _run_steps(graph, target_document, process.steps, state, interfaces, emissions, {}, act, tools)
+            outputs = _run_process(
+                graph,
+                target_document,
+                process,
+                values,
+                state,
+                interfaces,
+                emissions,
+                act,
+                tools,
+            )
+            for name in step.outputs:
+                bindings[name] = deepcopy(outputs[name])
         elif isinstance(step, Fail):
             raise ExecutionError("process_failed", step.message)
         elif isinstance(step, Assert):
@@ -472,7 +532,6 @@ def execute(
         )
     active = _active_interfaces(graph, arrival)
     matches: list[Trigger] = []
-    root_registry = graph.registries[graph.root]
     for trigger in node.triggers:
         if trigger.when != arrival.when:
             continue
@@ -484,7 +543,17 @@ def execute(
         return ExecutionResult(state=working_state)
     process_document, process = graph.entry(graph.root, matches[0].then, Process)
     emissions: list[Emission] = []
-    _run_steps(graph, process_document, process.steps, working_state, active, emissions, {}, act, tool_registry)
+    _run_process(
+        graph,
+        process_document,
+        process,
+        {},
+        working_state,
+        active,
+        emissions,
+        act,
+        tool_registry,
+    )
     return ExecutionResult(
         process=graph.display_target(process_document, "process", process.id),
         state=working_state,

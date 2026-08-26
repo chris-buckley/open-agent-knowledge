@@ -41,7 +41,16 @@ def trigger_xml(trigger: Trigger) -> str:
 
 def process_xml(process: Process) -> str:
     descriptor = surface_for(process)
-    return _xml_element(descriptor.tag or "process", {"id": process.id, "name": process.name}, "\n".join(process_lines(process)))
+    return _xml_element(
+        descriptor.tag or "process",
+        {
+            "id": process.id,
+            "name": process.name,
+            "input": process.input,
+            "output": process.output,
+        },
+        "\n".join(process_lines(process)),
+    )
 
 
 def interface_xml(interface: Interface) -> str:
@@ -95,7 +104,16 @@ def trigger_markdown(trigger: Trigger) -> str:
 
 def process_markdown(process: Process) -> str:
     descriptor = surface_for(process)
-    return _markdown_entry(descriptor.tag or "process", {"id": process.id, "name": process.name}, "\n".join(process_lines(process)))
+    return _markdown_entry(
+        descriptor.tag or "process",
+        {
+            "id": process.id,
+            "name": process.name,
+            "input": process.input,
+            "output": process.output,
+        },
+        "\n".join(process_lines(process)),
+    )
 
 
 def interface_markdown(interface: Interface) -> str:

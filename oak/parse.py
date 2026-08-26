@@ -56,7 +56,6 @@ from oak.node.parts import (
 from oak.render.oak.arrangement import PART_ORDER
 from oak.render.oak.instructions import BUILT_IN_INSTRUCTIONS
 from oak.surface import entry_surface
-from oak.vocabulary.text.target_path import split_target
 
 GroupingName = Literal["xml", "markdown"]
 
@@ -135,7 +134,7 @@ def _parts(text: str, grouping: GroupingName) -> dict[str, tuple[list[str], int]
             index += 1
         if index >= len(lines):
             _fail("part_unterminated", part, start, f"missing {closing}")
-        result[part] = (body, start)
+        result[part] = body, start
         index += 1
     if index != len(lines):
         _fail("trailing_content", "$", index + 1, "content follows the interfaces part")
@@ -154,8 +153,7 @@ def _xml_attributes(line: str, tag: str, path: str, number: int) -> dict[str, st
             _fail("entry_attribute", path, number, "invalid XML-like attribute syntax")
         key = match.group(1)
         raw = match.group(2)
-        value = html.unescape(raw[1:-1])
-        attributes[key] = value
+        attributes[key] = html.unescape(raw[1:-1])
         position = match.end()
     if source[position:].strip():
         _fail("entry_attribute", path, number, "invalid XML-like attribute syntax")
@@ -186,7 +184,13 @@ def _markdown_attributes(line: str, tag: str, path: str, number: int) -> dict[st
     return attributes
 
 
-def _entries(lines: list[str], start: int, tag: str, grouping: GroupingName, path: str) -> list[tuple[dict[str, str], list[str], int]]:
+def _entries(
+    lines: list[str],
+    start: int,
+    tag: str,
+    grouping: GroupingName,
+    path: str,
+) -> list[tuple[dict[str, str], list[str], int]]:
     entry_surface(tag)
     result: list[tuple[dict[str, str], list[str], int]] = []
     index = 0
@@ -320,7 +324,8 @@ def _constraint(source: str, path: str, line: int):
         return Lines(min=1, max=1)
     match = re.fullmatch(r"has ([0-9]+) lines", source)
     if match:
-        value = int(match.group(1)); return Lines(min=value, max=value)
+        value = int(match.group(1))
+        return Lines(min=value, max=value)
     match = re.fullmatch(r"has ([0-9]+) to ([0-9]+) lines", source)
     if match:
         return Lines(min=int(match.group(1)), max=int(match.group(2)))
@@ -385,14 +390,17 @@ def _schemas(lines: list[str], start: int, grouping: GroupingName) -> list[Schem
         template, separator, where_text = body.rpartition(marker)
         if not separator:
             _fail("schema_where", f"schemas.{attributes['id']}", number, "schema body needs the generated WHERE separator")
-        where_lines = where_text.splitlines()
         result.append(
             Schema(
                 id=attributes["id"],
                 name=attributes.get("name"),
                 purpose=attributes.get("purpose"),
                 template=template,
-                where=[_where(item, f"schemas.{attributes['id']}.where", number + len(template.splitlines()) + 3 + index) for index, item in enumerate(where_lines) if item],
+                where=[
+                    _where(item, f"schemas.{attributes['id']}.where", number + len(template.splitlines()) + 3 + index)
+                    for index, item in enumerate(where_text.splitlines())
+                    if item
+                ],
             )
         )
     return result
@@ -467,7 +475,48 @@ def _binding(source: str, path: str, line: int) -> ValueBinding:
     return ValueBinding(placeholder=placeholder, value=_value(value, path, line))
 
 
-def _steps(lines: list[str], index: int, indent: int, path: str, start: int, stop: set[str] | None = None):
+def _outputs(source: str) -> list[str]:
+    return [item.strip() for item in source.split(",")]
+
+
+def _call(
+    lines: list[str],
+    index: int,
+    indent: int,
+    path: str,
+    start: int,
+) -> tuple[Call, int]:
+    number = start + index
+    text = lines[index][indent + 5 :]
+    if not text.endswith(":"):
+        return Call(process=text), index + 1
+    target = text[:-1]
+    index += 1
+    inputs = []
+    outputs = []
+    if index < len(lines) and _indent(lines[index], path, start + index) == indent + 2 and lines[index][indent + 2 :] == "INPUTS:":
+        index += 1
+        while index < len(lines) and _indent(lines[index], path, start + index) == indent + 4:
+            inputs.append(_binding(lines[index][indent + 4 :], path, start + index))
+            index += 1
+        if not inputs:
+            _fail("call_inputs", path, number, "CALL INPUTS needs at least one binding")
+    if index < len(lines) and _indent(lines[index], path, start + index) == indent + 2 and lines[index][indent + 2 :].startswith("OUTPUTS: "):
+        outputs = _outputs(lines[index][indent + 11 :])
+        index += 1
+    if not inputs and not outputs:
+        _fail("call_bindings", path, number, "CALL block needs inputs or outputs")
+    return Call(process=target, inputs=inputs, outputs=outputs), index
+
+
+def _steps(
+    lines: list[str],
+    index: int,
+    indent: int,
+    path: str,
+    start: int,
+    stop: set[str] | None = None,
+):
     result = []
     stop = stop or set()
     while index < len(lines):
@@ -492,8 +541,7 @@ def _steps(lines: list[str], index: int, indent: int, path: str, start: int, sto
                 _fail("act_tool", path, number, str(error))
             if not isinstance(tool, str) or not rest[consumed:].startswith(": "):
                 _fail("act_tool", path, number, "ACT TOOL needs one JSON string and colon")
-            instruction = rest[consumed + 2 :]
-            step_data = {"tool": tool, "instruction": instruction, "inputs": [], "outputs": []}
+            step_data = {"tool": tool, "instruction": rest[consumed + 2 :], "inputs": [], "outputs": []}
             index += 1
         elif text.startswith("ACT "):
             step_data = {"tool": None, "instruction": text[4:], "inputs": [], "outputs": []}
@@ -507,7 +555,7 @@ def _steps(lines: list[str], index: int, indent: int, path: str, start: int, sto
                     step_data["inputs"].append(_binding(lines[index][indent + 4 :], path, start + index))
                     index += 1
             if index < len(lines) and _indent(lines[index], path, start + index) == indent + 2 and lines[index][indent + 2 :].startswith("OUTPUTS: "):
-                step_data["outputs"] = [item.strip() for item in lines[index][indent + 11 :].split(",")]
+                step_data["outputs"] = _outputs(lines[index][indent + 11 :])
                 index += 1
             result.append(Act(**step_data))
             continue
@@ -516,16 +564,21 @@ def _steps(lines: list[str], index: int, indent: int, path: str, start: int, sto
             if " = " not in body:
                 _fail("set", path, number, "SET needs target = value")
             target, value = body.split(" = ", 1)
-            result.append(Set(state=target, value=_value(value, path, number))); index += 1; continue
+            result.append(Set(state=target, value=_value(value, path, number)))
+            index += 1
+            continue
         if text.startswith("EMIT ") and text.endswith(":"):
             target = text[5:-1]
             index += 1
             bindings = []
             while index < len(lines) and _indent(lines[index], path, start + index) == indent + 2:
-                bindings.append(_binding(lines[index][indent + 2 :], path, start + index)); index += 1
-            result.append(Emit(interface=target, bindings=bindings)); continue
+                bindings.append(_binding(lines[index][indent + 2 :], path, start + index))
+                index += 1
+            result.append(Emit(interface=target, bindings=bindings))
+            continue
         if text.startswith("IF ") and text.endswith(":"):
-            condition = _compare(text[3:-1], path, number); index += 1
+            condition = _compare(text[3:-1], path, number)
+            index += 1
         elif text == "IF:":
             condition, index = _condition(lines, index + 1, indent + 2, path, start)
         else:
@@ -537,16 +590,22 @@ def _steps(lines: list[str], index: int, indent: int, path: str, start: int, sto
             otherwise = None
             if index < len(lines) and _indent(lines[index], path, start + index) == indent + 2 and lines[index][indent + 2 :] == "ELSE:":
                 otherwise, index = _steps(lines, index + 1, indent + 4, path, start)
-            result.append(If(condition=condition, then=then, otherwise=otherwise)); continue
+            result.append(If(condition=condition, then=then, otherwise=otherwise))
+            continue
         if text.startswith("CALL "):
-            result.append(Call(process=text[5:])); index += 1; continue
+            step, index = _call(lines, index, indent, path, start)
+            result.append(step)
+            continue
         if text.startswith("FAIL "):
             message = _json_value(text[5:], path, number)
             if not isinstance(message, str):
                 _fail("fail_message", path, number, "FAIL message must be a JSON string")
-            result.append(Fail(message=message)); index += 1; continue
+            result.append(Fail(message=message))
+            index += 1
+            continue
         if text.startswith("ASSERT "):
-            condition = _compare(text[7:], path, number); index += 1
+            condition = _compare(text[7:], path, number)
+            index += 1
         elif text == "ASSERT:":
             condition, index = _condition(lines, index + 1, indent + 2, path, start)
         else:
@@ -557,20 +616,26 @@ def _steps(lines: list[str], index: int, indent: int, path: str, start: int, sto
                 raw = _json_value(lines[index][indent + 10 :], path, start + index)
                 if not isinstance(raw, str):
                     _fail("assert_message", path, start + index, "MESSAGE must be a JSON string")
-                message = raw; index += 1
-            result.append(Assert(condition=condition, message=message)); continue
+                message = raw
+                index += 1
+            result.append(Assert(condition=condition, message=message))
+            continue
         if text.startswith("FOREACH ") and text.endswith(":"):
             body = text[8:-1]
             if " IN " not in body:
                 _fail("foreach", path, number, "FOREACH needs binding IN value")
             binding, value = body.split(" IN ", 1)
             children, index = _steps(lines, index + 1, indent + 2, path, start)
-            result.append(Foreach(binding=binding, value=_value(value, path, number), steps=children)); continue
+            result.append(Foreach(binding=binding, value=_value(value, path, number), steps=children))
+            continue
         if text == "PAR:":
             children, index = _steps(lines, index + 1, indent + 2, path, start)
-            result.append(Par(steps=children)); continue
+            result.append(Par(steps=children))
+            continue
         if text == "JOIN":
-            result.append(Join()); index += 1; continue
+            result.append(Join())
+            index += 1
+            continue
         _fail("unknown_step", path, number, f"unknown process step {text}")
     return result, index
 
@@ -583,7 +648,15 @@ def _processes(lines: list[str], start: int, grouping: GroupingName) -> list[Pro
         steps, index = _steps(body, 0, 0, f"processes.{attributes['id']}", number + 1)
         if index != len(body):
             _fail("process_trailing", f"processes.{attributes['id']}", number + index + 1, "unparsed process text")
-        result.append(Process(id=attributes["id"], name=attributes["name"], steps=steps))
+        result.append(
+            Process(
+                id=attributes["id"],
+                name=attributes["name"],
+                input=attributes.get("input"),
+                output=attributes.get("output"),
+                steps=steps,
+            )
+        )
     return result
 
 

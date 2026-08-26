@@ -127,7 +127,16 @@ def _context(document: str, vocabulary: str) -> dict[str, object]:
     }
     ids = {
         name: {"@id": f"oak:{name}", "@type": "@id"}
-        for name in ("schema", "process", "then", "constant", "stateTarget", "interface", "callTarget")
+        for name in (
+            "schema",
+            "process",
+            "then",
+            "constant",
+            "stateTarget",
+            "interface",
+            "input",
+            "output",
+        )
     }
     return {
         "@base": document,
@@ -279,7 +288,9 @@ def _step(document: str, step: Step) -> dict[str, object]:
         if step.otherwise is not None:
             node["otherwise"] = [_step(document, child) for child in step.otherwise]
     elif isinstance(step, Call):
-        node["callTarget"] = {"@id": target_id(document, step.process)}
+        node["process"] = {"@id": target_id(document, step.process)}
+        node["inputs"] = [_binding(document, binding) for binding in step.inputs]
+        node["outputs"] = list(step.outputs)
     elif isinstance(step, Fail):
         node["message"] = step.message
     elif isinstance(step, Assert):
@@ -309,16 +320,25 @@ def _entry(document: str, entry: Entry) -> dict[str, object]:
     if isinstance(entry, State):
         return {"@id": entry_id(document, "state", entry.id), "@type": "oak:State", "value": _json_literal(entry.value)}
     if isinstance(entry, Trigger):
-        node: dict[str, object] = {
+        return {
             "@id": entry_id(document, "trigger", entry.id),
             "@type": "oak:Trigger",
             "given": True if entry.given is True else _condition(document, entry.given),
             "when": entry.when,
             "then": {"@id": target_id(document, entry.then)},
         }
-        return node
     if isinstance(entry, Process):
-        return {"@id": entry_id(document, "process", entry.id), "@type": "oak:Process", "name": entry.name, "steps": [_step(document, step) for step in entry.steps]}
+        node: dict[str, object] = {
+            "@id": entry_id(document, "process", entry.id),
+            "@type": "oak:Process",
+            "name": entry.name,
+            "steps": [_step(document, step) for step in entry.steps],
+        }
+        if entry.input is not None:
+            node["input"] = {"@id": target_id(document, entry.input)}
+        if entry.output is not None:
+            node["output"] = {"@id": target_id(document, entry.output)}
+        return node
     if isinstance(entry, Interface):
         node = {
             "@id": entry_id(document, "interface", entry.id),

@@ -5,6 +5,7 @@ Trigger: One GIVEN, WHEN, and THEN signpost to a process.
 Do not read an interface or local binding in a trigger guard.
 Make equal trigger WHEN values provably disjoint.
 Give every non-true trigger guard at least one state read.
+Select only a process without an input schema from a trigger.
 ~~~~
 
 ~~~~constants

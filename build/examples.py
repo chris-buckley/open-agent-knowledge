@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from pydantic import ConfigDict, TypeAdapter, create_model
+from pydantic import ConfigDict, TypeAdapter, ValidationError, create_model
 
 from build.surfaces import (
     AUTHORABLE_MODELS,
@@ -42,6 +42,7 @@ from oak import (
     DottedPath,
     Emit,
     Emission,
+    ExecutionError,
     ExecutionResult,
     Fail,
     Foreach,
@@ -66,6 +67,7 @@ from oak import (
     Quantity,
     Regex,
     RegexPattern,
+    ResolutionError,
     Schema,
     Set,
     SlugId,
@@ -92,7 +94,6 @@ from oak.base import OakModel
 from oak.parse import _binding, _condition, _constraint, _interfaces, _named_values, _processes, _schemas, _steps, _triggers, _value, _where
 from oak.rules import RULES
 from oak.surface import SURFACES, surface_for
-from oak.vocabulary.text.target_path import split_target
 
 METADATA_MODELS = (
     *AUTHORABLE_MODELS,
@@ -195,54 +196,44 @@ def _freshness_gates() -> None:
     from build import prompt as prompt_build
     from build.docs import documents
 
-    # 1. Authorable model set equals documented model set.
     expected_names = {slug(model.__name__) + ".md" for model in AUTHORABLE_MODELS}
     if set(documents()) != expected_names:
         raise RuntimeError("freshness gate 1 failed")
 
-    # 2. Every concrete model example selects exactly one descriptor.
     for model in AUTHORABLE_MODELS:
         for instance in model_examples(model):
             surface_for(instance)
 
-    # 3. Every rendered field is covered once in each descriptor.
     for surface in SURFACES:
         rendered = [field.name for field in surface.fields if field.role == "rendered"]
         if len(rendered) != len(set(rendered)):
             raise RuntimeError(f"freshness gate 3 failed for {surface.id}")
 
-    # 4. Every field is classified as rendered, fixed, omitted, or generated.
     for surface in SURFACES:
         if {field.name for field in surface.fields} != set(surface.model.model_fields):
             raise RuntimeError(f"freshness gate 4 failed for {surface.id}")
 
-    # 5. Every validated model example renders through a descriptor.
     for surface in SURFACES:
         surface_example(surface)
 
-    # 6. Every rendered surface example parses to the preserved model data.
     for surface in SURFACES:
         original = surface_instance(surface)
         rebuilt = _parse_surface(surface, surface_example(surface))
         if _normalized(original) != _normalized(rebuilt):
             raise RuntimeError(f"freshness gate 6 failed for {surface.id}")
 
-    # 7. Every documentation page parses as one OAK document.
     parsed_docs = {name: parse(text) for name, text in documents().items()}
 
-    # 8. Every parsed documentation page reproduces its committed render.
     for name, node in parsed_docs.items():
         if render(node, grouping="markdown") + "\n" != documents()[name]:
             raise RuntimeError(f"freshness gate 8 failed for {name}")
 
-    # 9. Prompt and docs share the exact surface and rule objects.
     if not (
         docs_build.SURFACE_SOURCE is prompt_build.SURFACE_SOURCE is SURFACES
         and docs_build.RULE_SOURCE is prompt_build.RULE_SOURCE is RULES
     ):
         raise RuntimeError("freshness gate 9 failed")
 
-    # 10. Generated output paths and contents equal the committed snapshot.
     _validate_outputs()
 
 
@@ -259,6 +250,42 @@ def _validate_examples_and_render() -> None:
                 raise RuntimeError(f"{stem} {grouping} round trip changed text")
 
 
+def _contract_schemas() -> tuple[Schema, Schema]:
+    return (
+        Schema(
+            id="raw-name",
+            template="<RAW_NAME>",
+            where=[where("RAW_NAME", Type(of="string"), NonEmpty())],
+        ),
+        Schema(
+            id="normal-name",
+            template="<NORMAL_NAME>",
+            where=[where("NORMAL_NAME", Type(of="string"), NonEmpty())],
+        ),
+    )
+
+
+def _normalise_process() -> Process:
+    return Process(
+        id="normalise",
+        name="Normalise name",
+        input="schema.raw-name",
+        output="schema.normal-name",
+        steps=[
+            Act(
+                instruction="Normalise <RAW_NAME> into <NORMAL_NAME>.",
+                inputs=[
+                    ValueBinding(
+                        placeholder="RAW_NAME",
+                        value=BindingValue(binding="RAW_NAME"),
+                    )
+                ],
+                outputs=["NORMAL_NAME"],
+            )
+        ],
+    )
+
+
 def _validate_resolution() -> None:
     shared = Node(schemas=[Schema(id="shared", template="<VALUE>", where=[where("VALUE", Type(of="string"))])])
     root = Node(interfaces=[Interface(id="shared", direction="in", schema="shared.oak.md#schema.shared")])
@@ -266,6 +293,95 @@ def _validate_resolution() -> None:
     _document, schema = graph.entry("root.oak.md", "shared.oak.md#schema.shared", Schema)
     if schema.id != "shared":
         raise RuntimeError("resolution selected the wrong schema")
+
+    raw, normal = _contract_schemas()
+    target = Node(schemas=[raw, normal], processes=[_normalise_process()])
+    caller = Node(
+        processes=[
+            Process(
+                id="handle",
+                name="Handle request",
+                steps=[
+                    Call(
+                        process="target.oak.md#process.normalise",
+                        inputs=[ValueBinding(placeholder="RAW_NAME", value=LiteralValue(value="Ada"))],
+                        outputs=["NORMAL_NAME"],
+                    )
+                ],
+            )
+        ]
+    )
+    def loader(path: str) -> Node | None:
+        return target if path == "target.oak.md" else None
+
+    resolve(caller, source="root.oak.md", load=loader)
+
+    failures = (
+        (
+            "call_contract_mismatch",
+            Node(
+                processes=[
+                    Process(
+                        id="handle",
+                        name="Handle request",
+                        steps=[Call(process="target.oak.md#process.normalise")],
+                    )
+                ]
+            ),
+        ),
+        (
+            "trigger_process_input",
+            Node(
+                triggers=[
+                    Trigger(
+                        id="invalid",
+                        when="A name arrives.",
+                        then="target.oak.md#process.normalise",
+                    )
+                ]
+            ),
+        ),
+    )
+    for code, invalid in failures:
+        try:
+            resolve(invalid, source="root.oak.md", load=loader)
+        except ResolutionError as error:
+            if error.code != code:
+                raise RuntimeError(f"expected {code}, got {error.code}") from None
+        else:
+            raise RuntimeError(f"expected {code}")
+
+    relative_contract = Node(
+        processes=[
+            Process(
+                id="invalid",
+                name="Build result",
+                input="target.oak.md#schema.raw-name",
+                output="target.oak.md#schema.normal-name",
+                steps=[
+                    Act(
+                        instruction="Read <RAW_NAME>.",
+                        inputs=[
+                            ValueBinding(
+                                placeholder="RAW_NAME",
+                                value=BindingValue(binding="RAW_NAME"),
+                            )
+                        ],
+                    )
+                ],
+            )
+        ]
+    )
+    try:
+        resolve(relative_contract, source="root.oak.md", load=loader)
+    except ResolutionError as error:
+        if error.code != "process_output_binding_mismatch":
+            raise RuntimeError(
+                "expected process_output_binding_mismatch, "
+                f"got {error.code}"
+            ) from None
+    else:
+        raise RuntimeError("expected process_output_binding_mismatch")
 
 
 def _validate_execution() -> None:
@@ -330,6 +446,132 @@ def _validate_execution() -> None:
     if result.state != {"state.done": True}:
         raise RuntimeError("parallel or foreach execution failed")
 
+    raw, normal = _contract_schemas()
+    contract = Node(
+        schemas=[raw, normal],
+        triggers=[Trigger(id="name", when="A name arrives.", then="process.handle")],
+        processes=[
+            _normalise_process(),
+            Process(
+                id="handle",
+                name="Handle request",
+                steps=[
+                    Call(
+                        process="process.normalise",
+                        inputs=[
+                            ValueBinding(
+                                placeholder="RAW_NAME",
+                                value=InterfaceValue(interface="interface.request", placeholder="RAW_NAME"),
+                            )
+                        ],
+                        outputs=["NORMAL_NAME"],
+                    ),
+                    Emit(
+                        interface="interface.result",
+                        bindings=[
+                            ValueBinding(
+                                placeholder="NORMAL_NAME",
+                                value=BindingValue(binding="NORMAL_NAME"),
+                            )
+                        ],
+                    ),
+                ],
+            ),
+        ],
+        interfaces=[
+            Interface(id="request", direction="in", schema="schema.raw-name"),
+            Interface(id="result", direction="out", schema="schema.normal-name"),
+        ],
+    )
+    for grouping in ("xml", "markdown"):
+        rendered = render(contract, grouping=grouping)
+        if render(parse(rendered), grouping=grouping) != rendered:
+            raise RuntimeError(f"process contract {grouping} round trip changed text")
+
+    result = execute(
+        contract,
+        Arrival(when="A name arrives.", interfaces={"interface.request": {"RAW_NAME": " ada "}}),
+        {},
+        act=lambda _step, values: {"NORMAL_NAME": values["RAW_NAME"].strip().title()},
+    )
+    if result.emissions != [Emission(interface="interface.result", values={"NORMAL_NAME": "Ada"})]:
+        raise RuntimeError("process contract execution failed")
+
+    try:
+        execute(
+            contract,
+            Arrival(
+                when="A name arrives.",
+                interfaces={"interface.request": {"RAW_NAME": "Ada"}},
+            ),
+            {},
+            act=lambda _step, _values: {"NORMAL_NAME": ""},
+        )
+    except ExecutionError as error:
+        if error.code != "invalid_process_output":
+            raise RuntimeError(
+                f"expected invalid_process_output, got {error.code}"
+            ) from None
+    else:
+        raise RuntimeError("expected invalid_process_output")
+
+
+def _expect_rule(code: str, author) -> None:
+    try:
+        author()
+    except ValidationError as error:
+        if code not in {str(item["type"]) for item in error.errors()}:
+            raise RuntimeError(f"expected {code}, got {error}") from None
+        return
+    raise RuntimeError(f"expected {code}")
+
+
+def _validate_contract_rules() -> None:
+    raw, normal = _contract_schemas()
+
+    def trigger_input() -> None:
+        Node(
+            schemas=[raw, normal],
+            triggers=[Trigger(id="invalid", when="A name arrives.", then="process.normalise")],
+            processes=[_normalise_process()],
+        )
+
+    def output_missing() -> None:
+        Node(
+            schemas=[raw, normal],
+            processes=[
+                Process(
+                    id="normalise",
+                    name="Normalise name",
+                    input="schema.raw-name",
+                    output="schema.normal-name",
+                    steps=[
+                        Act(
+                            instruction="Read <RAW_NAME>.",
+                            inputs=[ValueBinding(placeholder="RAW_NAME", value=BindingValue(binding="RAW_NAME"))],
+                        )
+                    ],
+                )
+            ],
+        )
+
+    def call_mismatch() -> None:
+        Node(
+            schemas=[raw, normal],
+            processes=[
+                _normalise_process(),
+                Process(
+                    id="handle",
+                    name="Handle request",
+                    steps=[Call(process="process.normalise")],
+                ),
+            ],
+        )
+
+    _expect_rule("trigger_process_input", trigger_input)
+    _expect_rule("process_output_binding_mismatch", output_missing)
+    _expect_rule("call_contract_mismatch", call_mismatch)
+
 
 def _validate_json_ld_style_display() -> None:
     node = parse((ROOT / "examples" / "shell.oak.md").read_text(encoding="utf-8"))
@@ -343,6 +585,43 @@ def _validate_json_ld_style_display() -> None:
     )
     if data.get("@id") != "https://example.org/oak/shell.oak.md":
         raise RuntimeError("JSON-LD document id is wrong")
+
+    raw, normal = _contract_schemas()
+    contract = Node(
+        schemas=[raw, normal],
+        processes=[
+            _normalise_process(),
+            Process(
+                id="handle",
+                name="Handle request",
+                steps=[
+                    Call(
+                        process="process.normalise",
+                        inputs=[ValueBinding(placeholder="RAW_NAME", value=LiteralValue(value="Ada"))],
+                        outputs=["NORMAL_NAME"],
+                    )
+                ],
+            ),
+        ],
+    )
+    linked = json.loads(
+        render(
+            contract,
+            render="json-ld",
+            document="https://example.org/oak/contract.oak.md",
+            vocabulary="https://example.org/oak#",
+        )
+    )
+    normalise, handle = linked["processes"]
+    call = handle["steps"][0]
+    if not (
+        normalise["input"]["@id"].endswith("#schema.raw-name")
+        and normalise["output"]["@id"].endswith("#schema.normal-name")
+        and call["process"]["@id"].endswith("#process.normalise")
+        and call["outputs"] == ["NORMAL_NAME"]
+    ):
+        raise RuntimeError("JSON-LD process contract is wrong")
+
     styled = render(
         Node(instructions=[Instruction(id="wording", body="Utilize the exact command.")]),
         style="asd-ste100-9",
@@ -392,6 +671,7 @@ def validate_examples() -> None:
     _validate_examples_and_render()
     _validate_resolution()
     _validate_execution()
+    _validate_contract_rules()
     _validate_json_ld_style_display()
     _run_example_wrappers()
     _freshness_gates()

@@ -9,6 +9,8 @@ from pydantic import AfterValidator, ConfigDict, Field, JsonValue, model_validat
 from pydantic_core import PydanticCustomError
 
 from oak.base import DiscriminatedModel, Entry, OakModel
+from oak.node.parts.interfaces import SchemaTarget
+from oak.rules import rule_error
 from oak.vocabulary import NonBlankLine, Placeholder, ProcessName, TargetPath
 from oak.vocabulary.text.placeholder import placeholders_in
 from oak.vocabulary.text.target_path import local_target, typed_target
@@ -192,10 +194,12 @@ class If(StepModel):
 
 
 class Call(StepModel):
-    """One synchronous local or relative process invocation."""
-    model_config = ConfigDict(json_schema_extra={"examples": [{"kind": "call", "process": "process.finalize"}, {"kind": "call", "process": "../shared/processes.oak.md#process.finalize"}]})
+    """One synchronous process invocation with schema-bound inputs and outputs."""
+    model_config = ConfigDict(json_schema_extra={"examples": [{"kind": "call", "process": "process.normalise", "inputs": [{"placeholder": "RAW_NAME", "value": {"source": "literal", "value": " ada "}}], "outputs": ["NORMAL_NAME"]}, {"kind": "call", "process": "../shared/processes.oak.md#process.finalize"}]})
     kind: Literal["call"] = Field(default="call", description="The process step discriminator.", examples=["call"])
-    process: ProcessTarget = Field(description="The local or relative process target to invoke.", examples=["process.finalize"])
+    process: ProcessTarget = Field(description="The local or relative process target to invoke.", examples=["process.normalise"])
+    inputs: list[ValueBinding] = Field(default_factory=list, description="The called process input bindings in authored order.", examples=[[{"placeholder": "RAW_NAME", "value": {"source": "literal", "value": " ada "}}]])
+    outputs: list[Placeholder] = Field(default_factory=list, description="The called process outputs promoted to this process.", examples=[["NORMAL_NAME"]])
 
 
 class Fail(StepModel):
@@ -274,6 +278,8 @@ def step_values(step: Step) -> list[Value]:
         return [binding.value for binding in step.bindings]
     if isinstance(step, (If, Assert)):
         return condition_values(step.condition)
+    if isinstance(step, Call):
+        return [binding.value for binding in step.inputs]
     if isinstance(step, Foreach):
         return [step.value]
     if isinstance(step, Par):
@@ -286,7 +292,14 @@ def _check_value(value: Value, visible: set[str]) -> None:
         raise PydanticCustomError("unbound_process_binding", "process reads unbound local binding {binding}", {"binding": value.binding})
 
 
-def _validate_bindings(steps: list[Step], visible: set[str]) -> None:
+def _promote(outputs: set[str], visible: set[str], label: str = "process") -> None:
+    redefined = sorted(outputs & visible)
+    if redefined:
+        raise PydanticCustomError("process_binding_redefined", f"{label} redefines visible local bindings: {{bindings}}", {"bindings": ", ".join(redefined)})
+    visible.update(outputs)
+
+
+def _validate_bindings(steps: list[Step], visible: set[str]) -> set[str]:
     pending: set[str] | None = None
     for step in steps:
         if pending is not None and not isinstance(step, Join):
@@ -294,14 +307,13 @@ def _validate_bindings(steps: list[Step], visible: set[str]) -> None:
         for value in step_values(step):
             _check_value(value, visible)
         if isinstance(step, Act):
-            redefined = sorted(set(step.outputs) & visible)
-            if redefined:
-                raise PydanticCustomError("process_binding_redefined", "process redefines visible local bindings: {bindings}", {"bindings": ", ".join(redefined)})
-            visible.update(step.outputs)
+            _promote(set(step.outputs), visible)
         elif isinstance(step, If):
             _validate_bindings(step.then, set(visible))
             if step.otherwise is not None:
                 _validate_bindings(step.otherwise, set(visible))
+        elif isinstance(step, Call):
+            _promote(set(step.outputs), visible)
         elif isinstance(step, Foreach):
             if step.binding in visible:
                 raise PydanticCustomError("foreach_binding_redefined", "FOREACH redefines visible binding {binding}", {"binding": step.binding})
@@ -321,6 +333,7 @@ def _validate_bindings(steps: list[Step], visible: set[str]) -> None:
             pending = None
     if pending is not None:
         raise PydanticCustomError("parallel_join_missing", "PAR has no following JOIN")
+    return visible
 
 
 def _sequence_always_fails(steps: list[Step]) -> bool:
@@ -337,12 +350,57 @@ def _sequence_always_fails(steps: list[Step]) -> bool:
 
 class Process(Entry):
     """One named ordered way to do a task."""
-    model_config = ConfigDict(json_schema_extra={"examples": [{"part": "processes", "id": "write-oak", "name": "Write OAK", "steps": [{"kind": "act", "instruction": "Write the knowledge."}]}, {"part": "processes", "id": "parallel-search", "name": "Search sources", "steps": [{"kind": "par", "steps": [{"kind": "act", "tool": "tool-a", "instruction": "Produce <A>.", "outputs": ["A"]}, {"kind": "act", "tool": "tool-b", "instruction": "Produce <B>.", "outputs": ["B"]}]}, {"kind": "join"}]}]})
+    model_config = ConfigDict(json_schema_extra={"examples": [{"part": "processes", "id": "normalise", "name": "Normalise name", "input": "schema.raw-name", "output": "schema.normal-name", "steps": [{"kind": "act", "instruction": "Normalise <RAW_NAME> into <NORMAL_NAME>.", "inputs": [{"placeholder": "RAW_NAME", "value": {"source": "binding", "binding": "RAW_NAME"}}], "outputs": ["NORMAL_NAME"]}]}, {"part": "processes", "id": "parallel-search", "name": "Search sources", "steps": [{"kind": "par", "steps": [{"kind": "act", "tool": "tool-a", "instruction": "Produce <A>.", "outputs": ["A"]}, {"kind": "act", "tool": "tool-b", "instruction": "Produce <B>.", "outputs": ["B"]}]}, {"kind": "join"}]}]})
     part: Literal["processes"] = Field(default="processes", description="The entry part discriminator.", examples=["processes"])
     name: ProcessName = Field(description="The two-word process display name.", examples=["Write OAK", "Route command"])
+    input: SchemaTarget | None = Field(default=None, description="The optional schema that defines initial local bindings.", examples=["schema.raw-name"])
+    output: SchemaTarget | None = Field(default=None, description="The optional schema that defines successful local outputs.", examples=["schema.normal-name"])
     steps: list[Step] = Field(min_length=1, description="The typed process steps in authored order.", examples=[[{"kind": "act", "instruction": "Write the knowledge."}]])
     @model_validator(mode="after")
     def control_flow(self) -> Self:
-        _validate_bindings(self.steps, set())
+        if self.input is None:
+            _validate_bindings(self.steps, set())
         _sequence_always_fails(self.steps)
         return self
+
+
+def process_visible_bindings(process: Process, inputs: set[str]) -> set[str]:
+    """Return every binding visible after successful process completion."""
+    return _validate_bindings(process.steps, set(inputs))
+
+
+def validate_process_contract(process: Process, inputs: set[str], outputs: set[str]) -> None:
+    """Validate one process against resolved input and output schemas."""
+    visible = process_visible_bindings(process, inputs)
+    missing = sorted(outputs - visible)
+    if not missing or _sequence_always_fails(process.steps):
+        return
+    raise rule_error(
+        "process_output_binding_mismatch",
+        "process {process} cannot supply output placeholders: {placeholders}",
+        {"process": process.id, "placeholders": ", ".join(missing)},
+    )
+
+
+def validate_call_contract(call: Call, inputs: set[str], outputs: set[str]) -> None:
+    """Validate one call against resolved process schemas."""
+    authored_inputs = [binding.placeholder for binding in call.inputs]
+    authored_outputs = list(call.outputs)
+    input_set = set(authored_inputs)
+    output_set = set(authored_outputs)
+    if len(authored_inputs) == len(inputs) and input_set == inputs and len(authored_outputs) == len(outputs) and output_set == outputs:
+        return
+    raise rule_error(
+        "call_contract_mismatch",
+        (
+            "call contract differs; input missing: {input_missing}; "
+            "input unused: {input_unused}; output missing: {output_missing}; "
+            "output unused: {output_unused}"
+        ),
+        {
+            "input_missing": ", ".join(sorted(inputs - input_set)) or "none",
+            "input_unused": ", ".join(sorted(input_set - inputs)) or "none",
+            "output_missing": ", ".join(sorted(outputs - output_set)) or "none",
+            "output_unused": ", ".join(sorted(output_set - outputs)) or "none",
+        },
+    )
