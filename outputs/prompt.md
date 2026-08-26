@@ -1,4 +1,4 @@
-~~~~instructions
+<instructions>
 $ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and THEN omit $.
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
@@ -72,9 +72,9 @@ Name a tool exposed by the supplied exact tool registry.
 Remove a process step after a path that always fails.
 Do not give examples to a WHERE entry with placeholder-valued bounds.
 Target the part required by the typed reference field.
-~~~~
+</instructions>
 
-~~~~constants
+<constants>
 oak-ebnf: TEXT<<
 oak_document = xml_document | markdown_document ;
 xml_document = xml_instructions_part, blank_line, xml_constants_part, blank_line, xml_schemas_part, blank_line, xml_state_part, blank_line, xml_triggers_part, blank_line, xml_processes_part, blank_line, xml_interfaces_part ;
@@ -259,74 +259,74 @@ Use the supplied schema.
 <interfaces>
 </interfaces>
 >>
-~~~~
+</constants>
 
-~~~~schemas
-~~~schema;id="constraint-type";name="Type";purpose="The bound value has one datatype from the vocabulary catalog."
+<schemas>
+<schema id="constraint-type" name="Type" purpose="The bound value has one datatype from the vocabulary catalog.">
 is <OF>
 
 WHERE:
 - <OF> is string; is non-empty; The datatype name..
-~~~
+</schema>
 
-~~~schema;id="constraint-one-of";name="OneOf";purpose="The bound value is one of the listed values."
+<schema id="constraint-one-of" name="OneOf" purpose="The bound value is one of the listed values.">
 is one of <VALUES>
 
 WHERE:
 - <VALUES> is string; is non-empty; The allowed values..
-~~~
+</schema>
 
-~~~schema;id="constraint-regex";name="Regex";purpose="The bound value matches one anchored portable rust-regex pattern."
+<schema id="constraint-regex" name="Regex" purpose="The bound value matches one anchored portable rust-regex pattern.">
 matches `<PATTERN>`
 
 WHERE:
 - <PATTERN> is string; is non-empty; The whole-value portable pattern..
-~~~
+</schema>
 
-~~~schema;id="constraint-non-empty";name="NonEmpty";purpose="The bound value has at least one character or item."
+<schema id="constraint-non-empty" name="NonEmpty" purpose="The bound value has at least one character or item.">
 is non-empty
 
 WHERE:
-~~~
+</schema>
 
-~~~schema;id="constraint-max-chars";name="MaxChars";purpose="The bound value has at most n characters."
+<schema id="constraint-max-chars" name="MaxChars" purpose="The bound value has at most n characters.">
 is at most <N> characters
 
 WHERE:
 - <N> is string; is non-empty; The character limit..
-~~~
+</schema>
 
-~~~schema;id="constraint-lines";name="Lines";purpose="The bound value has one positive line-count bound."
+<schema id="constraint-lines" name="Lines" purpose="The bound value has one positive line-count bound.">
 has <MIN> to <MAX> lines
 
 WHERE:
 - <MIN> is string; is non-empty; The fewest lines..
 - <MAX> is string; is non-empty; The most lines..
-~~~
+</schema>
 
-~~~schema;id="constraint-list-of";name="ListOf";purpose="The bound value is items of one datatype joined by one separator."
+<schema id="constraint-list-of" name="ListOf" purpose="The bound value is items of one datatype joined by one separator.">
 is a list of <ITEM> joined by `<SEPARATOR>`
 
 WHERE:
 - <ITEM> is string; is non-empty; The datatype of every item..
 - <SEPARATOR> is string; is non-empty; The text between items..
-~~~
+</schema>
 
-~~~schema;id="constraint-at-least";name="AtLeast";purpose="The bound value is at least a number or another placeholder value."
+<schema id="constraint-at-least" name="AtLeast" purpose="The bound value is at least a number or another placeholder value.">
 is at least <VALUE>
 
 WHERE:
 - <VALUE> is string; is non-empty; A number or a placeholder of the same schema..
-~~~
+</schema>
 
-~~~schema;id="constraint-at-most";name="AtMost";purpose="The bound value is at most a number or another placeholder value."
+<schema id="constraint-at-most" name="AtMost" purpose="The bound value is at most a number or another placeholder value.">
 is at most <VALUE>
 
 WHERE:
 - <VALUE> is string; is non-empty; A number or a placeholder of the same schema..
-~~~
+</schema>
 
-~~~schema;id="where";name="Where";purpose="One placeholder, its constraints, examples, and description."
+<schema id="where" name="Where" purpose="One placeholder, its constraints, examples, and description.">
 - <PLACEHOLDER> <CONSTRAINTS> <EXAMPLES> <DESCRIPTION>.
 
 WHERE:
@@ -334,24 +334,24 @@ WHERE:
 - <CONSTRAINTS> is string; is non-empty; The constraints every bound value must satisfy..
 - <EXAMPLES> is string; is non-empty; Values that satisfy every locally resolvable constraint..
 - <DESCRIPTION> is string; is non-empty; What the placeholder holds, in one line..
-~~~
+</schema>
 
-~~~schema;id="instruction";name="Instruction";purpose="One rule the interpreter must follow."
+<schema id="instruction" name="Instruction" purpose="One rule the interpreter must follow.">
 <BODY>
 
 WHERE:
 - <BODY> is string; is non-empty; One directive or declarative rule..
-~~~
+</schema>
 
-~~~schema;id="constant-inline";name="Constant constant-inline";purpose="One value that stays the same during use."
+<schema id="constant-inline" name="Constant constant-inline" purpose="One value that stays the same during use.">
 <ID>: <VALUE>
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <VALUE> is string; is non-empty; The value that stays the same..
-~~~
+</schema>
 
-~~~schema;id="constant-text";name="Constant constant-text";purpose="One value that stays the same during use."
+<schema id="constant-text" name="Constant constant-text" purpose="One value that stays the same during use.">
 <ID>: TEXT<<
 <VALUE>
 >>
@@ -359,9 +359,9 @@ WHERE:
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <VALUE> is string; is non-empty; The value that stays the same..
-~~~
+</schema>
 
-~~~schema;id="constant-json";name="Constant constant-json";purpose="One value that stays the same during use."
+<schema id="constant-json" name="Constant constant-json" purpose="One value that stays the same during use.">
 <ID>: JSON<<
 <VALUE>
 >>
@@ -369,9 +369,9 @@ WHERE:
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <VALUE> is string; is non-empty; The value that stays the same..
-~~~
+</schema>
 
-~~~schema;id="constant-csv";name="Constant constant-csv";purpose="One value that stays the same during use."
+<schema id="constant-csv" name="Constant constant-csv" purpose="One value that stays the same during use.">
 <ID>: CSV<<
 <VALUE>
 >>
@@ -379,9 +379,9 @@ WHERE:
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <VALUE> is string; is non-empty; The value that stays the same..
-~~~
+</schema>
 
-~~~schema;id="constant-yaml";name="Constant constant-yaml";purpose="One value that stays the same during use."
+<schema id="constant-yaml" name="Constant constant-yaml" purpose="One value that stays the same during use.">
 <ID>: YAML<<
 <VALUE>
 >>
@@ -389,9 +389,9 @@ WHERE:
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <VALUE> is string; is non-empty; The value that stays the same..
-~~~
+</schema>
 
-~~~schema;id="schema";name="Schema";purpose="One reusable information shape with one Where per placeholder."
+<schema id="schema" name="Schema" purpose="One reusable information shape with one Where per placeholder.">
 <schema id="<ID>" name="<NAME>" purpose="<PURPOSE>">
 <TEMPLATE>
 
@@ -405,94 +405,94 @@ WHERE:
 - <PURPOSE> is string; is non-empty; What the information shape is for..
 - <TEMPLATE> is string; is non-empty; The literal shape with variable parts written as <PLACEHOLDER>..
 - <WHERE> is string; is non-empty; One Where per distinct template placeholder, in authored order..
-~~~
+</schema>
 
-~~~schema;id="state";name="State";purpose="One JSON value that can change while the interpreter runs."
+<schema id="state" name="State" purpose="One JSON value that can change while the interpreter runs.">
 <ID>: <VALUE>
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <VALUE> is string; is non-empty; The JSON value that can change..
-~~~
+</schema>
 
-~~~schema;id="value-literal";name="LiteralValue";purpose="One authored JSON value."
+<schema id="value-literal" name="LiteralValue" purpose="One authored JSON value.">
 <VALUE>
 
 WHERE:
 - <VALUE> is string; is non-empty; The authored JSON value..
-~~~
+</schema>
 
-~~~schema;id="value-constant";name="ConstantValue";purpose="One value read from a local or relative constant entry."
+<schema id="value-constant" name="ConstantValue" purpose="One value read from a local or relative constant entry.">
 $<CONSTANT>
 
 WHERE:
 - <CONSTANT> is string; is non-empty; The local or relative constant target to read..
-~~~
+</schema>
 
-~~~schema;id="value-state";name="StateValue";purpose="One value read from local state."
+<schema id="value-state" name="StateValue" purpose="One value read from local state.">
 $<STATE>
 
 WHERE:
 - <STATE> is string; is non-empty; The local state target to read..
-~~~
+</schema>
 
-~~~schema;id="value-interface";name="InterfaceValue";purpose="One placeholder value read from one active local input interface."
+<schema id="value-interface" name="InterfaceValue" purpose="One placeholder value read from one active local input interface.">
 $<INTERFACE>.<PLACEHOLDER>
 
 WHERE:
 - <INTERFACE> is string; is non-empty; The active local input interface target to read..
 - <PLACEHOLDER> is string; is non-empty; The interface schema placeholder to read..
-~~~
+</schema>
 
-~~~schema;id="value-binding";name="BindingValue";purpose="One value read from a visible process-local binding."
+<schema id="value-binding" name="BindingValue" purpose="One value read from a visible process-local binding.">
 $<BINDING>
 
 WHERE:
 - <BINDING> is string; is non-empty; The visible process-local binding to read..
-~~~
+</schema>
 
-~~~schema;id="value-binding-line";name="ValueBinding";purpose="One placeholder bound to one process value."
+<schema id="value-binding-line" name="ValueBinding" purpose="One placeholder bound to one process value.">
 <PLACEHOLDER> = <VALUE>
 
 WHERE:
 - <PLACEHOLDER> is string; is non-empty; The placeholder receiving the process value..
 - <VALUE> is string; is non-empty; The process value bound to the placeholder..
-~~~
+</schema>
 
-~~~schema;id="condition-compare";name="Compare";purpose="One strict structural or ordered comparison."
+<schema id="condition-compare" name="Compare" purpose="One strict structural or ordered comparison.">
 <LEFT> <OPERATOR> <RIGHT>
 
 WHERE:
 - <LEFT> is string; is non-empty; The value on the left of the comparison..
 - <OPERATOR> is string; is non-empty; The strict comparison operator..
 - <RIGHT> is string; is non-empty; The value on the right of the comparison..
-~~~
+</schema>
 
-~~~schema;id="condition-all";name="All";purpose="Every child condition must be true in authored order."
+<schema id="condition-all" name="All" purpose="Every child condition must be true in authored order.">
 ALL:
   <CONDITIONS>
 
 WHERE:
 - <CONDITIONS> is string; is non-empty; The child conditions in authored order..
-~~~
+</schema>
 
-~~~schema;id="condition-any";name="Any";purpose="At least one child condition must be true in authored order."
+<schema id="condition-any" name="Any" purpose="At least one child condition must be true in authored order.">
 ANY:
   <CONDITIONS>
 
 WHERE:
 - <CONDITIONS> is string; is non-empty; The child conditions in authored order..
-~~~
+</schema>
 
-~~~schema;id="condition-not";name="Not";purpose="One child condition whose result is inverted."
+<schema id="condition-not" name="Not" purpose="One child condition whose result is inverted.">
 NOT:
   <CONDITION>
 
 WHERE:
 - <CONDITION> is string; is non-empty; The child condition to invert..
-~~~
+</schema>
 
-~~~schema;id="act-native";name="Act act-native";purpose="One interpreter-native or exact named-tool action."
+<schema id="act-native" name="Act act-native" purpose="One interpreter-native or exact named-tool action.">
 ACT <INSTRUCTION>
   INPUTS:
     <INPUTS>
@@ -502,9 +502,9 @@ WHERE:
 - <INSTRUCTION> is string; is non-empty; The action the interpreter or exact tool performs..
 - <INPUTS> is string; is non-empty; The action input bindings in authored order..
 - <OUTPUTS> is string; is non-empty; The immutable local bindings the action must produce..
-~~~
+</schema>
 
-~~~schema;id="act-tool";name="Act act-tool";purpose="One interpreter-native or exact named-tool action."
+<schema id="act-tool" name="Act act-tool" purpose="One interpreter-native or exact named-tool action.">
 ACT TOOL "<TOOL>": <INSTRUCTION>
   INPUTS:
     <INPUTS>
@@ -515,26 +515,26 @@ WHERE:
 - <INSTRUCTION> is string; is non-empty; The action the interpreter or exact tool performs..
 - <INPUTS> is string; is non-empty; The action input bindings in authored order..
 - <OUTPUTS> is string; is non-empty; The immutable local bindings the action must produce..
-~~~
+</schema>
 
-~~~schema;id="step-set";name="Set";purpose="One local state write."
+<schema id="step-set" name="Set" purpose="One local state write.">
 SET <STATE> = <VALUE>
 
 WHERE:
 - <STATE> is string; is non-empty; The local state target to write..
 - <VALUE> is string; is non-empty; The process value written to state..
-~~~
+</schema>
 
-~~~schema;id="step-emit";name="Emit";purpose="One schema instance emitted through one local output interface."
+<schema id="step-emit" name="Emit" purpose="One schema instance emitted through one local output interface.">
 EMIT <INTERFACE>:
   <BINDINGS>
 
 WHERE:
 - <INTERFACE> is string; is non-empty; The local output interface target..
 - <BINDINGS> is string; is non-empty; One value binding for each interface schema placeholder..
-~~~
+</schema>
 
-~~~schema;id="step-if";name="If";purpose="One recursive condition with a then branch and optional else branch."
+<schema id="step-if" name="If" purpose="One recursive condition with a then branch and optional else branch.">
 IF <CONDITION>:
 THEN:
   <THEN>
@@ -545,9 +545,9 @@ WHERE:
 - <CONDITION> is string; is non-empty; The recursive condition that selects the branch..
 - <THEN> is string; is non-empty; The steps run when the condition is true..
 - <OTHERWISE> is string; is non-empty; The steps run when the condition is false..
-~~~
+</schema>
 
-~~~schema;id="step-call";name="Call";purpose="One synchronous process invocation with schema-bound inputs and outputs."
+<schema id="step-call" name="Call" purpose="One synchronous process invocation with schema-bound inputs and outputs.">
 CALL <PROCESS>:
   INPUTS:
     <INPUTS>
@@ -557,25 +557,25 @@ WHERE:
 - <PROCESS> is string; is non-empty; The local or relative process target to invoke..
 - <INPUTS> is string; is non-empty; The called process input bindings in authored order..
 - <OUTPUTS> is string; is non-empty; The called process outputs promoted to this process..
-~~~
+</schema>
 
-~~~schema;id="step-fail";name="Fail";purpose="One explicit process failure."
+<schema id="step-fail" name="Fail" purpose="One explicit process failure.">
 FAIL <MESSAGE>
 
 WHERE:
 - <MESSAGE> is string; is non-empty; The failure message..
-~~~
+</schema>
 
-~~~schema;id="step-assert";name="Assert";purpose="One required condition that aborts the transaction when false."
+<schema id="step-assert" name="Assert" purpose="One required condition that aborts the transaction when false.">
 ASSERT <CONDITION>
 MESSAGE <MESSAGE>
 
 WHERE:
 - <CONDITION> is string; is non-empty; The required recursive condition..
 - <MESSAGE> is string; is non-empty; The optional assertion failure message..
-~~~
+</schema>
 
-~~~schema;id="step-foreach";name="Foreach";purpose="One deterministic sequential iteration over a JSON list."
+<schema id="step-foreach" name="Foreach" purpose="One deterministic sequential iteration over a JSON list.">
 FOREACH <BINDING> IN <VALUE>:
   <STEPS>
 
@@ -583,23 +583,23 @@ WHERE:
 - <BINDING> is string; is non-empty; The immutable loop binding..
 - <VALUE> is string; is non-empty; The process value that must resolve to a JSON list..
 - <STEPS> is string; is non-empty; The sequential iteration steps..
-~~~
+</schema>
 
-~~~schema;id="step-par";name="Par";purpose="One deterministic group of exact named-tool acts."
+<schema id="step-par" name="Par" purpose="One deterministic group of exact named-tool acts.">
 PAR:
   <STEPS>
 
 WHERE:
 - <STEPS> is string; is non-empty; The exact named-tool acts launched in authored order..
-~~~
+</schema>
 
-~~~schema;id="step-join";name="Join";purpose="The barrier immediately after one parallel group."
+<schema id="step-join" name="Join" purpose="The barrier immediately after one parallel group.">
 JOIN
 
 WHERE:
-~~~
+</schema>
 
-~~~schema;id="process";name="Process";purpose="One named ordered way to do a task."
+<schema id="process" name="Process" purpose="One named ordered way to do a task.">
 <process id="<ID>" name="<NAME>" input="<INPUT>" output="<OUTPUT>">
 <STEPS>
 </process>
@@ -610,9 +610,9 @@ WHERE:
 - <INPUT> is string; is non-empty; The optional schema that defines initial local bindings..
 - <OUTPUT> is string; is non-empty; The optional schema that defines successful local outputs..
 - <STEPS> is string; is non-empty; The typed process steps in authored order..
-~~~
+</schema>
 
-~~~schema;id="trigger";name="Trigger";purpose="One GIVEN, WHEN, and THEN signpost to a process."
+<schema id="trigger" name="Trigger" purpose="One GIVEN, WHEN, and THEN signpost to a process.">
 <trigger id="<ID>">
 GIVEN: <GIVEN>
 WHEN: <WHEN>
@@ -624,9 +624,9 @@ WHERE:
 - <GIVEN> is string; is non-empty; True or the recursive state guard checked after WHEN..
 - <WHEN> is string; is non-empty; Why the interpreter enters the knowledge..
 - <THEN> is string; is non-empty; The local or relative process target selected by the trigger..
-~~~
+</schema>
 
-~~~schema;id="interface";name="Interface";purpose="One crossing of information at the active document boundary."
+<schema id="interface" name="Interface" purpose="One crossing of information at the active document boundary.">
 <interface id="<ID>" direction="<DIRECTION>" schema="<SCHEMA_ID>">
 <DESCRIPTION>
 </interface>
@@ -636,9 +636,9 @@ WHERE:
 - <DIRECTION> is string; is non-empty; The direction across the document boundary..
 - <SCHEMA_ID> is string; is non-empty; The local or relative schema target that defines the shape..
 - <DESCRIPTION> is string; is non-empty; What the document boundary crossing means..
-~~~
+</schema>
 
-~~~schema;id="node";name="Node";purpose="One complete idless set of the seven OAK parts."
+<schema id="node" name="Node" purpose="One complete idless set of the seven OAK parts.">
 <instructions>
 <INSTRUCTIONS>
 </instructions>
@@ -675,29 +675,29 @@ WHERE:
 - <TRIGGERS> is string; is non-empty; The node triggers in authored order..
 - <PROCESSES> is string; is non-empty; The node processes in authored order..
 - <INTERFACES> is string; is non-empty; The node interfaces in authored order..
-~~~
+</schema>
 
-~~~schema;id="oak-result";name="OAK Result";purpose="Carry the one valid OAK document written from the supplied source."
+<schema id="oak-result" name="OAK Result" purpose="Carry the one valid OAK document written from the supplied source.">
 <OAK>
 
 WHERE:
 - <OAK> is string; is non-empty; the complete valid OAK document.
-~~~
-~~~~
+</schema>
+</schemas>
 
-~~~~state
-~~~~
+<state>
+</state>
 
-~~~~triggers
-~~~trigger;id="write-oak-trigger"
+<triggers>
+<trigger id="write-oak-trigger">
 GIVEN: true
 WHEN: "Any source material is supplied with this prompt."
 THEN: process.write-oak
-~~~
-~~~~
+</trigger>
+</triggers>
 
-~~~~processes
-~~~process;id="write-oak";name="Write OAK"
+<processes>
+<process id="write-oak" name="Write OAK">
 ACT Derive <DRAFT> from the complete supplied source.
   OUTPUTS: DRAFT
 ACT Validate <DRAFT> against every supplied OAK contract and produce <OAK>.
@@ -706,11 +706,11 @@ ACT Validate <DRAFT> against every supplied OAK contract and produce <OAK>.
   OUTPUTS: OAK
 EMIT interface.result:
   OAK = $OAK
-~~~
-~~~~
+</process>
+</processes>
 
-~~~~interfaces
-~~~interface;id="result";direction="out";schema="schema.oak-result"
+<interfaces>
+<interface id="result" direction="out" schema="schema.oak-result">
 The sole OAK document returned to the caller.
-~~~
-~~~~
+</interface>
+</interfaces>

@@ -114,7 +114,7 @@ def tree() -> Node:
 
 def prompt() -> str:
     """Return the generated single-shot prompt."""
-    return render(tree(), grouping="markdown") + "\n"
+    return render(tree(), grouping="xml") + "\n"
 
 
 def write() -> Path:

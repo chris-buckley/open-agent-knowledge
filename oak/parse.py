@@ -59,6 +59,10 @@ from oak.surface import entry_surface
 
 GroupingName = Literal["xml", "markdown"]
 
+_BLOCK_CONSTANT_OPEN = re.compile(
+    r"^([a-z][a-z0-9]*(?:-[a-z0-9]+)*): (TEXT|JSON|CSV|YAML)<<$"
+)
+
 
 @dataclass(frozen=True, slots=True)
 class ParseFailure:
@@ -129,9 +133,35 @@ def _parts(text: str, grouping: GroupingName) -> dict[str, tuple[list[str], int]
         start = index + 2
         index += 1
         body: list[str] = []
-        while index < len(lines) and lines[index] != closing:
-            body.append(lines[index])
+        block: tuple[str, int] | None = None
+        depth = 1
+        while index < len(lines):
+            line = lines[index]
+            if block is None:
+                if grouping == "xml":
+                    if line == opening:
+                        depth += 1
+                    elif line == closing:
+                        depth -= 1
+                        if depth == 0:
+                            break
+                elif line == closing:
+                    break
+            body.append(line)
+            if part == "constants":
+                match = _BLOCK_CONSTANT_OPEN.fullmatch(line)
+                if block is None and match is not None:
+                    block = (match.group(1), index + 1)
+                elif block is not None and line == ">>":
+                    block = None
             index += 1
+        if block is not None:
+            _fail(
+                "block_constant_unterminated",
+                f"constants.{block[0]}",
+                block[1],
+                "missing >>",
+            )
         if index >= len(lines):
             _fail("part_unterminated", part, start, f"missing {closing}")
         result[part] = body, start
@@ -207,8 +237,19 @@ def _entries(
         closing = f"</{tag}>" if grouping == "xml" else "~~~"
         index += 1
         body: list[str] = []
-        while index < len(lines) and lines[index] != closing:
-            body.append(lines[index])
+        depth = 1
+        while index < len(lines):
+            line = lines[index]
+            if grouping == "xml":
+                if line == f"<{tag}>" or line.startswith(f"<{tag} "):
+                    depth += 1
+                elif line == closing:
+                    depth -= 1
+                    if depth == 0:
+                        break
+            elif line == closing:
+                break
+            body.append(line)
             index += 1
         if index >= len(lines):
             _fail("entry_unterminated", path, number, f"missing {closing}")
@@ -253,14 +294,13 @@ def _csv_value(body: str, path: str, line: int) -> list[dict[str, object]]:
 def _named_values(lines: list[str], start: int, *, constants: bool) -> list[Constant] | list[State]:
     result: list[Constant] | list[State] = []
     index = 0
-    block = re.compile(r"^([a-z][a-z0-9]*(?:-[a-z0-9]+)*): (TEXT|JSON|CSV|YAML)<<$")
     inline = re.compile(r"^([a-z][a-z0-9]*(?:-[a-z0-9]+)*): (.+)$")
     while index < len(lines):
         if lines[index] == "":
             index += 1
             continue
         number = start + index
-        block_match = block.fullmatch(lines[index])
+        block_match = _BLOCK_CONSTANT_OPEN.fullmatch(lines[index])
         if block_match:
             identifier, form = block_match.groups()
             index += 1

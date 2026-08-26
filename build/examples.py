@@ -642,9 +642,13 @@ def _validate_outputs() -> None:
     from build.ebnf import grammar
     from build.prompt import prompt
 
+    prompt_text = prompt()
+    if render(parse(prompt_text), grouping="xml") + "\n" != prompt_text:
+        raise RuntimeError("prompt output is not canonical XML OAK")
+
     expected = {
         ROOT / "outputs" / "oak.ebnf": grammar(),
-        ROOT / "outputs" / "prompt.md": prompt(),
+        ROOT / "outputs" / "prompt.md": prompt_text,
         **{
             ROOT / "outputs" / "docs" / name: text
             for name, text in documents().items()

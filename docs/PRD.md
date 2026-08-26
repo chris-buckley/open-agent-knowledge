@@ -471,7 +471,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 
 ### Prompt
 
-- Emit one single-shot authoring prompt to `outputs/prompt.md` as markdown-grouped OAK.
+- Emit one single-shot authoring prompt to `outputs/prompt.md` as xml-grouped OAK.
 - Treat the complete host-supplied modality context as the source.
 - Generate source-to-part instructions from one rule registry.
 - Include every authoring rule, every surface schema, the EBNF, and one canonical OAK example.
