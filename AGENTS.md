@@ -200,7 +200,7 @@ WHEN you communicate with the user, you MUST:
 - Write as one human talks to another, overly simple and concise.
 - Use exact names, paths, and commands.
 - State uncertainty plainly.
-- Do not use em dash or asterisk emphasis.
+- Do not use em dash, bold, or italics.
 - Do not use jargon. Defined repository concepts are permitted as the concept list grows.
 - Do not use filler, praise, or repetition.
 
