@@ -132,17 +132,6 @@ WHEN you design or extend the package authoring surface, you MUST:
 - Define each multi-line entry as one named module-level value and list only the names inside the node, so the node reads as a table of contents.
 - Postfix each entry variable name with its part (`command_line_schema`, `route_command_process`, `on_command_trigger`, `stdin_interface`).
 
-WHEN you name code, you MUST:
-
-- Reuse one exact domain noun for one concept across code, OAK, logs, errors, and documentation.
-- Name an action `<verb>_<object>[_<outcome-or-context>]`.
-- Name a value `<role>_<object>_<kind-or-unit>` when each added word removes ambiguity.
-- Name a collection by its contents and shape.
-- Name a boolean as one positive condition or control.
-- Name by purpose or result, not implementation.
-- Replace a generic noun with the known domain noun.
-- Keep the shortest name that is clear in its scope.
-
 WHEN you change `docs/PRD.md`, you MUST:
 
 - Follow the `authoring` rules in its front matter.
@@ -211,7 +200,7 @@ WHEN you communicate with the user, you MUST:
 - Write as one human talks to another, overly simple and concise.
 - Use exact names, paths, and commands.
 - State uncertainty plainly.
-- Do not use em dash, bold, or italics.
+- Do not use em dash or asterisk emphasis.
 - Do not use jargon. Defined repository concepts are permitted as the concept list grows.
 - Do not use filler, praise, or repetition.
 
