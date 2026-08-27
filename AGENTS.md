@@ -63,6 +63,7 @@ WHEN you infer repository rules, you MUST know these concepts:
 ```csv
 name,meaning
 schema,"one reusable information shape independent of boundary, direction, and process"
+WHERE,"the ordered schema lines that bind each template placeholder to exact constraints, examples, and low-ambiguity meaning"
 interface,"one identified information crossing at a document boundary; it selects a direction and a schema"
 operating context,"the complete information and rules supplied to an agent: instructions, constants, schemas, state, triggers, processes, interfaces"
 OAK,"Open Agent Knowledge, the universal knowledge standard this repository defines, formerly UAOC"
@@ -131,6 +132,16 @@ WHEN you design or extend the package authoring surface, you MUST:
 - Prefix each entry-id constant with its part (`PROCESS_ROUTE`, `TRIGGER_COMMAND`, `STATE_MODE`), mirroring the target path grammar.
 - Define each multi-line entry as one named module-level value and list only the names inside the node, so the node reads as a table of contents.
 - Postfix each entry variable name with its part (`command_line_schema`, `route_command_process`, `on_command_trigger`, `stdin_interface`).
+
+WHEN you design an OAK schema, you MUST:
+
+- Keep the template and WHERE as the authored authority.
+- Use the template to show the visible information structure.
+- Use typed WHERE constraints only for facts that need deterministic validation.
+- Use each WHERE description for low-ambiguity meaning the interpreter can infer.
+- Add formality only when it earns its token and implementation cost.
+- Do not replace an OAK schema with embedded JSON Schema.
+- Generate JSON Schema only as a separate projection for a specific external software boundary.
 
 WHEN you change `docs/PRD.md`, you MUST:
 
