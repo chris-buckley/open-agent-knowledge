@@ -9,6 +9,11 @@ Treat the complete supplied host context as the source, regardless of modality.
 Map directives, policies, interpretation rules, and required behaviour to instructions.
 Map stable values needed during use to constants.
 Map reusable information shapes and output contracts to schemas.
+Use each schema template to show the visible information structure.
+Use typed WHERE constraints only for facts that need deterministic validation.
+Use each WHERE description for low-ambiguity meaning the interpreter can infer.
+Add schema formality only when it earns its token and implementation cost.
+Do not embed JSON Schema in OAK; generate it separately only when a specific external software boundary requires it.
 Map values that can change while the knowledge runs to state.
 Map arrival reasons, state guards, and selected processes to triggers.
 Map ordered ways to perform tasks to processes.
