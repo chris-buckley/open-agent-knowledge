@@ -93,7 +93,7 @@ from oak import (
 )
 from oak.base import OakModel
 from oak.parse import _binding, _condition, _constraint, _interfaces, _named_values, _processes, _schemas, _steps, _triggers, _value, _where
-from oak.rules import ACT_GUIDANCE, DECOMPOSITION_GUIDANCE, ENTRY_ID_GUIDANCE, NAMING_GUIDANCE, RULES
+from oak.rules import ACT_GUIDANCE, DECOMPOSITION_GUIDANCE, DELEGATION_GUIDANCE, ENTRY_ID_GUIDANCE, NAMING_GUIDANCE, RULES
 from oak.surface import SURFACES, surface_for
 
 METADATA_MODELS = (
@@ -327,6 +327,98 @@ def _validate_resolution() -> None:
                         then="target.oak.md#process.normalise",
                     )
                 ]
+            ),
+        ),
+        (
+            "unknown_interface_placeholder",
+            Node(
+                interfaces=[
+                    Interface(
+                        id="request-input",
+                        direction="in",
+                        schema="target.oak.md#schema.raw-name",
+                    )
+                ],
+                processes=[
+                    Process(
+                        id="read-request",
+                        name="Read request",
+                        steps=[
+                            Act(
+                                instruction="Read <MISSING> and produce <NOTE>.",
+                                inputs=[
+                                    ValueBinding(
+                                        placeholder="MISSING",
+                                        value=InterfaceValue(
+                                            interface="interface.request-input",
+                                            placeholder="MISSING",
+                                        ),
+                                    )
+                                ],
+                                outputs=["NOTE"],
+                            )
+                        ],
+                    )
+                ],
+            ),
+        ),
+        (
+            "emit_schema_binding_mismatch",
+            Node(
+                interfaces=[
+                    Interface(
+                        id="result-output",
+                        direction="out",
+                        schema="target.oak.md#schema.normal-name",
+                    )
+                ],
+                processes=[
+                    Process(
+                        id="emit-result",
+                        name="Emit result",
+                        steps=[
+                            Act(instruction="Produce <WRONG>.", outputs=["WRONG"]),
+                            Emit(
+                                interface="interface.result-output",
+                                bindings=[
+                                    ValueBinding(
+                                        placeholder="WRONG",
+                                        value=BindingValue(binding="WRONG"),
+                                    )
+                                ],
+                            ),
+                        ],
+                    )
+                ],
+            ),
+        ),
+        (
+            "invalid_static_schema_binding",
+            Node(
+                interfaces=[
+                    Interface(
+                        id="result-output",
+                        direction="out",
+                        schema="target.oak.md#schema.normal-name",
+                    )
+                ],
+                processes=[
+                    Process(
+                        id="emit-blank",
+                        name="Emit blank",
+                        steps=[
+                            Emit(
+                                interface="interface.result-output",
+                                bindings=[
+                                    ValueBinding(
+                                        placeholder="NORMAL_NAME",
+                                        value=LiteralValue(value=""),
+                                    )
+                                ],
+                            )
+                        ],
+                    )
+                ],
             ),
         ),
     )
@@ -751,9 +843,9 @@ def _validate_act_authoring() -> None:
 
 
 def _validate_human_examples() -> None:
-    from examples import authoring, implementer, task_reviewer
+    from examples import compound_growth, delegation, implementer, task_reviewer
 
-    examples = (authoring, implementer, task_reviewer)
+    examples = (compound_growth, delegation, implementer, task_reviewer)
     for module in examples:
         rendered = module.build()
         target = module.TARGET
@@ -880,7 +972,7 @@ def _validate_outputs() -> None:
     if render(parse(authoring_text), grouping="xml") + "\n" != authoring_text:
         raise RuntimeError("authoring output is not canonical XML OAK")
     bodies = [instruction.body for instruction in tree().instructions]
-    for guidance in (*ENTRY_ID_GUIDANCE, *NAMING_GUIDANCE, *DECOMPOSITION_GUIDANCE, *ACT_GUIDANCE):
+    for guidance in (*ENTRY_ID_GUIDANCE, *NAMING_GUIDANCE, *DECOMPOSITION_GUIDANCE, *ACT_GUIDANCE, *DELEGATION_GUIDANCE):
         if bodies.count(guidance.instruction) != 1:
             raise RuntimeError(
                 f"authoring output does not contain guidance exactly once: {guidance.id}"

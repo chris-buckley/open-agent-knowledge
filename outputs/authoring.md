@@ -45,7 +45,7 @@ Replace generic nouns and vague process verbs with exact domain terms that state
 Decompose each multi-phase task into one process per phase.
 Give each phase process one input schema and one output schema.
 Name each contract schema as the information shape it carries.
-Keep each trigger-selected process an orchestrator of calls and emits.
+Keep each multi-phase trigger-selected process an orchestrator of calls and emits.
 Do not emit from a phase process.
 Keep pipeline values in call contracts; use state only for values that persist between arrivals.
 Treat plain `ACT` as the default action form.
@@ -71,6 +71,21 @@ Keep the rendered OAK syntax unchanged.
 Do not expose `ACT.infer`.
 Do not expose `ACT.use`.
 Add no second helper for interpreter-native work.
+Model each subagent as one worker OAK document with one in interface and one out interface.
+Treat the worker in interface schema as the request contract and the worker out interface schema as the result contract.
+Type each dispatch process with relative targets to the worker request and result schemas as its input and output schemas.
+Dispatch each worker inside its dispatch process with one exact tool name from the supplied registry.
+Prefer one registered portable `agent.<worker>` contract when the host permits registration.
+Use the native runner name verbatim when the host does not permit registration.
+Give each agent tool contract the worker request placeholders as inputs and the worker result placeholders as outputs.
+Keep agent invocation, model selection, and transport in the host registry, outside the OAK document.
+Treat the supplied registry as the worker allowlist.
+Run parallel workers as `PAR` children, one exact agent tool act per worker.
+Keep delegation depth at one: each worker returns its result to the coordinator and dispatches no workers.
+Do not dispatch a worker with `CALL`.
+`CALL` composes processes inside one interpreter and one transaction.
+Treat each dispatch as separate-interpreter host work, not as running an OAK process with `ACT TOOL`.
+Treat committed worker effects as external tool effects that the coordinator transaction cannot roll back.
 Do not use one act placeholder as both input and output.
 Make act instruction placeholders equal its inputs and outputs.
 Remove or repair an assertion that is statically false.
