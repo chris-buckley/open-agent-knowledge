@@ -42,6 +42,7 @@ from oak.node.parts import (
     Step,
     Trigger,
     Value,
+    While,
 )
 from oak.resolve import DocumentLoader, ResolvedGraph, resolve
 from oak.vocabulary import NonBlankLine, Placeholder, TargetPath
@@ -459,6 +460,41 @@ def _run_steps(
                 local = dict(bindings)
                 local[step.binding] = deepcopy(item)
                 _run_steps(graph, document, step.steps, state, interfaces, emissions, local, act, tools)
+        elif isinstance(step, While):
+            for _iteration in range(step.limit):
+                if not _condition(
+                    graph,
+                    document,
+                    step.condition,
+                    state,
+                    interfaces,
+                    bindings,
+                ):
+                    break
+                _run_steps(
+                    graph,
+                    document,
+                    step.steps,
+                    state,
+                    interfaces,
+                    emissions,
+                    dict(bindings),
+                    act,
+                    tools,
+                )
+            else:
+                if _condition(
+                    graph,
+                    document,
+                    step.condition,
+                    state,
+                    interfaces,
+                    bindings,
+                ):
+                    raise ExecutionError(
+                        "while_limit_reached",
+                        f"WHILE condition remains true after {step.limit} iterations",
+                    )
         elif isinstance(step, Par):
             pending = _parallel(graph, document, step, state, interfaces, bindings, tools)
         elif isinstance(step, Join):

@@ -40,6 +40,7 @@ from oak.node.parts import (
     Step,
     Trigger,
     Value,
+    While,
     condition_values,
     step_values,
 )
@@ -454,6 +455,16 @@ def _validate_steps(
                     {"process": process.id},
                 )
             continue
+        if isinstance(step, While):
+            _validate_condition(registry, process, step.condition)
+            if condition_result(registry, process, step.condition) is False:
+                raise PydanticCustomError(
+                    "dead_process_branch",
+                    "process {process} has a WHILE body that cannot run",
+                    {"process": process.id},
+                )
+            _validate_steps(registry, process, step.steps)
+            continue
         if isinstance(step, Foreach):
             _validate_steps(registry, process, step.steps)
             continue
@@ -505,6 +516,9 @@ def _calls(steps: list[Step]) -> Iterator[str]:
                 yield from _calls(step.otherwise)
             continue
         if isinstance(step, Foreach):
+            yield from _calls(step.steps)
+            continue
+        if isinstance(step, While):
             yield from _calls(step.steps)
 
 
@@ -732,6 +746,8 @@ def _walk_steps(
             if step.otherwise is not None:
                 yield from _walk_steps(step.otherwise, parallel=parallel)
         elif isinstance(step, Foreach):
+            yield from _walk_steps(step.steps, parallel=parallel)
+        elif isinstance(step, While):
             yield from _walk_steps(step.steps, parallel=parallel)
         elif isinstance(step, Par):
             yield from _walk_steps(step.steps, parallel=True)

@@ -45,6 +45,7 @@ from oak.node.parts import (
     Type,
     ValueBinding,
     Where,
+    While,
 )
 
 FieldRole = Literal["rendered", "fixed", "omitted", "generated"]
@@ -184,6 +185,7 @@ SURFACES = (
     _surface("step-fail", Fail, "FAIL <MESSAGE>", rendered=("message",), fixed=("kind",)),
     _surface("step-assert", Assert, "ASSERT <CONDITION>\nMESSAGE <MESSAGE>", rendered=("condition", "message"), fixed=("kind",)),
     _surface("step-foreach", Foreach, "FOREACH <BINDING> IN <VALUE>:\n  <STEPS>", rendered=("binding", "value", "steps"), fixed=("kind",)),
+    _surface("step-while", While, "WHILE <CONDITION> LIMIT <LIMIT>:\n  <STEPS>", rendered=("condition", "limit", "steps"), fixed=("kind",)),
     _surface("step-par", Par, "PAR:\n  <STEPS>", rendered=("steps",), fixed=("kind",)),
     _surface("step-join", Join, "JOIN", fixed=("kind",)),
     _surface("process", Process, '<process id="<ID>" name="<NAME>" input="<INPUT>" output="<OUTPUT>">\n<STEPS>\n</process>', rendered=("id", "name", "input", "output", "steps"), fixed=("part",), part="processes", tag="process"),

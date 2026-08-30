@@ -34,6 +34,7 @@ from oak.node.parts import (
     Step,
     Trigger,
     Value,
+    While,
 )
 from oak.node.parts.processes import (
     process_visible_bindings,
@@ -136,6 +137,10 @@ def _step_references(step: Step) -> Iterator[tuple[str, type[Entry]]]:
         yield from _value_targets((step.value,))
         for child in step.steps:
             yield from _step_references(child)
+    elif isinstance(step, While):
+        yield from _value_targets(_condition_values(step.condition))
+        for child in step.steps:
+            yield from _step_references(child)
     elif isinstance(step, Par):
         for child in step.steps:
             yield from _step_references(child)
@@ -233,6 +238,8 @@ def _walk_calls(steps: list[Step]) -> Iterator[Call]:
             if step.otherwise is not None:
                 yield from _walk_calls(step.otherwise)
         elif isinstance(step, Foreach):
+            yield from _walk_calls(step.steps)
+        elif isinstance(step, While):
             yield from _walk_calls(step.steps)
         elif isinstance(step, Par):
             yield from _walk_calls(step.steps)

@@ -35,6 +35,7 @@ from oak.node.parts.processes import (
     Step,
     Value,
     ValueBinding,
+    While,
 )
 from oak.node.parts.schemas import (
     AtLeast,
@@ -293,6 +294,26 @@ def _step_lines(step: Step, indent: int) -> list[str]:
         lines = [prefix + f"FOREACH {step.binding} IN {process_value_text(step.value)}:"]
         for child in step.steps:
             lines.extend(_step_lines(child, inner))
+        return lines
+    if isinstance(step, While):
+        condition = condition_lines(step.condition)
+        if len(condition) == 1:
+            lines = [
+                prefix
+                + "WHILE "
+                + condition[0]
+                + f" LIMIT {step.limit}:"
+            ]
+            child_indent = inner
+        else:
+            lines = [
+                prefix + f"WHILE LIMIT {step.limit}:",
+                *(" " * inner + line for line in condition),
+                " " * inner + "THEN:",
+            ]
+            child_indent = inner + 2
+        for child in step.steps:
+            lines.extend(_step_lines(child, child_indent))
         return lines
     if isinstance(step, Par):
         lines = [prefix + "PAR:"]

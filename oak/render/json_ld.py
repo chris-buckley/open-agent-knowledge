@@ -44,6 +44,7 @@ from oak.node.parts import (
     Value,
     ValueBinding,
     Where,
+    While,
 )
 from oak.vocabulary.text.target_path import split_target
 
@@ -76,6 +77,7 @@ _STEP_TYPES = {
     "fail": "Fail",
     "assert": "Assert",
     "foreach": "Foreach",
+    "while": "While",
     "par": "Par",
     "join": "Join",
 }
@@ -166,6 +168,7 @@ def _context(document: str, vocabulary: str) -> dict[str, object]:
         "message": "oak:message",
         "binding": "oak:binding",
         "loopBinding": "oak:loopBinding",
+        "limit": "oak:limit",
         "of": "oak:of",
         "values": {"@id": "oak:values", "@container": "@list"},
         "pattern": "oak:pattern",
@@ -300,6 +303,10 @@ def _step(document: str, step: Step) -> dict[str, object]:
     elif isinstance(step, Foreach):
         node["loopBinding"] = step.binding
         node["value"] = _value(document, step.value)
+        node["steps"] = [_step(document, child) for child in step.steps]
+    elif isinstance(step, While):
+        node["condition"] = _condition(document, step.condition)
+        node["limit"] = step.limit
         node["steps"] = [_step(document, child) for child in step.steps]
     elif isinstance(step, Par):
         node["steps"] = [_step(document, child) for child in step.steps]

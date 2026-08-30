@@ -37,6 +37,7 @@ from oak.node.parts.processes import (
     Step,
     Value,
     ValueBinding,
+    While,
     condition_values,
     step_values,
 )
@@ -124,6 +125,7 @@ __all__ = [
     "Value",
     "ValueBinding",
     "Where",
+    "While",
     "condition_values",
     "step_values",
     "where",

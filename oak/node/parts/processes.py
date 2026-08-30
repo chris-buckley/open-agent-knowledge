@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import Counter
 from typing import Annotated, Literal, Self
 
-from pydantic import AfterValidator, ConfigDict, Field, JsonValue, model_validator
+from pydantic import AfterValidator, ConfigDict, Field, JsonValue, PositiveInt, model_validator
 from pydantic_core import PydanticCustomError
 
 from oak.base import DiscriminatedModel, Entry, OakModel
@@ -226,6 +226,66 @@ class Foreach(StepModel):
     steps: list[Step] = Field(min_length=1, description="The sequential iteration steps.", examples=[[{"kind": "fail", "message": "Example failure."}]])
 
 
+class While(StepModel):
+    """One bounded pre-test loop over a recursive condition."""
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "kind": "while",
+                    "condition": {
+                        "kind": "compare",
+                        "left": {"source": "state", "state": "state.status"},
+                        "operator": "not_equals",
+                        "right": {"source": "literal", "value": "complete"},
+                    },
+                    "limit": 10,
+                    "steps": [
+                        {
+                            "kind": "set",
+                            "state": "state.status",
+                            "value": {"source": "literal", "value": "complete"},
+                        }
+                    ],
+                }
+            ]
+        }
+    )
+    kind: Literal["while"] = Field(
+        default="while",
+        description="The process step discriminator.",
+        examples=["while"],
+    )
+    condition: Condition = Field(
+        description="The recursive condition tested before every iteration.",
+        examples=[
+            {
+                "kind": "compare",
+                "left": {"source": "state", "state": "state.status"},
+                "operator": "not_equals",
+                "right": {"source": "literal", "value": "complete"},
+            }
+        ],
+    )
+    limit: PositiveInt = Field(
+        description="The hard maximum number of iterations.",
+        examples=[10],
+    )
+    steps: list[Step] = Field(
+        min_length=1,
+        description="The steps run in one fresh child binding scope per iteration.",
+        examples=[
+            [
+                {
+                    "kind": "set",
+                    "state": "state.status",
+                    "value": {"source": "literal", "value": "complete"},
+                }
+            ]
+        ],
+    )
+
+
 class Par(StepModel):
     """One deterministic group of exact named-tool acts."""
     model_config = ConfigDict(json_schema_extra={"examples": [{"kind": "par", "steps": [{"kind": "act", "tool": "tool-a", "instruction": "Produce <A>.", "outputs": ["A"]}, {"kind": "act", "tool": "tool-b", "instruction": "Produce <B>.", "outputs": ["B"]}]}]})
@@ -251,9 +311,10 @@ class Join(StepModel):
     kind: Literal["join"] = Field(default="join", description="The process step discriminator.", examples=["join"])
 
 
-Step = Annotated[Act | Set | Emit | If | Call | Fail | Assert | Foreach | Par | Join, Field(discriminator="kind")]
+Step = Annotated[Act | Set | Emit | If | Call | Fail | Assert | Foreach | While | Par | Join, Field(discriminator="kind")]
 If.model_rebuild(_types_namespace={"Step": Step, "Condition": Condition})
 Foreach.model_rebuild(_types_namespace={"Step": Step})
+While.model_rebuild(_types_namespace={"Step": Step, "Condition": Condition})
 Par.model_rebuild(_types_namespace={"Step": Step})
 
 
@@ -276,7 +337,7 @@ def step_values(step: Step) -> list[Value]:
         return [step.value]
     if isinstance(step, Emit):
         return [binding.value for binding in step.bindings]
-    if isinstance(step, (If, Assert)):
+    if isinstance(step, (If, Assert, While)):
         return condition_values(step.condition)
     if isinstance(step, Call):
         return [binding.value for binding in step.inputs]
@@ -320,6 +381,8 @@ def _validate_bindings(steps: list[Step], visible: set[str]) -> set[str]:
             if isinstance(step.value, LiteralValue) and not isinstance(step.value.value, list):
                 raise PydanticCustomError("foreach_source_not_list", "FOREACH literal source is not a list")
             _validate_bindings(step.steps, visible | {step.binding})
+        elif isinstance(step, While):
+            _validate_bindings(step.steps, set(visible))
         elif isinstance(step, Par):
             outputs = {output for child in step.steps if isinstance(child, Act) for output in child.outputs}
             redefined = sorted(outputs & visible)
@@ -341,6 +404,8 @@ def _sequence_always_fails(steps: list[Step]) -> bool:
         always_fails = isinstance(step, Fail)
         if isinstance(step, If):
             always_fails = _sequence_always_fails(step.then) and step.otherwise is not None and _sequence_always_fails(step.otherwise)
+        elif isinstance(step, While):
+            _sequence_always_fails(step.steps)
         if always_fails:
             if index + 1 < len(steps):
                 raise PydanticCustomError("unreachable_process_step", "a process step follows a path that always fails")

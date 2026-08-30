@@ -1,5 +1,6 @@
 """Open Agent Knowledge: text and direct Pydantic authoring APIs."""
 
+from oak.authoring import ACT
 from oak.execute import (
     ActHandler,
     Arrival,
@@ -58,6 +59,7 @@ from oak.node.parts import (
     Value,
     ValueBinding,
     Where,
+    While,
     where,
 )
 from oak.parse import OakParseError, ParseFailure, parse, parse_oak

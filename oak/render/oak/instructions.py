@@ -3,7 +3,7 @@
 from collections.abc import Iterator
 
 from oak.node.model import Node
-from oak.node.parts.processes import Call, Foreach, If, Par, Step
+from oak.node.parts.processes import Call, Foreach, If, Par, Step, While
 
 REFERENCE_INSTRUCTION = (
     "$ reads a value; local targets start with their part; relative targets "
@@ -22,7 +22,7 @@ _PART_INSTRUCTIONS = (
 
 CONTROL_INSTRUCTION = (
     "Conditions are typed trees; ALL, ANY, and NOT compose comparisons; "
-    "ASSERT fails a false condition; FOREACH is sequential; PAR outputs become visible only at JOIN."
+    "ASSERT fails a false condition; FOREACH is sequential; WHILE tests before each bounded iteration; PAR outputs become visible only at JOIN."
 )
 
 CONTRACT_INSTRUCTION = (
@@ -47,12 +47,12 @@ def _walk_steps(steps: list[Step]) -> Iterator[Step]:
             yield from _walk_steps(step.then)
             if step.otherwise is not None:
                 yield from _walk_steps(step.otherwise)
-        elif isinstance(step, (Foreach, Par)):
+        elif isinstance(step, (Foreach, While, Par)):
             yield from _walk_steps(step.steps)
 
 
 def instruction_lines(node: Node) -> list[str]:
-    """Return built-in lines followed by authored instructions."""
+    """Return the interpretation preamble, one blank separator, then authored instructions."""
     lines: list[str] = []
     steps = tuple(
         step
@@ -61,7 +61,7 @@ def instruction_lines(node: Node) -> list[str]:
     )
     if node.processes or node.triggers:
         lines.append(REFERENCE_INSTRUCTION)
-    if any(step.kind in {"assert", "foreach", "par", "join"} for step in steps):
+    if any(step.kind in {"assert", "foreach", "while", "par", "join"} for step in steps):
         lines.append(CONTROL_INSTRUCTION)
     if (
         any(process.input is not None or process.output is not None for process in node.processes)
@@ -71,5 +71,7 @@ def instruction_lines(node: Node) -> list[str]:
     for field, instruction in _PART_INSTRUCTIONS:
         if getattr(node, field):
             lines.append(instruction)
+    if lines and node.instructions:
+        lines.append("")
     lines.extend(instruction.body for instruction in node.instructions)
     return lines

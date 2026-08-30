@@ -95,7 +95,7 @@ def _style_steps(steps: list[dict[str, object]], path: str, failures: list[Style
         if kind == "if":
             _style_steps(step.get("then", []), f"{step_path}.then", failures)  # type: ignore[arg-type]
             _style_steps(step.get("otherwise") or [], f"{step_path}.otherwise", failures)  # type: ignore[arg-type]
-        elif kind == "foreach":
+        elif kind in {"foreach", "while"}:
             _style_steps(step.get("steps", []), f"{step_path}.steps", failures)  # type: ignore[arg-type]
         elif kind == "par":
             _style_steps(step.get("steps", []), f"{step_path}.steps", failures)  # type: ignore[arg-type]

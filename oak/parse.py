@@ -52,6 +52,7 @@ from oak.node.parts import (
     Type,
     ValueBinding,
     Where,
+    While,
 )
 from oak.render.oak.arrangement import PART_ORDER
 from oak.render.oak.instructions import BUILT_IN_INSTRUCTIONS
@@ -259,9 +260,7 @@ def _entries(
 
 
 def _instructions(lines: list[str], start: int) -> list[Instruction]:
-    authored = [line for line in lines if line not in BUILT_IN_INSTRUCTIONS]
-    if any(not line for line in authored):
-        _fail("blank_instruction", "instructions", start, "instructions cannot contain a blank line")
+    authored = [line for line in lines if line and line not in BUILT_IN_INSTRUCTIONS]
     return [Instruction(id=f"instruction-{index}", body=line) for index, line in enumerate(authored, 1)]
 
 
@@ -667,6 +666,54 @@ def _steps(
             binding, value = body.split(" IN ", 1)
             children, index = _steps(lines, index + 1, indent + 2, path, start)
             result.append(Foreach(binding=binding, value=_value(value, path, number), steps=children))
+            continue
+        if text.startswith("WHILE ") and text.endswith(":"):
+            body = text[6:-1]
+            if body.startswith("LIMIT "):
+                limit_text = body[6:]
+                if not limit_text.isdigit() or int(limit_text) < 1:
+                    _fail("while_limit", path, number, "WHILE LIMIT must be a positive integer")
+                condition, index = _condition(
+                    lines,
+                    index + 1,
+                    indent + 2,
+                    path,
+                    start,
+                )
+                if (
+                    index >= len(lines)
+                    or _indent(lines[index], path, start + index) != indent + 2
+                    or lines[index][indent + 2 :] != "THEN:"
+                ):
+                    _fail("while_then", path, start + index, "recursive WHILE needs THEN")
+                children, index = _steps(
+                    lines,
+                    index + 1,
+                    indent + 4,
+                    path,
+                    start,
+                )
+            else:
+                if " LIMIT " not in body:
+                    _fail("while", path, number, "WHILE needs condition LIMIT positive-integer")
+                condition_text, limit_text = body.rsplit(" LIMIT ", 1)
+                if not limit_text.isdigit() or int(limit_text) < 1:
+                    _fail("while_limit", path, number, "WHILE LIMIT must be a positive integer")
+                condition = _compare(condition_text, path, number)
+                children, index = _steps(
+                    lines,
+                    index + 1,
+                    indent + 2,
+                    path,
+                    start,
+                )
+            result.append(
+                While(
+                    condition=condition,
+                    limit=int(limit_text),
+                    steps=children,
+                )
+            )
             continue
         if text == "PAR:":
             children, index = _steps(lines, index + 1, indent + 2, path, start)
