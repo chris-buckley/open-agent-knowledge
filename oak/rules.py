@@ -132,7 +132,7 @@ DECOMPOSITION_GUIDANCE = (
     GuidanceRule("decompose-phases", "Decompose each multi-phase task into one process per phase."),
     GuidanceRule("contract-phase", "Give each phase process one input schema and one output schema."),
     GuidanceRule("name-contractschema", "Name each contract schema as the information shape it carries."),
-    GuidanceRule("orchestrate-trigger", "Keep each trigger-selected process an orchestrator of calls and emits."),
+    GuidanceRule("orchestrate-trigger", "Keep each multi-phase trigger-selected process an orchestrator of calls and emits."),
     GuidanceRule("restrict-phaseemit", "Do not emit from a phase process."),
     GuidanceRule("restrict-state", "Keep pipeline values in call contracts; use state only for values that persist between arrivals."),
 )
@@ -163,12 +163,31 @@ ACT_GUIDANCE = (
     GuidanceRule("avoid-helper", "Add no second helper for interpreter-native work."),
 )
 
+DELEGATION_GUIDANCE = (
+    GuidanceRule("model-worker", "Model each subagent as one worker OAK document with one in interface and one out interface."),
+    GuidanceRule("treat-contracts", "Treat the worker in interface schema as the request contract and the worker out interface schema as the result contract."),
+    GuidanceRule("type-dispatch", "Type each dispatch process with relative targets to the worker request and result schemas as its input and output schemas."),
+    GuidanceRule("dispatch-worker", "Dispatch each worker inside its dispatch process with one exact tool name from the supplied registry."),
+    GuidanceRule("prefer-portable-name", "Prefer one registered portable `agent.<worker>` contract when the host permits registration."),
+    GuidanceRule("use-native-name", "Use the native runner name verbatim when the host does not permit registration."),
+    GuidanceRule("mirror-contract", "Give each agent tool contract the worker request placeholders as inputs and the worker result placeholders as outputs."),
+    GuidanceRule("keep-invocation", "Keep agent invocation, model selection, and transport in the host registry, outside the OAK document."),
+    GuidanceRule("restrict-workers", "Treat the supplied registry as the worker allowlist."),
+    GuidanceRule("parallelize-workers", "Run parallel workers as `PAR` children, one exact agent tool act per worker."),
+    GuidanceRule("limit-depth", "Keep delegation depth at one: each worker returns its result to the coordinator and dispatches no workers."),
+    GuidanceRule("avoid-worker-call", "Do not dispatch a worker with `CALL`."),
+    GuidanceRule("compose-call", "`CALL` composes processes inside one interpreter and one transaction."),
+    GuidanceRule("separate-interpreter", "Treat each dispatch as separate-interpreter host work, not as running an OAK process with `ACT TOOL`."),
+    GuidanceRule("treat-worker-effects", "Treat committed worker effects as external tool effects that the coordinator transaction cannot roll back."),
+)
+
 AUTHORING_GUIDANCE = (
     *SOURCE_GUIDANCE,
     *ENTRY_ID_GUIDANCE,
     *NAMING_GUIDANCE,
     *DECOMPOSITION_GUIDANCE,
     *ACT_GUIDANCE,
+    *DELEGATION_GUIDANCE,
 )
 
 

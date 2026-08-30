@@ -26,15 +26,19 @@ from oak.node.parts import (
     Foreach,
     If,
     Interface,
+    InterfaceValue,
+    LiteralValue,
     Not,
     Par,
     Process,
     Schema,
+    SchemaBindingError,
     Set,
     Step,
     Trigger,
     Value,
     While,
+    step_values,
 )
 from oak.node.parts.processes import (
     process_visible_bindings,
@@ -249,8 +253,79 @@ def _contract_error(source: str, target: str, error: PydanticCustomError) -> Non
     _raise(str(error.type), source, target, str(error))
 
 
+def _iter_steps(steps: list[Step]) -> Iterator[Step]:
+    for step in steps:
+        yield step
+        if isinstance(step, If):
+            yield from _iter_steps(step.then)
+            if step.otherwise is not None:
+                yield from _iter_steps(step.otherwise)
+        elif isinstance(step, (Foreach, While, Par)):
+            yield from _iter_steps(step.steps)
+
+
+def _static_emit_values(graph: ResolvedGraph, document: str, step: Emit) -> dict[str, object] | None:
+    values: dict[str, object] = {}
+    for binding in step.bindings:
+        value = binding.value
+        if isinstance(value, LiteralValue):
+            values[binding.placeholder] = value.value
+        elif isinstance(value, ConstantValue):
+            _constant_document, constant = graph.entry(document, value.constant, Constant)
+            values[binding.placeholder] = constant.value
+        else:
+            return None
+    return values
+
+
+def _validate_relative_interfaces(graph: ResolvedGraph, document: str, node: Node) -> None:
+    schemas = {
+        f"interface.{interface.id}": graph.entry(document, interface.schema_id, Schema)[1]
+        for interface in node.interfaces
+        if is_relative_target(interface.schema_id)
+    }
+    if not schemas:
+        return
+    for process in node.processes:
+        for step in _iter_steps(process.steps):
+            if isinstance(step, Emit) and step.interface in schemas:
+                schema = schemas[step.interface]
+                bound = {binding.placeholder for binding in step.bindings}
+                if bound != schema.placeholders:
+                    _raise(
+                        "emit_schema_binding_mismatch",
+                        document,
+                        step.interface,
+                        f"process {process.id} emit bindings differ from the resolved interface schema placeholders",
+                    )
+                static_values = _static_emit_values(graph, document, step)
+                if static_values is not None:
+                    try:
+                        schema.bind(static_values)
+                    except SchemaBindingError as error:
+                        _raise(
+                            "invalid_static_schema_binding",
+                            document,
+                            step.interface,
+                            f"process {process.id} emits an invalid static binding: {error}",
+                        )
+            for value in step_values(step):
+                if (
+                    isinstance(value, InterfaceValue)
+                    and value.interface in schemas
+                    and value.placeholder not in schemas[value.interface].placeholders
+                ):
+                    _raise(
+                        "unknown_interface_placeholder",
+                        document,
+                        value.interface,
+                        f"process {process.id} reads placeholder {value.placeholder} absent from the resolved interface schema",
+                    )
+
+
 def _validate_contracts(graph: ResolvedGraph) -> None:
     for document, node in graph.documents.items():
+        _validate_relative_interfaces(graph, document, node)
         for process in node.processes:
             try:
                 validate_process_contract(
