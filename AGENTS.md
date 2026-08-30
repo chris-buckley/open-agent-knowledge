@@ -75,7 +75,7 @@ part,"one of the seven parts of a node (instructions|constants|schemas|state|tri
 entry,"one item in a part: one instruction, one constant, one schema, one state value, one trigger, one process, or one interface"
 target path,"one local part-qualified entry path or one relative document path followed by # and a part-qualified entry path"
 authoring surface,"the OAK text an interpreter or human writes; Pydantic is the programmatic authoring and validation form"
-surface descriptor,"one declarative authored text variant that drives rendering, parsing, EBNF, prompt generation, and documentation generation"
+surface descriptor,"one declarative authored text variant that drives rendering, parsing, EBNF, authoring generation, and documentation generation"
 vocabulary,"how information is conveyed without ambiguity inside every render: text shapes, datatypes, units, time, and display forms; where the core schema and Rust regex checks run"
 grouping,"the delimiters that group the parts and body entries of one OAK document (xml tags|markdown fences)"
 trigger,"the entry that signposts knowledge to the outside; it contains GIVEN, WHEN, and THEN and selects one process"
@@ -83,7 +83,7 @@ APS,"Agnostic Prompt Standard, the legacy standard that OAK succeeds; its skill 
 package,"the Pydantic models, defaults, parser, resolver, executor, surface descriptors, and renderers the PRD builds; it is the `oak` directory"
 render,"a representation of one OAK document (OAK|JSON-LD); OAK is the opinionated default, the successor of APS"
 build,"the directory that uses the package to generate the outputs; it is the `build` directory"
-output,"an artefact the build generates from the package once (EBNF|authoring prompt|documentation tree); it is in the `outputs` directory"
+output,"an artefact the build generates from the package once (EBNF|authoring document|documentation tree); it is in the `outputs` directory"
 text syntax,"the restricted syntax tree in `oak/vocabulary/syntax.py` from which the build generates each Rust regex, JSON Schema pattern, and EBNF production"
 ```
 

@@ -1,7 +1,7 @@
 ---
 title: OAK Product Requirements
 status: draft
-updated: 2026-08-26
+updated: 2026-08-30
 owner: Christopher Buckley
 defaults:
   render: OAK
@@ -72,6 +72,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 33. Reject a trigger-selected process with an input schema.
 34. Reject a process that cannot supply every output schema placeholder after successful completion.
 35. Reject a call whose input set differs from the called process input schema or whose output set differs from its output schema.
+36. Reject a while with no steps or a limit less than one.
 
 ## Structure
 
@@ -119,7 +120,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Normalize (CRLF|CR) line endings to LF before parsing.
 - Require each parsed document to contain the seven parts once in OAK order.
 - Generate unique instruction ids because the OAK render loses them.
-- Strip only exact built-in instruction lines before rebuilding authored instructions.
+- Strip exact built-in instruction lines and blank lines before rebuilding authored instructions.
 - Give each parse failure one code, one path, one optional line, and one message.
 - Collect every parse failure before raising `OakParseError`.
 
@@ -131,6 +132,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Each line MUST be a single imperative or declarative that changes system behaviour.
 - Require each instruction body to use `NonBlankLine`.
 - Render built-in interpretation instructions before authored instructions.
+- The interpretation preamble is the generated built-in instruction group.
 - A node's instructions apply before a process reached through a trigger.
 
 ## Constants
@@ -208,7 +210,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 ## Processes
 
 - Processes are exact ordered ways to do a task.
-- Represent each process step as one discriminated union of (act|set|emit|if|call|fail|assert|foreach|par|join) on `kind`.
+- Represent each process step as one discriminated union of (act|set|emit|if|call|fail|assert|foreach|while|par|join) on `kind`.
 - Represent each process value as one discriminated union of (literal|constant|state|interface|binding) on `source`.
 - Give each value binding one placeholder and one process value.
 - Give each process one `ProcessName`, optional input and output schema targets, and one or more steps.
@@ -255,6 +257,14 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Skip the foreach body for an empty list.
 - Give each foreach iteration a fresh child binding scope.
 - Keep each loop binding and iteration output inside its iteration.
+- Give each while one recursive condition, one positive hard limit, and one non-empty step list.
+- Test each while condition before every iteration.
+- Skip the while body when its condition is false before the first iteration.
+- Give each while iteration a fresh child binding scope.
+- Keep each while iteration output inside its iteration.
+- Keep staged state and emissions visible to later while iterations.
+- Stop after no more than the authored while limit.
+- Fail with `while_limit_reached` when the condition remains true after the authored limit.
 - Give each par one or more exact named-tool acts.
 - Resolve every par input before launching any child.
 - Give every par child the same immutable visible-binding snapshot.
@@ -283,7 +293,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Return no process and no emission when no trigger matches.
 - Raise `ExecutionError` with one code and one message on runtime failure.
 - Do not mutate the caller state mapping.
-- Use triggers and foreach for repetition instead of recursive process calls.
+- Use triggers, foreach, and bounded while for repetition instead of recursive process calls.
 - Processes can run without interfaces or triggers.
 - Refuse (expression strings|try|recover|retry|timeout|with|capture|return|unset|tell|snap|milestone).
 
@@ -330,6 +340,107 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Require each local datetime to include a numeric UTC offset.
 - Append an IANA time zone name in brackets when present.
 
+## Authoring
+
+- Direct Python authoring validates through the existing Pydantic models.
+
+### Entry IDs
+
+- Do not require a minimum word count for an entry id.
+- Use `<verb>-<object>[-<outcome-or-context>]` for process ids.
+- Start each process id with an exact base-form action verb.
+- Use `<verb>-<object>` for instruction ids.
+- Use noun phrases for constant, schema, state, and interface ids.
+- Use circumstance phrases for trigger ids.
+
+#### Example AST
+
+```text
+NODE
+├── INSTRUCTIONS
+│   └── require-verification
+├── CONSTANTS
+│   └── completion-criteria
+├── SCHEMAS
+│   ├── candidate
+│   ├── verification
+│   └── verified-candidate
+├── STATE
+│   ├── candidate-goal
+│   ├── verification-phase
+│   ├── current-candidate
+│   └── verification-feedback
+├── TRIGGERS
+│   ├── candidate-needed
+│   └── verification-needed
+├── PROCESSES
+│   ├── produce-candidate
+│   └── verify-candidate
+└── INTERFACES
+    └── verified-candidate-output
+```
+
+### Naming
+
+- The process naming rules apply to processes.
+- Name each reusable process for what it establishes, not how it works.
+- Name each query process with matching `SlugId` and `ProcessName` forms that use the semantic structure `<query-action>_<object>` and a non-mutating action (is|has|find|read) (e.g. `find-document` and `Find document`).
+- Name each command process with matching `SlugId` and `ProcessName` forms that use the semantic structure `<command-action>_<object>` and expose the state change (create|write|publish|delete) (e.g. `publish-report` and `Publish report`).
+- Name each combined process with matching `SlugId` and two-word `ProcessName` forms that place its mutating action first and use the semantic structure `<command-action>_<object>[_if_<condition>]` (e.g. `create-folder-if-missing` and `Create folder-if-missing`).
+- Name each verification process with matching `SlugId` and `ProcessName` forms that use the semantic structure `(test|validate|prove)_<object>[_<condition>][_<outcome>]` (e.g. `validate-candidate` and `Validate candidate`).
+- Define each required log event as a reusable process with the semantic structure `log_<object>_<event>` (e.g. `log-artifact-published` and `Log artifact-published`).
+- Perform interpreter-native logging with plain `ACT`.
+- Use `ACT TOOL` only when one exact registered logging tool must perform the logging operation.
+- Reuse a logging process from other processes with `CALL`.
+- The value naming rules apply to constants, schemas, state, and process bindings.
+- Name each value with the semantic structure `<role>_<object>_<kind-or-unit>` using a `SlugId` for a constant or state entry and a `Placeholder` for a schema or process binding (e.g. `source-document-file` and `SOURCE_DOCUMENT_FILE`).
+- Name each collection with the semantic structure `<contents>_<shape>` (e.g. `report-names` as a `SlugId` or `REPORT_NAMES` as a `Placeholder`).
+- Name each boolean as a positive condition or control (e.g. `is-ready` as a `SlugId` or `IS_READY` as a `Placeholder`).
+- Name each quantity with the semantic structure `[<context>_]<quantity>_<unit>` (e.g. `poll-interval-seconds` as a `SlugId` or `POLL_INTERVAL_SECONDS` as a `Placeholder`).
+- Name each identifier value with the semantic structure `<object>_id` (e.g. `document-id` as a `SlugId` or `DOCUMENT_ID` as a `Placeholder`).
+- The mapping naming rule applies to constants, state, and process bindings.
+- Name each mapping with the semantic structure `<key>_to_<value>` (e.g. `filename-to-document-id` as a `SlugId` or `FILENAME_TO_DOCUMENT_ID` as a `Placeholder`).
+- The lifetime rule applies to constants, state, process bindings, and interfaces.
+- Represent each variable-like value by its source and lifetime: `CONSTANT` for fixed values, `STATE` for mutable values, a process binding for local immutable values, and an `INTERFACE` binding for boundary values (e.g. `$constant.max-retries`, `$state.current-candidate`, or `$CANDIDATE`).
+- The shared naming rules apply to every entry part.
+- Use the shortest unambiguous name that states purpose or result and reuses one exact domain noun across every part, including verification processes (e.g. schema `candidate`, state `current-candidate`, process `validate-candidate`, and interface `verified-candidate-output`; do not rename `candidate` as `option` or `proposal`).
+- Replace generic nouns and vague process verbs with exact domain terms that state purpose or action (e.g. replace (data|item|result|value|config|response|path) with (candidate|verification-step|verified-candidate|retry-limit|validation-rules|review-feedback|source-document-file), and replace (handle|process|manage|do) with (validate|publish|archive|verify)).
+
+### Decomposition
+
+- Decompose each multi-phase task into one process per phase.
+- Give each phase process one input schema and one output schema.
+- Name each contract schema as the information shape it carries.
+- Keep each trigger-selected process an orchestrator of calls and emits.
+- Do not emit from a phase process.
+- Keep pipeline values in call contracts; use state only for values that persist between arrivals.
+
+### ACT
+
+- Treat plain `ACT` as the default action form.
+- Use plain `ACT` when the interpreter performs the instruction with its native capabilities.
+- No `ACT.tool` means interpreter-native work.
+- Use `ACT TOOL` only when one exact registered tool must perform the instruction.
+- Omit `ACT TOOL` when the interpreter may choose how to perform the instruction.
+- Copy each tool name from the supplied exact tool registry.
+- Preserve each tool name verbatim.
+- Do not invent, normalize, or infer a tool name.
+- Use `CALL` to run another OAK process.
+- Do not use `ACT TOOL` to run an OAK process.
+- Keep tool implementations, handlers, transport, credentials, server configuration, and aliases outside the OAK document.
+- Prefer `ACT TOOL` when stable tool selection, contract validation, auditability, or controlled side effects matter.
+- An exact tool name fixes which registry entry is selected.
+- An exact tool name does not guarantee deterministic output.
+- Require the selected tool itself to provide deterministic behaviour when deterministic output is required.
+- Expose plain `ACT` as `ACT(instruction, ...)` in direct Python authoring.
+- Expose named `ACT TOOL` as `ACT.tool(name, instruction, ...)` in direct Python authoring.
+- Make `ACT(...)` and `ACT.tool(...)` return the existing `Act` model.
+- Keep `ACT(...)` and `ACT.tool(...)` as one `act` process step kind.
+- Keep the rendered OAK syntax unchanged.
+- Do not expose `ACT.infer`.
+- Do not expose `ACT.use`.
+- Add no second helper for interpreter-native work.
+
 ## Pydantic
 
 - Pydantic v2 is the programmatic authoring and executable validation form, not a render.
@@ -343,7 +454,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Define each authored text syntax once under `oak/vocabulary/text`.
 - Define each concrete authored render variant once in `oak/surface.py`.
 - Classify every model field in each surface as (rendered|fixed|omitted|generated).
-- Build rendering, parsing, EBNF, prompt generation, and documentation generation from the same surfaces.
+- Build rendering, parsing, EBNF, authoring generation, and documentation generation from the same surfaces.
 - Keep each validator-backed authoring rule in `oak/rules.py` with its stable error code.
 - Build each reusable string shape with `Annotated` and `StringConstraints` or one reusable after validator.
 - Keep defaults and aliases at the field declaration.
@@ -380,6 +491,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Render entries in authored order.
 - Keep parts as siblings.
 - Render each authored instruction as its text after built-in instructions.
+- Separate the interpretation preamble from authored instructions with one blank line.
 - Generate built-in instructions only for authored features present in the node.
 - Render each trigger as one body entry with `id`, `GIVEN`, `WHEN`, and `THEN`.
 - Render each state and inline constant as its id, `: `, and one JSON value.
@@ -395,6 +507,8 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Render if with `IF`, its condition, `THEN`, and optional `ELSE`.
 - Render assert with `ASSERT`, its condition, and optional `MESSAGE`.
 - Render foreach with `FOREACH binding IN value` and its steps.
+- Render a compare while with `WHILE condition LIMIT positive-integer:` and its steps.
+- Render a recursive while with `WHILE LIMIT positive-integer:`, its condition, `THEN:`, and its steps.
 - Render par with `PAR`, named-tool acts, and one following `JOIN`.
 - Render fail with `FAIL` and one JSON string.
 - Render each interface with id, direction, schema target, and optional description.
@@ -446,6 +560,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Render process input and output as id-valued schema targets.
 - Render call process as an id-valued process target.
 - Render if `thenSteps` and `otherwise` as ordered step lists.
+- Render while `condition`, `limit`, and `steps` as one condition, one positive integer, and one ordered step list.
 - Derive each `Where` id as `#schema.SlugId/where/Placeholder`.
 - Render literal JSON values with `@type: @json`.
 - Keep context processing, structural validation, and graph target checks as separate boundaries.
@@ -457,7 +572,8 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - The build uses the package to generate outputs once.
 - A model writes OAK with the outputs, and the package validates what it writes.
 - Keep one surface descriptor registry as the source of every authored text variant.
-- Keep one authoring rule registry as the source of every generated validator instruction.
+- Keep one validator rule registry as the source of every generated validator instruction.
+- Keep one authoring guidance registry as the source of every generated authoring instruction.
 - Validate text aliases, metadata examples, surfaces, renders, parsing, resolution, execution, JSON-LD, styles, display forms, and outputs in `build/examples.py`.
 
 ### EBNF
@@ -469,14 +585,15 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Do not emit recursive node productions.
 - Do not use EBNF as a validator.
 
-### Prompt
+### Authoring
 
-- Emit one single-shot authoring prompt to `outputs/prompt.md` as xml-grouped OAK.
+- Emit one single-shot authoring document to `outputs/authoring.md` as xml-grouped OAK.
 - Treat the complete host-supplied modality context as the source.
 - Generate source-to-part instructions from one rule registry.
-- Include every authoring rule, every surface schema, the EBNF, and one canonical OAK example.
+- Generate every Entry ID, Naming, Decomposition, and ACT rule as one instruction entry.
+- Include every authoring rule, every surface schema, the EBNF, one canonical OAK example, and one decomposed orchestrator example.
 - Declare no universal input interface.
-- Declare one OAK result schema, one out interface, one trigger, and one process.
+- Declare one OAK document schema, one out interface, one trigger, and one process.
 - Derive a draft, validate it, and emit the valid OAK document as the sole response.
 
 ### Documentation
@@ -490,9 +607,14 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 
 ### Examples
 
-- Author each human example as OAK text held in its Python wrapper.
-- Parse, resolve, and render each example before writing its sibling `.oak.md` snapshot.
-- Keep each wrapper flat, dense, functional, and short.
+- Author each example with direct Python authoring.
+- Hoist each reused target and placeholder into one part-prefixed `UPPER_SNAKE` module constant.
+- Define each entry as one lower snake module value postfixed with its part, so the node reads as a table of contents.
+- Render, parse, resolve, and round-trip each example before writing its sibling `.oak.md` snapshot.
+- Exercise `ACT`, `ACT.tool`, bounded while, canonical OAK, parsing, resolution, and execution in `examples/authoring.py`.
+- Encode the extracted implementer instructions in `examples/implementer.py`.
+- Encode the extracted task reviewer instructions in `examples/task_reviewer.py`.
+- Keep each example flat, dense, functional, and short.
 
 ### Freshness
 
@@ -504,28 +626,30 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 6. Require every rendered example to parse back to the same preserved model data.
 7. Require every documentation page to parse as one OAK document.
 8. Require every parsed documentation page to reproduce its committed render.
-9. Require prompt and documentation generation to share the same surface and rule objects.
+9. Require authoring and documentation generation to share the same surface and rule objects.
 10. Require the generated output path set and contents to equal the committed snapshot.
 
 ### Tree
 
 ```t
 oak
-├── .agent
+├── .agents
 ├── .gitignore
 ├── AGENTS.md
 ├── CLAUDE.md
 ├── docs
-│   ├── PRD.md
-│   └── types.md
+│   └── PRD.md
 ├── examples
-│   ├── incident_triage.py
-│   ├── incident_triage.oak.md
-│   ├── shell.py
-│   └── shell.oak.md
-├── legacy-snapshot-aps
+│   ├── __init__.py
+│   ├── authoring.py
+│   ├── authoring.oak.md
+│   ├── implementer.py
+│   ├── implementer.oak.md
+│   ├── task_reviewer.py
+│   └── task_reviewer.oak.md
 ├── oak
 │   ├── __init__.py
+│   ├── authoring.py
 │   ├── base.py
 │   ├── defaults.py
 │   ├── execute.py
@@ -576,14 +700,14 @@ oak
 │           ├── target_path.py
 │           └── value_reference.py
 ├── build
+│   ├── authoring.py
 │   ├── docs.py
 │   ├── ebnf.py
 │   ├── examples.py
-│   ├── prompt.py
 │   └── surfaces.py
 ├── outputs
 │   ├── oak.ebnf
-│   ├── prompt.md
+│   ├── authoring.md
 │   └── docs
 │       └── ...
 └── pyproject.toml
