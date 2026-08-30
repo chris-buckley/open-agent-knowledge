@@ -1,0 +1,141 @@
+<instructions>
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and THEN omit $.
+Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+Each trigger contains GIVEN, WHEN, and THEN; WHEN matches first, GIVEN guards it, and THEN selects a process.
+Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
+Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both.
+
+Review only the scope defined by the supplied task brief.
+Read the task brief, implementation report, and diff once before assessment.
+Remain read-only and do not modify the implementation.
+Do not delegate review work to subagents.
+Treat the implementation report as a claim that requires diff evidence.
+Do not rerun broad test suites during the task-scoped review.
+Check specification compliance and implementation quality separately.
+Classify every issue by severity and explain its evidence.
+Report specification compliance, strengths, issues, and an overall assessment.
+</instructions>
+
+<constants>
+</constants>
+
+<schemas>
+<schema id="review-request" name="Review Request" purpose="Carry one task-scoped review package.">
+Task brief: <TASK_BRIEF>
+Implementation report: <IMPLEMENTATION_REPORT>
+Diff: <DIFF>
+
+WHERE:
+- <TASK_BRIEF> is string; is non-empty; the accepted implementation scope.
+- <IMPLEMENTATION_REPORT> is string; is non-empty; the implementer's completion claim.
+- <DIFF> is string; is non-empty; the exact code changes under review.
+</schema>
+
+<schema id="review-evidence" name="Review Evidence" purpose="Carry the inspected evidence for one task-scoped review.">
+<EVIDENCE>
+
+WHERE:
+- <EVIDENCE> is string; is non-empty; the inspected review evidence.
+</schema>
+
+<schema id="compliance" name="Compliance" purpose="Carry the requirement-by-requirement compliance result.">
+<SPEC_COMPLIANCE>
+
+WHERE:
+- <SPEC_COMPLIANCE> is string; is non-empty; the requirement-by-requirement result.
+</schema>
+
+<schema id="assessment" name="Assessment" purpose="Carry the evidence-based quality assessment.">
+Strengths: <STRENGTHS>
+Issues: <ISSUES>
+Assessment: <ASSESSMENT>
+
+WHERE:
+- <STRENGTHS> is string; is non-empty; the strongest implementation qualities.
+- <ISSUES> is string; is non-empty; the evidenced issues with severity.
+- <ASSESSMENT> is string; is non-empty; the overall task-scoped verdict.
+</schema>
+
+<schema id="task-review" name="Task Review" purpose="Carry one evidence-based task review.">
+Specification compliance: <SPEC_COMPLIANCE>
+Strengths: <STRENGTHS>
+Issues: <ISSUES>
+Assessment: <ASSESSMENT>
+
+WHERE:
+- <SPEC_COMPLIANCE> is string; is non-empty; the requirement-by-requirement result.
+- <STRENGTHS> is string; is non-empty; the strongest implementation qualities.
+- <ISSUES> is string; is non-empty; the evidenced issues with severity.
+- <ASSESSMENT> is string; is non-empty; the overall task-scoped verdict.
+</schema>
+</schemas>
+
+<state>
+</state>
+
+<triggers>
+<trigger id="review-requested">
+GIVEN: true
+WHEN: "A task review is requested."
+THEN: process.review-task
+</trigger>
+</triggers>
+
+<processes>
+<process id="read-evidence" name="Read evidence" input="schema.review-request" output="schema.review-evidence">
+ACT Inspect <TASK_BRIEF>, <IMPLEMENTATION_REPORT>, and <DIFF> once and produce <EVIDENCE>.
+  INPUTS:
+    TASK_BRIEF = $TASK_BRIEF
+    IMPLEMENTATION_REPORT = $IMPLEMENTATION_REPORT
+    DIFF = $DIFF
+  OUTPUTS: EVIDENCE
+</process>
+
+<process id="validate-compliance" name="Validate compliance" input="schema.review-evidence" output="schema.compliance">
+ACT Compare <EVIDENCE> with <TASK_BRIEF> and produce <SPEC_COMPLIANCE>.
+  INPUTS:
+    EVIDENCE = $EVIDENCE
+    TASK_BRIEF = $interface.review-request-input.TASK_BRIEF
+  OUTPUTS: SPEC_COMPLIANCE
+</process>
+
+<process id="assess-evidence" name="Assess evidence" input="schema.review-evidence" output="schema.assessment">
+ACT Assess <EVIDENCE> and produce <STRENGTHS>, <ISSUES>, and <ASSESSMENT>.
+  INPUTS:
+    EVIDENCE = $EVIDENCE
+  OUTPUTS: STRENGTHS, ISSUES, ASSESSMENT
+</process>
+
+<process id="review-task" name="Review task">
+CALL process.read-evidence:
+  INPUTS:
+    TASK_BRIEF = $interface.review-request-input.TASK_BRIEF
+    IMPLEMENTATION_REPORT = $interface.review-request-input.IMPLEMENTATION_REPORT
+    DIFF = $interface.review-request-input.DIFF
+  OUTPUTS: EVIDENCE
+CALL process.validate-compliance:
+  INPUTS:
+    EVIDENCE = $EVIDENCE
+  OUTPUTS: SPEC_COMPLIANCE
+CALL process.assess-evidence:
+  INPUTS:
+    EVIDENCE = $EVIDENCE
+  OUTPUTS: STRENGTHS, ISSUES, ASSESSMENT
+EMIT interface.task-review-output:
+  SPEC_COMPLIANCE = $SPEC_COMPLIANCE
+  STRENGTHS = $STRENGTHS
+  ISSUES = $ISSUES
+  ASSESSMENT = $ASSESSMENT
+</process>
+</processes>
+
+<interfaces>
+<interface id="review-request-input" direction="in" schema="schema.review-request">
+The brief, report, and diff supplied to the reviewer.
+</interface>
+
+<interface id="task-review-output" direction="out" schema="schema.task-review">
+The task-scoped review returned to the caller.
+</interface>
+</interfaces>
