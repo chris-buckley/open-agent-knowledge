@@ -16,7 +16,7 @@ WHEN working in this repository, you MUST:
 
 WHEN you update an `AGENTS.md` in this repository, you MUST:
 
-- Keep only rules, one `---` separator, and the enclosing `<instructions>` tags in the file.
+- Keep only rules, one concepts CSV, one optional `<intent>` block, one `---` separator, and the enclosing `<instructions>` tags in the file.
 - Use ASD-STE100 Simplified Technical English (STE).
 - Use the shortest wording that preserves the complete meaning.
 - Write each rule in this format:
@@ -33,7 +33,7 @@ WHEN you update an `AGENTS.md` in this repository, you MUST:
 - Use `WHEN working in this repository` for rules that apply throughout all work in this repository.
 - Use `WHEN you work in this directory` for rules that apply throughout a nested directory.
 - Keep rules about `AGENTS.md` files in this root file only, before the separator.
-- Put repository-specific rules after the separator.
+- Put repository-specific rules and content after the separator.
 - Keep `WHEN you finish any task` as the last rule in this root file.
 - Keep a nested `AGENTS.md` minimal: one pointer rule to this root file before its separator, then its own concepts and directory rules after its separator.
 - Do not repeat a rule an ancestor `AGENTS.md` states.
@@ -87,8 +87,18 @@ output,"an artefact the build generates from the package once (EBNF|authoring pr
 text syntax,"the restricted syntax tree in `oak/vocabulary/syntax.py` from which the build generates each Rust regex, JSON Schema pattern, and EBNF production"
 ```
 
+<intent>
+OAK is intended to provide a universal, portable standard and a common vocabulary for expressing knowledge as one compact, validated unit. Humans can read that unit. Agents can understand it, render it in different forms, connect it into larger graphs, and execute it when it contains behaviour.
+
+OAK addresses a structural problem in how knowledge is expressed. Prompts, business documents, procedures, policies, data contracts, tools, and agent workflows usually use incompatible formats. These formats mix rules, data, state, inputs, outputs, and actions without giving each element a consistent name or place. OAK organizes these elements into seven fixed parts and defines precisely how each part is referenced, validated, rendered, and executed.
+
+OAK is intended to bring determinism to AI by replacing implicit interpretation with explicit structure, shared vocabulary, validated contracts, and controlled execution. Knowledge becomes reusable infrastructure rather than passive text bound to one application. An agent can discover the right document, understand its rules and contracts, run one controlled cycle, update state, emit validated results, and compose that document with other OAK machines without guessing what any part means.
+</intent>
+
 WHEN working in this repository, you MUST:
 
+- Use `.agents` as the only repository directory for agent support files.
+- Do not create or reference `.agent`.
 - Read `docs/PRD.md` before any other work.
 - Apply the reduce principle: less is more. This is the most important instruction and principle.
 - Attack every implementation, every line of code, and every line of documentation, no matter what.
@@ -100,7 +110,7 @@ WHEN working in this repository, you MUST:
 
 WHEN you work with JSON-LD, JSON Schema, or Pydantic, you MUST:
 
-- Use the matching skill in `.agent/skills`.
+- Use the matching skill in `.agents/skills`.
 - Read its `SKILL.md` before you start.
 - Search its references, guides, and examples exhaustively for material that applies to the work.
 - Apply that material when you plan and do the work.
