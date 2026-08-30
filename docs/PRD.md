@@ -411,7 +411,7 @@ NODE
 - Decompose each multi-phase task into one process per phase.
 - Give each phase process one input schema and one output schema.
 - Name each contract schema as the information shape it carries.
-- Keep each trigger-selected process an orchestrator of calls and emits.
+- Keep each multi-phase trigger-selected process an orchestrator of calls and emits.
 - Do not emit from a phase process.
 - Keep pipeline values in call contracts; use state only for values that persist between arrivals.
 
@@ -440,6 +440,24 @@ NODE
 - Do not expose `ACT.infer`.
 - Do not expose `ACT.use`.
 - Add no second helper for interpreter-native work.
+
+### Delegation
+
+- Model each subagent as one worker OAK document with one in interface and one out interface.
+- Treat the worker in interface schema as the request contract and the worker out interface schema as the result contract.
+- Type each dispatch process with relative targets to the worker request and result schemas as its input and output schemas.
+- Dispatch each worker inside its dispatch process with one exact tool name from the supplied registry.
+- Prefer one registered portable `agent.<worker>` contract when the host permits registration.
+- Use the native runner name verbatim when the host does not permit registration.
+- Give each agent tool contract the worker request placeholders as inputs and the worker result placeholders as outputs.
+- Keep agent invocation, model selection, and transport in the host registry, outside the OAK document.
+- Treat the supplied registry as the worker allowlist.
+- Run parallel workers as `PAR` children, one exact agent tool act per worker.
+- Keep delegation depth at one: each worker returns its result to the coordinator and dispatches no workers.
+- Do not dispatch a worker with `CALL`.
+- `CALL` composes processes inside one interpreter and one transaction.
+- Treat each dispatch as separate-interpreter host work, not as running an OAK process with `ACT TOOL`.
+- Treat committed worker effects as external tool effects that the coordinator transaction cannot roll back.
 
 ## Pydantic
 
@@ -590,7 +608,7 @@ NODE
 - Emit one single-shot authoring document to `outputs/authoring.md` as xml-grouped OAK.
 - Treat the complete host-supplied modality context as the source.
 - Generate source-to-part instructions from one rule registry.
-- Generate every Entry ID, Naming, Decomposition, and ACT rule as one instruction entry.
+- Generate every Entry ID, Naming, Decomposition, ACT, and Delegation rule as one instruction entry.
 - Include every authoring rule, every surface schema, the EBNF, one canonical OAK example, and one decomposed orchestrator example.
 - Declare no universal input interface.
 - Declare one OAK document schema, one out interface, one trigger, and one process.
@@ -611,9 +629,11 @@ NODE
 - Hoist each reused target and placeholder into one part-prefixed `UPPER_SNAKE` module constant.
 - Define each entry as one lower snake module value postfixed with its part, so the node reads as a table of contents.
 - Render, parse, resolve, and round-trip each example before writing its sibling `.oak.md` snapshot.
-- Exercise `ACT`, `ACT.tool`, bounded while, canonical OAK, parsing, resolution, and execution in `examples/authoring.py`.
+- Grow one balance per bounded cycle and emit one reflection to the chat in `examples/compound_growth.py`.
+- Exercise `ACT`, `ACT.tool`, bounded while, canonical OAK, parsing, resolution, and execution in `examples/compound_growth.py`.
 - Encode the extracted implementer instructions in `examples/implementer.py`.
 - Encode the extracted task reviewer instructions in `examples/task_reviewer.py`.
+- Dispatch the task reviewer as one worker agent from `examples/delegation.py`.
 - Keep each example flat, dense, functional, and short.
 
 ### Freshness
@@ -641,8 +661,10 @@ oak
 │   └── PRD.md
 ├── examples
 │   ├── __init__.py
-│   ├── authoring.py
-│   ├── authoring.oak.md
+│   ├── compound_growth.py
+│   ├── compound_growth.oak.md
+│   ├── delegation.py
+│   ├── delegation.oak.md
 │   ├── implementer.py
 │   ├── implementer.oak.md
 │   ├── task_reviewer.py
