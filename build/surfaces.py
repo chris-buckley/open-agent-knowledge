@@ -45,6 +45,7 @@ from oak.node.parts import (
     Type,
     ValueBinding,
     Where,
+    While,
     where,
 )
 from oak.render.oak.groupings import interface_xml, process_xml, schema_xml, trigger_xml
@@ -93,6 +94,7 @@ AUTHORABLE_MODELS = (
     Fail,
     Assert,
     Foreach,
+    While,
     Par,
     Join,
     Process,
@@ -203,7 +205,7 @@ def surface_example(surface: Surface, *, grouping: str = "xml") -> str:
         return binding_line(value)
     if isinstance(value, (Compare, All, Any, Not)):
         return condition_text(value)
-    if isinstance(value, (Act, Set, Emit, If, Call, Fail, Assert, Foreach, Par, Join)):
+    if isinstance(value, (Act, Set, Emit, If, Call, Fail, Assert, Foreach, While, Par, Join)):
         return "\n".join(step_lines(value))
     raise TypeError(type(value).__name__)
 

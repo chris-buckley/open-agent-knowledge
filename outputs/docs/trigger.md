@@ -1,6 +1,7 @@
 ~~~~instructions
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+
 Trigger: One GIVEN, WHEN, and THEN signpost to a process.
 Do not read an interface or local binding in a trigger guard.
 Make equal trigger WHEN values provably disjoint.

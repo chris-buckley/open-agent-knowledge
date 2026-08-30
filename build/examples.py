@@ -25,6 +25,7 @@ from build.surfaces import (
     surface_instance,
 )
 from oak import (
+    ACT,
     Act,
     All,
     Any,
@@ -80,6 +81,7 @@ from oak import (
     ValueBinding,
     ValueReference,
     Where,
+    While,
     datetime_text,
     execute,
     number_text,
@@ -91,7 +93,7 @@ from oak import (
 )
 from oak.base import OakModel
 from oak.parse import _binding, _condition, _constraint, _interfaces, _named_values, _processes, _schemas, _steps, _triggers, _value, _where
-from oak.rules import RULES
+from oak.rules import ACT_GUIDANCE, DECOMPOSITION_GUIDANCE, ENTRY_ID_GUIDANCE, NAMING_GUIDANCE, RULES
 from oak.surface import SURFACES, surface_for
 
 METADATA_MODELS = (
@@ -175,7 +177,7 @@ def _parse_surface(surface, text: str):
         return _binding(text, surface.id, 1)
     if model in (Compare, All, Any, Not):
         return _condition(lines, 0, 0, surface.id, 1)[0]
-    if model in (Act, Set, Emit, If, Call, Fail, Assert, Foreach, Par, Join):
+    if model in (Act, Set, Emit, If, Call, Fail, Assert, Foreach, While, Par, Join):
         return _steps(lines, 0, 0, surface.id, 1)[0][0]
     raise TypeError(model.__name__)
 
@@ -191,8 +193,8 @@ def _normalized(value: OakModel) -> object:
 
 
 def _freshness_gates() -> None:
+    from build import authoring as authoring_build
     from build import docs as docs_build
-    from build import prompt as prompt_build
     from build.docs import documents
 
     expected_names = {slug(model.__name__) + ".md" for model in AUTHORABLE_MODELS}
@@ -228,8 +230,8 @@ def _freshness_gates() -> None:
             raise RuntimeError(f"freshness gate 8 failed for {name}")
 
     if not (
-        docs_build.SURFACE_SOURCE is prompt_build.SURFACE_SOURCE is SURFACES
-        and docs_build.RULE_SOURCE is prompt_build.RULE_SOURCE is RULES
+        docs_build.SURFACE_SOURCE is authoring_build.SURFACE_SOURCE is SURFACES
+        and docs_build.RULE_SOURCE is authoring_build.RULE_SOURCE is RULES
     ):
         raise RuntimeError("freshness gate 9 failed")
 
@@ -493,6 +495,272 @@ def _validate_execution() -> None:
         raise RuntimeError("expected invalid_process_output")
 
 
+def _validate_while() -> None:
+    recursive = Node(
+        state=[State(id="status", value="pending"), State(id="attempts", value=0)],
+        processes=[
+            Process(
+                id="wait-job",
+                name="Wait job",
+                steps=[
+                    While(
+                        condition=All(
+                            conditions=[
+                                Compare(
+                                    left=StateValue(state="state.status"),
+                                    operator="not_equals",
+                                    right=LiteralValue(value="complete"),
+                                ),
+                                Compare(
+                                    left=StateValue(state="state.attempts"),
+                                    operator="less_than",
+                                    right=LiteralValue(value=3),
+                                ),
+                            ]
+                        ),
+                        limit=3,
+                        steps=[
+                            Set(
+                                state="state.status",
+                                value=LiteralValue(value="complete"),
+                            )
+                        ],
+                    )
+                ],
+            )
+        ],
+    )
+    rendered = render(recursive)
+    if "WHILE LIMIT 3:" not in rendered or render(parse(rendered)) != rendered:
+        raise RuntimeError("recursive WHILE render or parse failed")
+    linked = json.loads(
+        render(
+            recursive,
+            render="json-ld",
+            document="https://example.org/oak/while.oak.md",
+            vocabulary="https://example.org/oak#",
+        )
+    )
+    while_step = linked["processes"][0]["steps"][0]
+    if not (
+        while_step["@type"] == "oak:While"
+        and while_step["limit"] == 3
+        and while_step["condition"]["@type"] == "oak:All"
+        and len(while_step["steps"]) == 1
+    ):
+        raise RuntimeError("WHILE JSON-LD is wrong")
+
+    progress = Node(
+        schemas=[
+            Schema(
+                id="progress-count",
+                template="<NEXT>",
+                where=[where("NEXT", Type(of="integer"))],
+            )
+        ],
+        state=[State(id="current-count", value=0)],
+        triggers=[
+            Trigger(
+                id="count-requested",
+                when="Count to two.",
+                then="process.advance-count",
+            )
+        ],
+        processes=[
+            Process(
+                id="advance-count",
+                name="Advance count",
+                steps=[
+                    While(
+                        condition=Compare(
+                            left=StateValue(state="state.current-count"),
+                            operator="less_than",
+                            right=LiteralValue(value=2),
+                        ),
+                        limit=3,
+                        steps=[
+                            ACT.tool(
+                                "counter.next",
+                                "Increment <COUNT> and produce <NEXT>.",
+                                inputs=[
+                                    ValueBinding(
+                                        placeholder="COUNT",
+                                        value=StateValue(state="state.current-count"),
+                                    )
+                                ],
+                                outputs=["NEXT"],
+                            ),
+                            Set(
+                                state="state.current-count",
+                                value=BindingValue(binding="NEXT"),
+                            ),
+                            Emit(
+                                interface="interface.progress-count-output",
+                                bindings=[
+                                    ValueBinding(
+                                        placeholder="NEXT",
+                                        value=BindingValue(binding="NEXT"),
+                                    )
+                                ],
+                            ),
+                        ],
+                    )
+                ],
+            )
+        ],
+        interfaces=[
+            Interface(
+                id="progress-count-output",
+                direction="out",
+                schema="schema.progress-count",
+            )
+        ],
+    )
+    calls: list[int] = []
+
+    def next_count(_step, values):
+        calls.append(values["COUNT"])
+        return {"NEXT": values["COUNT"] + 1}
+
+    tool = ToolContract(
+        next_count,
+        frozenset({"COUNT"}),
+        frozenset({"NEXT"}),
+    )
+    completed = execute(
+        progress,
+        Arrival(when="Count to two."),
+        {"state.current-count": 0},
+        tools={"counter.next": tool},
+    )
+    if not (
+        calls == [0, 1]
+        and completed.state["state.current-count"] == 2
+        and completed.emissions
+        == [
+            Emission(
+                interface="interface.progress-count-output",
+                values={"NEXT": 1},
+            ),
+            Emission(
+                interface="interface.progress-count-output",
+                values={"NEXT": 2},
+            ),
+        ]
+    ):
+        raise RuntimeError("WHILE state, emissions, or fresh iteration scope is wrong")
+    skipped = execute(
+        progress,
+        Arrival(when="Count to two."),
+        {"state.current-count": 2},
+        tools={"counter.next": tool},
+    )
+    if calls != [0, 1] or skipped.emissions:
+        raise RuntimeError("WHILE did not test its condition before the first iteration")
+
+    limited = Node(
+        state=[State(id="status", value="pending")],
+        triggers=[
+            Trigger(
+                id="poll-requested",
+                when="Poll without progress.",
+                then="process.poll-job",
+            )
+        ],
+        processes=[
+            Process(
+                id="poll-job",
+                name="Poll job",
+                steps=[
+                    While(
+                        condition=Compare(
+                            left=StateValue(state="state.status"),
+                            operator="not_equals",
+                            right=LiteralValue(value="complete"),
+                        ),
+                        limit=2,
+                        steps=[ACT("Wait for the next status.")],
+                    )
+                ],
+            )
+        ],
+    )
+    try:
+        execute(
+            limited,
+            Arrival(when="Poll without progress."),
+            {"state.status": "pending"},
+            act=lambda _step, _values: {},
+        )
+    except ExecutionError as error:
+        if error.code != "while_limit_reached":
+            raise RuntimeError(
+                f"expected while_limit_reached, got {error.code}"
+            ) from None
+    else:
+        raise RuntimeError("expected while_limit_reached")
+
+
+def _validate_act_authoring() -> None:
+    from oak.render.oak.syntax import step_lines
+
+    native = ACT(
+        "Classify <REPORT> and produce <SEVERITY>.",
+        inputs=[
+            ValueBinding(
+                placeholder="REPORT",
+                value=InterfaceValue(
+                    interface="interface.report",
+                    placeholder="REPORT",
+                ),
+            )
+        ],
+        outputs=["SEVERITY"],
+    )
+    exact = ACT.tool(
+        "jobs.status",
+        "Read <JOB_ID> and produce <STATUS>.",
+        inputs=[
+            ValueBinding(
+                placeholder="JOB_ID",
+                value=StateValue(state="state.job-id"),
+            )
+        ],
+        outputs=["STATUS"],
+    )
+    if not isinstance(native, Act) or native.tool is not None:
+        raise RuntimeError("ACT did not return one interpreter-native Act")
+    if not isinstance(exact, Act) or exact.tool != "jobs.status":
+        raise RuntimeError("ACT.tool did not return one exact named-tool Act")
+    if hasattr(ACT, "infer") or hasattr(ACT, "use"):
+        raise RuntimeError("ACT exposes a forbidden helper")
+    if "\n".join(step_lines(native)) != (
+        "ACT Classify <REPORT> and produce <SEVERITY>.\n"
+        "  INPUTS:\n"
+        "    REPORT = $interface.report.REPORT\n"
+        "  OUTPUTS: SEVERITY"
+    ):
+        raise RuntimeError("ACT changed interpreter-native OAK syntax")
+    if "\n".join(step_lines(exact)) != (
+        'ACT TOOL "jobs.status": Read <JOB_ID> and produce <STATUS>.\n'
+        "  INPUTS:\n"
+        "    JOB_ID = $state.job-id\n"
+        "  OUTPUTS: STATUS"
+    ):
+        raise RuntimeError("ACT.tool changed exact named-tool OAK syntax")
+
+
+def _validate_human_examples() -> None:
+    from examples import authoring, implementer, task_reviewer
+
+    examples = (authoring, implementer, task_reviewer)
+    for module in examples:
+        rendered = module.build()
+        target = module.TARGET
+        if not target.is_file() or target.read_text(encoding="utf-8") != rendered:
+            raise RuntimeError(f"example snapshot is missing or stale: {target}")
+
+
 def _expect_rule(code: str, author) -> None:
     try:
         author()
@@ -604,17 +872,23 @@ def _validate_json_ld_style_display() -> None:
 
 
 def _validate_outputs() -> None:
+    from build.authoring import authoring, tree
     from build.docs import documents
     from build.ebnf import grammar
-    from build.prompt import prompt
 
-    prompt_text = prompt()
-    if render(parse(prompt_text), grouping="xml") + "\n" != prompt_text:
-        raise RuntimeError("prompt output is not canonical XML OAK")
+    authoring_text = authoring()
+    if render(parse(authoring_text), grouping="xml") + "\n" != authoring_text:
+        raise RuntimeError("authoring output is not canonical XML OAK")
+    bodies = [instruction.body for instruction in tree().instructions]
+    for guidance in (*ENTRY_ID_GUIDANCE, *NAMING_GUIDANCE, *DECOMPOSITION_GUIDANCE, *ACT_GUIDANCE):
+        if bodies.count(guidance.instruction) != 1:
+            raise RuntimeError(
+                f"authoring output does not contain guidance exactly once: {guidance.id}"
+            )
 
     expected = {
         ROOT / "outputs" / "oak.ebnf": grammar(),
-        ROOT / "outputs" / "prompt.md": prompt_text,
+        ROOT / "outputs" / "authoring.md": authoring_text,
         **{
             ROOT / "outputs" / "docs" / name: text
             for name, text in documents().items()
@@ -627,6 +901,17 @@ def _validate_outputs() -> None:
     documented = {path for path in expected if path.parent == ROOT / "outputs" / "docs"}
     if actual != documented:
         raise RuntimeError("documentation output path set is stale")
+    actual_root = {
+        path
+        for path in (ROOT / "outputs").iterdir()
+        if path.is_file()
+    }
+    expected_root = {
+        ROOT / "outputs" / "oak.ebnf",
+        ROOT / "outputs" / "authoring.md",
+    }
+    if actual_root != expected_root:
+        raise RuntimeError("generated root output path set is stale")
 
 
 def validate_examples() -> None:
@@ -635,8 +920,11 @@ def validate_examples() -> None:
     _validate_metadata()
     _validate_resolution()
     _validate_execution()
+    _validate_while()
+    _validate_act_authoring()
     _validate_contract_rules()
     _validate_json_ld_style_display()
+    _validate_human_examples()
     _freshness_gates()
 
 

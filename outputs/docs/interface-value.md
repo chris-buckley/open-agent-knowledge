@@ -1,6 +1,7 @@
 ~~~~instructions
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+
 InterfaceValue: One placeholder value read from one active local input interface.
 Read and emit interfaces only in the active OAK document.
 Read only in or inout interfaces and emit only out or inout interfaces.

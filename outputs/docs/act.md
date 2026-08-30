@@ -1,6 +1,7 @@
 ~~~~instructions
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+
 Act: One interpreter-native or exact named-tool action.
 Do not use one act placeholder as both input and output.
 Make act instruction placeholders equal its inputs and outputs.

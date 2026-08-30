@@ -115,6 +115,8 @@ surface_step_assert = ? ASSERT <CONDITION>
 MESSAGE <MESSAGE> ? ;
 surface_step_foreach = ? FOREACH <BINDING> IN <VALUE>:
   <STEPS> ? ;
+surface_step_while = ? WHILE <CONDITION> LIMIT <LIMIT>:
+  <STEPS> ? ;
 surface_step_par = ? PAR:
   <STEPS> ? ;
 surface_step_join = ? JOIN ? ;

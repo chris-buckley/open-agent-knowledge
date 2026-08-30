@@ -5,6 +5,7 @@ Each schema is one information shape: a template with <PLACEHOLDER> slots and WH
 Each trigger contains GIVEN, WHEN, and THEN; WHEN matches first, GIVEN guards it, and THEN selects a process.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both.
+
 Treat the complete supplied host context as the source, regardless of modality.
 Map directives, policies, interpretation rules, and required behaviour to instructions.
 Map stable values needed during use to constants.
@@ -17,6 +18,59 @@ Leave a part empty when the source provides no justified entry.
 Do not invent state, triggers, processes, interfaces, or relative paths.
 Write exactly one valid OAK document containing one node.
 Emit the final OAK document as the sole response.
+Do not require a minimum word count for an entry id.
+Use `<verb>-<object>[-<outcome-or-context>]` for process ids.
+Start each process id with an exact base-form action verb.
+Use `<verb>-<object>` for instruction ids.
+Use noun phrases for constant, schema, state, and interface ids.
+Use circumstance phrases for trigger ids.
+Name each reusable process for what it establishes, not how it works.
+Name each query process with matching `SlugId` and `ProcessName` forms that use the semantic structure `<query-action>_<object>` and a non-mutating action (is|has|find|read) (e.g. `find-document` and `Find document`).
+Name each command process with matching `SlugId` and `ProcessName` forms that use the semantic structure `<command-action>_<object>` and expose the state change (create|write|publish|delete) (e.g. `publish-report` and `Publish report`).
+Name each combined process with matching `SlugId` and two-word `ProcessName` forms that place its mutating action first and use the semantic structure `<command-action>_<object>[_if_<condition>]` (e.g. `create-folder-if-missing` and `Create folder-if-missing`).
+Name each verification process with matching `SlugId` and `ProcessName` forms that use the semantic structure `(test|validate|prove)_<object>[_<condition>][_<outcome>]` (e.g. `validate-candidate` and `Validate candidate`).
+Define each required log event as a reusable process with the semantic structure `log_<object>_<event>` (e.g. `log-artifact-published` and `Log artifact-published`).
+Perform interpreter-native logging with plain `ACT`.
+Use `ACT TOOL` only when one exact registered logging tool must perform the logging operation.
+Reuse a logging process from other processes with `CALL`.
+Name each value with the semantic structure `<role>_<object>_<kind-or-unit>` using a `SlugId` for a constant or state entry and a `Placeholder` for a schema or process binding (e.g. `source-document-file` and `SOURCE_DOCUMENT_FILE`).
+Name each collection with the semantic structure `<contents>_<shape>` (e.g. `report-names` as a `SlugId` or `REPORT_NAMES` as a `Placeholder`).
+Name each boolean as a positive condition or control (e.g. `is-ready` as a `SlugId` or `IS_READY` as a `Placeholder`).
+Name each quantity with the semantic structure `[<context>_]<quantity>_<unit>` (e.g. `poll-interval-seconds` as a `SlugId` or `POLL_INTERVAL_SECONDS` as a `Placeholder`).
+Name each identifier value with the semantic structure `<object>_id` (e.g. `document-id` as a `SlugId` or `DOCUMENT_ID` as a `Placeholder`).
+Name each mapping with the semantic structure `<key>_to_<value>` (e.g. `filename-to-document-id` as a `SlugId` or `FILENAME_TO_DOCUMENT_ID` as a `Placeholder`).
+Represent each variable-like value by its source and lifetime: `CONSTANT` for fixed values, `STATE` for mutable values, a process binding for local immutable values, and an `INTERFACE` binding for boundary values (e.g. `$constant.max-retries`, `$state.current-candidate`, or `$CANDIDATE`).
+Use the shortest unambiguous name that states purpose or result and reuses one exact domain noun across every part, including verification processes (e.g. schema `candidate`, state `current-candidate`, process `validate-candidate`, and interface `verified-candidate-output`; do not rename `candidate` as `option` or `proposal`).
+Replace generic nouns and vague process verbs with exact domain terms that state purpose or action (e.g. replace (data|item|result|value|config|response|path) with (candidate|verification-step|verified-candidate|retry-limit|validation-rules|review-feedback|source-document-file), and replace (handle|process|manage|do) with (validate|publish|archive|verify)).
+Decompose each multi-phase task into one process per phase.
+Give each phase process one input schema and one output schema.
+Name each contract schema as the information shape it carries.
+Keep each trigger-selected process an orchestrator of calls and emits.
+Do not emit from a phase process.
+Keep pipeline values in call contracts; use state only for values that persist between arrivals.
+Treat plain `ACT` as the default action form.
+Use plain `ACT` when the interpreter performs the instruction with its native capabilities.
+No `ACT.tool` means interpreter-native work.
+Use `ACT TOOL` only when one exact registered tool must perform the instruction.
+Omit `ACT TOOL` when the interpreter may choose how to perform the instruction.
+Copy each tool name from the supplied exact tool registry.
+Preserve each tool name verbatim.
+Do not invent, normalize, or infer a tool name.
+Use `CALL` to run another OAK process.
+Do not use `ACT TOOL` to run an OAK process.
+Keep tool implementations, handlers, transport, credentials, server configuration, and aliases outside the OAK document.
+Prefer `ACT TOOL` when stable tool selection, contract validation, auditability, or controlled side effects matter.
+An exact tool name fixes which registry entry is selected.
+An exact tool name does not guarantee deterministic output.
+Require the selected tool itself to provide deterministic behaviour when deterministic output is required.
+Expose plain `ACT` as `ACT(instruction, ...)` in direct Python authoring.
+Expose named `ACT TOOL` as `ACT.tool(name, instruction, ...)` in direct Python authoring.
+Make `ACT(...)` and `ACT.tool(...)` return the existing `Act` model.
+Keep `ACT(...)` and `ACT.tool(...)` as one `act` process step kind.
+Keep the rendered OAK syntax unchanged.
+Do not expose `ACT.infer`.
+Do not expose `ACT.use`.
+Add no second helper for interpreter-native work.
 Do not use one act placeholder as both input and output.
 Make act instruction placeholders equal its inputs and outputs.
 Remove or repair an assertion that is statically false.
@@ -193,6 +247,8 @@ surface_step_assert = ? ASSERT <CONDITION>
 MESSAGE <MESSAGE> ? ;
 surface_step_foreach = ? FOREACH <BINDING> IN <VALUE>:
   <STEPS> ? ;
+surface_step_while = ? WHILE <CONDITION> LIMIT <LIMIT>:
+  <STEPS> ? ;
 surface_step_par = ? PAR:
   <STEPS> ? ;
 surface_step_join = ? JOIN ? ;
@@ -258,6 +314,33 @@ Use the supplied schema.
 
 <interfaces>
 </interfaces>
+>>
+
+orchestrator-example: TEXT<<
+<process id="implement-task" name="Implement task">
+CALL process.plan-task:
+  INPUTS:
+    TASK_BRIEF = $interface.task-request-input.TASK_BRIEF
+    CONTEXT = $interface.task-request-input.CONTEXT
+  OUTPUTS: PLAN
+CALL process.implement-plan:
+  INPUTS:
+    PLAN = $PLAN
+  OUTPUTS: CHANGESET
+CALL process.test-changeset:
+  INPUTS:
+    CHANGESET = $CHANGESET
+  OUTPUTS: TESTS
+CALL process.review-changeset:
+  INPUTS:
+    PLAN = $PLAN
+    CHANGESET = $CHANGESET
+  OUTPUTS: FINDINGS
+EMIT interface.implementation-report-output:
+  CHANGESET = $CHANGESET
+  TESTS = $TESTS
+  FINDINGS = $FINDINGS
+</process>
 >>
 </constants>
 
@@ -585,6 +668,16 @@ WHERE:
 - <STEPS> is string; is non-empty; The sequential iteration steps..
 </schema>
 
+<schema id="step-while" name="While" purpose="One bounded pre-test loop over a recursive condition.">
+WHILE <CONDITION> LIMIT <LIMIT>:
+  <STEPS>
+
+WHERE:
+- <CONDITION> is string; is non-empty; The recursive condition tested before every iteration..
+- <LIMIT> is string; is non-empty; The hard maximum number of iterations..
+- <STEPS> is string; is non-empty; The steps run in one fresh child binding scope per iteration..
+</schema>
+
 <schema id="step-par" name="Par" purpose="One deterministic group of exact named-tool acts.">
 PAR:
   <STEPS>
@@ -677,7 +770,7 @@ WHERE:
 - <INTERFACES> is string; is non-empty; The node interfaces in authored order..
 </schema>
 
-<schema id="oak-result" name="OAK Result" purpose="Carry the one valid OAK document written from the supplied source.">
+<schema id="oak-document" name="OAK Document" purpose="Carry the one valid OAK document written from the supplied source.">
 <OAK>
 
 WHERE:
@@ -689,7 +782,7 @@ WHERE:
 </state>
 
 <triggers>
-<trigger id="write-oak-trigger">
+<trigger id="source-supplied">
 GIVEN: true
 WHEN: "Any source material is supplied with this prompt."
 THEN: process.write-oak
@@ -704,13 +797,13 @@ ACT Validate <DRAFT> against every supplied OAK contract and produce <OAK>.
   INPUTS:
     DRAFT = $DRAFT
   OUTPUTS: OAK
-EMIT interface.result:
+EMIT interface.oak-document-output:
   OAK = $OAK
 </process>
 </processes>
 
 <interfaces>
-<interface id="result" direction="out" schema="schema.oak-result">
+<interface id="oak-document-output" direction="out" schema="schema.oak-document">
 The sole OAK document returned to the caller.
 </interface>
 </interfaces>

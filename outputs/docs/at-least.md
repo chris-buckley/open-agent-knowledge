@@ -1,6 +1,7 @@
 ~~~~instructions
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+
 AtLeast: The bound value is at least a number or another placeholder value.
 ~~~~
 

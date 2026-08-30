@@ -1,6 +1,7 @@
 ~~~~instructions
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+
 Lines: The bound value has one positive line-count bound.
 Keep a lines minimum at or below its maximum.
 Give each lines constraint a minimum, maximum, or both.

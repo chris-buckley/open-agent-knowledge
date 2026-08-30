@@ -1,6 +1,7 @@
 ~~~~instructions
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+
 Compare: One strict structural or ordered comparison.
 Order only two numbers or two strings without coercion.
 ~~~~

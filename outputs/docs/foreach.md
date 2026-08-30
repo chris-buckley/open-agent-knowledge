@@ -1,6 +1,7 @@
 ~~~~instructions
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+
 Foreach: One deterministic sequential iteration over a JSON list.
 Use a new loop binding that does not shadow a visible binding.
 Give FOREACH a value that resolves to a JSON list.

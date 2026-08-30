@@ -1,6 +1,7 @@
 ~~~~instructions
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+
 Emit: One schema instance emitted through one local output interface.
 Bind each emitted placeholder once.
 Bind every interface schema placeholder exactly once when emitting.

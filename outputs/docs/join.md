@@ -1,6 +1,7 @@
 ~~~~instructions
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+
 Join: The barrier immediately after one parallel group.
 Put JOIN immediately after one PAR.
 Put no step between PAR and JOIN.

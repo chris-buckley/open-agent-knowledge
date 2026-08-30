@@ -1,6 +1,7 @@
 ~~~~instructions
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+
 Process: One named ordered way to do a task.
 Do not redefine a visible immutable process binding.
 Make every process output schema placeholder visible after successful completion.

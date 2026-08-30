@@ -1,6 +1,7 @@
 ~~~~instructions
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+
 Where: One placeholder, its constraints, examples, and description.
 Make every WHERE example satisfy its local constraints.
 Do not give examples to a WHERE entry with placeholder-valued bounds.

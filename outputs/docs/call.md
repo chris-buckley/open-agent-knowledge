@@ -1,6 +1,7 @@
 ~~~~instructions
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+
 Call: One synchronous process invocation with schema-bound inputs and outputs.
 Match each call's inputs and outputs to the called process schemas.
 Keep the resolved process call graph acyclic.
