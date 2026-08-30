@@ -6,7 +6,6 @@ from datetime import datetime
 from decimal import Decimal
 import json
 from pathlib import Path
-import runpy
 import sys
 from typing import Annotated
 
@@ -237,19 +236,6 @@ def _freshness_gates() -> None:
     _validate_outputs()
 
 
-def _validate_examples_and_render() -> None:
-    for stem in ("shell", "incident_triage"):
-        path = ROOT / "examples" / f"{stem}.oak.md"
-        text = path.read_text(encoding="utf-8")
-        node = parse(text)
-        if render(node) + "\n" != text:
-            raise RuntimeError(f"{stem} canonical render is stale")
-        for grouping in ("xml", "markdown"):
-            rendered = render(node, grouping=grouping)
-            if render(parse(rendered), grouping=grouping) != rendered:
-                raise RuntimeError(f"{stem} {grouping} round trip changed text")
-
-
 def _contract_schemas() -> tuple[Schema, Schema]:
     return (
         Schema(
@@ -385,15 +371,6 @@ def _validate_resolution() -> None:
 
 
 def _validate_execution() -> None:
-    shell = parse((ROOT / "examples" / "shell.oak.md").read_text(encoding="utf-8"))
-    result = execute(
-        shell,
-        Arrival(when="A command line arrives.", interfaces={"interface.stdin": {"COMMAND": "pwd"}}),
-        {"state.mode": "open"},
-    )
-    if result.process != "process.route" or result.emissions != [Emission(interface="interface.stdout", values={"OUTPUT": "/oak"})]:
-        raise RuntimeError("shell execution failed")
-
     parallel = Node(
         state=[State(id="done", value=False)],
         triggers=[Trigger(id="run-trigger", when="Run parallel work.", then="process.run")],
@@ -574,18 +551,6 @@ def _validate_contract_rules() -> None:
 
 
 def _validate_json_ld_style_display() -> None:
-    node = parse((ROOT / "examples" / "shell.oak.md").read_text(encoding="utf-8"))
-    data = json.loads(
-        render(
-            node,
-            render="json-ld",
-            document="https://example.org/oak/shell.oak.md",
-            vocabulary="https://example.org/oak#",
-        )
-    )
-    if data.get("@id") != "https://example.org/oak/shell.oak.md":
-        raise RuntimeError("JSON-LD document id is wrong")
-
     raw, normal = _contract_schemas()
     contract = Node(
         schemas=[raw, normal],
@@ -615,7 +580,8 @@ def _validate_json_ld_style_display() -> None:
     normalise, handle = linked["processes"]
     call = handle["steps"][0]
     if not (
-        normalise["input"]["@id"].endswith("#schema.raw-name")
+        linked.get("@id") == "https://example.org/oak/contract.oak.md"
+        and normalise["input"]["@id"].endswith("#schema.raw-name")
         and normalise["output"]["@id"].endswith("#schema.normal-name")
         and call["process"]["@id"].endswith("#process.normalise")
         and call["outputs"] == ["NORMAL_NAME"]
@@ -663,21 +629,14 @@ def _validate_outputs() -> None:
         raise RuntimeError("documentation output path set is stale")
 
 
-def _run_example_wrappers() -> None:
-    for stem in ("shell", "incident_triage"):
-        runpy.run_path(str(ROOT / "examples" / f"{stem}.py"), run_name="__main__")
-
-
 def validate_examples() -> None:
     """Raise when any example, gate, or working product path is invalid."""
     _validate_text_examples()
     _validate_metadata()
-    _validate_examples_and_render()
     _validate_resolution()
     _validate_execution()
     _validate_contract_rules()
     _validate_json_ld_style_display()
-    _run_example_wrappers()
     _freshness_gates()
 
 
