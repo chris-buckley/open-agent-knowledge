@@ -40,17 +40,24 @@ def _parts(prefix: str) -> list[str]:
     return [f'markdown_{part}_part = "~~~~{part}", lf, text_body, "~~~~" ;' for part in PART_ORDER]
 
 
-def grammar() -> str:
-    """Return the generated OAK EBNF snapshot."""
+_BODY_ENTRIES = {
+    "xml": 'xml_body_entry = "<", entry_tag, attributes, ">", lf, text_body, "</", entry_tag, ">" ;',
+    "markdown": 'markdown_body_entry = "~~~", entry_tag, markdown_attributes, lf, text_body, "~~~" ;',
+}
+
+_ATTRIBUTES = {
+    "xml": "attributes = ? zero or more XML-like string attributes ? ;",
+    "markdown": "markdown_attributes = ? zero or more semicolon JSON-string attributes ? ;",
+}
+
+
+def grammar(groupings: tuple[str, ...] = ("xml", "markdown")) -> str:
+    """Return the generated EBNF snapshot for the named groupings."""
     lines = [
-        "oak_document = xml_document | markdown_document ;",
+        "oak_document = " + " | ".join(f"{grouping}_document" for grouping in groupings) + " ;",
         "(* an empty part is omitted from the render *)",
-        *_document("xml"),
-        *_parts("xml"),
-        *_document("markdown"),
-        *_parts("markdown"),
-        'xml_body_entry = "<", entry_tag, attributes, ">", lf, text_body, "</", entry_tag, ">" ;',
-        'markdown_body_entry = "~~~", entry_tag, markdown_attributes, lf, text_body, "~~~" ;',
+        *[line for grouping in groupings for line in (*_document(grouping), *_parts(grouping))],
+        *[_BODY_ENTRIES[grouping] for grouping in groupings],
         'entry_tag = "schema" | "trigger" | "process" | "interface" ;',
         "constant = inline_constant | text_constant | json_constant | csv_constant | yaml_constant ;",
         'inline_constant = slug_id, ": ", json_value ;',
@@ -61,8 +68,7 @@ def grammar() -> str:
         "json_value = ? one JSON value ? ;",
         "csv_body = ? one CSV header and one or more data rows ? ;",
         "yaml_body = ? one YAML value ? ;",
-        "attributes = ? zero or more XML-like string attributes ? ;",
-        "markdown_attributes = ? zero or more semicolon JSON-string attributes ? ;",
+        *[_ATTRIBUTES[grouping] for grouping in groupings],
         "text_body = { text_line, lf } ;",
         "text_line = ? any character except CR or LF ? ;",
         "blank_line = lf, lf ;",

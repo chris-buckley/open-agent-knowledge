@@ -110,7 +110,7 @@ def tree() -> Node:
     return Node(
         instructions=instructions,
         constants=[
-            Constant(id="oak-ebnf", form="text", value=grammar().rstrip("\n")),
+            Constant(id="oak-ebnf", form="text", value=grammar(groupings=("xml",)).rstrip("\n")),
             Constant(id="canonical-oak", form="text", value=surface_example(next(surface for surface in SURFACES if surface.id == "node"))),
             Constant(id="orchestrator-example", form="text", value=_orchestrator_example()),
         ],
