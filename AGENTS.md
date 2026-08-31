@@ -166,10 +166,13 @@ WHEN you change the package or `docs/PRD.md`, you MUST:
 - Update each file in `examples` that the change makes invalid.
 - Run each script in `examples` and keep its regenerated render next to it.
 
-WHEN a change makes a code path obsolete, you MUST:
+WHEN a change makes a name, contract, format, location, or code path obsolete, you MUST:
 
-- Remove the obsolete path.
-- Do not add compatibility layers, fallbacks, or migrations.
+- Find every definition and repository-owned use.
+- Update every dependent file and generated output in the same task.
+- Delete the replaced implementation, its tests, and its support material.
+- Do not add compatibility layers, shims, wrappers, aliases, re-exports, fallbacks, or migrations.
+- Add backward compatibility only when `docs/PRD.md` or the user names the exact contract and consumer.
 
 WHEN you add a capability, you MUST:
 
@@ -213,6 +216,12 @@ WHEN you communicate with the user, you MUST:
 - Do not use em dash, bold, or italics.
 - Do not use jargon. Defined repository concepts are permitted as the concept list grows.
 - Do not use filler, praise, or repetition.
+
+WHEN you finish an implementation or refactor, you MUST:
+
+- Inspect the final diff, not only the test results.
+- Search for every replaced identifier, path, format, and contract.
+- Keep only the current implementation and remove dead or duplicate code the diff exposes.
 
 WHEN you finish any task, you MUST:
 
