@@ -22,8 +22,16 @@ from oak.vocabulary.text.value_reference import VALUE_REFERENCE_EBNF
 TARGET = ROOT / "outputs" / "oak.ebnf"
 
 
-def _sequence(prefix: str) -> str:
-    return ", blank_line, ".join(f"{prefix}_{part}_part" for part in PART_ORDER)
+def _document(prefix: str) -> list[str]:
+    lines = [f"{prefix}_document = [ {prefix}_parts_from_{PART_ORDER[0]} ] ;"]
+    for index, part in enumerate(PART_ORDER):
+        name = f"{prefix}_parts_from_{part}"
+        if index + 1 < len(PART_ORDER):
+            successor = f"{prefix}_parts_from_{PART_ORDER[index + 1]}"
+            lines.append(f"{name} = {prefix}_{part}_part, [ blank_line, {successor} ] | {successor} ;")
+        else:
+            lines.append(f"{name} = {prefix}_{part}_part ;")
+    return lines
 
 
 def _parts(prefix: str) -> list[str]:
@@ -36,9 +44,10 @@ def grammar() -> str:
     """Return the generated OAK EBNF snapshot."""
     lines = [
         "oak_document = xml_document | markdown_document ;",
-        f"xml_document = {_sequence('xml')} ;",
+        "(* an empty part is omitted from the render *)",
+        *_document("xml"),
         *_parts("xml"),
-        f"markdown_document = {_sequence('markdown')} ;",
+        *_document("markdown"),
         *_parts("markdown"),
         'xml_body_entry = "<", entry_tag, attributes, ">", lf, text_body, "</", entry_tag, ">" ;',
         'markdown_body_entry = "~~~", entry_tag, markdown_attributes, lf, text_body, "~~~" ;',

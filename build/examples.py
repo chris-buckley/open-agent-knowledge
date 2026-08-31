@@ -92,7 +92,7 @@ from oak import (
     where,
 )
 from oak.base import OakModel
-from oak.parse import _binding, _condition, _constraint, _interfaces, _named_values, _processes, _schemas, _steps, _triggers, _value, _where
+from oak.parse import OakParseError, _binding, _condition, _constraint, _interfaces, _named_values, _processes, _schemas, _steps, _triggers, _value, _where
 from oak.rules import ACT_GUIDANCE, DECOMPOSITION_GUIDANCE, DELEGATION_GUIDANCE, ENTRY_ID_GUIDANCE, NAMING_GUIDANCE, RULES
 from oak.surface import SURFACES, surface_for
 
@@ -793,6 +793,42 @@ def _validate_while() -> None:
         raise RuntimeError("expected while_limit_reached")
 
 
+def _validate_part_omission() -> None:
+    if render(Node(), grouping="xml") != "" or render(Node(), grouping="markdown") != "":
+        raise RuntimeError("empty node must render as one empty document")
+    if parse("").model_dump() != Node().model_dump():
+        raise RuntimeError("empty document must parse as one empty node")
+    single = Node(instructions=[Instruction(id="record", body="Record the mode.")])
+    sparse = Node(state=[State(id="mode", value="idle")])
+    state_preamble = "State holds values that persist and can change while processes run."
+    expected_renders = {
+        ("single", "xml"): "<instructions>\nRecord the mode.\n</instructions>",
+        ("single", "markdown"): "~~~~instructions\nRecord the mode.\n~~~~",
+        ("sparse", "xml"): f'<instructions>\n{state_preamble}\n</instructions>\n\n<state>\nmode: "idle"\n</state>',
+        ("sparse", "markdown"): f'~~~~instructions\n{state_preamble}\n~~~~\n\n~~~~state\nmode: "idle"\n~~~~',
+    }
+    for name, node in (("single", single), ("sparse", sparse)):
+        for grouping in ("xml", "markdown"):
+            rendered = render(node, grouping=grouping)
+            if rendered != expected_renders[name, grouping]:
+                raise RuntimeError(f"{name} {grouping} render changed")
+            if _normalized(parse(rendered)) != _normalized(node):
+                raise RuntimeError(f"{name} {grouping} parse changed")
+    invalid_documents = (
+        ('<state>\nmode: "idle"\n</state>\n\n<constants>\nlimit: 1\n</constants>', "part_order"),
+        ('<state>\nmode: "idle"\n</state>\n\n<state>\nmode: "idle"\n</state>', "part_order"),
+        ('<constants>\nlimit: 1\n</constants>\n<state>\nmode: "idle"\n</state>', "part_separator"),
+    )
+    for source, code in invalid_documents:
+        try:
+            parse(source)
+        except OakParseError as error:
+            if error.failures[0].code != code:
+                raise RuntimeError(f"expected {code}, got {error.failures[0].code}") from None
+        else:
+            raise RuntimeError(f"expected {code}")
+
+
 def _validate_act_authoring() -> None:
     from oak.render.oak.syntax import step_lines
 
@@ -1023,6 +1059,7 @@ def validate_examples() -> None:
     _validate_resolution()
     _validate_execution()
     _validate_while()
+    _validate_part_omission()
     _validate_act_authoring()
     _validate_contract_rules()
     _validate_json_ld_style_display()
