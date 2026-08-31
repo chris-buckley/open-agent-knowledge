@@ -92,7 +92,7 @@ SOURCE_GUIDANCE = (
     GuidanceRule("map-triggers", "Map arrival reasons, state guards, and selected processes to triggers."),
     GuidanceRule("map-processes", "Map ordered ways to perform tasks to processes."),
     GuidanceRule("map-interfaces", "Map verifiable document-boundary crossings to interfaces."),
-    GuidanceRule("leave-part", "Leave a part empty when the source provides no justified entry."),
+    GuidanceRule("omit-part", "Omit a part when the source provides no justified entry."),
     GuidanceRule("avoid-invention", "Do not invent state, triggers, processes, interfaces, or relative paths."),
     GuidanceRule("write-document", "Write exactly one valid OAK document containing one node."),
     GuidanceRule("emit-document", "Emit the final OAK document as the sole response."),

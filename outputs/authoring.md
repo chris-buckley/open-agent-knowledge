@@ -14,7 +14,7 @@ Map values that can change while the knowledge runs to state.
 Map arrival reasons, state guards, and selected processes to triggers.
 Map ordered ways to perform tasks to processes.
 Map verifiable document-boundary crossings to interfaces.
-Leave a part empty when the source provides no justified entry.
+Omit a part when the source provides no justified entry.
 Do not invent state, triggers, processes, interfaces, or relative paths.
 Write exactly one valid OAK document containing one node.
 Emit the final OAK document as the sole response.

@@ -118,12 +118,14 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Accept OAK as UTF-8 bytes or text.
 - Infer the grouping from the first part delimiter when no grouping is named.
 - Normalize (CRLF|CR) line endings to LF before parsing.
-- Require each present part to appear once in OAK order; parse a missing part as empty.
+- Require each present part to appear once in OAK order.
+- Parse a missing part as empty.
 - Parse an empty document as one empty node.
 - Generate unique instruction ids because the OAK render loses them.
 - Strip exact built-in instruction lines and blank lines before rebuilding authored instructions.
 - Give each parse failure one code, one path, one optional line, and one message.
 - Collect every parse failure before raising `OakParseError`.
+- Raise a failure that stops the part split alone, because the parts cannot be read past it.
 
 ## Instructions
 
@@ -507,8 +509,9 @@ NODE
 
 #### Arrangement
 
-- Render the seven parts in this order: instructions, constants, schemas, state, triggers, processes, interfaces.
-- Render each part with a rendered body once; omit an empty part.
+- Render the parts in this order: instructions, constants, schemas, state, triggers, processes, interfaces.
+- Render each part with a rendered body once.
+- Omit an empty part from the render.
 - Render a node with no rendered body as one empty document.
 - Render entries in authored order.
 - Keep parts as siblings.
