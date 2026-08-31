@@ -319,7 +319,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Define `ProcessName` as two ASCII alphanumeric words with optional internal hyphens, separated by one U+0020 SPACE, with an uppercase first character.
 - Define `Placeholder` as ASCII upper snake case without a leading, trailing, or repeated underscore.
 - Define `EntryPath` as `part.SlugId` for one singular part name.
-- Define `RelativeDocumentPath` as a relative POSIX path ending in `.oak.md` without a scheme, query, or fragment.
+- Define `RelativeDocumentPath` as a relative POSIX path of (letter|digit|`.`|`_`|`-`|`/`) ending in `.oak.md`.
 - Define `TargetPath` as (`EntryPath`|`RelativeDocumentPath#EntryPath`).
 - Define `DottedPath` as one local (constant|schema|state|process|interface) target or one local interface placeholder path.
 - Define `ValueReference` as `$` followed by one (constant target|local state target|local interface placeholder path|Placeholder).
@@ -473,6 +473,8 @@ NODE
 - Define each concrete authored render variant once in `oak/surface.py`.
 - Classify every model field in each surface as (rendered|fixed|omitted|generated).
 - Build rendering, parsing, EBNF, authoring generation, and documentation generation from the same surfaces.
+- Show the complete shape in each surface descriptor; the render omits an empty optional segment.
+- Constrain a projected surface field as non-empty only when the model requires it.
 - Keep each validator-backed authoring rule in `oak/rules.py` with its stable error code.
 - Build each reusable string shape with `Annotated` and `StringConstraints` or one reusable after validator.
 - Keep defaults and aliases at the field declaration.
@@ -520,8 +522,11 @@ NODE
 - Render each process value as one JSON literal or `ValueReference`.
 - Render an unnamed act with `ACT` and a named act with `ACT TOOL` and one JSON string tool name.
 - Render (SET|CALL|EMIT) targets as `TargetPath` without `$`.
-- Render a call without bindings on one line.
-- Render a call with bindings as `CALL target:`, an optional `INPUTS` block, and an optional `OUTPUTS` line.
+- Render each (act|call|emit) as one line.
+- End each act and call with one binding suffix, even when empty.
+- Render the binding suffix as `(PLACEHOLDER=value, ...)` with `, ` between bindings.
+- Append ` -> ` and the ordered outputs to an act or call with outputs.
+- Render an emit as `EMIT target (bindings)` with no outputs.
 - Render if with `IF`, its condition, `THEN`, and optional `ELSE`.
 - Render assert with `ASSERT`, its condition, and optional `MESSAGE`.
 - Render foreach with `FOREACH binding IN value` and its steps.
@@ -616,7 +621,8 @@ NODE
 
 ### Documentation
 
-- Emit one markdown-grouped OAK document per authorable model under `outputs/docs`.
+- Emit one xml-grouped OAK document per authorable model under `outputs/docs`.
+- Round-trip one node in both groupings to keep the markdown grouping verified.
 - Generate each page from the model metadata, matching authoring rules, surface descriptors, grammar productions, and canonical rendered examples.
 - Represent each rendered example as an OAK constant, never as a JSON object dump.
 - Project each surface render shape into one OAK schema.
