@@ -145,7 +145,7 @@ Target the part required by the typed reference field.
 
 <constants>
 oak-ebnf: TEXT<<
-oak_document = xml_document | markdown_document ;
+oak_document = xml_document ;
 (* an empty part is omitted from the render *)
 xml_document = [ xml_parts_from_instructions ] ;
 xml_parts_from_instructions = xml_instructions_part, [ blank_line, xml_parts_from_constants ] | xml_parts_from_constants ;
@@ -162,23 +162,7 @@ xml_state_part = "<state>", lf, text_body, "</state>" ;
 xml_triggers_part = "<triggers>", lf, text_body, "</triggers>" ;
 xml_processes_part = "<processes>", lf, text_body, "</processes>" ;
 xml_interfaces_part = "<interfaces>", lf, text_body, "</interfaces>" ;
-markdown_document = [ markdown_parts_from_instructions ] ;
-markdown_parts_from_instructions = markdown_instructions_part, [ blank_line, markdown_parts_from_constants ] | markdown_parts_from_constants ;
-markdown_parts_from_constants = markdown_constants_part, [ blank_line, markdown_parts_from_schemas ] | markdown_parts_from_schemas ;
-markdown_parts_from_schemas = markdown_schemas_part, [ blank_line, markdown_parts_from_state ] | markdown_parts_from_state ;
-markdown_parts_from_state = markdown_state_part, [ blank_line, markdown_parts_from_triggers ] | markdown_parts_from_triggers ;
-markdown_parts_from_triggers = markdown_triggers_part, [ blank_line, markdown_parts_from_processes ] | markdown_parts_from_processes ;
-markdown_parts_from_processes = markdown_processes_part, [ blank_line, markdown_parts_from_interfaces ] | markdown_parts_from_interfaces ;
-markdown_parts_from_interfaces = markdown_interfaces_part ;
-markdown_instructions_part = "~~~~instructions", lf, text_body, "~~~~" ;
-markdown_constants_part = "~~~~constants", lf, text_body, "~~~~" ;
-markdown_schemas_part = "~~~~schemas", lf, text_body, "~~~~" ;
-markdown_state_part = "~~~~state", lf, text_body, "~~~~" ;
-markdown_triggers_part = "~~~~triggers", lf, text_body, "~~~~" ;
-markdown_processes_part = "~~~~processes", lf, text_body, "~~~~" ;
-markdown_interfaces_part = "~~~~interfaces", lf, text_body, "~~~~" ;
 xml_body_entry = "<", entry_tag, attributes, ">", lf, text_body, "</", entry_tag, ">" ;
-markdown_body_entry = "~~~", entry_tag, markdown_attributes, lf, text_body, "~~~" ;
 entry_tag = "schema" | "trigger" | "process" | "interface" ;
 constant = inline_constant | text_constant | json_constant | csv_constant | yaml_constant ;
 inline_constant = slug_id, ": ", json_value ;
@@ -190,7 +174,6 @@ json_value = ? one JSON value ? ;
 csv_body = ? one CSV header and one or more data rows ? ;
 yaml_body = ? one YAML value ? ;
 attributes = ? zero or more XML-like string attributes ? ;
-markdown_attributes = ? zero or more semicolon JSON-string attributes ? ;
 text_body = { text_line, lf } ;
 text_line = ? any character except CR or LF ? ;
 blank_line = lf, lf ;
@@ -202,6 +185,9 @@ process_name = ? [A-Z] ?, { ? [A-Za-z0-9] ? }, { "-", ? [A-Za-z0-9] ?, { ? [A-Za
 placeholder = ? [A-Z] ?, { ? [A-Z0-9] ? }, { "_", ? [A-Z0-9] ?, { ? [A-Z0-9] ? } } ;
 dotted_path = ( "constant" | "schema" | "state" | "process" | "interface" ), ".", slug_id, [ ".", placeholder ] ;
 value_reference = "$", ( placeholder | constant_target | state_target | interface_value_path ) ;
+constant_target = [ relative_document_path, "#" ], "constant", ".", slug_id ;
+state_target = "state", ".", slug_id ;
+interface_value_path = "interface", ".", slug_id, ".", placeholder ;
 entry_part = "instruction" | "constant" | "schema" | "state" | "trigger" | "process" | "interface" ;
 entry_path = entry_part, ".", slug_id ;
 relative_document_path = ? one relative POSIX path of letters, digits, ".", "_", "-", and "/" ending in .oak.md ? ;
