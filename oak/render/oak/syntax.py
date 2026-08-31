@@ -220,37 +220,29 @@ def condition_text(condition: Condition) -> str:
 
 def _binding_line(binding: ValueBinding, indent: int) -> str:
     surface_for(binding)
-    return " " * indent + f"{binding.placeholder} = " + process_value_text(binding.value)
+    return " " * indent + f"{binding.placeholder}=" + process_value_text(binding.value)
+
+
+def _suffix_text(bindings: list[ValueBinding], outputs: list[str]) -> str:
+    body = "(" + ", ".join(_binding_line(binding, 0) for binding in bindings) + ")"
+    if outputs:
+        body += " -> " + ", ".join(outputs)
+    return body
 
 
 def _act_lines(step: Act, indent: int) -> list[str]:
     prefix = " " * indent
-    inner = indent + 2
     surface_for(step)
     if step.tool is None:
-        lines = [prefix + "ACT " + step.instruction]
+        head = "ACT " + step.instruction
     else:
-        lines = [prefix + "ACT TOOL " + value_text(step.tool) + ": " + step.instruction]
-    if step.inputs:
-        lines.append(" " * inner + "INPUTS:")
-        lines.extend(_binding_line(binding, inner + 2) for binding in step.inputs)
-    if step.outputs:
-        lines.append(" " * inner + "OUTPUTS: " + ", ".join(step.outputs))
-    return lines
+        head = "ACT TOOL " + value_text(step.tool) + ": " + step.instruction
+    return [prefix + head + " " + _suffix_text(step.inputs, step.outputs)]
 
 
 def _call_lines(step: Call, indent: int) -> list[str]:
     prefix = " " * indent
-    inner = indent + 2
-    if not step.inputs and not step.outputs:
-        return [prefix + "CALL " + step.process]
-    lines = [prefix + "CALL " + step.process + ":"]
-    if step.inputs:
-        lines.append(" " * inner + "INPUTS:")
-        lines.extend(_binding_line(binding, inner + 2) for binding in step.inputs)
-    if step.outputs:
-        lines.append(" " * inner + "OUTPUTS: " + ", ".join(step.outputs))
-    return lines
+    return [prefix + "CALL " + step.process + " " + _suffix_text(step.inputs, step.outputs)]
 
 
 def _step_lines(step: Step, indent: int) -> list[str]:
@@ -262,7 +254,7 @@ def _step_lines(step: Step, indent: int) -> list[str]:
     if isinstance(step, Set):
         return [prefix + "SET " + step.state + " = " + process_value_text(step.value)]
     if isinstance(step, Emit):
-        return [prefix + "EMIT " + step.interface + ":", *(_binding_line(binding, inner) for binding in step.bindings)]
+        return [prefix + "EMIT " + step.interface + " " + _suffix_text(step.bindings, [])]
     if isinstance(step, If):
         condition = condition_lines(step.condition)
         if len(condition) == 1:

@@ -1,6 +1,5 @@
 """TargetPath: one local entry or one relative document entry target."""
 
-from pathlib import PurePosixPath
 import re
 from typing import Annotated
 
@@ -26,8 +25,9 @@ _ENTRY_BODY = (
     rf"(?:{_ENTRY_PART})\."
     rf"{SLUG_ID_SYNTAX.body}"
 )
+DOCUMENT_PATH_BODY = r"[A-Za-z0-9._/-]+\.oak\.md"
 TARGET_PATH_PATTERN = (
-    rf"^(?:[^#\r\n]+\.oak\.md#)?"
+    rf"^(?:{DOCUMENT_PATH_BODY}#)?"
     rf"{_ENTRY_BODY}$"
 )
 TARGET_PATH_EBNF = (
@@ -47,7 +47,8 @@ ENTRY_PART_EBNF = (
 )
 RELATIVE_DOCUMENT_PATH_EBNF = (
     "relative_document_path = "
-    "? one relative POSIX path ending in .oak.md ? ;"
+    "? one relative POSIX path of letters, digits, "
+    '".", "_", "-", and "/" ending in .oak.md ? ;'
 )
 
 _ENTRY_RE = re.compile(
@@ -56,36 +57,23 @@ _ENTRY_RE = re.compile(
 )
 
 
+_DOCUMENT_RE = re.compile(r"[A-Za-z0-9._/-]+")
+
+
 def _document_path(value: str) -> str:
     if (
-        "\x00" in value
-        or "\r" in value
-        or "\n" in value
-        or "\\" in value
-        or "?" in value
-        or "#" in value
+        _DOCUMENT_RE.fullmatch(value) is None
         or "//" in value
-    ):
-        raise PydanticCustomError(
-            "invalid_document_path",
-            "document path is not a clean relative POSIX path",
-        )
-
-    path = PurePosixPath(value)
-    first = value.split("/", 1)[0]
-
-    if (
-        path.is_absolute()
-        or ":" in first
+        or value.startswith("/")
         or not value.endswith(".oak.md")
-        or value in ("", ".", "..")
         or value.endswith(("/.", "/.."))
     ):
         raise PydanticCustomError(
             "invalid_document_path",
             (
-                "document path must be relative and "
-                "end in .oak.md"
+                "document path must be one relative POSIX path of "
+                'letters, digits, ".", "_", "-", and "/" '
+                "ending in .oak.md"
             ),
         )
 

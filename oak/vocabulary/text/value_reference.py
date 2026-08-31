@@ -9,6 +9,7 @@ from pydantic_core import PydanticCustomError
 from oak.vocabulary.text.placeholder import PLACEHOLDER_SYNTAX
 from oak.vocabulary.text.slug_id import SLUG_ID_SYNTAX
 from oak.vocabulary.text.target_path import (
+    DOCUMENT_PATH_BODY,
     TargetPath,
     is_relative_target,
     split_target,
@@ -17,7 +18,7 @@ from oak.vocabulary.text.target_path import (
 VALUE_REFERENCE_PATTERN = (
     r"^\$(?:"
     + PLACEHOLDER_SYNTAX.body
-    + r"|(?:[^#\r\n]+\.oak\.md#)?constant\."
+    + rf"|(?:{DOCUMENT_PATH_BODY}#)?constant\."
     + SLUG_ID_SYNTAX.body
     + r"|state\."
     + SLUG_ID_SYNTAX.body

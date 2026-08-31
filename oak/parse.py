@@ -57,6 +57,7 @@ from oak.node.parts import (
 from oak.render.oak.arrangement import PART_ORDER
 from oak.render.oak.instructions import BUILT_IN_INSTRUCTIONS
 from oak.surface import entry_surface
+from oak.vocabulary.text.placeholder import PLACEHOLDER_SYNTAX
 
 GroupingName = Literal["xml", "markdown"]
 
@@ -508,44 +509,73 @@ def _condition(lines: list[str], index: int, indent: int, path: str, start: int)
 
 
 def _binding(source: str, path: str, line: int) -> ValueBinding:
-    if " = " not in source:
-        _fail("binding", path, line, "binding needs NAME = value")
-    placeholder, value = source.split(" = ", 1)
+    placeholder, separator, value = source.partition("=")
+    if not separator:
+        _fail("binding", path, line, "binding needs NAME=value")
     return ValueBinding(placeholder=placeholder, value=_value(value, path, line))
 
 
-def _outputs(source: str) -> list[str]:
-    return [item.strip() for item in source.split(",")]
+_SUFFIX_PLACEHOLDER_RE = re.compile(PLACEHOLDER_SYNTAX.body)
 
 
-def _call(
-    lines: list[str],
-    index: int,
-    indent: int,
+def _suffix_value(source: str, position: int) -> int | None:
+    if source.startswith("$", position):
+        end = position + 1
+        while end < len(source) and source[end] not in ",)":
+            end += 1
+        return end
+    try:
+        _, end = json.JSONDecoder().raw_decode(source, position)
+    except json.JSONDecodeError:
+        return None
+    return end
+
+
+def _suffix(source: str) -> tuple[list[tuple[str, str]], list[str]] | None:
+    """Return (bindings, outputs) when source is exactly one binding suffix."""
+    if not source.startswith("("):
+        return None
+    bindings: list[tuple[str, str]] = []
+    position = 1
+    if source.startswith(")", position):
+        position += 1
+    else:
+        while True:
+            end = source.find("=", position)
+            if end == -1 or _SUFFIX_PLACEHOLDER_RE.fullmatch(source, position, end) is None:
+                return None
+            value_start = end + 1
+            value_end = _suffix_value(source, value_start)
+            if value_end is None:
+                return None
+            bindings.append((source[position:end], source[value_start:value_end]))
+            position = value_end
+            if source.startswith(", ", position):
+                position += 2
+                continue
+            if source.startswith(")", position):
+                position += 1
+                break
+            return None
+    if position == len(source):
+        return bindings, []
+    if not source.startswith(" -> ", position):
+        return None
+    outputs = source[position + 4 :].split(", ")
+    if any(_SUFFIX_PLACEHOLDER_RE.fullmatch(item) is None for item in outputs):
+        return None
+    return bindings, outputs
+
+
+def _suffix_bindings(
+    bindings: list[tuple[str, str]],
     path: str,
-    start: int,
-) -> tuple[Call, int]:
-    number = start + index
-    text = lines[index][indent + 5 :]
-    if not text.endswith(":"):
-        return Call(process=text), index + 1
-    target = text[:-1]
-    index += 1
-    inputs = []
-    outputs = []
-    if index < len(lines) and _indent(lines[index], path, start + index) == indent + 2 and lines[index][indent + 2 :] == "INPUTS:":
-        index += 1
-        while index < len(lines) and _indent(lines[index], path, start + index) == indent + 4:
-            inputs.append(_binding(lines[index][indent + 4 :], path, start + index))
-            index += 1
-        if not inputs:
-            _fail("call_inputs", path, number, "CALL INPUTS needs at least one binding")
-    if index < len(lines) and _indent(lines[index], path, start + index) == indent + 2 and lines[index][indent + 2 :].startswith("OUTPUTS: "):
-        outputs = _outputs(lines[index][indent + 11 :])
-        index += 1
-    if not inputs and not outputs:
-        _fail("call_bindings", path, number, "CALL block needs inputs or outputs")
-    return Call(process=target, inputs=inputs, outputs=outputs), index
+    line: int,
+) -> list[ValueBinding]:
+    return [
+        ValueBinding(placeholder=placeholder, value=_value(value, path, line))
+        for placeholder, value in bindings
+    ]
 
 
 def _steps(
@@ -580,23 +610,30 @@ def _steps(
                 _fail("act_tool", path, number, str(error))
             if not isinstance(tool, str) or not rest[consumed:].startswith(": "):
                 _fail("act_tool", path, number, "ACT TOOL needs one JSON string and colon")
-            step_data = {"tool": tool, "instruction": rest[consumed + 2 :], "inputs": [], "outputs": []}
-            index += 1
+            body = rest[consumed + 2 :]
         elif text.startswith("ACT "):
-            step_data = {"tool": None, "instruction": text[4:], "inputs": [], "outputs": []}
-            index += 1
+            tool = None
+            body = text[4:]
         else:
-            step_data = None
-        if step_data is not None:
-            if index < len(lines) and _indent(lines[index], path, start + index) == indent + 2 and lines[index][indent + 2 :] == "INPUTS:":
-                index += 1
-                while index < len(lines) and _indent(lines[index], path, start + index) == indent + 4:
-                    step_data["inputs"].append(_binding(lines[index][indent + 4 :], path, start + index))
-                    index += 1
-            if index < len(lines) and _indent(lines[index], path, start + index) == indent + 2 and lines[index][indent + 2 :].startswith("OUTPUTS: "):
-                step_data["outputs"] = _outputs(lines[index][indent + 11 :])
-                index += 1
-            result.append(Act(**step_data))
+            body = None
+        if body is not None:
+            position = len(body)
+            parsed = None
+            while parsed is None:
+                position = body.rfind(" (", 0, position)
+                if position == -1:
+                    _fail("act_suffix", path, number, "ACT needs one (bindings) suffix")
+                parsed = _suffix(body[position + 1 :])
+            bindings, outputs = parsed
+            result.append(
+                Act(
+                    tool=tool,
+                    instruction=body[:position],
+                    inputs=_suffix_bindings(bindings, path, number),
+                    outputs=outputs,
+                )
+            )
+            index += 1
             continue
         if text.startswith("SET "):
             body = text[4:]
@@ -606,14 +643,16 @@ def _steps(
             result.append(Set(state=target, value=_value(value, path, number)))
             index += 1
             continue
-        if text.startswith("EMIT ") and text.endswith(":"):
-            target = text[5:-1]
+        if text.startswith("EMIT "):
+            target, _, remainder = text[5:].partition(" ")
+            parsed = _suffix(remainder)
+            if parsed is None:
+                _fail("emit_suffix", path, number, "EMIT needs target (bindings)")
+            bindings, outputs = parsed
+            if outputs:
+                _fail("emit_suffix", path, number, "EMIT takes no outputs")
+            result.append(Emit(interface=target, bindings=_suffix_bindings(bindings, path, number)))
             index += 1
-            bindings = []
-            while index < len(lines) and _indent(lines[index], path, start + index) == indent + 2:
-                bindings.append(_binding(lines[index][indent + 2 :], path, start + index))
-                index += 1
-            result.append(Emit(interface=target, bindings=bindings))
             continue
         if text.startswith("IF ") and text.endswith(":"):
             condition = _compare(text[3:-1], path, number)
@@ -632,8 +671,19 @@ def _steps(
             result.append(If(condition=condition, then=then, otherwise=otherwise))
             continue
         if text.startswith("CALL "):
-            step, index = _call(lines, index, indent, path, start)
-            result.append(step)
+            target, _, remainder = text[5:].partition(" ")
+            parsed = _suffix(remainder)
+            if parsed is None:
+                _fail("call_suffix", path, number, "CALL needs target (bindings)")
+            bindings, outputs = parsed
+            result.append(
+                Call(
+                    process=target,
+                    inputs=_suffix_bindings(bindings, path, number),
+                    outputs=outputs,
+                )
+            )
+            index += 1
             continue
         if text.startswith("FAIL "):
             message = _json_value(text[5:], path, number)
