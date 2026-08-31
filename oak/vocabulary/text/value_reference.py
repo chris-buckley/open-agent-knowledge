@@ -29,9 +29,12 @@ VALUE_REFERENCE_PATTERN = (
     + r")$"
 )
 VALUE_REFERENCE_EBNF = (
-    "value_reference = \"$\", "
+    'value_reference = "$", '
     "( placeholder | constant_target | state_target | "
-    "interface_value_path ) ;"
+    "interface_value_path ) ;\n"
+    'constant_target = [ relative_document_path, "#" ], "constant", ".", slug_id ;\n'
+    'state_target = "state", ".", slug_id ;\n'
+    'interface_value_path = "interface", ".", slug_id, ".", placeholder ;'
 )
 
 _BARE_RE = re.compile(
