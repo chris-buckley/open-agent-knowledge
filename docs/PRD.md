@@ -619,7 +619,7 @@ NODE
 - Treat the complete host-supplied modality context as the source.
 - Generate source-to-part instructions from one rule registry.
 - Generate every Entry ID, Naming, Decomposition, ACT, and Delegation rule as one instruction entry.
-- Include every authoring rule, every surface schema, the EBNF, one canonical OAK example, and one decomposed orchestrator example.
+- Include every authoring rule, every surface schema, the xml grammar, one canonical OAK example, and one decomposed orchestrator example.
 - Declare no universal input interface.
 - Declare one OAK document schema, one out interface, one trigger, and one process.
 - Derive a draft, validate it, and emit the valid OAK document as the sole response.
