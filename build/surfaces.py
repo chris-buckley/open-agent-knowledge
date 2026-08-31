@@ -140,6 +140,13 @@ def field_description(model: type[OakModel], name: str) -> str:
     return field.description
 
 
+def _guaranteed(surface: Surface, name: str) -> bool:
+    """Return whether the surface always renders the field non-empty."""
+    if surface.model.model_fields[name].is_required():
+        return True
+    return any(field_name == name and expected is not None for field_name, expected in surface.when)
+
+
 def surface_schema(surface: Surface) -> Schema:
     """Project one authored surface into one OAK schema."""
     metadata = model_schema(surface.model)
@@ -159,7 +166,7 @@ def surface_schema(surface: Surface) -> Schema:
             where(
                 field.placeholder,
                 Type(of="string"),
-                NonEmpty(),
+                *([NonEmpty()] if _guaranteed(surface, field.name) else []),
                 description=field_description(surface.model, field.name),
             )
             for field in rendered

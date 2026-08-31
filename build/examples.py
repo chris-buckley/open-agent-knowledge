@@ -226,7 +226,7 @@ def _freshness_gates() -> None:
     parsed_docs = {name: parse(text) for name, text in documents().items()}
 
     for name, node in parsed_docs.items():
-        if render(node, grouping="markdown") + "\n" != documents()[name]:
+        if render(node, grouping="xml") + "\n" != documents()[name]:
             raise RuntimeError(f"freshness gate 8 failed for {name}")
 
     if not (
@@ -827,19 +827,29 @@ def _validate_act_authoring() -> None:
     if hasattr(ACT, "infer") or hasattr(ACT, "use"):
         raise RuntimeError("ACT exposes a forbidden helper")
     if "\n".join(step_lines(native)) != (
-        "ACT Classify <REPORT> and produce <SEVERITY>.\n"
-        "  INPUTS:\n"
-        "    REPORT = $interface.report.REPORT\n"
-        "  OUTPUTS: SEVERITY"
+        "ACT Classify <REPORT> and produce <SEVERITY>. (REPORT=$interface.report.REPORT) -> SEVERITY"
     ):
         raise RuntimeError("ACT changed interpreter-native OAK syntax")
     if "\n".join(step_lines(exact)) != (
-        'ACT TOOL "jobs.status": Read <JOB_ID> and produce <STATUS>.\n'
-        "  INPUTS:\n"
-        "    JOB_ID = $state.job-id\n"
-        "  OUTPUTS: STATUS"
+        'ACT TOOL "jobs.status": Read <JOB_ID> and produce <STATUS>. (JOB_ID=$state.job-id) -> STATUS'
     ):
         raise RuntimeError("ACT.tool changed exact named-tool OAK syntax")
+    combos = (
+        (ACT("Wait."), "ACT Wait. ()"),
+        (
+            ACT("Read <NOTE>.", inputs=[ValueBinding(placeholder="NOTE", value=LiteralValue(value=1))]),
+            "ACT Read <NOTE>. (NOTE=1)",
+        ),
+        (ACT("Produce <NOTE>.", outputs=["NOTE"]), "ACT Produce <NOTE>. () -> NOTE"),
+        (Call(process="process.run"), "CALL process.run ()"),
+    )
+    for step, expected in combos:
+        line = "\n".join(step_lines(step))
+        if line != expected:
+            raise RuntimeError(f"suffix render changed: {line}")
+        parsed = _steps([line], 0, 0, "suffix", 1)[0][0]
+        if parsed.model_dump() != step.model_dump():
+            raise RuntimeError(f"suffix parse changed: {line}")
 
 
 def _validate_human_examples() -> None:

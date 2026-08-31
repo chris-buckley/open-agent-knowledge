@@ -53,7 +53,7 @@ def document(model: type) -> str:
         ],
         schemas=[surface_schema(surface) for surface in surfaces],
     )
-    return render(node, grouping="markdown") + "\n"
+    return render(node, grouping="xml") + "\n"
 
 
 def documents() -> dict[str, str]:
