@@ -11,7 +11,7 @@ from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes import Process
 from oak.node.parts.schemas import Schema
 from oak.node.parts.triggers import Trigger
-from oak.render.oak.arrangement import PART_ORDER, schema_text
+from oak.render.oak.arrangement import schema_text
 from oak.render.oak.instructions import instruction_lines
 from oak.render.oak.styles import StyleName, styled_node
 from oak.render.oak.syntax import constant_text, interface_body, named_value_line, process_lines, trigger_lines
@@ -59,22 +59,20 @@ def interface_xml(interface: Interface) -> str:
 
 
 def _xml_part(tag: str, bodies: list[str], separator: str = "\n") -> str:
-    if not bodies:
-        return f"<{tag}>\n</{tag}>"
     return _xml_element(tag, {}, separator.join(bodies))
 
 
 def _node_xml(node: Node) -> str:
     parts = [
-        _xml_part("instructions", instruction_lines(node)),
-        _xml_part("constants", [constant_text(item) for item in node.constants], "\n\n"),
-        _xml_part("schemas", [schema_xml(item) for item in node.schemas], "\n\n"),
-        _xml_part("state", [named_value_line(item) for item in node.state]),
-        _xml_part("triggers", [trigger_xml(item) for item in node.triggers], "\n\n"),
-        _xml_part("processes", [process_xml(item) for item in node.processes], "\n\n"),
-        _xml_part("interfaces", [interface_xml(item) for item in node.interfaces], "\n\n"),
+        ("instructions", instruction_lines(node), "\n"),
+        ("constants", [constant_text(item) for item in node.constants], "\n\n"),
+        ("schemas", [schema_xml(item) for item in node.schemas], "\n\n"),
+        ("state", [named_value_line(item) for item in node.state], "\n"),
+        ("triggers", [trigger_xml(item) for item in node.triggers], "\n\n"),
+        ("processes", [process_xml(item) for item in node.processes], "\n\n"),
+        ("interfaces", [interface_xml(item) for item in node.interfaces], "\n\n"),
     ]
-    return "\n\n".join(parts)
+    return "\n\n".join(_xml_part(tag, bodies, separator) for tag, bodies, separator in parts if bodies)
 
 
 def node_xml(node: Node, *, style: StyleName = "authored") -> str:
@@ -123,21 +121,21 @@ def interface_markdown(interface: Interface) -> str:
 
 def _markdown_part(tag: str, bodies: list[str], separator: str = "\n") -> str:
     text = separator.join(bodies)
-    closing = "" if not text or text.endswith("\n") else "\n"
+    closing = "" if text.endswith("\n") else "\n"
     return f"~~~~{tag}\n{text}{closing}~~~~"
 
 
 def _node_markdown(node: Node) -> str:
-    parts = {
-        "instructions": _markdown_part("instructions", instruction_lines(node)),
-        "constants": _markdown_part("constants", [constant_text(item) for item in node.constants], "\n\n"),
-        "schemas": _markdown_part("schemas", [schema_markdown(item) for item in node.schemas], "\n\n"),
-        "state": _markdown_part("state", [named_value_line(item) for item in node.state]),
-        "triggers": _markdown_part("triggers", [trigger_markdown(item) for item in node.triggers], "\n\n"),
-        "processes": _markdown_part("processes", [process_markdown(item) for item in node.processes], "\n\n"),
-        "interfaces": _markdown_part("interfaces", [interface_markdown(item) for item in node.interfaces], "\n\n"),
-    }
-    return "\n\n".join(parts[name] for name in PART_ORDER)
+    parts = [
+        ("instructions", instruction_lines(node), "\n"),
+        ("constants", [constant_text(item) for item in node.constants], "\n\n"),
+        ("schemas", [schema_markdown(item) for item in node.schemas], "\n\n"),
+        ("state", [named_value_line(item) for item in node.state], "\n"),
+        ("triggers", [trigger_markdown(item) for item in node.triggers], "\n\n"),
+        ("processes", [process_markdown(item) for item in node.processes], "\n\n"),
+        ("interfaces", [interface_markdown(item) for item in node.interfaces], "\n\n"),
+    ]
+    return "\n\n".join(_markdown_part(tag, bodies, separator) for tag, bodies, separator in parts if bodies)
 
 
 def node_markdown(node: Node, *, style: StyleName = "authored") -> str:

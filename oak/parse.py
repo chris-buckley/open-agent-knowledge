@@ -112,26 +112,31 @@ def _source_text(source: str | bytes) -> str:
 
 
 def _infer_grouping(text: str) -> GroupingName:
-    if text.startswith("<instructions>\n"):
+    first = text.partition("\n")[0]
+    if first in {f"<{part}>" for part in PART_ORDER}:
         return "xml"
-    if text.startswith("~~~~instructions\n"):
+    if first in {f"~~~~{part}" for part in PART_ORDER}:
         return "markdown"
-    _fail("unknown_grouping", "$", 1, "document must start with the instructions part")
+    _fail("unknown_grouping", "$", 1, "document must start with one part delimiter")
 
 
 def _parts(text: str, grouping: GroupingName) -> dict[str, tuple[list[str], int]]:
     lines = text.splitlines()
     index = 0
     result: dict[str, tuple[list[str], int]] = {}
-    for part_index, part in enumerate(PART_ORDER):
-        if part_index:
-            if index >= len(lines) or lines[index] != "":
-                _fail("part_separator", part, index + 1, "parts need one blank line between them")
-            index += 1
+    for part in PART_ORDER:
         opening = f"<{part}>" if grouping == "xml" else f"~~~~{part}"
         closing = f"</{part}>" if grouping == "xml" else "~~~~"
-        if index >= len(lines) or lines[index] != opening:
-            _fail("part_order", part, index + 1, f"expected {opening}")
+        position = index
+        if result:
+            if position < len(lines) and lines[position] == opening:
+                _fail("part_separator", part, position + 1, "parts need one blank line between them")
+            if position >= len(lines) or lines[position] != "":
+                continue
+            position += 1
+        if position >= len(lines) or lines[position] != opening:
+            continue
+        index = position
         start = index + 2
         index += 1
         body: list[str] = []
@@ -169,7 +174,7 @@ def _parts(text: str, grouping: GroupingName) -> dict[str, tuple[list[str], int]
         result[part] = body, start
         index += 1
     if index != len(lines):
-        _fail("trailing_content", "$", index + 1, "content follows the interfaces part")
+        _fail("part_order", "$", index + 1, "parts appear once in OAK order")
     return result
 
 
@@ -850,9 +855,11 @@ def _validation_failures(error: ValidationError) -> list[ParseFailure]:
 def parse(source: str | bytes, *, grouping: GroupingName | None = None) -> Node:
     """Parse one OAK document and run every standalone model check."""
     text = _source_text(source)
-    grouping = grouping or _infer_grouping(text)
+    if not text:
+        return Node()
     failures: list[ParseFailure] = []
     try:
+        grouping = grouping or _infer_grouping(text)
         parts = _parts(text, grouping)
     except _Parse as error:
         raise OakParseError((error.failure,)) from None
@@ -867,6 +874,8 @@ def parse(source: str | bytes, *, grouping: GroupingName | None = None) -> Node:
         "interfaces": lambda body, start: _interfaces(body, start, grouping),
     }
     for part in PART_ORDER:
+        if part not in parts:
+            continue
         body, start = parts[part]
         try:
             data[part] = parsers[part](body, start)
