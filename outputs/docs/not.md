@@ -23,15 +23,3 @@ WHERE:
 - <CONDITION> is string; is non-empty; The child condition to invert..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

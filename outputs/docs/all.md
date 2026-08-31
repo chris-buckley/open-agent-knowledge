@@ -24,15 +24,3 @@ WHERE:
 - <CONDITIONS> is string; is non-empty; The child conditions in authored order..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

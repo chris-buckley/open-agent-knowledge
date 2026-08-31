@@ -17,9 +17,6 @@ Classify every issue by severity and explain its evidence.
 Report specification compliance, strengths, issues, and an overall assessment.
 </instructions>
 
-<constants>
-</constants>
-
 <schemas>
 <schema id="review-request" name="Review Request" purpose="Carry one task-scoped review package.">
 Task brief: <TASK_BRIEF>
@@ -70,9 +67,6 @@ WHERE:
 - <ASSESSMENT> is string; is non-empty; the overall task-scoped verdict.
 </schema>
 </schemas>
-
-<state>
-</state>
 
 <triggers>
 <trigger id="review-requested">

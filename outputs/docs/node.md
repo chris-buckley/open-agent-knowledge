@@ -9,7 +9,7 @@ Target the part required by the typed reference field.
 </instructions>
 
 <constants>
-example-1: "<instructions>\nUse the supplied schema.\n</instructions>\n\n<constants>\n</constants>\n\n<schemas>\n</schemas>\n\n<state>\n</state>\n\n<triggers>\n</triggers>\n\n<processes>\n</processes>\n\n<interfaces>\n</interfaces>"
+example-1: "<instructions>\nUse the supplied schema.\n</instructions>"
 
 grammar: TEXT<<
 surface_node = ? <instructions>
@@ -82,15 +82,3 @@ WHERE:
 - <INTERFACES> is string; The node interfaces in authored order..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

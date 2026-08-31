@@ -22,15 +22,3 @@ JOIN
 WHERE:
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

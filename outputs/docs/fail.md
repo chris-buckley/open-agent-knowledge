@@ -21,15 +21,3 @@ WHERE:
 - <MESSAGE> is string; is non-empty; The failure message..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

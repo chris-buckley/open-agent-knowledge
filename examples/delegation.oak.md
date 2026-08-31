@@ -8,15 +8,6 @@ Each interface is one document-boundary crossing: in arrives, out is emitted, an
 Return the worker task review unchanged.
 </instructions>
 
-<constants>
-</constants>
-
-<schemas>
-</schemas>
-
-<state>
-</state>
-
 <triggers>
 <trigger id="delegation-requested">
 GIVEN: true

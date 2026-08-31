@@ -24,15 +24,3 @@ WHERE:
 - <RIGHT> is string; is non-empty; The value on the right of the comparison..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

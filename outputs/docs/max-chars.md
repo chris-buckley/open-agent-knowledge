@@ -21,15 +21,3 @@ WHERE:
 - <N> is string; is non-empty; The character limit..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

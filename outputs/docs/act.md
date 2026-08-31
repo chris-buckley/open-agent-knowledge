@@ -42,15 +42,3 @@ WHERE:
 - <OUTPUTS> is string; The immutable local bindings the action must produce..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

@@ -27,15 +27,3 @@ WHERE:
 - <STEPS> is string; is non-empty; The sequential iteration steps..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

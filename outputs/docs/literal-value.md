@@ -21,15 +21,3 @@ WHERE:
 - <VALUE> is string; is non-empty; The authored JSON value..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

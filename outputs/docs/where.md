@@ -26,15 +26,3 @@ WHERE:
 - <DESCRIPTION> is string; What the placeholder holds, in one line..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

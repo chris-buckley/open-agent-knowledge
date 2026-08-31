@@ -26,15 +26,3 @@ WHERE:
 - <MESSAGE> is string; The optional assertion failure message..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

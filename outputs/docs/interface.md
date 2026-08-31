@@ -28,15 +28,3 @@ WHERE:
 - <DESCRIPTION> is string; What the document boundary crossing means..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

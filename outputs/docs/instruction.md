@@ -21,15 +21,3 @@ WHERE:
 - <BODY> is string; is non-empty; One directive or declarative rule..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

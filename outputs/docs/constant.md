@@ -86,15 +86,3 @@ WHERE:
 - <VALUE> is string; is non-empty; The value that stays the same..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

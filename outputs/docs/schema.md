@@ -38,15 +38,3 @@ WHERE:
 - <WHERE> is string; One Where per distinct template placeholder, in authored order..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

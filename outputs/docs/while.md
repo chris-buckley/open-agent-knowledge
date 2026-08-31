@@ -26,15 +26,3 @@ WHERE:
 - <STEPS> is string; is non-empty; The steps run in one fresh child binding scope per iteration..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

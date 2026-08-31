@@ -21,15 +21,3 @@ WHERE:
 - <OF> is string; is non-empty; The datatype name..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

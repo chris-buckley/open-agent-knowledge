@@ -22,15 +22,3 @@ WHERE:
 - <VALUE> is string; is non-empty; The JSON value that can change..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

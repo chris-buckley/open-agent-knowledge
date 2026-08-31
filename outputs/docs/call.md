@@ -26,15 +26,3 @@ WHERE:
 - <OUTPUTS> is string; The called process outputs promoted to this process..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

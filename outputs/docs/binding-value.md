@@ -21,15 +21,3 @@ WHERE:
 - <BINDING> is string; is non-empty; The visible process-local binding to read..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

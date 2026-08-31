@@ -22,15 +22,3 @@ WHERE:
 - <SEPARATOR> is string; is non-empty; The text between items..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

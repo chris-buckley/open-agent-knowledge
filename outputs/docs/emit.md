@@ -27,15 +27,3 @@ WHERE:
 - <BINDINGS> is string; is non-empty; One value binding for each interface schema placeholder..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

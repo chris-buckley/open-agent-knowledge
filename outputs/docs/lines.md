@@ -24,15 +24,3 @@ WHERE:
 - <MAX> is string; The most lines..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

@@ -17,9 +17,6 @@ Review the completed changes against the task before reporting.
 Report status, changes, verification, commit, and review findings.
 </instructions>
 
-<constants>
-</constants>
-
 <schemas>
 <schema id="task-request" name="Task Request" purpose="Carry one implementation task and its working context.">
 Task brief: <TASK_BRIEF>
@@ -116,9 +113,6 @@ WHERE:
 - <FINDINGS> is string; is non-empty; the self-review findings.
 </schema>
 </schemas>
-
-<state>
-</state>
 
 <triggers>
 <trigger id="implementation-requested">

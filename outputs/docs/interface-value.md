@@ -25,15 +25,3 @@ WHERE:
 - <PLACEHOLDER> is string; is non-empty; The interface schema placeholder to read..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

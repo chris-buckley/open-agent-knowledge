@@ -21,15 +21,3 @@ WHERE:
 - <CONSTANT> is string; is non-empty; The local or relative constant target to read..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

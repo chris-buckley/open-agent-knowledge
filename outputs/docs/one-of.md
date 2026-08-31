@@ -21,15 +21,3 @@ WHERE:
 - <VALUES> is string; is non-empty; The allowed values..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

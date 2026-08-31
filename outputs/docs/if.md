@@ -32,15 +32,3 @@ WHERE:
 - <OTHERWISE> is string; The steps run when the condition is false..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

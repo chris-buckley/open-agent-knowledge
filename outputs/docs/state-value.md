@@ -22,15 +22,3 @@ WHERE:
 - <STATE> is string; is non-empty; The local state target to read..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

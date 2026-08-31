@@ -28,15 +28,3 @@ WHERE:
 - <STEPS> is string; is non-empty; The exact named-tool acts launched in authored order..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

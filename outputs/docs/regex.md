@@ -21,15 +21,3 @@ WHERE:
 - <PATTERN> is string; is non-empty; The whole-value portable pattern..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

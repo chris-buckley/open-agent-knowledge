@@ -36,15 +36,3 @@ WHERE:
 - <THEN> is string; is non-empty; The local or relative process target selected by the trigger..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>

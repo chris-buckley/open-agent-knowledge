@@ -21,15 +21,3 @@ WHERE:
 - <VALUE> is string; is non-empty; A number or a placeholder of the same schema..
 </schema>
 </schemas>
-
-<state>
-</state>
-
-<triggers>
-</triggers>
-
-<processes>
-</processes>
-
-<interfaces>
-</interfaces>
