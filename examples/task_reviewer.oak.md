@@ -84,49 +84,22 @@ THEN: process.review-task
 
 <processes>
 <process id="read-evidence" name="Read evidence" input="schema.review-request" output="schema.review-evidence">
-ACT Inspect <TASK_BRIEF>, <IMPLEMENTATION_REPORT>, and <DIFF> once and produce <EVIDENCE>.
-  INPUTS:
-    TASK_BRIEF = $TASK_BRIEF
-    IMPLEMENTATION_REPORT = $IMPLEMENTATION_REPORT
-    DIFF = $DIFF
-  OUTPUTS: EVIDENCE
+ACT Inspect <TASK_BRIEF>, <IMPLEMENTATION_REPORT>, and <DIFF> once and produce <EVIDENCE>. (TASK_BRIEF=$TASK_BRIEF, IMPLEMENTATION_REPORT=$IMPLEMENTATION_REPORT, DIFF=$DIFF) -> EVIDENCE
 </process>
 
 <process id="validate-compliance" name="Validate compliance" input="schema.review-evidence" output="schema.compliance">
-ACT Compare <EVIDENCE> with <TASK_BRIEF> and produce <SPEC_COMPLIANCE>.
-  INPUTS:
-    EVIDENCE = $EVIDENCE
-    TASK_BRIEF = $interface.review-request-input.TASK_BRIEF
-  OUTPUTS: SPEC_COMPLIANCE
+ACT Compare <EVIDENCE> with <TASK_BRIEF> and produce <SPEC_COMPLIANCE>. (EVIDENCE=$EVIDENCE, TASK_BRIEF=$interface.review-request-input.TASK_BRIEF) -> SPEC_COMPLIANCE
 </process>
 
 <process id="assess-evidence" name="Assess evidence" input="schema.review-evidence" output="schema.assessment">
-ACT Assess <EVIDENCE> and produce <STRENGTHS>, <ISSUES>, and <ASSESSMENT>.
-  INPUTS:
-    EVIDENCE = $EVIDENCE
-  OUTPUTS: STRENGTHS, ISSUES, ASSESSMENT
+ACT Assess <EVIDENCE> and produce <STRENGTHS>, <ISSUES>, and <ASSESSMENT>. (EVIDENCE=$EVIDENCE) -> STRENGTHS, ISSUES, ASSESSMENT
 </process>
 
 <process id="review-task" name="Review task">
-CALL process.read-evidence:
-  INPUTS:
-    TASK_BRIEF = $interface.review-request-input.TASK_BRIEF
-    IMPLEMENTATION_REPORT = $interface.review-request-input.IMPLEMENTATION_REPORT
-    DIFF = $interface.review-request-input.DIFF
-  OUTPUTS: EVIDENCE
-CALL process.validate-compliance:
-  INPUTS:
-    EVIDENCE = $EVIDENCE
-  OUTPUTS: SPEC_COMPLIANCE
-CALL process.assess-evidence:
-  INPUTS:
-    EVIDENCE = $EVIDENCE
-  OUTPUTS: STRENGTHS, ISSUES, ASSESSMENT
-EMIT interface.task-review-output:
-  SPEC_COMPLIANCE = $SPEC_COMPLIANCE
-  STRENGTHS = $STRENGTHS
-  ISSUES = $ISSUES
-  ASSESSMENT = $ASSESSMENT
+CALL process.read-evidence (TASK_BRIEF=$interface.review-request-input.TASK_BRIEF, IMPLEMENTATION_REPORT=$interface.review-request-input.IMPLEMENTATION_REPORT, DIFF=$interface.review-request-input.DIFF) -> EVIDENCE
+CALL process.validate-compliance (EVIDENCE=$EVIDENCE) -> SPEC_COMPLIANCE
+CALL process.assess-evidence (EVIDENCE=$EVIDENCE) -> STRENGTHS, ISSUES, ASSESSMENT
+EMIT interface.task-review-output (SPEC_COMPLIANCE=$SPEC_COMPLIANCE, STRENGTHS=$STRENGTHS, ISSUES=$ISSUES, ASSESSMENT=$ASSESSMENT)
 </process>
 </processes>
 

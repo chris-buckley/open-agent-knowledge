@@ -60,35 +60,17 @@ THEN: process.grow-balance
 
 <processes>
 <process id="scale-balance" name="Scale balance" input="schema.scaling" output="schema.scaled-balance">
-ACT TOOL "math.multiply": Multiply <BALANCE> by <FACTOR> and round to 2 decimals to produce <SCALED_BALANCE>.
-  INPUTS:
-    BALANCE = $BALANCE
-    FACTOR = $FACTOR
-  OUTPUTS: SCALED_BALANCE
+ACT TOOL "math.multiply": Multiply <BALANCE> by <FACTOR> and round to 2 decimals to produce <SCALED_BALANCE>. (BALANCE=$BALANCE, FACTOR=$FACTOR) -> SCALED_BALANCE
 </process>
 
 <process id="grow-balance" name="Grow balance">
 WHILE $state.current-balance is less than $state.reflection-target LIMIT 60:
-  CALL process.scale-balance:
-    INPUTS:
-      BALANCE = $state.current-balance
-      FACTOR = $constant.growth-rate
-    OUTPUTS: SCALED_BALANCE
+  CALL process.scale-balance (BALANCE=$state.current-balance, FACTOR=$constant.growth-rate) -> SCALED_BALANCE
   SET state.current-balance = $SCALED_BALANCE
-ACT Reflect on <BALANCE> reaching <TARGET> and produce <REFLECTION>.
-  INPUTS:
-    BALANCE = $state.current-balance
-    TARGET = $state.reflection-target
-  OUTPUTS: REFLECTION
-CALL process.scale-balance:
-  INPUTS:
-    BALANCE = $state.current-balance
-    FACTOR = $constant.reflection-step
-  OUTPUTS: SCALED_BALANCE
+ACT Reflect on <BALANCE> reaching <TARGET> and produce <REFLECTION>. (BALANCE=$state.current-balance, TARGET=$state.reflection-target) -> REFLECTION
+CALL process.scale-balance (BALANCE=$state.current-balance, FACTOR=$constant.reflection-step) -> SCALED_BALANCE
 SET state.reflection-target = $SCALED_BALANCE
-EMIT interface.reflection-output:
-  BALANCE = $state.current-balance
-  REFLECTION = $REFLECTION
+EMIT interface.reflection-output (BALANCE=$state.current-balance, REFLECTION=$REFLECTION)
 </process>
 </processes>
 

@@ -189,7 +189,7 @@ dotted_path = ( "constant" | "schema" | "state" | "process" | "interface" ), "."
 value_reference = "$", ( placeholder | constant_target | state_target | interface_value_path ) ;
 entry_part = "instruction" | "constant" | "schema" | "state" | "trigger" | "process" | "interface" ;
 entry_path = entry_part, ".", slug_id ;
-relative_document_path = ? one relative POSIX path ending in .oak.md ? ;
+relative_document_path = ? one relative POSIX path of letters, digits, ".", "_", "-", and "/" ending in .oak.md ? ;
 target_path = entry_path | relative_document_path, "#", entry_path ;
 regex_pattern = "^", { ( "." | "[", [ "^" ], ( ? [^\r\n\\\[\]\-&~] ?, "-", ? [^\r\n\\\[\]\-&~] ? | ( "\\", ? [\\.^$|?*+(){}\[\]/-] ? | "\\", ? [nrt] ? ) | ? [^\r\n\\\[\]\-&~] ? ), { ( ? [^\r\n\\\[\]\-&~] ?, "-", ? [^\r\n\\\[\]\-&~] ? | ( "\\", ? [\\.^$|?*+(){}\[\]/-] ? | "\\", ? [nrt] ? ) | ? [^\r\n\\\[\]\-&~] ? ) }, "]" | "\\", ? [\\.^$|?*+(){}\[\]/-] ? | "\\", ? [nrt] ? | ? [^\r\n\\.^$*+?{}\[\]()|] ? ), [ ( "*" | "+" | "?" | "{", ? [0-9] ?, { ? [0-9] ? }, "}" | "{", ? [0-9] ?, { ? [0-9] ? }, ",}" | "{", ? [0-9] ?, { ? [0-9] ? }, ",", ? [0-9] ?, { ? [0-9] ? }, "}" ) ] }, "$" ;
 
@@ -229,7 +229,7 @@ surface_value_constant = ? $<CONSTANT> ? ;
 surface_value_state = ? $<STATE> ? ;
 surface_value_interface = ? $<INTERFACE>.<PLACEHOLDER> ? ;
 surface_value_binding = ? $<BINDING> ? ;
-surface_value_binding_line = ? <PLACEHOLDER> = <VALUE> ? ;
+surface_value_binding_line = ? <PLACEHOLDER>=<VALUE> ? ;
 surface_condition_compare = ? <LEFT> <OPERATOR> <RIGHT> ? ;
 surface_condition_all = ? ALL:
   <CONDITIONS> ? ;
@@ -237,26 +237,16 @@ surface_condition_any = ? ANY:
   <CONDITIONS> ? ;
 surface_condition_not = ? NOT:
   <CONDITION> ? ;
-surface_act_native = ? ACT <INSTRUCTION>
-  INPUTS:
-    <INPUTS>
-  OUTPUTS: <OUTPUTS> ? ;
-surface_act_tool = ? ACT TOOL "<TOOL>": <INSTRUCTION>
-  INPUTS:
-    <INPUTS>
-  OUTPUTS: <OUTPUTS> ? ;
+surface_act_native = ? ACT <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
+surface_act_tool = ? ACT TOOL "<TOOL>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
 surface_step_set = ? SET <STATE> = <VALUE> ? ;
-surface_step_emit = ? EMIT <INTERFACE>:
-  <BINDINGS> ? ;
+surface_step_emit = ? EMIT <INTERFACE> (<BINDINGS>) ? ;
 surface_step_if = ? IF <CONDITION>:
 THEN:
   <THEN>
 ELSE:
   <OTHERWISE> ? ;
-surface_step_call = ? CALL <PROCESS>:
-  INPUTS:
-    <INPUTS>
-  OUTPUTS: <OUTPUTS> ? ;
+surface_step_call = ? CALL <PROCESS> (<INPUTS>) -> <OUTPUTS> ? ;
 surface_step_fail = ? FAIL <MESSAGE> ? ;
 surface_step_assert = ? ASSERT <CONDITION>
 MESSAGE <MESSAGE> ? ;
@@ -333,28 +323,11 @@ Use the supplied schema.
 
 orchestrator-example: TEXT<<
 <process id="implement-task" name="Implement task">
-CALL process.plan-task:
-  INPUTS:
-    TASK_BRIEF = $interface.task-request-input.TASK_BRIEF
-    CONTEXT = $interface.task-request-input.CONTEXT
-  OUTPUTS: PLAN
-CALL process.implement-plan:
-  INPUTS:
-    PLAN = $PLAN
-  OUTPUTS: CHANGESET
-CALL process.test-changeset:
-  INPUTS:
-    CHANGESET = $CHANGESET
-  OUTPUTS: TESTS
-CALL process.review-changeset:
-  INPUTS:
-    PLAN = $PLAN
-    CHANGESET = $CHANGESET
-  OUTPUTS: FINDINGS
-EMIT interface.implementation-report-output:
-  CHANGESET = $CHANGESET
-  TESTS = $TESTS
-  FINDINGS = $FINDINGS
+CALL process.plan-task (TASK_BRIEF=$interface.task-request-input.TASK_BRIEF, CONTEXT=$interface.task-request-input.CONTEXT) -> PLAN
+CALL process.implement-plan (PLAN=$PLAN) -> CHANGESET
+CALL process.test-changeset (CHANGESET=$CHANGESET) -> TESTS
+CALL process.review-changeset (PLAN=$PLAN, CHANGESET=$CHANGESET) -> FINDINGS
+EMIT interface.implementation-report-output (CHANGESET=$CHANGESET, TESTS=$TESTS, FINDINGS=$FINDINGS)
 </process>
 >>
 </constants>
@@ -398,8 +371,8 @@ WHERE:
 has <MIN> to <MAX> lines
 
 WHERE:
-- <MIN> is string; is non-empty; The fewest lines..
-- <MAX> is string; is non-empty; The most lines..
+- <MIN> is string; The fewest lines..
+- <MAX> is string; The most lines..
 </schema>
 
 <schema id="constraint-list-of" name="ListOf" purpose="The bound value is items of one datatype joined by one separator.">
@@ -430,8 +403,8 @@ WHERE:
 WHERE:
 - <PLACEHOLDER> is string; is non-empty; The bare placeholder name..
 - <CONSTRAINTS> is string; is non-empty; The constraints every bound value must satisfy..
-- <EXAMPLES> is string; is non-empty; Values that satisfy every locally resolvable constraint..
-- <DESCRIPTION> is string; is non-empty; What the placeholder holds, in one line..
+- <EXAMPLES> is string; Values that satisfy every locally resolvable constraint..
+- <DESCRIPTION> is string; What the placeholder holds, in one line..
 </schema>
 
 <schema id="instruction" name="Instruction" purpose="One rule the interpreter must follow.">
@@ -499,10 +472,10 @@ WHERE:
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
-- <NAME> is string; is non-empty; The display name..
-- <PURPOSE> is string; is non-empty; What the information shape is for..
+- <NAME> is string; The display name..
+- <PURPOSE> is string; What the information shape is for..
 - <TEMPLATE> is string; is non-empty; The literal shape with variable parts written as <PLACEHOLDER>..
-- <WHERE> is string; is non-empty; One Where per distinct template placeholder, in authored order..
+- <WHERE> is string; One Where per distinct template placeholder, in authored order..
 </schema>
 
 <schema id="state" name="State" purpose="One JSON value that can change while the interpreter runs.">
@@ -550,7 +523,7 @@ WHERE:
 </schema>
 
 <schema id="value-binding-line" name="ValueBinding" purpose="One placeholder bound to one process value.">
-<PLACEHOLDER> = <VALUE>
+<PLACEHOLDER>=<VALUE>
 
 WHERE:
 - <PLACEHOLDER> is string; is non-empty; The placeholder receiving the process value..
@@ -591,28 +564,22 @@ WHERE:
 </schema>
 
 <schema id="act-native" name="Act act-native" purpose="One interpreter-native or exact named-tool action.">
-ACT <INSTRUCTION>
-  INPUTS:
-    <INPUTS>
-  OUTPUTS: <OUTPUTS>
+ACT <INSTRUCTION> (<INPUTS>) -> <OUTPUTS>
 
 WHERE:
 - <INSTRUCTION> is string; is non-empty; The action the interpreter or exact tool performs..
-- <INPUTS> is string; is non-empty; The action input bindings in authored order..
-- <OUTPUTS> is string; is non-empty; The immutable local bindings the action must produce..
+- <INPUTS> is string; The action input bindings in authored order..
+- <OUTPUTS> is string; The immutable local bindings the action must produce..
 </schema>
 
 <schema id="act-tool" name="Act act-tool" purpose="One interpreter-native or exact named-tool action.">
-ACT TOOL "<TOOL>": <INSTRUCTION>
-  INPUTS:
-    <INPUTS>
-  OUTPUTS: <OUTPUTS>
+ACT TOOL "<TOOL>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS>
 
 WHERE:
 - <TOOL> is string; is non-empty; The exact host tool name, or null for interpreter-native work..
 - <INSTRUCTION> is string; is non-empty; The action the interpreter or exact tool performs..
-- <INPUTS> is string; is non-empty; The action input bindings in authored order..
-- <OUTPUTS> is string; is non-empty; The immutable local bindings the action must produce..
+- <INPUTS> is string; The action input bindings in authored order..
+- <OUTPUTS> is string; The immutable local bindings the action must produce..
 </schema>
 
 <schema id="step-set" name="Set" purpose="One local state write.">
@@ -624,8 +591,7 @@ WHERE:
 </schema>
 
 <schema id="step-emit" name="Emit" purpose="One schema instance emitted through one local output interface.">
-EMIT <INTERFACE>:
-  <BINDINGS>
+EMIT <INTERFACE> (<BINDINGS>)
 
 WHERE:
 - <INTERFACE> is string; is non-empty; The local output interface target..
@@ -642,19 +608,16 @@ ELSE:
 WHERE:
 - <CONDITION> is string; is non-empty; The recursive condition that selects the branch..
 - <THEN> is string; is non-empty; The steps run when the condition is true..
-- <OTHERWISE> is string; is non-empty; The steps run when the condition is false..
+- <OTHERWISE> is string; The steps run when the condition is false..
 </schema>
 
 <schema id="step-call" name="Call" purpose="One synchronous process invocation with schema-bound inputs and outputs.">
-CALL <PROCESS>:
-  INPUTS:
-    <INPUTS>
-  OUTPUTS: <OUTPUTS>
+CALL <PROCESS> (<INPUTS>) -> <OUTPUTS>
 
 WHERE:
 - <PROCESS> is string; is non-empty; The local or relative process target to invoke..
-- <INPUTS> is string; is non-empty; The called process input bindings in authored order..
-- <OUTPUTS> is string; is non-empty; The called process outputs promoted to this process..
+- <INPUTS> is string; The called process input bindings in authored order..
+- <OUTPUTS> is string; The called process outputs promoted to this process..
 </schema>
 
 <schema id="step-fail" name="Fail" purpose="One explicit process failure.">
@@ -670,7 +633,7 @@ MESSAGE <MESSAGE>
 
 WHERE:
 - <CONDITION> is string; is non-empty; The required recursive condition..
-- <MESSAGE> is string; is non-empty; The optional assertion failure message..
+- <MESSAGE> is string; The optional assertion failure message..
 </schema>
 
 <schema id="step-foreach" name="Foreach" purpose="One deterministic sequential iteration over a JSON list.">
@@ -715,8 +678,8 @@ WHERE:
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <NAME> is string; is non-empty; The two-word process display name..
-- <INPUT> is string; is non-empty; The optional schema that defines initial local bindings..
-- <OUTPUT> is string; is non-empty; The optional schema that defines successful local outputs..
+- <INPUT> is string; The optional schema that defines initial local bindings..
+- <OUTPUT> is string; The optional schema that defines successful local outputs..
 - <STEPS> is string; is non-empty; The typed process steps in authored order..
 </schema>
 
@@ -729,7 +692,7 @@ THEN: <THEN>
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
-- <GIVEN> is string; is non-empty; True or the recursive state guard checked after WHEN..
+- <GIVEN> is string; True or the recursive state guard checked after WHEN..
 - <WHEN> is string; is non-empty; Why the interpreter enters the knowledge..
 - <THEN> is string; is non-empty; The local or relative process target selected by the trigger..
 </schema>
@@ -743,7 +706,7 @@ WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <DIRECTION> is string; is non-empty; The direction across the document boundary..
 - <SCHEMA_ID> is string; is non-empty; The local or relative schema target that defines the shape..
-- <DESCRIPTION> is string; is non-empty; What the document boundary crossing means..
+- <DESCRIPTION> is string; What the document boundary crossing means..
 </schema>
 
 <schema id="node" name="Node" purpose="One complete idless set of the seven OAK parts.">
@@ -776,13 +739,13 @@ WHERE:
 </interfaces>
 
 WHERE:
-- <INSTRUCTIONS> is string; is non-empty; The node instructions in authored order..
-- <CONSTANTS> is string; is non-empty; The node constants in authored order..
-- <SCHEMAS> is string; is non-empty; The node schemas in authored order..
-- <STATE> is string; is non-empty; The node state values in authored order..
-- <TRIGGERS> is string; is non-empty; The node triggers in authored order..
-- <PROCESSES> is string; is non-empty; The node processes in authored order..
-- <INTERFACES> is string; is non-empty; The node interfaces in authored order..
+- <INSTRUCTIONS> is string; The node instructions in authored order..
+- <CONSTANTS> is string; The node constants in authored order..
+- <SCHEMAS> is string; The node schemas in authored order..
+- <STATE> is string; The node state values in authored order..
+- <TRIGGERS> is string; The node triggers in authored order..
+- <PROCESSES> is string; The node processes in authored order..
+- <INTERFACES> is string; The node interfaces in authored order..
 </schema>
 
 <schema id="oak-document" name="OAK Document" purpose="Carry the one valid OAK document written from the supplied source.">
@@ -806,14 +769,9 @@ THEN: process.write-oak
 
 <processes>
 <process id="write-oak" name="Write OAK">
-ACT Derive <DRAFT> from the complete supplied source.
-  OUTPUTS: DRAFT
-ACT Validate <DRAFT> against every supplied OAK contract and produce <OAK>.
-  INPUTS:
-    DRAFT = $DRAFT
-  OUTPUTS: OAK
-EMIT interface.oak-document-output:
-  OAK = $OAK
+ACT Derive <DRAFT> from the complete supplied source. () -> DRAFT
+ACT Validate <DRAFT> against every supplied OAK contract and produce <OAK>. (DRAFT=$DRAFT) -> OAK
+EMIT interface.oak-document-output (OAK=$OAK)
 </process>
 </processes>
 

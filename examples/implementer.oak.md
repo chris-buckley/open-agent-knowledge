@@ -130,91 +130,38 @@ THEN: process.implement-task
 
 <processes>
 <process id="plan-task" name="Plan task" input="schema.task-request" output="schema.implementation-plan">
-ACT Read <TASK_BRIEF> with <CONTEXT> and produce <DRAFT_PLAN> and <QUESTIONS>.
-  INPUTS:
-    TASK_BRIEF = $TASK_BRIEF
-    CONTEXT = $CONTEXT
-  OUTPUTS: DRAFT_PLAN, QUESTIONS
-ACT Resolve <QUESTIONS> into <DRAFT_PLAN> and produce <PLAN>.
-  INPUTS:
-    QUESTIONS = $QUESTIONS
-    DRAFT_PLAN = $DRAFT_PLAN
-  OUTPUTS: PLAN
+ACT Read <TASK_BRIEF> with <CONTEXT> and produce <DRAFT_PLAN> and <QUESTIONS>. (TASK_BRIEF=$TASK_BRIEF, CONTEXT=$CONTEXT) -> DRAFT_PLAN, QUESTIONS
+ACT Resolve <QUESTIONS> into <DRAFT_PLAN> and produce <PLAN>. (QUESTIONS=$QUESTIONS, DRAFT_PLAN=$DRAFT_PLAN) -> PLAN
 </process>
 
 <process id="implement-plan" name="Implement plan" input="schema.implementation-plan" output="schema.changeset">
-ACT Implement <PLAN> exactly and produce <CHANGESET>.
-  INPUTS:
-    PLAN = $PLAN
-  OUTPUTS: CHANGESET
+ACT Implement <PLAN> exactly and produce <CHANGESET>. (PLAN=$PLAN) -> CHANGESET
 </process>
 
 <process id="test-changeset" name="Test changeset" input="schema.changeset" output="schema.verification">
-ACT Run relevant verification for <CHANGESET> and produce <TESTS>.
-  INPUTS:
-    CHANGESET = $CHANGESET
-  OUTPUTS: TESTS
+ACT Run relevant verification for <CHANGESET> and produce <TESTS>. (CHANGESET=$CHANGESET) -> TESTS
 </process>
 
 <process id="review-changeset" name="Review changeset" input="schema.planned-changeset" output="schema.review-findings">
-ACT Review <CHANGESET> against <PLAN> and produce <FINDINGS>.
-  INPUTS:
-    CHANGESET = $CHANGESET
-    PLAN = $PLAN
-  OUTPUTS: FINDINGS
+ACT Review <CHANGESET> against <PLAN> and produce <FINDINGS>. (CHANGESET=$CHANGESET, PLAN=$PLAN) -> FINDINGS
 </process>
 
 <process id="apply-findings" name="Apply findings" input="schema.reviewed-changeset" output="schema.completion">
-ACT Apply <FINDINGS> to <CHANGESET> and produce <SUMMARY> and <STATUS>.
-  INPUTS:
-    FINDINGS = $FINDINGS
-    CHANGESET = $CHANGESET
-  OUTPUTS: SUMMARY, STATUS
+ACT Apply <FINDINGS> to <CHANGESET> and produce <SUMMARY> and <STATUS>. (FINDINGS=$FINDINGS, CHANGESET=$CHANGESET) -> SUMMARY, STATUS
 </process>
 
 <process id="commit-changeset" name="Commit changeset" input="schema.verified-changeset" output="schema.commit">
-ACT Commit <CHANGESET> after <TESTS> and produce <COMMIT>.
-  INPUTS:
-    CHANGESET = $CHANGESET
-    TESTS = $TESTS
-  OUTPUTS: COMMIT
+ACT Commit <CHANGESET> after <TESTS> and produce <COMMIT>. (CHANGESET=$CHANGESET, TESTS=$TESTS) -> COMMIT
 </process>
 
 <process id="implement-task" name="Implement task">
-CALL process.plan-task:
-  INPUTS:
-    TASK_BRIEF = $interface.task-request-input.TASK_BRIEF
-    CONTEXT = $interface.task-request-input.CONTEXT
-  OUTPUTS: PLAN
-CALL process.implement-plan:
-  INPUTS:
-    PLAN = $PLAN
-  OUTPUTS: CHANGESET
-CALL process.test-changeset:
-  INPUTS:
-    CHANGESET = $CHANGESET
-  OUTPUTS: TESTS
-CALL process.review-changeset:
-  INPUTS:
-    PLAN = $PLAN
-    CHANGESET = $CHANGESET
-  OUTPUTS: FINDINGS
-CALL process.apply-findings:
-  INPUTS:
-    CHANGESET = $CHANGESET
-    FINDINGS = $FINDINGS
-  OUTPUTS: SUMMARY, STATUS
-CALL process.commit-changeset:
-  INPUTS:
-    CHANGESET = $CHANGESET
-    TESTS = $TESTS
-  OUTPUTS: COMMIT
-EMIT interface.implementation-report-output:
-  STATUS = $STATUS
-  SUMMARY = $SUMMARY
-  TESTS = $TESTS
-  COMMIT = $COMMIT
-  FINDINGS = $FINDINGS
+CALL process.plan-task (TASK_BRIEF=$interface.task-request-input.TASK_BRIEF, CONTEXT=$interface.task-request-input.CONTEXT) -> PLAN
+CALL process.implement-plan (PLAN=$PLAN) -> CHANGESET
+CALL process.test-changeset (CHANGESET=$CHANGESET) -> TESTS
+CALL process.review-changeset (PLAN=$PLAN, CHANGESET=$CHANGESET) -> FINDINGS
+CALL process.apply-findings (CHANGESET=$CHANGESET, FINDINGS=$FINDINGS) -> SUMMARY, STATUS
+CALL process.commit-changeset (CHANGESET=$CHANGESET, TESTS=$TESTS) -> COMMIT
+EMIT interface.implementation-report-output (STATUS=$STATUS, SUMMARY=$SUMMARY, TESTS=$TESTS, COMMIT=$COMMIT, FINDINGS=$FINDINGS)
 </process>
 </processes>
 

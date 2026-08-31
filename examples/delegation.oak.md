@@ -27,26 +27,12 @@ THEN: process.delegate-review
 
 <processes>
 <process id="dispatch-review" name="Dispatch review" input="task_reviewer.oak.md#schema.review-request" output="task_reviewer.oak.md#schema.task-review">
-ACT TOOL "agent.reviewer": Review <TASK_BRIEF>, <IMPLEMENTATION_REPORT>, and <DIFF> in one worker agent and produce <SPEC_COMPLIANCE>, <STRENGTHS>, <ISSUES>, and <ASSESSMENT>.
-  INPUTS:
-    TASK_BRIEF = $TASK_BRIEF
-    IMPLEMENTATION_REPORT = $IMPLEMENTATION_REPORT
-    DIFF = $DIFF
-  OUTPUTS: SPEC_COMPLIANCE, STRENGTHS, ISSUES, ASSESSMENT
+ACT TOOL "agent.reviewer": Review <TASK_BRIEF>, <IMPLEMENTATION_REPORT>, and <DIFF> in one worker agent and produce <SPEC_COMPLIANCE>, <STRENGTHS>, <ISSUES>, and <ASSESSMENT>. (TASK_BRIEF=$TASK_BRIEF, IMPLEMENTATION_REPORT=$IMPLEMENTATION_REPORT, DIFF=$DIFF) -> SPEC_COMPLIANCE, STRENGTHS, ISSUES, ASSESSMENT
 </process>
 
 <process id="delegate-review" name="Delegate review">
-CALL process.dispatch-review:
-  INPUTS:
-    TASK_BRIEF = $interface.review-request-input.TASK_BRIEF
-    IMPLEMENTATION_REPORT = $interface.review-request-input.IMPLEMENTATION_REPORT
-    DIFF = $interface.review-request-input.DIFF
-  OUTPUTS: SPEC_COMPLIANCE, STRENGTHS, ISSUES, ASSESSMENT
-EMIT interface.task-review-output:
-  SPEC_COMPLIANCE = $SPEC_COMPLIANCE
-  STRENGTHS = $STRENGTHS
-  ISSUES = $ISSUES
-  ASSESSMENT = $ASSESSMENT
+CALL process.dispatch-review (TASK_BRIEF=$interface.review-request-input.TASK_BRIEF, IMPLEMENTATION_REPORT=$interface.review-request-input.IMPLEMENTATION_REPORT, DIFF=$interface.review-request-input.DIFF) -> SPEC_COMPLIANCE, STRENGTHS, ISSUES, ASSESSMENT
+EMIT interface.task-review-output (SPEC_COMPLIANCE=$SPEC_COMPLIANCE, STRENGTHS=$STRENGTHS, ISSUES=$ISSUES, ASSESSMENT=$ASSESSMENT)
 </process>
 </processes>
 

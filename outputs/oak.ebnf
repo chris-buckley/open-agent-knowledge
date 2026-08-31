@@ -42,7 +42,7 @@ dotted_path = ( "constant" | "schema" | "state" | "process" | "interface" ), "."
 value_reference = "$", ( placeholder | constant_target | state_target | interface_value_path ) ;
 entry_part = "instruction" | "constant" | "schema" | "state" | "trigger" | "process" | "interface" ;
 entry_path = entry_part, ".", slug_id ;
-relative_document_path = ? one relative POSIX path ending in .oak.md ? ;
+relative_document_path = ? one relative POSIX path of letters, digits, ".", "_", "-", and "/" ending in .oak.md ? ;
 target_path = entry_path | relative_document_path, "#", entry_path ;
 regex_pattern = "^", { ( "." | "[", [ "^" ], ( ? [^\r\n\\\[\]\-&~] ?, "-", ? [^\r\n\\\[\]\-&~] ? | ( "\\", ? [\\.^$|?*+(){}\[\]/-] ? | "\\", ? [nrt] ? ) | ? [^\r\n\\\[\]\-&~] ? ), { ( ? [^\r\n\\\[\]\-&~] ?, "-", ? [^\r\n\\\[\]\-&~] ? | ( "\\", ? [\\.^$|?*+(){}\[\]/-] ? | "\\", ? [nrt] ? ) | ? [^\r\n\\\[\]\-&~] ? ) }, "]" | "\\", ? [\\.^$|?*+(){}\[\]/-] ? | "\\", ? [nrt] ? | ? [^\r\n\\.^$*+?{}\[\]()|] ? ), [ ( "*" | "+" | "?" | "{", ? [0-9] ?, { ? [0-9] ? }, "}" | "{", ? [0-9] ?, { ? [0-9] ? }, ",}" | "{", ? [0-9] ?, { ? [0-9] ? }, ",", ? [0-9] ?, { ? [0-9] ? }, "}" ) ] }, "$" ;
 
@@ -82,7 +82,7 @@ surface_value_constant = ? $<CONSTANT> ? ;
 surface_value_state = ? $<STATE> ? ;
 surface_value_interface = ? $<INTERFACE>.<PLACEHOLDER> ? ;
 surface_value_binding = ? $<BINDING> ? ;
-surface_value_binding_line = ? <PLACEHOLDER> = <VALUE> ? ;
+surface_value_binding_line = ? <PLACEHOLDER>=<VALUE> ? ;
 surface_condition_compare = ? <LEFT> <OPERATOR> <RIGHT> ? ;
 surface_condition_all = ? ALL:
   <CONDITIONS> ? ;
@@ -90,26 +90,16 @@ surface_condition_any = ? ANY:
   <CONDITIONS> ? ;
 surface_condition_not = ? NOT:
   <CONDITION> ? ;
-surface_act_native = ? ACT <INSTRUCTION>
-  INPUTS:
-    <INPUTS>
-  OUTPUTS: <OUTPUTS> ? ;
-surface_act_tool = ? ACT TOOL "<TOOL>": <INSTRUCTION>
-  INPUTS:
-    <INPUTS>
-  OUTPUTS: <OUTPUTS> ? ;
+surface_act_native = ? ACT <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
+surface_act_tool = ? ACT TOOL "<TOOL>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
 surface_step_set = ? SET <STATE> = <VALUE> ? ;
-surface_step_emit = ? EMIT <INTERFACE>:
-  <BINDINGS> ? ;
+surface_step_emit = ? EMIT <INTERFACE> (<BINDINGS>) ? ;
 surface_step_if = ? IF <CONDITION>:
 THEN:
   <THEN>
 ELSE:
   <OTHERWISE> ? ;
-surface_step_call = ? CALL <PROCESS>:
-  INPUTS:
-    <INPUTS>
-  OUTPUTS: <OUTPUTS> ? ;
+surface_step_call = ? CALL <PROCESS> (<INPUTS>) -> <OUTPUTS> ? ;
 surface_step_fail = ? FAIL <MESSAGE> ? ;
 surface_step_assert = ? ASSERT <CONDITION>
 MESSAGE <MESSAGE> ? ;

@@ -1,4 +1,4 @@
-~~~~instructions
+<instructions>
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 
@@ -6,9 +6,9 @@ Schema: One reusable information shape with one Where per placeholder.
 Define each schema placeholder once in WHERE.
 Make the template and WHERE placeholder sets equal.
 Reference only another placeholder in the same schema.
-~~~~
+</instructions>
 
-~~~~constants
+<constants>
 example-1: "<schema id=\"outline\" name=\"Hierarchical Outline\" purpose=\"Generate a numbered outline.\">\n## <OUTLINE_TITLE>\n\n\nWHERE:\n- <OUTLINE_TITLE> is string.\n</schema>"
 
 grammar: TEXT<<
@@ -19,10 +19,10 @@ WHERE:
 <WHERE>
 </schema> ? ;
 >>
-~~~~
+</constants>
 
-~~~~schemas
-~~~schema;id="schema";name="Schema";purpose="One reusable information shape with one Where per placeholder."
+<schemas>
+<schema id="schema" name="Schema" purpose="One reusable information shape with one Where per placeholder.">
 <schema id="<ID>" name="<NAME>" purpose="<PURPOSE>">
 <TEMPLATE>
 
@@ -32,21 +32,21 @@ WHERE:
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
-- <NAME> is string; is non-empty; The display name..
-- <PURPOSE> is string; is non-empty; What the information shape is for..
+- <NAME> is string; The display name..
+- <PURPOSE> is string; What the information shape is for..
 - <TEMPLATE> is string; is non-empty; The literal shape with variable parts written as <PLACEHOLDER>..
-- <WHERE> is string; is non-empty; One Where per distinct template placeholder, in authored order..
-~~~
-~~~~
+- <WHERE> is string; One Where per distinct template placeholder, in authored order..
+</schema>
+</schemas>
 
-~~~~state
-~~~~
+<state>
+</state>
 
-~~~~triggers
-~~~~
+<triggers>
+</triggers>
 
-~~~~processes
-~~~~
+<processes>
+</processes>
 
-~~~~interfaces
-~~~~
+<interfaces>
+</interfaces>

@@ -1,35 +1,35 @@
-~~~~instructions
+<instructions>
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 
 BindingValue: One value read from a visible process-local binding.
-~~~~
+</instructions>
 
-~~~~constants
+<constants>
 example-1: "$RESULT"
 
 grammar: TEXT<<
 surface_value_binding = ? $<BINDING> ? ;
 >>
-~~~~
+</constants>
 
-~~~~schemas
-~~~schema;id="value-binding";name="BindingValue";purpose="One value read from a visible process-local binding."
+<schemas>
+<schema id="value-binding" name="BindingValue" purpose="One value read from a visible process-local binding.">
 $<BINDING>
 
 WHERE:
 - <BINDING> is string; is non-empty; The visible process-local binding to read..
-~~~
-~~~~
+</schema>
+</schemas>
 
-~~~~state
-~~~~
+<state>
+</state>
 
-~~~~triggers
-~~~~
+<triggers>
+</triggers>
 
-~~~~processes
-~~~~
+<processes>
+</processes>
 
-~~~~interfaces
-~~~~
+<interfaces>
+</interfaces>

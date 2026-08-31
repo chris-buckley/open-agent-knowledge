@@ -1,4 +1,4 @@
-~~~~instructions
+<instructions>
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 
@@ -7,9 +7,9 @@ Use the same columns in every CSV row.
 Use only JSON scalar values in CSV cells.
 Give each CSV constant one non-empty list of object rows.
 Give each TEXT constant one string value.
-~~~~
+</instructions>
 
-~~~~constants
+<constants>
 example-1: "default-time-zone: \"Z\""
 
 example-2: "repository-tree: TEXT<<\noak\n└── SKILL.md\n>>"
@@ -35,18 +35,18 @@ surface_constant_yaml = ? <ID>: YAML<<
 <VALUE>
 >> ? ;
 >>
-~~~~
+</constants>
 
-~~~~schemas
-~~~schema;id="constant-inline";name="Constant constant-inline";purpose="One value that stays the same during use."
+<schemas>
+<schema id="constant-inline" name="Constant constant-inline" purpose="One value that stays the same during use.">
 <ID>: <VALUE>
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <VALUE> is string; is non-empty; The value that stays the same..
-~~~
+</schema>
 
-~~~schema;id="constant-text";name="Constant constant-text";purpose="One value that stays the same during use."
+<schema id="constant-text" name="Constant constant-text" purpose="One value that stays the same during use.">
 <ID>: TEXT<<
 <VALUE>
 >>
@@ -54,9 +54,9 @@ WHERE:
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <VALUE> is string; is non-empty; The value that stays the same..
-~~~
+</schema>
 
-~~~schema;id="constant-json";name="Constant constant-json";purpose="One value that stays the same during use."
+<schema id="constant-json" name="Constant constant-json" purpose="One value that stays the same during use.">
 <ID>: JSON<<
 <VALUE>
 >>
@@ -64,9 +64,9 @@ WHERE:
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <VALUE> is string; is non-empty; The value that stays the same..
-~~~
+</schema>
 
-~~~schema;id="constant-csv";name="Constant constant-csv";purpose="One value that stays the same during use."
+<schema id="constant-csv" name="Constant constant-csv" purpose="One value that stays the same during use.">
 <ID>: CSV<<
 <VALUE>
 >>
@@ -74,9 +74,9 @@ WHERE:
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <VALUE> is string; is non-empty; The value that stays the same..
-~~~
+</schema>
 
-~~~schema;id="constant-yaml";name="Constant constant-yaml";purpose="One value that stays the same during use."
+<schema id="constant-yaml" name="Constant constant-yaml" purpose="One value that stays the same during use.">
 <ID>: YAML<<
 <VALUE>
 >>
@@ -84,17 +84,17 @@ WHERE:
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <VALUE> is string; is non-empty; The value that stays the same..
-~~~
-~~~~
+</schema>
+</schemas>
 
-~~~~state
-~~~~
+<state>
+</state>
 
-~~~~triggers
-~~~~
+<triggers>
+</triggers>
 
-~~~~processes
-~~~~
+<processes>
+</processes>
 
-~~~~interfaces
-~~~~
+<interfaces>
+</interfaces>
