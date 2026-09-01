@@ -65,12 +65,15 @@ An exact tool name does not guarantee deterministic output.
 Require the selected tool itself to provide deterministic behaviour when deterministic output is required.
 Expose plain `ACT` as `ACT(instruction, ...)` in direct Python authoring.
 Expose named `ACT TOOL` as `ACT.tool(name, instruction, ...)` in direct Python authoring.
+Accept `input` and `output` schema targets in both authoring helpers.
 Make `ACT(...)` and `ACT.tool(...)` return the existing `Act` model.
 Keep `ACT(...)` and `ACT.tool(...)` as one `act` process step kind.
-Keep the rendered OAK syntax unchanged.
 Do not expose `ACT.infer`.
 Do not expose `ACT.use`.
 Add no second helper for interpreter-native work.
+Bind a constant or state value to one schema placeholder with `AS` when a schema constrains it.
+Give an act input and output schema targets when its values must validate at the action boundary.
+Seed a typed trigger-selected process through trigger inputs, one binding per input schema placeholder.
 Model each subagent as one worker OAK document with one in interface and one out interface.
 Treat the worker in interface schema as the request contract and the worker out interface schema as the result contract.
 Type each dispatch process with relative targets to the worker request and result schemas as its input and output schemas.
@@ -78,6 +81,7 @@ Dispatch each worker inside its dispatch process with one exact tool name from t
 Prefer one registered portable `agent.<worker>` contract when the host permits registration.
 Use the native runner name verbatim when the host does not permit registration.
 Give each agent tool contract the worker request placeholders as inputs and the worker result placeholders as outputs.
+Give each agent dispatch act and contract the worker request and result schemas as input and output targets.
 Keep agent invocation, model selection, and transport in the host registry, outside the OAK document.
 Treat the supplied registry as the worker allowlist.
 Run parallel workers as `PAR` children, one exact agent tool act per worker.
@@ -88,6 +92,7 @@ Treat each dispatch as separate-interpreter host work, not as running an OAK pro
 Treat committed worker effects as external tool effects that the coordinator transaction cannot roll back.
 Do not use one act placeholder as both input and output.
 Make act instruction placeholders equal its inputs and outputs.
+Match act inputs and outputs to its input and output schema placeholders.
 Remove or repair an assertion that is statically false.
 Match each call's inputs and outputs to the called process schemas.
 Give each ALL or ANY condition at least two children.
@@ -107,14 +112,18 @@ Supply the referencing document path before resolving a relative target.
 Read and write state only in the active OAK document.
 Use a new loop binding that does not shadow a visible binding.
 Give FOREACH a value that resolves to a JSON list.
+Give a schema binding both a schema target and a placeholder.
 Read only in or inout interfaces and emit only out or inout interfaces.
+Do not start an act instruction with an act schema attribute.
 Use only JSON scalar values in CSV cells.
 Give each CSV constant one non-empty list of object rows.
 Use a relative POSIX document path ending in .oak.md without a scheme, query, or extra fragment.
 Keep a lines minimum at or below its maximum.
+Make every schema-bound value satisfy its placeholder constraints.
 Make every statically known emission satisfy its interface schema.
 Give each TEXT constant one string value.
 Do not read an interface or local binding in a trigger guard.
+Do not read a local binding in a trigger input.
 Make every WHERE example satisfy its local constraints.
 Put JOIN immediately after one PAR.
 Give each lines constraint a minimum, maximum, or both.
@@ -130,15 +139,17 @@ Do not redefine a visible immutable process binding.
 Keep the local process call graph acyclic.
 Make every process output schema placeholder visible after successful completion.
 Remove an assertion that is statically true.
-Match a named tool's declared input and output contract.
+Match a named tool's declared placeholder sets and schema targets.
 Use a tool in PAR only when its supplied registry confirms parallel use.
+Bind each selected process input schema placeholder exactly once in trigger inputs.
 Give every non-true trigger guard at least one state read.
-Select only a process without an input schema from a trigger.
 Read only a visible prior process-local binding.
 Reference only another placeholder in the same schema.
 Read a placeholder present in the interface schema.
+Bind a placeholder present in the selected schema.
 Name a tool exposed by the supplied exact tool registry.
 Remove a process step after a path that always fails.
+Do not bind a placeholder that has a placeholder-valued bound.
 Do not give examples to a WHERE entry with placeholder-valued bounds.
 Target the part required by the typed reference field.
 </instructions>
@@ -165,11 +176,14 @@ xml_interfaces_part = "<interfaces>", lf, text_body, "</interfaces>" ;
 xml_body_entry = "<", entry_tag, attributes, ">", lf, text_body, "</", entry_tag, ">" ;
 entry_tag = "schema" | "trigger" | "process" | "interface" ;
 constant = inline_constant | text_constant | json_constant | csv_constant | yaml_constant ;
-inline_constant = slug_id, ": ", json_value ;
-text_constant = slug_id, ": TEXT<<", lf, text_body, ">>" ;
-json_constant = slug_id, ": JSON<<", lf, json_value, lf, ">>" ;
-csv_constant = slug_id, ": CSV<<", lf, csv_body, lf, ">>" ;
-yaml_constant = slug_id, ": YAML<<", lf, yaml_body, lf, ">>" ;
+inline_constant = slug_id, [ as_clause ], ": ", json_value ;
+text_constant = slug_id, [ as_clause ], ": TEXT<<", lf, text_body, ">>" ;
+json_constant = slug_id, [ as_clause ], ": JSON<<", lf, json_value, lf, ">>" ;
+csv_constant = slug_id, [ as_clause ], ": CSV<<", lf, csv_body, lf, ">>" ;
+yaml_constant = slug_id, [ as_clause ], ": YAML<<", lf, yaml_body, lf, ">>" ;
+state_entry = slug_id, [ as_clause ], ": ", json_value ;
+as_clause = " AS ", schema_placeholder_path ;
+schema_placeholder_path = [ relative_document_path, "#" ], "schema", ".", slug_id, ".", placeholder ;
 json_value = ? one JSON value ? ;
 csv_body = ? one CSV header and one or more data rows ? ;
 yaml_body = ? one YAML value ? ;
@@ -205,17 +219,17 @@ surface_constraint_at_least = ? is at least <VALUE> ? ;
 surface_constraint_at_most = ? is at most <VALUE> ? ;
 surface_where = ? - <PLACEHOLDER> <CONSTRAINTS> <EXAMPLES> <DESCRIPTION>. ? ;
 surface_instruction = ? <BODY> ? ;
-surface_constant_inline = ? <ID>: <VALUE> ? ;
-surface_constant_text = ? <ID>: TEXT<<
+surface_constant_inline = ? <ID> AS <SCHEMA_ID>.<PLACEHOLDER>: <VALUE> ? ;
+surface_constant_text = ? <ID> AS <SCHEMA_ID>.<PLACEHOLDER>: TEXT<<
 <VALUE>
 >> ? ;
-surface_constant_json = ? <ID>: JSON<<
+surface_constant_json = ? <ID> AS <SCHEMA_ID>.<PLACEHOLDER>: JSON<<
 <VALUE>
 >> ? ;
-surface_constant_csv = ? <ID>: CSV<<
+surface_constant_csv = ? <ID> AS <SCHEMA_ID>.<PLACEHOLDER>: CSV<<
 <VALUE>
 >> ? ;
-surface_constant_yaml = ? <ID>: YAML<<
+surface_constant_yaml = ? <ID> AS <SCHEMA_ID>.<PLACEHOLDER>: YAML<<
 <VALUE>
 >> ? ;
 surface_schema = ? <schema id="<ID>" name="<NAME>" purpose="<PURPOSE>">
@@ -224,7 +238,7 @@ surface_schema = ? <schema id="<ID>" name="<NAME>" purpose="<PURPOSE>">
 WHERE:
 <WHERE>
 </schema> ? ;
-surface_state = ? <ID>: <VALUE> ? ;
+surface_state = ? <ID> AS <SCHEMA_ID>.<PLACEHOLDER>: <VALUE> ? ;
 surface_value_literal = ? <VALUE> ? ;
 surface_value_constant = ? $<CONSTANT> ? ;
 surface_value_state = ? $<STATE> ? ;
@@ -238,8 +252,8 @@ surface_condition_any = ? ANY:
   <CONDITIONS> ? ;
 surface_condition_not = ? NOT:
   <CONDITION> ? ;
-surface_act_native = ? ACT <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
-surface_act_tool = ? ACT TOOL "<TOOL>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
+surface_act_native = ? ACT input="<INPUT>" output="<OUTPUT>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
+surface_act_tool = ? ACT TOOL "<TOOL>" input="<INPUT>" output="<OUTPUT>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
 surface_step_set = ? SET <STATE> = <VALUE> ? ;
 surface_step_emit = ? EMIT <INTERFACE> (<BINDINGS>) ? ;
 surface_step_if = ? IF <CONDITION>:
@@ -264,7 +278,7 @@ surface_process = ? <process id="<ID>" name="<NAME>" input="<INPUT>" output="<OU
 surface_trigger = ? <trigger id="<ID>">
 GIVEN: <GIVEN>
 WHEN: <WHEN>
-THEN: <THEN>
+THEN: <THEN> (<INPUTS>)
 </trigger> ? ;
 surface_interface = ? <interface id="<ID>" direction="<DIRECTION>" schema="<SCHEMA_ID>">
 <DESCRIPTION>
@@ -398,50 +412,60 @@ WHERE:
 </schema>
 
 <schema id="constant-inline" name="Constant constant-inline" purpose="One value that stays the same during use.">
-<ID>: <VALUE>
+<ID> AS <SCHEMA_ID>.<PLACEHOLDER>: <VALUE>
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <SCHEMA_ID> is string; The optional local or relative schema target whose placeholder constrains the value..
+- <PLACEHOLDER> is string; The schema placeholder the value must satisfy..
 - <VALUE> is string; is non-empty; The value that stays the same..
 </schema>
 
 <schema id="constant-text" name="Constant constant-text" purpose="One value that stays the same during use.">
-<ID>: TEXT<<
+<ID> AS <SCHEMA_ID>.<PLACEHOLDER>: TEXT<<
 <VALUE>
 >>
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <SCHEMA_ID> is string; The optional local or relative schema target whose placeholder constrains the value..
+- <PLACEHOLDER> is string; The schema placeholder the value must satisfy..
 - <VALUE> is string; is non-empty; The value that stays the same..
 </schema>
 
 <schema id="constant-json" name="Constant constant-json" purpose="One value that stays the same during use.">
-<ID>: JSON<<
+<ID> AS <SCHEMA_ID>.<PLACEHOLDER>: JSON<<
 <VALUE>
 >>
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <SCHEMA_ID> is string; The optional local or relative schema target whose placeholder constrains the value..
+- <PLACEHOLDER> is string; The schema placeholder the value must satisfy..
 - <VALUE> is string; is non-empty; The value that stays the same..
 </schema>
 
 <schema id="constant-csv" name="Constant constant-csv" purpose="One value that stays the same during use.">
-<ID>: CSV<<
+<ID> AS <SCHEMA_ID>.<PLACEHOLDER>: CSV<<
 <VALUE>
 >>
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <SCHEMA_ID> is string; The optional local or relative schema target whose placeholder constrains the value..
+- <PLACEHOLDER> is string; The schema placeholder the value must satisfy..
 - <VALUE> is string; is non-empty; The value that stays the same..
 </schema>
 
 <schema id="constant-yaml" name="Constant constant-yaml" purpose="One value that stays the same during use.">
-<ID>: YAML<<
+<ID> AS <SCHEMA_ID>.<PLACEHOLDER>: YAML<<
 <VALUE>
 >>
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <SCHEMA_ID> is string; The optional local or relative schema target whose placeholder constrains the value..
+- <PLACEHOLDER> is string; The schema placeholder the value must satisfy..
 - <VALUE> is string; is non-empty; The value that stays the same..
 </schema>
 
@@ -462,10 +486,12 @@ WHERE:
 </schema>
 
 <schema id="state" name="State" purpose="One JSON value that can change while the interpreter runs.">
-<ID>: <VALUE>
+<ID> AS <SCHEMA_ID>.<PLACEHOLDER>: <VALUE>
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <SCHEMA_ID> is string; The optional local or relative schema target whose placeholder constrains every value..
+- <PLACEHOLDER> is string; The schema placeholder every value must satisfy..
 - <VALUE> is string; is non-empty; The JSON value that can change..
 </schema>
 
@@ -547,19 +573,23 @@ WHERE:
 </schema>
 
 <schema id="act-native" name="Act act-native" purpose="One interpreter-native or exact named-tool action.">
-ACT <INSTRUCTION> (<INPUTS>) -> <OUTPUTS>
+ACT input="<INPUT>" output="<OUTPUT>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS>
 
 WHERE:
+- <INPUT> is string; The optional schema that validates the resolved input values before invocation..
+- <OUTPUT> is string; The optional schema that validates the produced outputs before promotion..
 - <INSTRUCTION> is string; is non-empty; The action the interpreter or exact tool performs..
 - <INPUTS> is string; The action input bindings in authored order..
 - <OUTPUTS> is string; The immutable local bindings the action must produce..
 </schema>
 
 <schema id="act-tool" name="Act act-tool" purpose="One interpreter-native or exact named-tool action.">
-ACT TOOL "<TOOL>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS>
+ACT TOOL "<TOOL>" input="<INPUT>" output="<OUTPUT>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS>
 
 WHERE:
 - <TOOL> is string; is non-empty; The exact host tool name, or null for interpreter-native work..
+- <INPUT> is string; The optional schema that validates the resolved input values before invocation..
+- <OUTPUT> is string; The optional schema that validates the produced outputs before promotion..
 - <INSTRUCTION> is string; is non-empty; The action the interpreter or exact tool performs..
 - <INPUTS> is string; The action input bindings in authored order..
 - <OUTPUTS> is string; The immutable local bindings the action must produce..
@@ -670,7 +700,7 @@ WHERE:
 <trigger id="<ID>">
 GIVEN: <GIVEN>
 WHEN: <WHEN>
-THEN: <THEN>
+THEN: <THEN> (<INPUTS>)
 </trigger>
 
 WHERE:
@@ -678,6 +708,7 @@ WHERE:
 - <GIVEN> is string; True or the recursive state guard checked after WHEN..
 - <WHEN> is string; is non-empty; Why the interpreter enters the knowledge..
 - <THEN> is string; is non-empty; The local or relative process target selected by the trigger..
+- <INPUTS> is string; The input bindings that seed the selected process input schema..
 </schema>
 
 <schema id="interface" name="Interface" purpose="One crossing of information at the active document boundary.">

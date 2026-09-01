@@ -4,9 +4,10 @@ Each schema is one information shape: a template with <PLACEHOLDER> slots and WH
 
 Trigger: One GIVEN, WHEN, and THEN signpost to a process.
 Do not read an interface or local binding in a trigger guard.
+Do not read a local binding in a trigger input.
 Make equal trigger WHEN values provably disjoint.
+Bind each selected process input schema placeholder exactly once in trigger inputs.
 Give every non-true trigger guard at least one state read.
-Select only a process without an input schema from a trigger.
 </instructions>
 
 <constants>
@@ -16,7 +17,7 @@ grammar: TEXT<<
 surface_trigger = ? <trigger id="<ID>">
 GIVEN: <GIVEN>
 WHEN: <WHEN>
-THEN: <THEN>
+THEN: <THEN> (<INPUTS>)
 </trigger> ? ;
 >>
 </constants>
@@ -26,7 +27,7 @@ THEN: <THEN>
 <trigger id="<ID>">
 GIVEN: <GIVEN>
 WHEN: <WHEN>
-THEN: <THEN>
+THEN: <THEN> (<INPUTS>)
 </trigger>
 
 WHERE:
@@ -34,5 +35,6 @@ WHERE:
 - <GIVEN> is string; True or the recursive state guard checked after WHEN..
 - <WHEN> is string; is non-empty; Why the interpreter enters the knowledge..
 - <THEN> is string; is non-empty; The local or relative process target selected by the trigger..
+- <INPUTS> is string; The input bindings that seed the selected process input schema..
 </schema>
 </schemas>
