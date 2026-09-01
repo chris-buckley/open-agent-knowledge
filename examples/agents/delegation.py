@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 import sys
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -28,7 +28,7 @@ from oak import (
     render,
     resolve,
 )
-from examples.task_reviewer import task_reviewer_node
+from examples.agents.task_reviewer import task_reviewer_node
 
 SCHEMA_WORKER_REQUEST = "task_reviewer.oak.md#schema.review-request"
 SCHEMA_WORKER_RESULT = "task_reviewer.oak.md#schema.task-review"
@@ -38,7 +38,7 @@ INTERFACE_REVIEW_REQUEST_INPUT = "interface.review-request-input"
 INTERFACE_TASK_REVIEW_OUTPUT = "interface.task-review-output"
 
 TOOL_AGENT_REVIEWER = "agent.reviewer"
-WORKER_DOCUMENT = "examples/task_reviewer.oak.md"
+WORKER_DOCUMENT = "examples/agents/task_reviewer.oak.md"
 WORKER_ARRIVAL_WHEN = "A task review is requested."
 WHEN_DELEGATION_REQUESTED = "Delegate the task review."
 
@@ -127,7 +127,7 @@ TARGET = Path(__file__).with_suffix(".oak.md")
 REQUEST_VALUES = {
     "TASK_BRIEF": "Add one bounded while to the growth example.",
     "IMPLEMENTATION_REPORT": "Added the while and regenerated the snapshot.",
-    "DIFF": "examples/compound_growth.py: +12 -2",
+    "DIFF": "examples/agents/compound_growth.py: +12 -2",
 }
 
 
@@ -164,7 +164,7 @@ def build() -> str:
     """Render, parse, resolve across the worker, execute the dispatch, and round-trip."""
     rendered = render(delegation_node)
     parsed = parse(rendered)
-    resolve(parsed, source="examples/delegation.oak.md", load=_load_worker)
+    resolve(parsed, source="examples/agents/delegation.oak.md", load=_load_worker)
     if render(parsed) != rendered:
         raise RuntimeError("delegation example changed during render and parse")
     completed = execute(
@@ -181,7 +181,7 @@ def build() -> str:
                 frozenset(RESULT_PLACEHOLDERS),
             )
         },
-        source="examples/delegation.oak.md",
+        source="examples/agents/delegation.oak.md",
         load=_load_worker,
     )
     expected_review = _reviewer_agent(None, REQUEST_VALUES)

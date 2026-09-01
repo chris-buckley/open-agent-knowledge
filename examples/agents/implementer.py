@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 import sys
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -13,13 +13,20 @@ from oak import (
     ACT,
     BindingValue,
     Call,
+    Compare,
+    Constant,
+    ConstantValue,
     Emit,
+    If,
     Instruction,
     Interface,
     InterfaceValue,
+    LiteralValue,
     Node,
     NonEmpty,
+    OneOf,
     Process,
+    Regex,
     Schema,
     Trigger,
     Type,
@@ -41,6 +48,8 @@ SCHEMA_COMPLETION = "schema.completion"
 SCHEMA_VERIFIED_CHANGESET = "schema.verified-changeset"
 SCHEMA_COMMIT = "schema.commit"
 SCHEMA_IMPLEMENTATION_REPORT = "schema.implementation-report"
+SCHEMA_ESCALATION = "schema.escalation"
+CONSTANT_COMMIT_CONVENTION = "constant.commit-convention"
 PROCESS_PLAN_TASK = "process.plan-task"
 PROCESS_IMPLEMENT_PLAN = "process.implement-plan"
 PROCESS_TEST_CHANGESET = "process.test-changeset"
@@ -50,6 +59,7 @@ PROCESS_COMMIT_CHANGESET = "process.commit-changeset"
 PROCESS_IMPLEMENT_TASK = "process.implement-task"
 INTERFACE_TASK_REQUEST_INPUT = "interface.task-request-input"
 INTERFACE_IMPLEMENTATION_REPORT_OUTPUT = "interface.implementation-report-output"
+INTERFACE_ESCALATION_OUTPUT = "interface.escalation-output"
 
 PLACEHOLDER_TASK_BRIEF = "TASK_BRIEF"
 PLACEHOLDER_CONTEXT = "CONTEXT"
@@ -62,6 +72,18 @@ PLACEHOLDER_FINDINGS = "FINDINGS"
 PLACEHOLDER_SUMMARY = "SUMMARY"
 PLACEHOLDER_STATUS = "STATUS"
 PLACEHOLDER_COMMIT = "COMMIT"
+PLACEHOLDER_COMMIT_CONVENTION = "COMMIT_CONVENTION"
+
+PLAN_WHERE = where(PLACEHOLDER_PLAN, Type(of="string"), NonEmpty(), description="the ready implementation plan")
+CHANGESET_WHERE = where(PLACEHOLDER_CHANGESET, Type(of="string"), NonEmpty(), description="the implemented code changes")
+TESTS_WHERE = where(PLACEHOLDER_TESTS, Type(of="string"), NonEmpty(), description="the verification evidence")
+FINDINGS_WHERE = where(PLACEHOLDER_FINDINGS, Type(of="string"), NonEmpty(), description="the self-review findings")
+SUMMARY_WHERE = where(PLACEHOLDER_SUMMARY, Type(of="string"), NonEmpty(), description="the implemented changes")
+STATUS_WHERE = where(PLACEHOLDER_STATUS, Type(of="string"), OneOf(values=["complete", "blocked"]), description="the completion status")
+COMPLETE_STATUS_WHERE = where(PLACEHOLDER_STATUS, Type(of="string"), OneOf(values=["complete"]), description="the complete status")
+BLOCKED_STATUS_WHERE = where(PLACEHOLDER_STATUS, Type(of="string"), OneOf(values=["blocked"]), description="the blocked status")
+BLOCKED_SUMMARY_WHERE = where(PLACEHOLDER_SUMMARY, Type(of="string"), NonEmpty(), description="the work state when blocked")
+COMMIT_WHERE = where(PLACEHOLDER_COMMIT, Type(of="string"), Regex(pattern="^[0-9a-f]{7,40}$"), description="the resulting commit hash")
 
 implementer_instructions = [
     Instruction(id=slug, body=body)
@@ -94,7 +116,7 @@ implementation_plan_schema = Schema(
     name="Implementation Plan",
     purpose="Carry one implementation plan with its questions resolved.",
     template="<PLAN>",
-    where=[where(PLACEHOLDER_PLAN, Type(of="string"), NonEmpty(), description="the ready implementation plan")],
+    where=[PLAN_WHERE],
 )
 
 changeset_schema = Schema(
@@ -102,7 +124,7 @@ changeset_schema = Schema(
     name="Changeset",
     purpose="Carry the implemented code changes.",
     template="<CHANGESET>",
-    where=[where(PLACEHOLDER_CHANGESET, Type(of="string"), NonEmpty(), description="the implemented code changes")],
+    where=[CHANGESET_WHERE],
 )
 
 verification_schema = Schema(
@@ -110,7 +132,7 @@ verification_schema = Schema(
     name="Verification",
     purpose="Carry the verification evidence for one changeset.",
     template="<TESTS>",
-    where=[where(PLACEHOLDER_TESTS, Type(of="string"), NonEmpty(), description="the verification evidence")],
+    where=[TESTS_WHERE],
 )
 
 planned_changeset_schema = Schema(
@@ -118,10 +140,7 @@ planned_changeset_schema = Schema(
     name="Planned Changeset",
     purpose="Carry the implemented changes with the plan they must satisfy.",
     template="Plan: <PLAN>\nChangeset: <CHANGESET>",
-    where=[
-        where(PLACEHOLDER_PLAN, Type(of="string"), NonEmpty(), description="the ready implementation plan"),
-        where(PLACEHOLDER_CHANGESET, Type(of="string"), NonEmpty(), description="the implemented code changes"),
-    ],
+    where=[PLAN_WHERE, CHANGESET_WHERE],
 )
 
 review_findings_schema = Schema(
@@ -129,7 +148,7 @@ review_findings_schema = Schema(
     name="Review Findings",
     purpose="Carry the self-review findings for one changeset.",
     template="<FINDINGS>",
-    where=[where(PLACEHOLDER_FINDINGS, Type(of="string"), NonEmpty(), description="the self-review findings")],
+    where=[FINDINGS_WHERE],
 )
 
 reviewed_changeset_schema = Schema(
@@ -137,10 +156,7 @@ reviewed_changeset_schema = Schema(
     name="Reviewed Changeset",
     purpose="Carry the implemented changes with the findings to apply.",
     template="Changeset: <CHANGESET>\nFindings: <FINDINGS>",
-    where=[
-        where(PLACEHOLDER_CHANGESET, Type(of="string"), NonEmpty(), description="the implemented code changes"),
-        where(PLACEHOLDER_FINDINGS, Type(of="string"), NonEmpty(), description="the self-review findings"),
-    ],
+    where=[CHANGESET_WHERE, FINDINGS_WHERE],
 )
 
 completion_schema = Schema(
@@ -148,10 +164,7 @@ completion_schema = Schema(
     name="Completion",
     purpose="Carry the completion status after findings are applied.",
     template="Status: <STATUS>\nSummary: <SUMMARY>",
-    where=[
-        where(PLACEHOLDER_STATUS, Type(of="string"), NonEmpty(), description="the completion status"),
-        where(PLACEHOLDER_SUMMARY, Type(of="string"), NonEmpty(), description="the implemented changes"),
-    ],
+    where=[STATUS_WHERE, SUMMARY_WHERE],
 )
 
 verified_changeset_schema = Schema(
@@ -159,18 +172,15 @@ verified_changeset_schema = Schema(
     name="Verified Changeset",
     purpose="Carry the implemented changes with their verification evidence.",
     template="Changeset: <CHANGESET>\nTests: <TESTS>",
-    where=[
-        where(PLACEHOLDER_CHANGESET, Type(of="string"), NonEmpty(), description="the implemented code changes"),
-        where(PLACEHOLDER_TESTS, Type(of="string"), NonEmpty(), description="the verification evidence"),
-    ],
+    where=[CHANGESET_WHERE, TESTS_WHERE],
 )
 
 commit_schema = Schema(
     id="commit",
     name="Commit",
-    purpose="Carry the resulting commit reference.",
+    purpose="Carry the resulting commit hash.",
     template="<COMMIT>",
-    where=[where(PLACEHOLDER_COMMIT, Type(of="string"), NonEmpty(), description="the resulting commit reference")],
+    where=[COMMIT_WHERE],
 )
 
 implementation_report_schema = Schema(
@@ -178,13 +188,20 @@ implementation_report_schema = Schema(
     name="Implementation Report",
     purpose="Carry the completed implementer report.",
     template="Status: <STATUS>\nSummary: <SUMMARY>\nTests: <TESTS>\nCommit: <COMMIT>\nFindings: <FINDINGS>",
-    where=[
-        where(PLACEHOLDER_STATUS, Type(of="string"), NonEmpty(), description="the completion status"),
-        where(PLACEHOLDER_SUMMARY, Type(of="string"), NonEmpty(), description="the implemented changes"),
-        where(PLACEHOLDER_TESTS, Type(of="string"), NonEmpty(), description="the verification evidence"),
-        where(PLACEHOLDER_COMMIT, Type(of="string"), NonEmpty(), description="the resulting commit reference"),
-        where(PLACEHOLDER_FINDINGS, Type(of="string"), NonEmpty(), description="the self-review findings"),
-    ],
+    where=[COMPLETE_STATUS_WHERE, SUMMARY_WHERE, TESTS_WHERE, COMMIT_WHERE, FINDINGS_WHERE],
+)
+
+escalation_schema = Schema(
+    id="escalation",
+    name="Escalation",
+    purpose="Carry the blocked outcome and its findings to the caller.",
+    template="Status: <STATUS>\nSummary: <SUMMARY>\nFindings: <FINDINGS>",
+    where=[BLOCKED_STATUS_WHERE, BLOCKED_SUMMARY_WHERE, FINDINGS_WHERE],
+)
+
+commit_convention_constant = Constant(
+    id="commit-convention",
+    value="type(scope): imperative summary",
 )
 
 implementation_requested_trigger = Trigger(
@@ -287,10 +304,11 @@ commit_changeset_process = Process(
     output=SCHEMA_COMMIT,
     steps=[
         ACT(
-            "Commit <CHANGESET> after <TESTS> and produce <COMMIT>.",
+            "Commit <CHANGESET> after <TESTS> with one <COMMIT_CONVENTION> message and produce <COMMIT>.",
             inputs=[
                 ValueBinding(placeholder=PLACEHOLDER_CHANGESET, value=BindingValue(binding=PLACEHOLDER_CHANGESET)),
                 ValueBinding(placeholder=PLACEHOLDER_TESTS, value=BindingValue(binding=PLACEHOLDER_TESTS)),
+                ValueBinding(placeholder=PLACEHOLDER_COMMIT_CONVENTION, value=ConstantValue(constant=CONSTANT_COMMIT_CONVENTION)),
             ],
             outputs=[PLACEHOLDER_COMMIT],
         ),
@@ -335,22 +353,41 @@ implement_task_process = Process(
             ],
             outputs=[PLACEHOLDER_SUMMARY, PLACEHOLDER_STATUS],
         ),
-        Call(
-            process=PROCESS_COMMIT_CHANGESET,
-            inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_CHANGESET, value=BindingValue(binding=PLACEHOLDER_CHANGESET)),
-                ValueBinding(placeholder=PLACEHOLDER_TESTS, value=BindingValue(binding=PLACEHOLDER_TESTS)),
+        If(
+            condition=Compare(
+                left=BindingValue(binding=PLACEHOLDER_STATUS),
+                operator="equals",
+                right=LiteralValue(value="blocked"),
+            ),
+            then=[
+                Emit(
+                    interface=INTERFACE_ESCALATION_OUTPUT,
+                    bindings=[
+                        ValueBinding(placeholder=PLACEHOLDER_STATUS, value=BindingValue(binding=PLACEHOLDER_STATUS)),
+                        ValueBinding(placeholder=PLACEHOLDER_SUMMARY, value=BindingValue(binding=PLACEHOLDER_SUMMARY)),
+                        ValueBinding(placeholder=PLACEHOLDER_FINDINGS, value=BindingValue(binding=PLACEHOLDER_FINDINGS)),
+                    ],
+                ),
             ],
-            outputs=[PLACEHOLDER_COMMIT],
-        ),
-        Emit(
-            interface=INTERFACE_IMPLEMENTATION_REPORT_OUTPUT,
-            bindings=[
-                ValueBinding(placeholder=PLACEHOLDER_STATUS, value=BindingValue(binding=PLACEHOLDER_STATUS)),
-                ValueBinding(placeholder=PLACEHOLDER_SUMMARY, value=BindingValue(binding=PLACEHOLDER_SUMMARY)),
-                ValueBinding(placeholder=PLACEHOLDER_TESTS, value=BindingValue(binding=PLACEHOLDER_TESTS)),
-                ValueBinding(placeholder=PLACEHOLDER_COMMIT, value=BindingValue(binding=PLACEHOLDER_COMMIT)),
-                ValueBinding(placeholder=PLACEHOLDER_FINDINGS, value=BindingValue(binding=PLACEHOLDER_FINDINGS)),
+            otherwise=[
+                Call(
+                    process=PROCESS_COMMIT_CHANGESET,
+                    inputs=[
+                        ValueBinding(placeholder=PLACEHOLDER_CHANGESET, value=BindingValue(binding=PLACEHOLDER_CHANGESET)),
+                        ValueBinding(placeholder=PLACEHOLDER_TESTS, value=BindingValue(binding=PLACEHOLDER_TESTS)),
+                    ],
+                    outputs=[PLACEHOLDER_COMMIT],
+                ),
+                Emit(
+                    interface=INTERFACE_IMPLEMENTATION_REPORT_OUTPUT,
+                    bindings=[
+                        ValueBinding(placeholder=PLACEHOLDER_STATUS, value=BindingValue(binding=PLACEHOLDER_STATUS)),
+                        ValueBinding(placeholder=PLACEHOLDER_SUMMARY, value=BindingValue(binding=PLACEHOLDER_SUMMARY)),
+                        ValueBinding(placeholder=PLACEHOLDER_TESTS, value=BindingValue(binding=PLACEHOLDER_TESTS)),
+                        ValueBinding(placeholder=PLACEHOLDER_COMMIT, value=BindingValue(binding=PLACEHOLDER_COMMIT)),
+                        ValueBinding(placeholder=PLACEHOLDER_FINDINGS, value=BindingValue(binding=PLACEHOLDER_FINDINGS)),
+                    ],
+                ),
             ],
         ),
     ],
@@ -370,8 +407,16 @@ implementation_report_output_interface = Interface(
     description="The implementer's final status and evidence.",
 )
 
+escalation_output_interface = Interface(
+    id="escalation-output",
+    direction="out",
+    schema=SCHEMA_ESCALATION,
+    description="The blocked outcome returned instead of a commit.",
+)
+
 implementer_node = Node(
     instructions=implementer_instructions,
+    constants=[commit_convention_constant],
     schemas=[
         task_request_schema,
         implementation_plan_schema,
@@ -384,6 +429,7 @@ implementer_node = Node(
         verified_changeset_schema,
         commit_schema,
         implementation_report_schema,
+        escalation_schema,
     ],
     triggers=[implementation_requested_trigger],
     processes=[
@@ -395,7 +441,7 @@ implementer_node = Node(
         commit_changeset_process,
         implement_task_process,
     ],
-    interfaces=[task_request_input_interface, implementation_report_output_interface],
+    interfaces=[task_request_input_interface, implementation_report_output_interface, escalation_output_interface],
 )
 
 TARGET = Path(__file__).with_suffix(".oak.md")
