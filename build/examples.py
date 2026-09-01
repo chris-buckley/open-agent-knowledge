@@ -904,7 +904,15 @@ def _validate_act_authoring() -> None:
 
 
 def _validate_human_examples() -> None:
-    from examples.agents import compound_growth, delegation, implementer, task_reviewer
+    from examples.agents import (
+        amendment_reviewer,
+        compound_growth,
+        delegation,
+        implementer,
+        successor,
+        successor_verifier,
+        task_reviewer,
+    )
     from examples.schemas import (
         api_coverage_table,
         code_changes,
@@ -919,9 +927,12 @@ def _validate_human_examples() -> None:
     )
 
     examples = (
+        amendment_reviewer,
         compound_growth,
         delegation,
         implementer,
+        successor_verifier,
+        successor,
         task_reviewer,
         api_coverage_table,
         code_changes,

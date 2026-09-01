@@ -1,7 +1,7 @@
 ---
 title: OAK Product Requirements
 status: draft
-updated: 2026-08-30
+updated: 2026-09-01
 owner: Christopher Buckley
 defaults:
   render: OAK
@@ -424,9 +424,9 @@ NODE
 - Name each collection with the semantic structure `<contents>_<shape>` (e.g. `report-names` as a `SlugId` or `REPORT_NAMES` as a `Placeholder`).
 - Name each boolean as a positive condition or control (e.g. `is-ready` as a `SlugId` or `IS_READY` as a `Placeholder`).
 - Name each quantity with the semantic structure `[<context>_]<quantity>_<unit>` (e.g. `poll-interval-seconds` as a `SlugId` or `POLL_INTERVAL_SECONDS` as a `Placeholder`).
-- Name each identifier value with the semantic structure `<object>_id` (e.g. `document-id` as a `SlugId` or `DOCUMENT_ID` as a `Placeholder`).
+- Name each identifier value with the semantic structure `<object>_id` (e.g. `document-id` as a `SlugId` or `DOCUMENT_ID`).
 - The mapping naming rule applies to constants, state, and process bindings.
-- Name each mapping with the semantic structure `<key>_to_<value>` (e.g. `filename-to-document-id` as a `SlugId` or `FILENAME_TO_DOCUMENT_ID` as a `Placeholder`).
+- Name each mapping with the semantic structure `<key>_to_<value>` (e.g. `filename-to-document-id` as a `SlugId` or `FILENAME_TO_DOCUMENT_ID`).
 - The lifetime rule applies to constants, state, process bindings, and interfaces.
 - Represent each variable-like value by its source and lifetime: `CONSTANT` for fixed values, `STATE` for mutable values, a process binding for local immutable values, and an `INTERFACE` binding for boundary values (e.g. `$constant.max-retries`, `$state.current-candidate`, or `$CANDIDATE`).
 - The shared naming rules apply to every entry part.
@@ -685,6 +685,9 @@ NODE
 - Encode each ported legacy format as one constrained schema document under `examples/schemas`.
 - Bind one accepted and one rejected value set per ported constraint kind across `examples/schemas`.
 - Dispatch the task reviewer as one worker agent with a schema-typed agent contract from `examples/agents/delegation.py`.
+- Challenge one amendment in `examples/agents/amendment_reviewer.py` and prove one candidate in `examples/agents/successor_verifier.py`.
+- Govern one amendment across proposal and evidence arrivals in `examples/agents/successor.py`.
+- Publish one successor only with parse, resolution, canonical, invariant, and exact-scope proof values.
 - Keep each example flat, dense, functional, and short.
 
 ### Freshness
@@ -714,12 +717,18 @@ oak
 │   ├── __init__.py
 │   ├── agents
 │   │   ├── __init__.py
+│   │   ├── amendment_reviewer.py
+│   │   ├── amendment_reviewer.oak.md
 │   │   ├── compound_growth.py
 │   │   ├── compound_growth.oak.md
 │   │   ├── delegation.py
 │   │   ├── delegation.oak.md
 │   │   ├── implementer.py
 │   │   ├── implementer.oak.md
+│   │   ├── successor.py
+│   │   ├── successor.oak.md
+│   │   ├── successor_verifier.py
+│   │   ├── successor_verifier.oak.md
 │   │   ├── task_reviewer.py
 │   │   └── task_reviewer.oak.md
 │   └── schemas
