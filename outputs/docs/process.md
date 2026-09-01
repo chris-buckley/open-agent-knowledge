@@ -5,6 +5,7 @@ Each schema is one information shape: a template with <PLACEHOLDER> slots and WH
 Process: One named ordered way to do a task.
 Do not redefine a visible immutable process binding.
 Make every process output schema placeholder visible after successful completion.
+Do not read an interface in a process with an input schema.
 Read only a visible prior process-local binding.
 Remove a process step after a path that always fails.
 </instructions>

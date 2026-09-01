@@ -143,6 +143,7 @@ Match a named tool's declared placeholder sets and schema targets.
 Use a tool in PAR only when its supplied registry confirms parallel use.
 Bind each selected process input schema placeholder exactly once in trigger inputs.
 Give every non-true trigger guard at least one state read.
+Do not read an interface in a process with an input schema.
 Read only a visible prior process-local binding.
 Reference only another placeholder in the same schema.
 Read a placeholder present in the interface schema.

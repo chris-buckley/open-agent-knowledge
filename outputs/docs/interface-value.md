@@ -5,6 +5,7 @@ Each schema is one information shape: a template with <PLACEHOLDER> slots and WH
 InterfaceValue: One placeholder value read from one active local input interface.
 Read and emit interfaces only in the active OAK document.
 Read only in or inout interfaces and emit only out or inout interfaces.
+Do not read an interface in a process with an input schema.
 Read a placeholder present in the interface schema.
 </instructions>
 
