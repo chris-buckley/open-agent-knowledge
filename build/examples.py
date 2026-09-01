@@ -318,7 +318,7 @@ def _validate_resolution() -> None:
             ),
         ),
         (
-            "trigger_process_input",
+            "trigger_contract_mismatch",
             Node(
                 triggers=[
                     Trigger(
@@ -878,6 +878,21 @@ def _validate_act_authoring() -> None:
         ),
         (ACT("Produce <NOTE>.", outputs=["NOTE"]), "ACT Produce <NOTE>. () -> NOTE"),
         (Call(process="process.run"), "CALL process.run ()"),
+        (
+            ACT("Produce <NOTE>.", output="schema.note", outputs=["NOTE"]),
+            'ACT output="schema.note": Produce <NOTE>. () -> NOTE',
+        ),
+        (
+            ACT.tool(
+                "jobs.status",
+                "Read <JOB_ID> and produce <STATUS>.",
+                input="schema.job",
+                output="schema.status",
+                inputs=[ValueBinding(placeholder="JOB_ID", value=StateValue(state="state.job-id"))],
+                outputs=["STATUS"],
+            ),
+            'ACT TOOL "jobs.status" input="schema.job" output="schema.status": Read <JOB_ID> and produce <STATUS>. (JOB_ID=$state.job-id) -> STATUS',
+        ),
     )
     for step, expected in combos:
         line = "\n".join(step_lines(step))
@@ -978,9 +993,59 @@ def _validate_contract_rules() -> None:
             ],
         )
 
-    _expect_rule("trigger_process_input", trigger_input)
+    def act_mismatch() -> None:
+        Node(
+            schemas=[raw, normal],
+            processes=[
+                Process(
+                    id="read-name",
+                    name="Read name",
+                    steps=[
+                        Act(
+                            input="schema.raw-name",
+                            instruction="Read <NOTE>.",
+                            inputs=[ValueBinding(placeholder="NOTE", value=LiteralValue(value="x"))],
+                        )
+                    ],
+                )
+            ],
+        )
+
+    def typed_constant_invalid() -> None:
+        Node(
+            schemas=[raw],
+            constants=[Constant(id="fixed-name", schema="schema.raw-name", placeholder="RAW_NAME", value=5)],
+        )
+
+    def typed_constant_unknown() -> None:
+        Node(
+            schemas=[raw],
+            constants=[Constant(id="fixed-name", schema="schema.raw-name", placeholder="MISSING", value="Ada")],
+        )
+
+    def incomplete_binding() -> None:
+        Constant(id="fixed-name", schema="schema.raw-name", value="Ada")
+
+    def reserved_instruction() -> None:
+        Act(instruction='input="schema.fake": Say <X>.', inputs=[ValueBinding(placeholder="X", value=LiteralValue(value="hi"))])
+
+    def trigger_binding_read() -> None:
+        Trigger(
+            id="invalid",
+            when="A name arrives.",
+            then="process.normalise",
+            inputs=[ValueBinding(placeholder="RAW_NAME", value=BindingValue(binding="RAW_NAME"))],
+        )
+
+    _expect_rule("trigger_contract_mismatch", trigger_input)
     _expect_rule("process_output_binding_mismatch", output_missing)
     _expect_rule("call_contract_mismatch", call_mismatch)
+    _expect_rule("act_schema_mismatch", act_mismatch)
+    _expect_rule("invalid_schema_binding", typed_constant_invalid)
+    _expect_rule("unknown_schema_placeholder", typed_constant_unknown)
+    _expect_rule("incomplete_schema_binding", incomplete_binding)
+    _expect_rule("invalid_act_instruction", reserved_instruction)
+    _expect_rule("invalid_trigger_input_value", trigger_binding_read)
 
 
 def _validate_json_ld_style_display() -> None:
