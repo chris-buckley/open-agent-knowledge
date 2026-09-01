@@ -889,9 +889,36 @@ def _validate_act_authoring() -> None:
 
 
 def _validate_human_examples() -> None:
-    from examples import compound_growth, delegation, implementer, task_reviewer
+    from examples.agents import compound_growth, delegation, implementer, task_reviewer
+    from examples.schemas import (
+        api_coverage_table,
+        code_changes,
+        code_map,
+        docs_index,
+        error,
+        hierarchical_outline,
+        ideation_list,
+        link_manifest,
+        process_execution_table,
+        smeac_plan,
+    )
 
-    examples = (compound_growth, delegation, implementer, task_reviewer)
+    examples = (
+        compound_growth,
+        delegation,
+        implementer,
+        task_reviewer,
+        api_coverage_table,
+        code_changes,
+        code_map,
+        docs_index,
+        error,
+        hierarchical_outline,
+        ideation_list,
+        link_manifest,
+        process_execution_table,
+        smeac_plan,
+    )
     for module in examples:
         rendered = module.build()
         target = module.TARGET
