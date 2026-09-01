@@ -1,0 +1,274 @@
+"""Author one leaf worker that challenges a proposed OAK amendment."""
+
+from __future__ import annotations
+
+from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from oak import (
+    ACT,
+    BindingValue,
+    Emit,
+    Instruction,
+    Interface,
+    InterfaceValue,
+    Node,
+    NonEmpty,
+    OneOf,
+    Process,
+    Schema,
+    Trigger,
+    Type,
+    ValueBinding,
+    parse,
+    render,
+    resolve,
+    where,
+)
+
+SCHEMA_AMENDMENT_REVIEW_REQUEST = "schema.amendment-review-request"
+SCHEMA_AMENDMENT_REVIEW = "schema.amendment-review"
+PROCESS_REVIEW_AMENDMENT = "process.review-amendment"
+INTERFACE_REVIEW_REQUEST_INPUT = "interface.review-request-input"
+INTERFACE_REVIEW_OUTPUT = "interface.review-output"
+
+WHEN_AMENDMENT_REVIEW_REQUESTED = "An amendment review is requested."
+
+PLACEHOLDER_CURRENT_OAK = "CURRENT_OAK"
+PLACEHOLDER_AMENDMENT_ID = "AMENDMENT_ID"
+PLACEHOLDER_AMENDMENT = "AMENDMENT"
+PLACEHOLDER_RATIONALE = "RATIONALE"
+PLACEHOLDER_EVIDENCE = "EVIDENCE"
+PLACEHOLDER_PROTECTED_INVARIANTS = "PROTECTED_INVARIANTS"
+PLACEHOLDER_DECISION = "DECISION"
+PLACEHOLDER_REVIEW_FINDINGS = "REVIEW_FINDINGS"
+PLACEHOLDER_EVIDENCE_REQUEST = "EVIDENCE_REQUEST"
+
+REQUEST_PLACEHOLDERS = (
+    PLACEHOLDER_CURRENT_OAK,
+    PLACEHOLDER_AMENDMENT_ID,
+    PLACEHOLDER_AMENDMENT,
+    PLACEHOLDER_RATIONALE,
+    PLACEHOLDER_EVIDENCE,
+    PLACEHOLDER_PROTECTED_INVARIANTS,
+)
+REVIEW_PLACEHOLDERS = (
+    PLACEHOLDER_DECISION,
+    PLACEHOLDER_REVIEW_FINDINGS,
+    PLACEHOLDER_EVIDENCE_REQUEST,
+)
+
+amendment_reviewer_instructions = [
+    Instruction(
+        id="challenge-amendment",
+        body="Challenge the amendment against the supplied evidence and protected invariants.",
+    ),
+    Instruction(
+        id="preserve-current",
+        body="Treat the current OAK document and protected invariants as read-only.",
+    ),
+    Instruction(
+        id="request-evidence",
+        body="Request evidence when the amendment cannot yet be justified.",
+    ),
+    Instruction(
+        id="reject-breach",
+        body="Reject an amendment that breaks a protected invariant.",
+    ),
+    Instruction(
+        id="forbid-publication",
+        body="Do not compile, ratify, or publish a successor.",
+    ),
+]
+
+amendment_review_request_schema = Schema(
+    id="amendment-review-request",
+    name="Amendment Review Request",
+    purpose="Carry one proposed amendment and the evidence needed to challenge it.",
+    template=(
+        "Current OAK: <CURRENT_OAK>\n"
+        "Amendment id: <AMENDMENT_ID>\n"
+        "Amendment: <AMENDMENT>\n"
+        "Rationale: <RATIONALE>\n"
+        "Evidence: <EVIDENCE>\n"
+        "Protected invariants: <PROTECTED_INVARIANTS>"
+    ),
+    where=[
+        where(
+            PLACEHOLDER_CURRENT_OAK,
+            Type(of="string"),
+            NonEmpty(),
+            description="the current canonical OAK document",
+        ),
+        where(
+            PLACEHOLDER_AMENDMENT_ID,
+            Type(of="string"),
+            NonEmpty(),
+            description="the stable amendment identifier",
+        ),
+        where(
+            PLACEHOLDER_AMENDMENT,
+            Type(of="string"),
+            NonEmpty(),
+            description="the exact proposed change",
+        ),
+        where(
+            PLACEHOLDER_RATIONALE,
+            Type(of="string"),
+            NonEmpty(),
+            description="why the proposed change is needed",
+        ),
+        where(
+            PLACEHOLDER_EVIDENCE,
+            Type(of="string"),
+            description="the supplied implementation or validation evidence, empty when absent",
+        ),
+        where(
+            PLACEHOLDER_PROTECTED_INVARIANTS,
+            Type(of="string"),
+            NonEmpty(),
+            description="the invariants every successor must preserve",
+        ),
+    ],
+)
+
+amendment_review_schema = Schema(
+    id="amendment-review",
+    name="Amendment Review",
+    purpose="Carry the independent decision and evidence request for one amendment.",
+    template=(
+        "Decision: <DECISION>\n"
+        "Findings: <REVIEW_FINDINGS>\n"
+        "Evidence request: <EVIDENCE_REQUEST>"
+    ),
+    where=[
+        where(
+            PLACEHOLDER_DECISION,
+            Type(of="string"),
+            OneOf(values=["accept", "reject", "needs-evidence"]),
+            description="the independent amendment decision",
+        ),
+        where(
+            PLACEHOLDER_REVIEW_FINDINGS,
+            Type(of="string"),
+            NonEmpty(),
+            description="the evidence-based review findings",
+        ),
+        where(
+            PLACEHOLDER_EVIDENCE_REQUEST,
+            Type(of="string"),
+            description="the missing evidence request, empty when none is needed",
+        ),
+    ],
+)
+
+amendment_review_requested_trigger = Trigger(
+    id="amendment-review-requested",
+    when=WHEN_AMENDMENT_REVIEW_REQUESTED,
+    then=PROCESS_REVIEW_AMENDMENT,
+    inputs=[
+        ValueBinding(
+            placeholder=placeholder,
+            value=InterfaceValue(
+                interface=INTERFACE_REVIEW_REQUEST_INPUT,
+                placeholder=placeholder,
+            ),
+        )
+        for placeholder in REQUEST_PLACEHOLDERS
+    ],
+)
+
+review_amendment_process = Process(
+    id="review-amendment",
+    name="Review amendment",
+    input=SCHEMA_AMENDMENT_REVIEW_REQUEST,
+    output=SCHEMA_AMENDMENT_REVIEW,
+    steps=[
+        ACT(
+            (
+                "For <AMENDMENT_ID>, challenge <AMENDMENT> with <RATIONALE> and "
+                "<EVIDENCE> against <CURRENT_OAK> and "
+                "<PROTECTED_INVARIANTS>, then produce "
+                "<DECISION>, <REVIEW_FINDINGS>, and <EVIDENCE_REQUEST>."
+            ),
+            input=SCHEMA_AMENDMENT_REVIEW_REQUEST,
+            output=SCHEMA_AMENDMENT_REVIEW,
+            inputs=[
+                ValueBinding(
+                    placeholder=placeholder,
+                    value=BindingValue(binding=placeholder),
+                )
+                for placeholder in REQUEST_PLACEHOLDERS
+            ],
+            outputs=list(REVIEW_PLACEHOLDERS),
+        ),
+        Emit(
+            interface=INTERFACE_REVIEW_OUTPUT,
+            bindings=[
+                ValueBinding(
+                    placeholder=placeholder,
+                    value=BindingValue(binding=placeholder),
+                )
+                for placeholder in REVIEW_PLACEHOLDERS
+            ],
+        ),
+    ],
+)
+
+review_request_input_interface = Interface(
+    id="review-request-input",
+    direction="in",
+    schema=SCHEMA_AMENDMENT_REVIEW_REQUEST,
+    description="The amendment package supplied by the successor coordinator.",
+)
+
+review_output_interface = Interface(
+    id="review-output",
+    direction="out",
+    schema=SCHEMA_AMENDMENT_REVIEW,
+    description="The independent amendment decision returned to the coordinator.",
+)
+
+amendment_reviewer_node = Node(
+    instructions=amendment_reviewer_instructions,
+    schemas=[
+        amendment_review_request_schema,
+        amendment_review_schema,
+    ],
+    triggers=[
+        amendment_review_requested_trigger,
+    ],
+    processes=[
+        review_amendment_process,
+    ],
+    interfaces=[
+        review_request_input_interface,
+        review_output_interface,
+    ],
+)
+
+TARGET = Path(__file__).with_suffix(".oak.md")
+
+
+def build() -> str:
+    """Render, parse, resolve, and round-trip the amendment reviewer."""
+    rendered = render(amendment_reviewer_node)
+    parsed = parse(rendered)
+    resolve(parsed)
+    if render(parsed) != rendered:
+        raise RuntimeError("amendment reviewer changed during render and parse")
+    return rendered
+
+
+def write() -> Path:
+    """Write the canonical sibling OAK snapshot."""
+    TARGET.write_text(build(), encoding="utf-8", newline="\n")
+    return TARGET
+
+
+if __name__ == "__main__":
+    print(f"wrote {write()}")
