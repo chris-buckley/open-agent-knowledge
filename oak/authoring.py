@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
+from oak.node.parts.interfaces import SchemaTarget
 from oak.node.parts.processes import Act, ValueBinding
 from oak.vocabulary import NonBlankLine, Placeholder
 
@@ -15,11 +16,15 @@ class _ActAuthor:
         self,
         instruction: NonBlankLine,
         *,
+        input: SchemaTarget | None = None,
+        output: SchemaTarget | None = None,
         inputs: Iterable[ValueBinding] = (),
         outputs: Iterable[Placeholder] = (),
     ) -> Act:
         """Return one interpreter-native act."""
         return Act(
+            input=input,
+            output=output,
             instruction=instruction,
             inputs=list(inputs),
             outputs=list(outputs),
@@ -30,12 +35,16 @@ class _ActAuthor:
         name: NonBlankLine,
         instruction: NonBlankLine,
         *,
+        input: SchemaTarget | None = None,
+        output: SchemaTarget | None = None,
         inputs: Iterable[ValueBinding] = (),
         outputs: Iterable[Placeholder] = (),
     ) -> Act:
         """Return one act bound to an exact supplied tool name."""
         return Act(
             tool=name,
+            input=input,
+            output=output,
             instruction=instruction,
             inputs=list(inputs),
             outputs=list(outputs),

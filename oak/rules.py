@@ -40,7 +40,8 @@ _RULES = (
     AuthoringRule("process_call_cycle", "Keep the local process call graph acyclic.", ("Call",)),
     AuthoringRule("call_contract_mismatch", "Match each call's inputs and outputs to the called process schemas.", ("Call",)),
     AuthoringRule("process_output_binding_mismatch", "Make every process output schema placeholder visible after successful completion.", ("Process",)),
-    AuthoringRule("trigger_process_input", "Select only a process without an input schema from a trigger.", ("Trigger",)),
+    AuthoringRule("trigger_contract_mismatch", "Bind each selected process input schema placeholder exactly once in trigger inputs.", ("Trigger",)),
+    AuthoringRule("invalid_trigger_input_value", "Do not read a local binding in a trigger input.", ("Trigger",)),
     AuthoringRule("dead_process_branch", "Remove a process branch that cannot run.", ("If", "While")),
     AuthoringRule("unreachable_process_step", "Remove a process step after a path that always fails.", ("Process",)),
     AuthoringRule("condition_group_too_short", "Give each ALL or ANY condition at least two children.", ("All", "Any")),
@@ -58,7 +59,9 @@ _RULES = (
     AuthoringRule("parallel_join_missing", "Follow a final PAR with JOIN.", ("Par",)),
     AuthoringRule("parallel_join_not_adjacent", "Put no step between PAR and JOIN.", ("Par", "Join")),
     AuthoringRule("unknown_tool", "Name a tool exposed by the supplied exact tool registry.", ("Act",)),
-    AuthoringRule("tool_contract_mismatch", "Match a named tool's declared input and output contract.", ("Act",)),
+    AuthoringRule("tool_contract_mismatch", "Match a named tool's declared placeholder sets and schema targets.", ("Act",)),
+    AuthoringRule("act_schema_mismatch", "Match act inputs and outputs to its input and output schema placeholders.", ("Act",)),
+    AuthoringRule("invalid_act_instruction", "Do not start an act instruction with an act schema attribute.", ("Act",)),
     AuthoringRule("tool_parallelism_unknown", "Use a tool in PAR only when its supplied registry confirms parallel use.", ("Par",)),
     AuthoringRule("duplicate_act_input", "Bind each act input placeholder once.", ("Act",)),
     AuthoringRule("duplicate_act_output", "Declare each act output placeholder once.", ("Act",)),
@@ -67,6 +70,10 @@ _RULES = (
     AuthoringRule("duplicate_emit_placeholder", "Bind each emitted placeholder once.", ("Emit",)),
     AuthoringRule("unbound_process_binding", "Read only a visible prior process-local binding.", ("Process",)),
     AuthoringRule("process_binding_redefined", "Do not redefine a visible immutable process binding.", ("Process",)),
+    AuthoringRule("incomplete_schema_binding", "Give a schema binding both a schema target and a placeholder.", ("Constant", "State")),
+    AuthoringRule("unknown_schema_placeholder", "Bind a placeholder present in the selected schema.", ("Constant", "State")),
+    AuthoringRule("unresolved_schema_binding", "Do not bind a placeholder that has a placeholder-valued bound.", ("Constant", "State")),
+    AuthoringRule("invalid_schema_binding", "Make every schema-bound value satisfy its placeholder constraints.", ("Constant", "State")),
     AuthoringRule("invalid_text_constant", "Give each TEXT constant one string value.", ("Constant",)),
     AuthoringRule("invalid_csv_constant", "Give each CSV constant one non-empty list of object rows.", ("Constant",)),
     AuthoringRule("csv_column_mismatch", "Use the same columns in every CSV row.", ("Constant",)),
@@ -155,12 +162,18 @@ ACT_GUIDANCE = (
     GuidanceRule("require-determinism", "Require the selected tool itself to provide deterministic behaviour when deterministic output is required."),
     GuidanceRule("expose-native", "Expose plain `ACT` as `ACT(instruction, ...)` in direct Python authoring."),
     GuidanceRule("expose-tool", "Expose named `ACT TOOL` as `ACT.tool(name, instruction, ...)` in direct Python authoring."),
+    GuidanceRule("accept-schemas", "Accept `input` and `output` schema targets in both authoring helpers."),
     GuidanceRule("return-act", "Make `ACT(...)` and `ACT.tool(...)` return the existing `Act` model."),
     GuidanceRule("keep-kind", "Keep `ACT(...)` and `ACT.tool(...)` as one `act` process step kind."),
-    GuidanceRule("keep-syntax", "Keep the rendered OAK syntax unchanged."),
     GuidanceRule("omit-infer", "Do not expose `ACT.infer`."),
     GuidanceRule("omit-use", "Do not expose `ACT.use`."),
     GuidanceRule("avoid-helper", "Add no second helper for interpreter-native work."),
+)
+
+TYPED_BINDING_GUIDANCE = (
+    GuidanceRule("bind-entry", "Bind a constant or state value to one schema placeholder with `AS` when a schema constrains it."),
+    GuidanceRule("type-act", "Give an act input and output schema targets when its values must validate at the action boundary."),
+    GuidanceRule("seed-trigger", "Seed a typed trigger-selected process through trigger inputs, one binding per input schema placeholder."),
 )
 
 DELEGATION_GUIDANCE = (
@@ -171,6 +184,7 @@ DELEGATION_GUIDANCE = (
     GuidanceRule("prefer-portable-name", "Prefer one registered portable `agent.<worker>` contract when the host permits registration."),
     GuidanceRule("use-native-name", "Use the native runner name verbatim when the host does not permit registration."),
     GuidanceRule("mirror-contract", "Give each agent tool contract the worker request placeholders as inputs and the worker result placeholders as outputs."),
+    GuidanceRule("type-dispatch-act", "Give each agent dispatch act and contract the worker request and result schemas as input and output targets."),
     GuidanceRule("keep-invocation", "Keep agent invocation, model selection, and transport in the host registry, outside the OAK document."),
     GuidanceRule("restrict-workers", "Treat the supplied registry as the worker allowlist."),
     GuidanceRule("parallelize-workers", "Run parallel workers as `PAR` children, one exact agent tool act per worker."),
@@ -187,6 +201,7 @@ AUTHORING_GUIDANCE = (
     *NAMING_GUIDANCE,
     *DECOMPOSITION_GUIDANCE,
     *ACT_GUIDANCE,
+    *TYPED_BINDING_GUIDANCE,
     *DELEGATION_GUIDANCE,
 )
 

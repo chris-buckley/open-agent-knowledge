@@ -12,9 +12,41 @@ from oak.node.parts.processes import (
     InterfaceValue,
     ProcessTarget,
     StateValue,
+    ValueBinding,
     condition_values,
 )
+from oak.rules import rule_error
 from oak.vocabulary import NonBlankLine
+
+
+def validate_trigger_contract(
+    trigger: "Trigger",
+    inputs: set[str] | None,
+) -> None:
+    """Validate one trigger against the selected process input schema."""
+    authored = [binding.placeholder for binding in trigger.inputs]
+    if inputs is None:
+        if authored:
+            raise rule_error(
+                "trigger_contract_mismatch",
+                "trigger {trigger} binds inputs but its process has no input schema",
+                {"trigger": trigger.id},
+            )
+        return
+    if len(authored) == len(inputs) and set(authored) == inputs:
+        return
+    raise rule_error(
+        "trigger_contract_mismatch",
+        (
+            "trigger {trigger} inputs differ from the process input schema; "
+            "missing: {missing}; unused: {unused}"
+        ),
+        {
+            "trigger": trigger.id,
+            "missing": ", ".join(sorted(inputs - set(authored))) or "none",
+            "unused": ", ".join(sorted(set(authored) - inputs)) or "none",
+        },
+    )
 
 
 class Trigger(Entry):
@@ -87,6 +119,34 @@ class Trigger(Entry):
             "../shared/processes.oak.md#process.write-oak",
         ],
     )
+    inputs: list[ValueBinding] = Field(
+        default_factory=list,
+        description="The input bindings that seed the selected process input schema.",
+        examples=[
+            [
+                {
+                    "placeholder": "REQUEST",
+                    "value": {
+                        "source": "interface",
+                        "interface": "interface.request",
+                        "placeholder": "REQUEST",
+                    },
+                }
+            ]
+        ],
+    )
+
+    @model_validator(mode="after")
+    def valid_inputs(self) -> Self:
+        if any(
+            isinstance(binding.value, BindingValue)
+            for binding in self.inputs
+        ):
+            raise PydanticCustomError(
+                "invalid_trigger_input_value",
+                "trigger input cannot read a local binding",
+            )
+        return self
 
     @model_validator(mode="after")
     def guard(self) -> Self:

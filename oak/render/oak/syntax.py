@@ -120,11 +120,17 @@ def value_text(value: object, *, indent: int | None = None) -> str:
     return json.dumps(value, ensure_ascii=False, indent=indent)
 
 
-def _block(identifier: str, form: str, body: str) -> str:
+def _binding_head(entry: Constant | State) -> str:
+    if entry.schema_id is None:
+        return entry.id
+    return f"{entry.id} AS {entry.schema_id}.{entry.placeholder}"
+
+
+def _block(head: str, form: str, body: str) -> str:
     if any(line == ">>" for line in body.splitlines()):
-        raise ValueError(f"constant {identifier} body contains the closing line >>")
+        raise ValueError(f"constant {head} body contains the closing line >>")
     separator = "" if body.endswith("\n") else "\n"
-    return f"{identifier}: {form}<<\n{body}{separator}>>"
+    return f"{head}: {form}<<\n{body}{separator}>>"
 
 
 def _csv_body(value: list[dict[str, object]]) -> str:
@@ -139,28 +145,29 @@ def _csv_body(value: list[dict[str, object]]) -> str:
 def constant_text(constant: Constant) -> str:
     """Return one inline or block constant entry."""
     surface_for(constant)
+    head = _binding_head(constant)
     if constant.form == "inline":
-        return f"{constant.id}: {value_text(constant.value)}"
+        return f"{head}: {value_text(constant.value)}"
     if constant.form == "text":
         if not isinstance(constant.value, str):
             raise TypeError("a text constant must contain text")
-        return _block(constant.id, "TEXT", constant.value)
+        return _block(head, "TEXT", constant.value)
     if constant.form == "json":
-        return _block(constant.id, "JSON", value_text(constant.value, indent=2))
+        return _block(head, "JSON", value_text(constant.value, indent=2))
     if constant.form == "csv":
         if not isinstance(constant.value, list):
             raise TypeError("a CSV constant must contain rows")
-        return _block(constant.id, "CSV", _csv_body(constant.value))
+        return _block(head, "CSV", _csv_body(constant.value))
     if constant.form == "yaml":
         body = yaml.safe_dump(constant.value, allow_unicode=True, default_flow_style=False, sort_keys=False).rstrip("\n")
-        return _block(constant.id, "YAML", body)
+        return _block(head, "YAML", body)
     raise TypeError(f"unsupported constant form {constant.form}")
 
 
 def named_value_line(entry: State) -> str:
     """Return one state value line."""
     surface_for(entry)
-    return f"{entry.id}: {value_text(entry.value)}"
+    return f"{_binding_head(entry)}: {value_text(entry.value)}"
 
 
 def process_value_text(value: Value) -> str:
@@ -230,13 +237,23 @@ def _suffix_text(bindings: list[ValueBinding], outputs: list[str]) -> str:
     return body
 
 
+def _act_attributes(step: Act) -> str:
+    attributes = ""
+    if step.input is not None:
+        attributes += f' input="{step.input}"'
+    if step.output is not None:
+        attributes += f' output="{step.output}"'
+    return attributes
+
+
 def _act_lines(step: Act, indent: int) -> list[str]:
     prefix = " " * indent
     surface_for(step)
+    attributes = _act_attributes(step)
     if step.tool is None:
-        head = "ACT " + step.instruction
+        head = "ACT" + attributes + (": " if attributes else " ") + step.instruction
     else:
-        head = "ACT TOOL " + value_text(step.tool) + ": " + step.instruction
+        head = "ACT TOOL " + value_text(step.tool) + attributes + ": " + step.instruction
     return [prefix + head + " " + _suffix_text(step.inputs, step.outputs)]
 
 
@@ -341,7 +358,10 @@ def trigger_lines(trigger: object) -> list[str]:
             lines = ["GIVEN: " + condition[0]]
         else:
             lines = ["GIVEN:", *("  " + line for line in condition)]
-    lines.extend(("WHEN: " + value_text(trigger.when), "THEN: " + trigger.then))
+    then_line = "THEN: " + trigger.then
+    if trigger.inputs:
+        then_line += " " + _suffix_text(trigger.inputs, [])
+    lines.extend(("WHEN: " + value_text(trigger.when), then_line))
     return lines
 
 

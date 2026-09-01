@@ -133,12 +133,20 @@ class StepModel(DiscriminatedModel):
 
 class Act(StepModel):
     """One interpreter-native or exact named-tool action."""
-    model_config = ConfigDict(json_schema_extra={"examples": [{"kind": "act", "instruction": "Turn <REQUEST> into <RESULT>.", "inputs": [{"placeholder": "REQUEST", "value": {"source": "interface", "interface": "interface.request", "placeholder": "REQUEST"}}], "outputs": ["RESULT"]}, {"kind": "act", "tool": "mcp__docs__search", "instruction": "Find <QUERY> and return <RESULT>.", "inputs": [{"placeholder": "QUERY", "value": {"source": "literal", "value": "OAK"}}], "outputs": ["RESULT"]}]})
+    model_config = ConfigDict(json_schema_extra={"examples": [{"kind": "act", "instruction": "Turn <REQUEST> into <RESULT>.", "inputs": [{"placeholder": "REQUEST", "value": {"source": "interface", "interface": "interface.request", "placeholder": "REQUEST"}}], "outputs": ["RESULT"]}, {"kind": "act", "tool": "mcp__docs__search", "input": "schema.query", "output": "schema.result", "instruction": "Find <QUERY> and return <RESULT>.", "inputs": [{"placeholder": "QUERY", "value": {"source": "literal", "value": "OAK"}}], "outputs": ["RESULT"]}]})
     kind: Literal["act"] = Field(default="act", description="The process step discriminator.", examples=["act"])
     tool: NonBlankLine | None = Field(default=None, description="The exact host tool name, or null for interpreter-native work.", examples=["mcp__docs__search"])
+    input: SchemaTarget | None = Field(default=None, description="The optional schema that validates the resolved input values before invocation.", examples=["schema.query"])
+    output: SchemaTarget | None = Field(default=None, description="The optional schema that validates the produced outputs before promotion.", examples=["schema.result"])
     instruction: NonBlankLine = Field(description="The action the interpreter or exact tool performs.", examples=["Turn <REQUEST> into <RESULT>."])
     inputs: list[ValueBinding] = Field(default_factory=list, description="The action input bindings in authored order.", examples=[[{"placeholder": "REQUEST", "value": {"source": "interface", "interface": "interface.request", "placeholder": "REQUEST"}}]])
     outputs: list[Placeholder] = Field(default_factory=list, description="The immutable local bindings the action must produce.", examples=[["RESULT"]])
+    @model_validator(mode="after")
+    def reserved_prefix(self) -> Self:
+        if self.instruction.startswith(('input="', 'output="')):
+            raise PydanticCustomError("invalid_act_instruction", "an act instruction cannot start with an act schema attribute")
+        return self
+
     @model_validator(mode="after")
     def placeholders(self) -> Self:
         input_names = [item.placeholder for item in self.inputs]
@@ -445,6 +453,32 @@ def validate_process_contract(process: Process, inputs: set[str], outputs: set[s
         "process {process} cannot supply output placeholders: {placeholders}",
         {"process": process.id, "placeholders": ", ".join(missing)},
     )
+
+
+def validate_act_contract(act: Act, inputs: set[str] | None, outputs: set[str] | None) -> None:
+    """Validate one act against its resolved input and output schemas."""
+    if inputs is not None:
+        authored = [binding.placeholder for binding in act.inputs]
+        if len(authored) != len(inputs) or set(authored) != inputs:
+            raise rule_error(
+                "act_schema_mismatch",
+                "act input bindings differ from its input schema; missing: {missing}; unused: {unused}",
+                {
+                    "missing": ", ".join(sorted(inputs - set(authored))) or "none",
+                    "unused": ", ".join(sorted(set(authored) - inputs)) or "none",
+                },
+            )
+    if outputs is not None:
+        declared = set(act.outputs)
+        if len(act.outputs) != len(outputs) or declared != outputs:
+            raise rule_error(
+                "act_schema_mismatch",
+                "act outputs differ from its output schema; missing: {missing}; unused: {unused}",
+                {
+                    "missing": ", ".join(sorted(outputs - declared)) or "none",
+                    "unused": ", ".join(sorted(declared - outputs)) or "none",
+                },
+            )
 
 
 def validate_call_contract(call: Call, inputs: set[str], outputs: set[str]) -> None:

@@ -11,7 +11,7 @@ from pydantic_core import PydanticCustomError
 
 from oak.base import Entry
 from oak.node import Node
-from oak.node.graph import entry_registry
+from oak.node.graph import entry_registry, validate_typed_value
 from oak.node.parts import (
     Act,
     All,
@@ -42,9 +42,11 @@ from oak.node.parts import (
 )
 from oak.node.parts.processes import (
     process_visible_bindings,
+    validate_act_contract,
     validate_call_contract,
     validate_process_contract,
 )
+from oak.node.parts.triggers import validate_trigger_contract
 from oak.parse import OakParseError, parse
 from oak.vocabulary.text.target_path import is_relative_target, split_target
 
@@ -123,6 +125,10 @@ def _value_targets(values: Iterable[Value]) -> Iterator[tuple[str, type[Entry]]]
 
 def _step_references(step: Step) -> Iterator[tuple[str, type[Entry]]]:
     if isinstance(step, Act):
+        if step.input is not None:
+            yield step.input, Schema
+        if step.output is not None:
+            yield step.output, Schema
         yield from _value_targets(binding.value for binding in step.inputs)
     elif isinstance(step, Set):
         yield from _value_targets((step.value,))
@@ -155,6 +161,9 @@ def _step_references(step: Step) -> Iterator[tuple[str, type[Entry]]]:
 
 def iter_targets(node: Node) -> Iterator[tuple[str, type[Entry]]]:
     """Yield every resolvable typed target in one document."""
+    for entry in (*node.constants, *node.state):
+        if entry.schema_id is not None:
+            yield entry.schema_id, Schema
     for interface in node.interfaces:
         yield interface.schema_id, Schema
     for process in node.processes:
@@ -164,6 +173,7 @@ def iter_targets(node: Node) -> Iterator[tuple[str, type[Entry]]]:
             yield process.output, Schema
     for trigger in node.triggers:
         yield trigger.then, Process
+        yield from _value_targets(binding.value for binding in trigger.inputs)
         if trigger.given is not True:
             yield from _value_targets(_condition_values(trigger.given))
     for process in node.processes:
@@ -286,6 +296,20 @@ def _validate_relative_interfaces(graph: ResolvedGraph, document: str, node: Nod
     }
     if not schemas:
         return
+    for trigger in node.triggers:
+        for binding in trigger.inputs:
+            value = binding.value
+            if (
+                isinstance(value, InterfaceValue)
+                and value.interface in schemas
+                and value.placeholder not in schemas[value.interface].placeholders
+            ):
+                _raise(
+                    "unknown_interface_placeholder",
+                    document,
+                    value.interface,
+                    f"trigger {trigger.id} reads placeholder {value.placeholder} absent from the resolved interface schema",
+                )
     for process in node.processes:
         for step in _iter_steps(process.steps):
             if isinstance(step, Emit) and step.interface in schemas:
@@ -335,15 +359,35 @@ def _validate_contracts(graph: ResolvedGraph) -> None:
                 )
             except PydanticCustomError as error:
                 _contract_error(document, f"process.{process.id}", error)
+        for entry in (*node.constants, *node.state):
+            if entry.schema_id is None or not is_relative_target(entry.schema_id):
+                continue
+            _schema_document, schema = graph.entry(document, entry.schema_id, Schema)
+            try:
+                validate_typed_value(entry, schema)
+            except PydanticCustomError as error:
+                _contract_error(document, entry.schema_id, error)
         for trigger in node.triggers:
             target_document, process = graph.entry(document, trigger.then, Process)
-            if process.input is not None:
-                _raise(
-                    "trigger_process_input",
-                    document,
-                    trigger.then,
-                    f"trigger {trigger.id} selects process {process.id} with an input schema",
+            try:
+                validate_trigger_contract(
+                    trigger,
+                    None if process.input is None else _schema_names(graph, target_document, process.input),
                 )
+            except PydanticCustomError as error:
+                _contract_error(document, trigger.then, error)
+        for process in node.processes:
+            for step in _iter_steps(process.steps):
+                if not isinstance(step, Act) or (step.input is None and step.output is None):
+                    continue
+                try:
+                    validate_act_contract(
+                        step,
+                        None if step.input is None else _schema_names(graph, document, step.input),
+                        None if step.output is None else _schema_names(graph, document, step.output),
+                    )
+                except PydanticCustomError as error:
+                    _contract_error(document, step.input or step.output or "", error)
         for process in node.processes:
             for call in _walk_calls(process.steps):
                 target_document, target = graph.entry(document, call.process, Process)

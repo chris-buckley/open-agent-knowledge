@@ -892,3 +892,66 @@ class Schema(Entry):
 
         if failures:
             raise SchemaBindingError(failures)
+
+    def bind_value(
+        self,
+        placeholder: str,
+        value: object,
+    ) -> None:
+        """Validate one value against one schema placeholder."""
+        entry = next(
+            (
+                item
+                for item in self.where
+                if item.placeholder == placeholder
+            ),
+            None,
+        )
+        if entry is None:
+            raise SchemaBindingError(
+                [
+                    BindingFailure(
+                        "unknown_binding",
+                        placeholder,
+                        "not a placeholder of this schema",
+                    )
+                ]
+            )
+
+        failures: list[BindingFailure] = []
+        values = {placeholder: value}
+        for constraint in _validation_order(
+            entry.constraints
+        ):
+            if (
+                isinstance(
+                    constraint,
+                    _BOUND_CONSTRAINTS,
+                )
+                and isinstance(
+                    constraint.value,
+                    str,
+                )
+                and constraint.value not in values
+            ):
+                continue
+
+            try:
+                constraint.check(value, values)
+            except (
+                ValueError,
+                ValidationError,
+            ) as error:
+                failures.append(
+                    BindingFailure(
+                        (
+                            "constraint_"
+                            f"{constraint.kind}"
+                        ),
+                        placeholder,
+                        _error_message(error),
+                    )
+                )
+
+        if failures:
+            raise SchemaBindingError(failures)

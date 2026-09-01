@@ -61,8 +61,10 @@ from oak.vocabulary.text.placeholder import PLACEHOLDER_SYNTAX
 
 GroupingName = Literal["xml", "markdown"]
 
+_AS_CLAUSE = r"(?: AS ([^ :]+?)\.(" + PLACEHOLDER_SYNTAX.body + r"))?"
+
 _BLOCK_CONSTANT_OPEN = re.compile(
-    r"^([a-z][a-z0-9]*(?:-[a-z0-9]+)*): (TEXT|JSON|CSV|YAML)<<$"
+    r"^([a-z][a-z0-9]*(?:-[a-z0-9]+)*)" + _AS_CLAUSE + r": (TEXT|JSON|CSV|YAML)<<$"
 )
 
 
@@ -299,7 +301,7 @@ def _csv_value(body: str, path: str, line: int) -> list[dict[str, object]]:
 def _named_values(lines: list[str], start: int, *, constants: bool) -> list[Constant] | list[State]:
     result: list[Constant] | list[State] = []
     index = 0
-    inline = re.compile(r"^([a-z][a-z0-9]*(?:-[a-z0-9]+)*): (.+)$")
+    inline = re.compile(r"^([a-z][a-z0-9]*(?:-[a-z0-9]+)*)" + _AS_CLAUSE + r": (.+)$")
     while index < len(lines):
         if lines[index] == "":
             index += 1
@@ -307,7 +309,7 @@ def _named_values(lines: list[str], start: int, *, constants: bool) -> list[Cons
         number = start + index
         block_match = _BLOCK_CONSTANT_OPEN.fullmatch(lines[index])
         if block_match:
-            identifier, form = block_match.groups()
+            identifier, schema_target, placeholder, form = block_match.groups()
             index += 1
             body_lines: list[str] = []
             while index < len(lines) and lines[index] != ">>":
@@ -334,17 +336,17 @@ def _named_values(lines: list[str], start: int, *, constants: bool) -> list[Cons
                 except yaml.YAMLError as error:
                     _fail("invalid_yaml", f"constants.{identifier}", number, str(error))
                 constant_form = "yaml"
-            result.append(Constant(id=identifier, form=constant_form, value=value))
+            result.append(Constant(id=identifier, form=constant_form, schema=schema_target, placeholder=placeholder, value=value))
             continue
         inline_match = inline.fullmatch(lines[index])
         if inline_match is None:
             _fail("named_value", "constants" if constants else "state", number, "expected id: JSON")
-        identifier, source = inline_match.groups()
+        identifier, schema_target, placeholder, source = inline_match.groups()
         value = _json_value(source, f"{'constants' if constants else 'state'}.{identifier}", number)
         if constants:
-            result.append(Constant(id=identifier, value=value))
+            result.append(Constant(id=identifier, schema=schema_target, placeholder=placeholder, value=value))
         else:
-            result.append(State(id=identifier, value=value))
+            result.append(State(id=identifier, schema=schema_target, placeholder=placeholder, value=value))
         index += 1
     return result
 
@@ -572,6 +574,30 @@ def _suffix(source: str) -> tuple[list[tuple[str, str]], list[str]] | None:
     return bindings, outputs
 
 
+_ACT_INPUT_RE = re.compile(r'^ input="([^"]+)"')
+_ACT_OUTPUT_RE = re.compile(r'^ output="([^"]+)"')
+
+
+def _act_attributes(source: str) -> tuple[str | None, str | None, str] | None:
+    """Return (input, output, body) when source starts with act schema attributes."""
+    input_target = None
+    output_target = None
+    rest = source
+    match = _ACT_INPUT_RE.match(rest)
+    if match:
+        input_target = match.group(1)
+        rest = rest[match.end() :]
+    match = _ACT_OUTPUT_RE.match(rest)
+    if match:
+        output_target = match.group(1)
+        rest = rest[match.end() :]
+    if input_target is None and output_target is None:
+        return None
+    if not rest.startswith(": "):
+        return None
+    return input_target, output_target, rest[2:]
+
+
 def _suffix_bindings(
     bindings: list[tuple[str, str]],
     path: str,
@@ -606,6 +632,8 @@ def _steps(
         text = lines[index][indent:]
         if text in stop:
             break
+        act_input: str | None = None
+        act_output: str | None = None
         if text.startswith("ACT TOOL "):
             rest = text[len("ACT TOOL ") :]
             try:
@@ -613,12 +641,23 @@ def _steps(
                 tool, consumed = decoder.raw_decode(rest)
             except json.JSONDecodeError as error:
                 _fail("act_tool", path, number, str(error))
-            if not isinstance(tool, str) or not rest[consumed:].startswith(": "):
+            if not isinstance(tool, str):
                 _fail("act_tool", path, number, "ACT TOOL needs one JSON string and colon")
-            body = rest[consumed + 2 :]
+            remainder = rest[consumed:]
+            attributes = _act_attributes(remainder)
+            if attributes is not None:
+                act_input, act_output, body = attributes
+            elif remainder.startswith(": "):
+                body = remainder[2:]
+            else:
+                _fail("act_tool", path, number, "ACT TOOL needs one JSON string and colon")
         elif text.startswith("ACT "):
             tool = None
-            body = text[4:]
+            attributes = _act_attributes(text[3:])
+            if attributes is not None:
+                act_input, act_output, body = attributes
+            else:
+                body = text[4:]
         else:
             body = None
         if body is not None:
@@ -633,6 +672,8 @@ def _steps(
             result.append(
                 Act(
                     tool=tool,
+                    input=act_input,
+                    output=act_output,
                     instruction=body[:position],
                     inputs=_suffix_bindings(bindings, path, number),
                     outputs=outputs,
@@ -826,10 +867,21 @@ def _triggers(lines: list[str], start: int, grouping: GroupingName) -> list[Trig
         if index >= len(body) or not body[index].startswith("THEN: "):
             _fail("trigger_then", f"triggers.{attributes['id']}", number + index + 1, "trigger needs THEN")
         then = body[index][6:]
+        inputs = []
+        split_at = then.find(" (")
+        if split_at != -1:
+            parsed = _suffix(then[split_at + 1 :])
+            if parsed is None:
+                _fail("trigger_inputs", f"triggers.{attributes['id']}", number + index + 1, "THEN needs one (bindings) suffix")
+            suffix_bindings, suffix_outputs = parsed
+            if suffix_outputs:
+                _fail("trigger_inputs", f"triggers.{attributes['id']}", number + index + 1, "THEN accepts no outputs")
+            inputs = _suffix_bindings(suffix_bindings, f"triggers.{attributes['id']}", number + index + 1)
+            then = then[:split_at]
         index += 1
         if index != len(body):
             _fail("trigger_trailing", f"triggers.{attributes['id']}", number + index + 1, "content follows THEN")
-        result.append(Trigger(id=attributes["id"], given=given, when=when, then=then))
+        result.append(Trigger(id=attributes["id"], given=given, when=when, then=then, inputs=inputs))
     return result
 
 

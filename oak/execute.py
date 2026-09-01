@@ -38,6 +38,7 @@ from oak.node.parts import (
     Schema,
     SchemaBindingError,
     Set,
+    State,
     StateValue,
     Step,
     Trigger,
@@ -66,6 +67,8 @@ class ToolContract:
     inputs: frozenset[str]
     outputs: frozenset[str]
     parallel: bool = False
+    input: str | None = None
+    output: str | None = None
 
 
 class Arrival(OakModel):
@@ -319,15 +322,19 @@ def _parallel(
         }
         for child in acts
     ]
+    for child, values in zip(acts, prepared, strict=True):
+        _validate_act_values(graph, document, child.input, values, "invalid_act_input")
     futures: list[Future[dict[str, JsonValue]]] = []
     with ThreadPoolExecutor(max_workers=len(acts)) as executor:
         for child, values in zip(acts, prepared, strict=True):
             futures.append(executor.submit(_invoke, child, values, None, tools))
         results: list[dict[str, JsonValue] | None] = []
         failures: list[str] = []
-        for future in futures:
+        for child, future in zip(acts, futures, strict=True):
             try:
-                results.append(future.result())
+                result = future.result()
+                _validate_act_values(graph, document, child.output, result, "invalid_act_output")
+                results.append(result)
             except Exception as error:
                 results.append(None)
                 failures.append(str(error))
@@ -345,6 +352,38 @@ def _schema(
         return None
     _schema_document, schema = graph.entry(document, target, Schema)
     return schema
+
+
+def _validate_act_values(
+    graph: ResolvedGraph,
+    document: str,
+    target: str | None,
+    values: Mapping[str, JsonValue],
+    code: str,
+) -> None:
+    schema = _schema(graph, document, target)
+    if schema is None:
+        return
+    try:
+        schema.bind(values)
+    except SchemaBindingError as error:
+        raise ExecutionError(code, f"{target}: {error}") from None
+
+
+def _validate_state_value(
+    graph: ResolvedGraph,
+    document: str,
+    entry: State,
+    value: JsonValue,
+    key: str,
+) -> None:
+    schema = _schema(graph, document, entry.schema_id)
+    if schema is None or entry.placeholder is None:
+        return
+    try:
+        schema.bind_value(entry.placeholder, value)
+    except SchemaBindingError as error:
+        raise ExecutionError("invalid_state_value", f"state {key}: {error}") from None
 
 
 def _run_process(
@@ -399,13 +438,19 @@ def _run_steps(
                 binding.placeholder: _resolve_value(graph, document, binding.value, state, interfaces, bindings)
                 for binding in step.inputs
             }
-            bindings.update(_invoke(step, values, act, tools))
+            _validate_act_values(graph, document, step.input, values, "invalid_act_input")
+            outputs = _invoke(step, values, act, tools)
+            _validate_act_values(graph, document, step.output, outputs, "invalid_act_output")
+            bindings.update(outputs)
         elif isinstance(step, Set):
             identifier = target_id(step.state)
+            _state_document, entry = graph.entry(document, step.state, State)
             key = graph.display_target(document, "state", identifier)
-            state[key] = _JSON_ADAPTER.validate_python(
+            resolved = _JSON_ADAPTER.validate_python(
                 _resolve_value(graph, document, step.value, state, interfaces, bindings)
             )
+            _validate_state_value(graph, _state_document, entry, resolved, key)
+            state[key] = resolved
         elif isinstance(step, Emit):
             identifier = target_id(step.interface)
             _interface_document, interface = graph.entry(document, step.interface, Interface)
@@ -566,6 +611,12 @@ def execute(
             + "; unknown: "
             + (", ".join(sorted(supplied_state - expected_state)) or "none"),
         )
+    for document, graph_node in graph.documents.items():
+        for entry in graph_node.state:
+            if entry.schema_id is None:
+                continue
+            key = graph.display_target(document, "state", entry.id)
+            _validate_state_value(graph, document, entry, working_state[key], key)
     active = _active_interfaces(graph, arrival)
     matches: list[Trigger] = []
     for trigger in node.triggers:
@@ -578,12 +629,16 @@ def execute(
     if not matches:
         return ExecutionResult(state=working_state)
     process_document, process = graph.entry(graph.root, matches[0].then, Process)
+    seeded = {
+        binding.placeholder: _resolve_value(graph, graph.root, binding.value, working_state, active, {})
+        for binding in matches[0].inputs
+    }
     emissions: list[Emission] = []
     _run_process(
         graph,
         process_document,
         process,
-        {},
+        seeded,
         working_state,
         active,
         emissions,

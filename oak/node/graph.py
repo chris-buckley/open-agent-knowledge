@@ -46,9 +46,11 @@ from oak.node.parts import (
 )
 from oak.node.parts.processes import (
     process_visible_bindings,
+    validate_act_contract,
     validate_call_contract,
     validate_process_contract,
 )
+from oak.node.parts.triggers import validate_trigger_contract
 from oak.rules import rule_error
 from oak.vocabulary.text.target_path import is_relative_target, target_id
 
@@ -65,6 +67,8 @@ class ToolContractLike(Protocol):
     inputs: frozenset[str]
     outputs: frozenset[str]
     parallel: bool
+    input: str | None
+    output: str | None
 
 
 def iter_entries(node: Node) -> Iterator[Entry]:
@@ -348,6 +352,75 @@ def _static_emit_values(
     return values
 
 
+def _act_contract(
+    registry: Mapping[str, Entry],
+    process: Process,
+    step: Act,
+) -> None:
+    input_schema = _process_schema(registry, process, step.input)
+    output_schema = _process_schema(registry, process, step.output)
+    input_known = step.input is None or input_schema is not None
+    output_known = step.output is None or output_schema is not None
+    if input_known and output_known:
+        validate_act_contract(
+            step,
+            None if input_schema is None else input_schema.placeholders,
+            None if output_schema is None else output_schema.placeholders,
+        )
+
+
+def validate_typed_value(entry: Constant | State, schema: Schema) -> None:
+    """Validate one AS-bound entry value against its resolved schema."""
+    source_type = type(entry).__name__.lower()
+    if entry.placeholder not in schema.placeholders:
+        raise rule_error(
+            "unknown_schema_placeholder",
+            "{source_type} {source} binds placeholder {placeholder} absent from schema {schema}",
+            {
+                "source_type": source_type,
+                "source": entry.id,
+                "placeholder": entry.placeholder,
+                "schema": schema.id,
+            },
+        )
+    where = next(item for item in schema.where if item.placeholder == entry.placeholder)
+    if where.references:
+        raise rule_error(
+            "unresolved_schema_binding",
+            "{source_type} {source} binds placeholder {placeholder} with a placeholder-valued bound",
+            {
+                "source_type": source_type,
+                "source": entry.id,
+                "placeholder": entry.placeholder,
+            },
+        )
+    try:
+        schema.bind_value(entry.placeholder, entry.value)
+    except SchemaBindingError as error:
+        raise rule_error(
+            "invalid_schema_binding",
+            "{source_type} {source} value fails schema {schema}: {reason}",
+            {
+                "source_type": source_type,
+                "source": entry.id,
+                "schema": schema.id,
+                "reason": str(error),
+            },
+        ) from None
+
+
+def _validate_typed_entries(
+    registry: Mapping[str, Entry],
+    node: Node,
+) -> None:
+    for entry in (*node.constants, *node.state):
+        if entry.schema_id is None:
+            continue
+        schema = _target(registry, entry, entry.schema_id, Schema)
+        if schema is not None:
+            validate_typed_value(entry, schema)
+
+
 def _call_contract(
     registry: Mapping[str, Entry],
     source: Process,
@@ -473,13 +546,17 @@ def _validate_steps(
                 if isinstance(child, Act):
                     for binding in child.inputs:
                         _validate_value(registry, process, binding.value)
+                    _act_contract(registry, process, child)
             continue
         if isinstance(step, Call):
             target = _target(registry, process, step.process, Process)
             if target is not None:
                 _call_contract(registry, process, step, target)
             continue
-        if isinstance(step, (Act, Fail, Join)):
+        if isinstance(step, Act):
+            _act_contract(registry, process, step)
+            continue
+        if isinstance(step, (Fail, Join)):
             continue
         raise TypeError(f"unsupported process step {type(step).__name__}")
 
@@ -712,12 +789,15 @@ def _validate_triggers(
     by_when: dict[str, list[Trigger]] = defaultdict(list)
     for trigger in triggers:
         process = _target(registry, trigger, trigger.then, Process)
-        if process is not None and process.input is not None:
-            raise rule_error(
-                "trigger_process_input",
-                "trigger {trigger} selects process {process} with an input schema",
-                {"trigger": trigger.id, "process": process.id},
-            )
+        for binding in trigger.inputs:
+            _validate_value(registry, trigger, binding.value)
+        if process is not None:
+            input_schema = _process_schema(registry, process, process.input)
+            if process.input is None or input_schema is not None:
+                validate_trigger_contract(
+                    trigger,
+                    None if input_schema is None else input_schema.placeholders,
+                )
         if trigger.given is not True:
             _validate_condition(registry, trigger, trigger.given)
         by_when[trigger.when].append(trigger)
@@ -771,7 +851,12 @@ def validate_tools(
                 )
             authored_inputs = frozenset(binding.placeholder for binding in step.inputs)
             authored_outputs = frozenset(step.outputs)
-            if authored_inputs != contract.inputs or authored_outputs != contract.outputs:
+            if (
+                authored_inputs != contract.inputs
+                or authored_outputs != contract.outputs
+                or step.input != contract.input
+                or step.output != contract.output
+            ):
                 raise PydanticCustomError(
                     "tool_contract_mismatch",
                     "process {process} act contract differs from tool {tool}",
@@ -790,6 +875,7 @@ def validate_graph(node: Node) -> None:
     registry = entry_registry(node)
     for interface in node.interfaces:
         _interface_schema(registry, interface)
+    _validate_typed_entries(registry, node)
     for process in node.processes:
         _validate_process_contract(registry, process)
     _validate_triggers(registry, node.triggers)

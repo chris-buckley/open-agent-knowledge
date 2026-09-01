@@ -5,7 +5,9 @@ from typing import Literal, Self
 from pydantic import ConfigDict, Field, JsonValue, model_validator
 
 from oak.base import Entry
+from oak.node.parts.interfaces import SchemaTarget
 from oak.rules import rule_error
+from oak.vocabulary import Placeholder
 
 ConstantForm = Literal["inline", "text", "json", "csv", "yaml"]
 
@@ -70,6 +72,18 @@ class Constant(Entry):
         description="The OAK constant form.",
         examples=["inline", "text", "json", "csv", "yaml"],
     )
+    schema_id: SchemaTarget | None = Field(
+        default=None,
+        alias="schema",
+        title="Schema",
+        description="The optional local or relative schema target whose placeholder constrains the value.",
+        examples=["schema.scaling"],
+    )
+    placeholder: Placeholder | None = Field(
+        default=None,
+        description="The schema placeholder the value must satisfy.",
+        examples=["FACTOR"],
+    )
     value: JsonValue = Field(
         description="The value that stays the same.",
         examples=[
@@ -79,6 +93,15 @@ class Constant(Entry):
             [{"service": "billing", "enabled": True}],
         ],
     )
+
+    @model_validator(mode="after")
+    def valid_binding(self) -> Self:
+        if (self.schema_id is None) != (self.placeholder is None):
+            raise rule_error(
+                "incomplete_schema_binding",
+                "a schema binding needs both a schema target and a placeholder",
+            )
+        return self
 
     @model_validator(mode="after")
     def valid_form(self) -> Self:

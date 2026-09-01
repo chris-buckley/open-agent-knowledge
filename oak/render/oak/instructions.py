@@ -3,7 +3,7 @@
 from collections.abc import Iterator
 
 from oak.node.model import Node
-from oak.node.parts.processes import Call, Foreach, If, Par, Step, While
+from oak.node.parts.processes import Act, Call, Foreach, If, Par, Step, While
 
 REFERENCE_INSTRUCTION = (
     "$ reads a value; local targets start with their part; relative targets "
@@ -30,11 +30,29 @@ CONTRACT_INSTRUCTION = (
     "and CALL binds inputs and promotes declared outputs."
 )
 
+ACT_SCHEMA_INSTRUCTION = (
+    "ACT input and output schemas validate resolved inputs before invocation "
+    "and produced outputs before promotion."
+)
+
+TRIGGER_INPUT_INSTRUCTION = (
+    "Trigger inputs seed the selected process input schema; "
+    "each seeded value validates before the process runs."
+)
+
+TYPED_ENTRY_INSTRUCTION = (
+    "AS binds one constant or state value to one schema placeholder; "
+    "the value must satisfy that placeholder at resolution and before each state write commits."
+)
+
 BUILT_IN_INSTRUCTIONS = frozenset(
     (
         REFERENCE_INSTRUCTION,
         CONTROL_INSTRUCTION,
         CONTRACT_INSTRUCTION,
+        ACT_SCHEMA_INSTRUCTION,
+        TRIGGER_INPUT_INSTRUCTION,
+        TYPED_ENTRY_INSTRUCTION,
         *(text for _field, text in _PART_INSTRUCTIONS),
     )
 )
@@ -68,6 +86,12 @@ def instruction_lines(node: Node) -> list[str]:
         or any(isinstance(step, Call) and (step.inputs or step.outputs) for step in steps)
     ):
         lines.append(CONTRACT_INSTRUCTION)
+    if any(isinstance(step, Act) and (step.input is not None or step.output is not None) for step in steps):
+        lines.append(ACT_SCHEMA_INSTRUCTION)
+    if any(trigger.inputs for trigger in node.triggers):
+        lines.append(TRIGGER_INPUT_INSTRUCTION)
+    if any(entry.schema_id is not None for entry in (*node.constants, *node.state)):
+        lines.append(TYPED_ENTRY_INSTRUCTION)
     for field, instruction in _PART_INSTRUCTIONS:
         if getattr(node, field):
             lines.append(instruction)

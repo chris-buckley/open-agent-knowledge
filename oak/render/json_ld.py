@@ -277,6 +277,10 @@ def _step(document: str, step: Step) -> dict[str, object]:
         node["instruction"] = step.instruction
         if step.tool is not None:
             node["tool"] = step.tool
+        if step.input is not None:
+            node["input"] = {"@id": target_id(document, step.input)}
+        if step.output is not None:
+            node["output"] = {"@id": target_id(document, step.output)}
         node["inputs"] = [_binding(document, binding) for binding in step.inputs]
         node["outputs"] = list(step.outputs)
     elif isinstance(step, Set):
@@ -321,19 +325,30 @@ def _entry(document: str, entry: Entry) -> dict[str, object]:
     if isinstance(entry, Instruction):
         return {"@id": entry_id(document, "instruction", entry.id), "@type": "oak:Instruction", "body": entry.body}
     if isinstance(entry, Constant):
-        return {"@id": entry_id(document, "constant", entry.id), "@type": "oak:Constant", "form": entry.form, "value": _json_literal(entry.value)}
+        node: dict[str, object] = {"@id": entry_id(document, "constant", entry.id), "@type": "oak:Constant", "form": entry.form, "value": _json_literal(entry.value)}
+        if entry.schema_id is not None:
+            node["schema"] = {"@id": target_id(document, entry.schema_id)}
+            node["placeholder"] = entry.placeholder
+        return node
     if isinstance(entry, Schema):
         return _schema(document, entry)
     if isinstance(entry, State):
-        return {"@id": entry_id(document, "state", entry.id), "@type": "oak:State", "value": _json_literal(entry.value)}
+        node = {"@id": entry_id(document, "state", entry.id), "@type": "oak:State", "value": _json_literal(entry.value)}
+        if entry.schema_id is not None:
+            node["schema"] = {"@id": target_id(document, entry.schema_id)}
+            node["placeholder"] = entry.placeholder
+        return node
     if isinstance(entry, Trigger):
-        return {
+        node = {
             "@id": entry_id(document, "trigger", entry.id),
             "@type": "oak:Trigger",
             "given": True if entry.given is True else _condition(document, entry.given),
             "when": entry.when,
             "then": {"@id": target_id(document, entry.then)},
         }
+        if entry.inputs:
+            node["inputs"] = [_binding(document, binding) for binding in entry.inputs]
+        return node
     if isinstance(entry, Process):
         node: dict[str, object] = {
             "@id": entry_id(document, "process", entry.id),
