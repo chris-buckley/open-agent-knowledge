@@ -69,10 +69,13 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 30. Reject an unresolved relative target when explicit resolution is requested.
 31. Reject an unknown tool or a named-tool act that conflicts with its supplied registry contract.
 32. Reject a par tool whose supplied registry does not confirm parallel use.
-33. Reject a trigger-selected process with an input schema.
+33. Reject a trigger whose input set differs from the selected process input schema, including inputs on a process without one.
 34. Reject a process that cannot supply every output schema placeholder after successful completion.
 35. Reject a call whose input set differs from the called process input schema or whose output set differs from its output schema.
 36. Reject a while with no steps or a limit less than one.
+37. Reject a trigger input that reads a local binding.
+38. Reject an act whose inputs differ from its input schema placeholders or whose outputs differ from its output schema placeholders.
+39. Reject a schema binding without both a schema target and a placeholder, with a placeholder absent from the schema, with a placeholder-valued bound, or with a value that fails the placeholder constraints.
 
 ## Structure
 
@@ -109,7 +112,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Do not scan directories, guess filenames, use the working directory as a registry, or fetch the network during resolution.
 - Pydantic v2 is the programmatic authoring and validation form.
 - OAK text is the human and interpreter authoring surface.
-- Constants and state hold any JSON value.
+- Constants and state hold any JSON value; an `AS` schema binding constrains the bound value.
 - Validation is strict: no type coercion and no unknown fields.
 - Give every model and field a title, a description, and examples.
 - Give every concrete authored text variant one surface descriptor.
@@ -143,6 +146,10 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Constants are values that stay the same in every use of the knowledge.
 - Give each constant one `form` selected from (inline|text|json|csv|yaml).
 - Default each constant form to `inline`.
+- Give each constant an optional schema binding: one local or relative schema target and one placeholder of that schema.
+- Require both binding fields or neither.
+- Reject a bound placeholder absent from the schema or carrying a placeholder-valued bound.
+- Validate each bound constant value against its placeholder constraints during node and graph validation.
 - Render an inline constant as one JSON value on one line.
 - Render a block constant with one (`TEXT<<`|`JSON<<`|`CSV<<`|`YAML<<`) opening line and one `>>` closing line.
 - Reject `>>` as a line inside a block body.
@@ -180,6 +187,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Resolve placeholder-valued bounds within the same schema instance.
 - Apply datatype validation before each bound comparison.
 - Accept placeholder bindings from the interpreter instead of recovering them from rendered text.
+- Validate one value against one schema placeholder with `Schema.bind_value`.
 - Raise `SchemaBindingError` with every binding failure.
 - Give each binding failure one code, one placeholder, and one message.
 
@@ -188,16 +196,23 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - State holds JSON values that change while the interpreter uses the knowledge.
 - Keep authored state ids fixed for one document.
 - Stage state writes until successful top-level process completion.
+- Give each state entry the same optional schema binding as a constant.
+- Validate each bound authored value during node and graph validation.
+- Validate each bound supplied value before trigger selection with `invalid_state_value`.
+- Validate each bound state write before staging with `invalid_state_value`.
 
 ## Triggers
 
 - Triggers route intent to knowledge.
-- A trigger contains one `given`, one `when`, and one `then`.
+- A trigger contains one `given`, one `when`, one `then`, and one input binding list.
 - Give `given` either true or one recursive condition.
 - Default direct Pydantic trigger authoring to `given=true`.
 - Render `GIVEN` in every trigger.
 - Require each `when` value to use `NonBlankLine`.
 - Give `then` one local or relative process target.
+- Give each trigger input one value binding whose value is not a local binding.
+- Require the trigger input set to equal the selected process input schema placeholder set, empty when it declares none.
+- Resolve trigger input values from the root document, validate them through the process input schema, and seed them as the initial process-local bindings.
 - Match trigger `when` by exact string equality.
 - Evaluate `given` only after `when` matches.
 - Evaluate a condition tree in authored order with short-circuiting.
@@ -219,16 +234,20 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Give each process one `ProcessName`, optional input and output schema targets, and one or more steps.
 - Use each input schema placeholder as one initial process-local binding.
 - Require every output schema placeholder to be visible after successful process completion.
-- Require each trigger-selected process to declare no input schema.
+- Seed a trigger-selected process input from its trigger inputs.
 - Author the first process-name word as the action and the second as its object.
 - Execute process steps in authored order.
-- Give each act one instruction, one input binding list, one output placeholder list, and one optional exact tool name.
+- Give each act one instruction, one input binding list, one output placeholder list, one optional exact tool name, and optional input and output schema targets.
 - Treat an act without a tool as interpreter-native work.
 - Preserve a named tool string verbatim.
 - Require each act instruction placeholder to occur once in its inputs or outputs.
 - Reject a duplicate act input or output.
 - Reject an act placeholder used as both input and output.
 - Require an act to return exactly its declared outputs.
+- Require act inputs to equal its input schema placeholders and act outputs to equal its output schema placeholders when declared.
+- Reject an act instruction that starts with an act schema attribute.
+- Validate resolved act input values through the act input schema before invocation with `invalid_act_input`.
+- Validate act outputs through the act output schema before promotion with `invalid_act_output`.
 - Store each act output as an immutable process-local JSON binding.
 - Give each condition one of (compare|all|any|not).
 - Give each compare one left value, one operator, and one right value.
@@ -270,6 +289,8 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Fail with `while_limit_reached` when the condition remains true after the authored limit.
 - Give each par one or more exact named-tool acts.
 - Resolve every par input before launching any child.
+- Fail a par before launching any child when input resolution or act input validation fails.
+- Treat an act output validation failure inside par as one child failure.
 - Give every par child the same immutable visible-binding snapshot.
 - Launch par children in authored order and permit completion in any order.
 - Keep par outputs pending and invisible before join.
@@ -291,6 +312,8 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Require the supplied state target set to equal the resolved authored state target set.
 - Execute one cycle with `execute(document, arrival, state, act=..., tools=...)`.
 - Require an interpreter-native act handler only when an unnamed act runs.
+- Give each supplied tool contract one handler, one input placeholder set, one output placeholder set, one parallel flag, and optional input and output schema targets.
+- Reject a named-tool act whose placeholder sets or schema targets differ from its supplied contract.
 - Validate each act or tool result against its declared output set.
 - Return the selected process target, committed state, and ordered emissions after success.
 - Return no process and no emission when no trigger matches.
@@ -328,6 +351,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Define `ValueReference` as `$` followed by one (constant target|local state target|local interface placeholder path|Placeholder).
 - `$` reads a process value.
 - Use `TargetPath` without `$` for each (SET|CALL|EMIT|THEN|schema) target.
+- Define a schema binding clause as ` AS `, one schema target, `.`, and one placeholder.
 - Delimit each placeholder with `<` and `>` in schema templates, `Where` lines, and act instructions.
 - Render each binding target and act output as a bare placeholder.
 - Define `Datatype` as (string|integer|number|boolean|quantity|datetime|uri|path).
@@ -437,12 +461,18 @@ NODE
 - Require the selected tool itself to provide deterministic behaviour when deterministic output is required.
 - Expose plain `ACT` as `ACT(instruction, ...)` in direct Python authoring.
 - Expose named `ACT TOOL` as `ACT.tool(name, instruction, ...)` in direct Python authoring.
+- Accept `input` and `output` schema targets in both authoring helpers.
 - Make `ACT(...)` and `ACT.tool(...)` return the existing `Act` model.
 - Keep `ACT(...)` and `ACT.tool(...)` as one `act` process step kind.
-- Keep the rendered OAK syntax unchanged.
 - Do not expose `ACT.infer`.
 - Do not expose `ACT.use`.
 - Add no second helper for interpreter-native work.
+
+### Schema bindings
+
+- Bind a constant or state value to one schema placeholder with `AS` when a schema constrains it.
+- Give an act input and output schema targets when its values must validate at the action boundary.
+- Seed a typed trigger-selected process through trigger inputs, one binding per input schema placeholder.
 
 ### Delegation
 
@@ -453,6 +483,7 @@ NODE
 - Prefer one registered portable `agent.<worker>` contract when the host permits registration.
 - Use the native runner name verbatim when the host does not permit registration.
 - Give each agent tool contract the worker request placeholders as inputs and the worker result placeholders as outputs.
+- Give each agent dispatch act and contract the worker request and result schemas as input and output targets.
 - Keep agent invocation, model selection, and transport in the host registry, outside the OAK document.
 - Treat the supplied registry as the worker allowlist.
 - Run parallel workers as `PAR` children, one exact agent tool act per worker.
@@ -519,13 +550,16 @@ NODE
 - Separate the interpretation preamble from authored instructions with one blank line.
 - Generate built-in instructions only for authored features present in the node.
 - Render each trigger as one body entry with `id`, `GIVEN`, `WHEN`, and `THEN`.
-- Render each state and inline constant as its id, `: `, and one JSON value.
-- Render each block constant with its form opener, body, and closing line.
+- End `THEN` with one binding suffix only when the trigger has inputs.
+- Render each state and inline constant as its id, an optional schema binding clause, `: `, and one JSON value.
+- Render each block constant with its id, an optional schema binding clause, its form opener, body, and closing line.
 - Render each process with its id, name, optional input and output schema targets, and typed steps.
 - Let line order carry step sequence.
 - Indent nested condition and step bodies by two spaces.
 - Render each process value as one JSON literal or `ValueReference`.
 - Render an unnamed act with `ACT` and a named act with `ACT TOOL` and one JSON string tool name.
+- Render act schema targets as `input="target"` and `output="target"` attributes before the act colon.
+- Follow attributed `ACT` and every `ACT TOOL` head with `: ` before the instruction; plain unattributed `ACT` uses one space.
 - Render (SET|CALL|EMIT) targets as `TargetPath` without `$`.
 - Render each (act|call|emit) as one line.
 - End each act and call with one binding suffix, even when empty.
@@ -584,8 +618,9 @@ NODE
 - Define one root context with `@base` and the `oak` prefix.
 - Render each entry, `Where`, constraint, condition, process value, and step kind as `@type`.
 - Render `where`, `constraints`, `examples`, `steps`, `inputs`, `outputs`, `bindings`, `conditions`, `thenSteps`, and `otherwise` as ordered lists.
-- Render trigger `then` as an id-valued process target.
-- Render process input and output as id-valued schema targets.
+- Render trigger `then` as an id-valued process target and trigger inputs as one ordered binding list when present.
+- Render process, act, constant, and state schema targets as id-valued schema targets.
+- Render each constant and state schema binding with its `placeholder`.
 - Render call process as an id-valued process target.
 - Render if `thenSteps` and `otherwise` as ordered step lists.
 - Render while `condition`, `limit`, and `steps` as one condition, one positive integer, and one ordered step list.
@@ -618,7 +653,7 @@ NODE
 - Emit one single-shot authoring document to `outputs/authoring.md` as xml-grouped OAK.
 - Treat the complete host-supplied modality context as the source.
 - Generate source-to-part instructions from one rule registry.
-- Generate every Entry ID, Naming, Decomposition, ACT, and Delegation rule as one instruction entry.
+- Generate every Entry ID, Naming, Decomposition, ACT, Schema binding, and Delegation rule as one instruction entry.
 - Include every authoring rule, every surface schema, the xml grammar, one canonical OAK example, and one decomposed orchestrator example.
 - Declare no universal input interface.
 - Declare one OAK document schema, one out interface, one trigger, and one process.
@@ -643,11 +678,13 @@ NODE
 - Keep agent examples under `examples/agents` and ported format schemas under `examples/schemas`.
 - Grow one balance per bounded cycle and emit one reflection to the chat in `examples/agents/compound_growth.py`.
 - Exercise `ACT`, `ACT.tool`, bounded while, canonical OAK, parsing, resolution, and execution in `examples/agents/compound_growth.py`.
+- Exercise schema-bound constants, state, trigger inputs, act schemas, and a typed tool contract in `examples/agents/compound_growth.py`.
 - Encode the extracted implementer instructions in `examples/agents/implementer.py`.
 - Encode the extracted task reviewer instructions in `examples/agents/task_reviewer.py`.
+- Seed each trigger-selected reviewer and coordinator process from interface-sourced trigger inputs.
 - Encode each ported legacy format as one constrained schema document under `examples/schemas`.
 - Bind one accepted and one rejected value set per ported constraint kind across `examples/schemas`.
-- Dispatch the task reviewer as one worker agent from `examples/agents/delegation.py`.
+- Dispatch the task reviewer as one worker agent with a schema-typed agent contract from `examples/agents/delegation.py`.
 - Keep each example flat, dense, functional, and short.
 
 ### Freshness
