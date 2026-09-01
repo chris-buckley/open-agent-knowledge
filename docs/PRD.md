@@ -608,7 +608,7 @@ NODE
 
 - Emit one EBNF grammar for OAK to `outputs/oak.ebnf`.
 - Emit one production for each named text alias.
-- Emit both grouping productions for every surface descriptor.
+- Emit one production for each surface descriptor.
 - Derive document structure from the fixed part order.
 - Do not emit recursive node productions.
 - Do not use EBNF as a validator.
@@ -637,14 +637,17 @@ NODE
 ### Examples
 
 - Author each example with direct Python authoring.
-- Hoist each reused target and placeholder into one part-prefixed `UPPER_SNAKE` module constant.
-- Define each entry as one lower snake module value postfixed with its part, so the node reads as a table of contents.
+- Hoist each target and placeholder reused across entries into one part-prefixed `UPPER_SNAKE` module constant.
+- Define each multi-line entry as one lower snake module value postfixed with its part, so the node reads as a table of contents.
 - Render, parse, resolve, and round-trip each example before writing its sibling `.oak.md` snapshot.
-- Grow one balance per bounded cycle and emit one reflection to the chat in `examples/compound_growth.py`.
-- Exercise `ACT`, `ACT.tool`, bounded while, canonical OAK, parsing, resolution, and execution in `examples/compound_growth.py`.
-- Encode the extracted implementer instructions in `examples/implementer.py`.
-- Encode the extracted task reviewer instructions in `examples/task_reviewer.py`.
-- Dispatch the task reviewer as one worker agent from `examples/delegation.py`.
+- Keep agent examples under `examples/agents` and ported format schemas under `examples/schemas`.
+- Grow one balance per bounded cycle and emit one reflection to the chat in `examples/agents/compound_growth.py`.
+- Exercise `ACT`, `ACT.tool`, bounded while, canonical OAK, parsing, resolution, and execution in `examples/agents/compound_growth.py`.
+- Encode the extracted implementer instructions in `examples/agents/implementer.py`.
+- Encode the extracted task reviewer instructions in `examples/agents/task_reviewer.py`.
+- Encode each ported legacy format as one constrained schema document under `examples/schemas`.
+- Bind one accepted and one rejected value set per ported constraint kind across `examples/schemas`.
+- Dispatch the task reviewer as one worker agent from `examples/agents/delegation.py`.
 - Keep each example flat, dense, functional, and short.
 
 ### Freshness
@@ -672,14 +675,38 @@ oak
 │   └── PRD.md
 ├── examples
 │   ├── __init__.py
-│   ├── compound_growth.py
-│   ├── compound_growth.oak.md
-│   ├── delegation.py
-│   ├── delegation.oak.md
-│   ├── implementer.py
-│   ├── implementer.oak.md
-│   ├── task_reviewer.py
-│   └── task_reviewer.oak.md
+│   ├── agents
+│   │   ├── __init__.py
+│   │   ├── compound_growth.py
+│   │   ├── compound_growth.oak.md
+│   │   ├── delegation.py
+│   │   ├── delegation.oak.md
+│   │   ├── implementer.py
+│   │   ├── implementer.oak.md
+│   │   ├── task_reviewer.py
+│   │   └── task_reviewer.oak.md
+│   └── schemas
+│       ├── __init__.py
+│       ├── api_coverage_table.py
+│       ├── api_coverage_table.oak.md
+│       ├── code_changes.py
+│       ├── code_changes.oak.md
+│       ├── code_map.py
+│       ├── code_map.oak.md
+│       ├── docs_index.py
+│       ├── docs_index.oak.md
+│       ├── error.py
+│       ├── error.oak.md
+│       ├── hierarchical_outline.py
+│       ├── hierarchical_outline.oak.md
+│       ├── ideation_list.py
+│       ├── ideation_list.oak.md
+│       ├── link_manifest.py
+│       ├── link_manifest.oak.md
+│       ├── process_execution_table.py
+│       ├── process_execution_table.oak.md
+│       ├── smeac_plan.py
+│       └── smeac_plan.oak.md
 ├── oak
 │   ├── __init__.py
 │   ├── authoring.py
