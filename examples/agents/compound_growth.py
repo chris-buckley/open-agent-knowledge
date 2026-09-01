@@ -1,4 +1,4 @@
-"""Author one endless grow-and-reflect machine: each cycle compounds a balance, reflects, and emits."""
+"""Author one endless grow-and-reflect machine with schema-bound constants, state, trigger inputs, and tool contracts."""
 
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ if str(ROOT) not in sys.path:
 from oak import (
     ACT,
     Arrival,
+    AtLeast,
     BindingValue,
     Call,
     Compare,
@@ -43,6 +44,7 @@ CONSTANT_GROWTH_RATE = "constant.growth-rate"
 CONSTANT_REFLECTION_STEP = "constant.reflection-step"
 SCHEMA_SCALING = "schema.scaling"
 SCHEMA_SCALED_BALANCE = "schema.scaled-balance"
+SCHEMA_GROWTH_TARGET = "schema.growth-target"
 SCHEMA_REFLECTION = "schema.reflection"
 STATE_CURRENT_BALANCE = "state.current-balance"
 STATE_REFLECTION_TARGET = "state.reflection-target"
@@ -66,8 +68,18 @@ growth_instructions = [
     )
 ]
 
-growth_rate_constant = Constant(id="growth-rate", value=1.05)
-reflection_step_constant = Constant(id="reflection-step", value=8)
+growth_rate_constant = Constant(
+    id="growth-rate",
+    schema=SCHEMA_SCALING,
+    placeholder=PLACEHOLDER_FACTOR,
+    value=1.05,
+)
+reflection_step_constant = Constant(
+    id="reflection-step",
+    schema=SCHEMA_SCALING,
+    placeholder=PLACEHOLDER_FACTOR,
+    value=8,
+)
 
 scaling_schema = Schema(
     id="scaling",
@@ -75,8 +87,8 @@ scaling_schema = Schema(
     purpose="Carry one balance and the factor to scale it by.",
     template="Balance: <BALANCE>\nFactor: <FACTOR>",
     where=[
-        where(PLACEHOLDER_BALANCE, Type(of="number"), description="the balance to scale"),
-        where(PLACEHOLDER_FACTOR, Type(of="number"), description="the multiplication factor"),
+        where(PLACEHOLDER_BALANCE, Type(of="number"), AtLeast(value=0), description="the non-negative balance to scale"),
+        where(PLACEHOLDER_FACTOR, Type(of="number"), AtLeast(value=1), description="the multiplication factor"),
     ],
 )
 
@@ -86,6 +98,14 @@ scaled_balance_schema = Schema(
     purpose="Carry the balance after one multiplication.",
     template="<SCALED_BALANCE>",
     where=[where(PLACEHOLDER_SCALED_BALANCE, Type(of="number"), description="the balance after one multiplication")],
+)
+
+growth_target_schema = Schema(
+    id="growth-target",
+    name="Growth Target",
+    purpose="Carry the balance one growth cycle must reach.",
+    template="Target: <TARGET>",
+    where=[where(PLACEHOLDER_TARGET, Type(of="number"), AtLeast(value=0), description="the balance the cycle must reach")],
 )
 
 reflection_schema = Schema(
@@ -99,13 +119,26 @@ reflection_schema = Schema(
     ],
 )
 
-current_balance_state = State(id="current-balance", value=100)
-reflection_target_state = State(id="reflection-target", value=800)
+current_balance_state = State(
+    id="current-balance",
+    schema=SCHEMA_SCALING,
+    placeholder=PLACEHOLDER_BALANCE,
+    value=100,
+)
+reflection_target_state = State(
+    id="reflection-target",
+    schema=SCHEMA_SCALING,
+    placeholder=PLACEHOLDER_BALANCE,
+    value=800,
+)
 
 growth_requested_trigger = Trigger(
     id="growth-requested",
     when=WHEN_GROWTH_REQUESTED,
     then=PROCESS_GROW_BALANCE,
+    inputs=[
+        ValueBinding(placeholder=PLACEHOLDER_TARGET, value=StateValue(state=STATE_REFLECTION_TARGET)),
+    ],
 )
 
 scale_balance_process = Process(
@@ -117,6 +150,8 @@ scale_balance_process = Process(
         ACT.tool(
             TOOL_MATH_MULTIPLY,
             "Multiply <BALANCE> by <FACTOR> and round to 2 decimals to produce <SCALED_BALANCE>.",
+            input=SCHEMA_SCALING,
+            output=SCHEMA_SCALED_BALANCE,
             inputs=[
                 ValueBinding(placeholder=PLACEHOLDER_BALANCE, value=BindingValue(binding=PLACEHOLDER_BALANCE)),
                 ValueBinding(placeholder=PLACEHOLDER_FACTOR, value=BindingValue(binding=PLACEHOLDER_FACTOR)),
@@ -129,12 +164,13 @@ scale_balance_process = Process(
 grow_balance_process = Process(
     id="grow-balance",
     name="Grow balance",
+    input=SCHEMA_GROWTH_TARGET,
     steps=[
         While(
             condition=Compare(
                 left=StateValue(state=STATE_CURRENT_BALANCE),
                 operator="less_than",
-                right=StateValue(state=STATE_REFLECTION_TARGET),
+                right=BindingValue(binding=PLACEHOLDER_TARGET),
             ),
             limit=60,
             steps=[
@@ -153,14 +189,14 @@ grow_balance_process = Process(
             "Reflect on <BALANCE> reaching <TARGET> and produce <REFLECTION>.",
             inputs=[
                 ValueBinding(placeholder=PLACEHOLDER_BALANCE, value=StateValue(state=STATE_CURRENT_BALANCE)),
-                ValueBinding(placeholder=PLACEHOLDER_TARGET, value=StateValue(state=STATE_REFLECTION_TARGET)),
+                ValueBinding(placeholder=PLACEHOLDER_TARGET, value=BindingValue(binding=PLACEHOLDER_TARGET)),
             ],
             outputs=[PLACEHOLDER_REFLECTION],
         ),
         Call(
             process=PROCESS_SCALE_BALANCE,
             inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_BALANCE, value=StateValue(state=STATE_CURRENT_BALANCE)),
+                ValueBinding(placeholder=PLACEHOLDER_BALANCE, value=StateValue(state=STATE_REFLECTION_TARGET)),
                 ValueBinding(placeholder=PLACEHOLDER_FACTOR, value=ConstantValue(constant=CONSTANT_REFLECTION_STEP)),
             ],
             outputs=[PLACEHOLDER_SCALED_BALANCE],
@@ -186,7 +222,7 @@ reflection_output_interface = Interface(
 growth_node = Node(
     instructions=growth_instructions,
     constants=[growth_rate_constant, reflection_step_constant],
-    schemas=[scaling_schema, scaled_balance_schema, reflection_schema],
+    schemas=[scaling_schema, scaled_balance_schema, growth_target_schema, reflection_schema],
     state=[current_balance_state, reflection_target_state],
     triggers=[growth_requested_trigger],
     processes=[scale_balance_process, grow_balance_process],
@@ -216,6 +252,8 @@ def build() -> str:
             _multiply_tool,
             frozenset({PLACEHOLDER_BALANCE, PLACEHOLDER_FACTOR}),
             frozenset({PLACEHOLDER_SCALED_BALANCE}),
+            input=SCHEMA_SCALING,
+            output=SCHEMA_SCALED_BALANCE,
         )
     }
     state = {STATE_CURRENT_BALANCE: 100, STATE_REFLECTION_TARGET: 800}

@@ -1,6 +1,7 @@
 <instructions>
 $ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and THEN omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
+Trigger inputs seed the selected process input schema; each seeded value validates before the process runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 Each trigger contains GIVEN, WHEN, and THEN; WHEN matches first, GIVEN guards it, and THEN selects a process.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
@@ -72,7 +73,7 @@ WHERE:
 <trigger id="review-requested">
 GIVEN: true
 WHEN: "A task review is requested."
-THEN: process.review-task
+THEN: process.review-task (TASK_BRIEF=$interface.review-request-input.TASK_BRIEF, IMPLEMENTATION_REPORT=$interface.review-request-input.IMPLEMENTATION_REPORT, DIFF=$interface.review-request-input.DIFF)
 </trigger>
 </triggers>
 
@@ -89,8 +90,8 @@ ACT Compare <EVIDENCE> with <TASK_BRIEF> and produce <SPEC_COMPLIANCE>. (EVIDENC
 ACT Assess <EVIDENCE> and produce <STRENGTHS>, <ISSUES>, and <ASSESSMENT>. (EVIDENCE=$EVIDENCE) -> STRENGTHS, ISSUES, ASSESSMENT
 </process>
 
-<process id="review-task" name="Review task">
-CALL process.read-evidence (TASK_BRIEF=$interface.review-request-input.TASK_BRIEF, IMPLEMENTATION_REPORT=$interface.review-request-input.IMPLEMENTATION_REPORT, DIFF=$interface.review-request-input.DIFF) -> EVIDENCE
+<process id="review-task" name="Review task" input="schema.review-request">
+CALL process.read-evidence (TASK_BRIEF=$TASK_BRIEF, IMPLEMENTATION_REPORT=$IMPLEMENTATION_REPORT, DIFF=$DIFF) -> EVIDENCE
 CALL process.validate-compliance (EVIDENCE=$EVIDENCE) -> SPEC_COMPLIANCE
 CALL process.assess-evidence (EVIDENCE=$EVIDENCE) -> STRENGTHS, ISSUES, ASSESSMENT
 EMIT interface.task-review-output (SPEC_COMPLIANCE=$SPEC_COMPLIANCE, STRENGTHS=$STRENGTHS, ISSUES=$ISSUES, ASSESSMENT=$ASSESSMENT)

@@ -123,6 +123,11 @@ review_requested_trigger = Trigger(
     id="review-requested",
     when="A task review is requested.",
     then=PROCESS_REVIEW_TASK,
+    inputs=[
+        ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=InterfaceValue(interface=INTERFACE_REVIEW_REQUEST_INPUT, placeholder=PLACEHOLDER_TASK_BRIEF)),
+        ValueBinding(placeholder=PLACEHOLDER_IMPLEMENTATION_REPORT, value=InterfaceValue(interface=INTERFACE_REVIEW_REQUEST_INPUT, placeholder=PLACEHOLDER_IMPLEMENTATION_REPORT)),
+        ValueBinding(placeholder=PLACEHOLDER_DIFF, value=InterfaceValue(interface=INTERFACE_REVIEW_REQUEST_INPUT, placeholder=PLACEHOLDER_DIFF)),
+    ],
 )
 
 read_evidence_process = Process(
@@ -177,13 +182,14 @@ assess_evidence_process = Process(
 review_task_process = Process(
     id="review-task",
     name="Review task",
+    input=SCHEMA_REVIEW_REQUEST,
     steps=[
         Call(
             process=PROCESS_READ_EVIDENCE,
             inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=InterfaceValue(interface=INTERFACE_REVIEW_REQUEST_INPUT, placeholder=PLACEHOLDER_TASK_BRIEF)),
-                ValueBinding(placeholder=PLACEHOLDER_IMPLEMENTATION_REPORT, value=InterfaceValue(interface=INTERFACE_REVIEW_REQUEST_INPUT, placeholder=PLACEHOLDER_IMPLEMENTATION_REPORT)),
-                ValueBinding(placeholder=PLACEHOLDER_DIFF, value=InterfaceValue(interface=INTERFACE_REVIEW_REQUEST_INPUT, placeholder=PLACEHOLDER_DIFF)),
+                ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=BindingValue(binding=PLACEHOLDER_TASK_BRIEF)),
+                ValueBinding(placeholder=PLACEHOLDER_IMPLEMENTATION_REPORT, value=BindingValue(binding=PLACEHOLDER_IMPLEMENTATION_REPORT)),
+                ValueBinding(placeholder=PLACEHOLDER_DIFF, value=BindingValue(binding=PLACEHOLDER_DIFF)),
             ],
             outputs=[PLACEHOLDER_EVIDENCE],
         ),

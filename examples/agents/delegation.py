@@ -56,6 +56,13 @@ delegation_requested_trigger = Trigger(
     id="delegation-requested",
     when=WHEN_DELEGATION_REQUESTED,
     then=PROCESS_DELEGATE_REVIEW,
+    inputs=[
+        ValueBinding(
+            placeholder=placeholder,
+            value=InterfaceValue(interface=INTERFACE_REVIEW_REQUEST_INPUT, placeholder=placeholder),
+        )
+        for placeholder in REQUEST_PLACEHOLDERS
+    ],
 )
 
 dispatch_review_process = Process(
@@ -67,6 +74,8 @@ dispatch_review_process = Process(
         ACT.tool(
             TOOL_AGENT_REVIEWER,
             "Review <TASK_BRIEF>, <IMPLEMENTATION_REPORT>, and <DIFF> in one worker agent and produce <SPEC_COMPLIANCE>, <STRENGTHS>, <ISSUES>, and <ASSESSMENT>.",
+            input=SCHEMA_WORKER_REQUEST,
+            output=SCHEMA_WORKER_RESULT,
             inputs=[
                 ValueBinding(placeholder=placeholder, value=BindingValue(binding=placeholder))
                 for placeholder in REQUEST_PLACEHOLDERS
@@ -79,14 +88,12 @@ dispatch_review_process = Process(
 delegate_review_process = Process(
     id="delegate-review",
     name="Delegate review",
+    input=SCHEMA_WORKER_REQUEST,
     steps=[
         Call(
             process=PROCESS_DISPATCH_REVIEW,
             inputs=[
-                ValueBinding(
-                    placeholder=placeholder,
-                    value=InterfaceValue(interface=INTERFACE_REVIEW_REQUEST_INPUT, placeholder=placeholder),
-                )
+                ValueBinding(placeholder=placeholder, value=BindingValue(binding=placeholder))
                 for placeholder in REQUEST_PLACEHOLDERS
             ],
             outputs=list(RESULT_PLACEHOLDERS),
@@ -179,6 +186,8 @@ def build() -> str:
                 _reviewer_agent,
                 frozenset(REQUEST_PLACEHOLDERS),
                 frozenset(RESULT_PLACEHOLDERS),
+                input=SCHEMA_WORKER_REQUEST,
+                output=SCHEMA_WORKER_RESULT,
             )
         },
         source="examples/agents/delegation.oak.md",
