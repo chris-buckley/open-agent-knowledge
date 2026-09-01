@@ -76,6 +76,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 37. Reject a trigger input that reads a local binding.
 38. Reject an act whose inputs differ from its input schema placeholders or whose outputs differ from its output schema placeholders.
 39. Reject a schema binding without both a schema target and a placeholder, with a placeholder absent from the schema, with a placeholder-valued bound, or with a value that fails the placeholder constraints.
+40. Reject an interface read in a process with an input schema.
 
 ## Structure
 
@@ -186,8 +187,11 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Apply every `Where` constraint to each bound value.
 - Resolve placeholder-valued bounds within the same schema instance.
 - Apply datatype validation before each bound comparison.
+- Validate each bound value in its JSON form.
+- Reject a bound value that is not one JSON value.
 - Accept placeholder bindings from the interpreter instead of recovering them from rendered text.
 - Validate one value against one schema placeholder with `Schema.bind_value`.
+- Reject a `bind_value` placeholder that has a placeholder-valued bound.
 - Raise `SchemaBindingError` with every binding failure.
 - Give each binding failure one code, one placeholder, and one message.
 
@@ -235,6 +239,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Use each input schema placeholder as one initial process-local binding.
 - Require every output schema placeholder to be visible after successful process completion.
 - Seed a trigger-selected process input from its trigger inputs.
+- Reject an interface read in a process that declares an input schema.
 - Author the first process-name word as the action and the second as its object.
 - Execute process steps in authored order.
 - Give each act one instruction, one input binding list, one output placeholder list, one optional exact tool name, and optional input and output schema targets.
@@ -357,7 +362,9 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Define `Datatype` as (string|integer|number|boolean|quantity|datetime|uri|path).
 - Define `Unit` as (%|kg|°C|kg·m/s²).
 - Represent a quantity as one Decimal value and one unit enum.
+- Bind a quantity value as one JSON object with one value and one unit.
 - Represent a datetime as one aware datetime and one optional IANA time zone name.
+- Bind a datetime value as one ISO 8601 string with an offset.
 - Reject a naive datetime and never convert one to UTC.
 - Use U+002E FULL STOP as the decimal separator.
 - Use U+2009 THIN SPACE as the thousands separator.
