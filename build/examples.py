@@ -69,6 +69,7 @@ from oak import (
     RegexPattern,
     ResolutionError,
     Schema,
+    SchemaBindingError,
     Set,
     SlugId,
     State,
@@ -1037,6 +1038,65 @@ def _validate_contract_rules() -> None:
             inputs=[ValueBinding(placeholder="RAW_NAME", value=BindingValue(binding="RAW_NAME"))],
         )
 
+    def typed_interface_read() -> None:
+        Node(
+            schemas=[raw],
+            interfaces=[Interface(id="name-input", direction="in", schema="schema.raw-name")],
+            processes=[
+                Process(
+                    id="read-name",
+                    name="Read name",
+                    input="schema.raw-name",
+                    steps=[
+                        Act(
+                            instruction="Read <RAW_NAME>.",
+                            inputs=[
+                                ValueBinding(
+                                    placeholder="RAW_NAME",
+                                    value=InterfaceValue(interface="interface.name-input", placeholder="RAW_NAME"),
+                                )
+                            ],
+                        )
+                    ],
+                )
+            ],
+        )
+
+    scaling = Schema(
+        id="scaling",
+        template="<BALANCE> times <FACTOR>",
+        where=[
+            where("BALANCE", Type(of="number")),
+            where("FACTOR", Type(of="number"), AtLeast(value="BALANCE")),
+        ],
+    )
+    try:
+        scaling.bind_value("FACTOR", 0)
+    except SchemaBindingError as error:
+        if error.failures[0].code != "unresolved_binding":
+            raise RuntimeError(f"expected unresolved_binding, got {error}") from None
+    else:
+        raise RuntimeError("bind_value accepted a placeholder-valued bound")
+
+    floor = Schema(id="floor", template="<VALUE>", where=[where("VALUE", AtLeast(value=0))])
+    try:
+        floor.bind_value("VALUE", float("nan"))
+    except SchemaBindingError as error:
+        if error.failures[0].code != "invalid_json_value":
+            raise RuntimeError(f"expected invalid_json_value, got {error}") from None
+    else:
+        raise RuntimeError("bind_value accepted a non-JSON value")
+
+    mass = Schema(id="mass", template="<MASS>", where=[where("MASS", Type(of="quantity"))])
+    mass.bind({"MASS": {"value": "10", "unit": "kg"}})
+    try:
+        mass.bind({"MASS": Quantity(value=Decimal("10"), unit=Unit.KILOGRAM)})
+    except SchemaBindingError as error:
+        if error.failures[0].code != "invalid_json_value":
+            raise RuntimeError(f"expected invalid_json_value, got {error}") from None
+    else:
+        raise RuntimeError("bind accepted a non-JSON quantity value")
+
     _expect_rule("trigger_contract_mismatch", trigger_input)
     _expect_rule("process_output_binding_mismatch", output_missing)
     _expect_rule("call_contract_mismatch", call_mismatch)
@@ -1046,6 +1106,7 @@ def _validate_contract_rules() -> None:
     _expect_rule("incomplete_schema_binding", incomplete_binding)
     _expect_rule("invalid_act_instruction", reserved_instruction)
     _expect_rule("invalid_trigger_input_value", trigger_binding_read)
+    _expect_rule("typed_process_interface_read", typed_interface_read)
 
 
 def _validate_json_ld_style_display() -> None:
