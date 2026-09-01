@@ -37,6 +37,15 @@ WHERE:
 - <EVIDENCE> is string; is non-empty; the inspected review evidence.
 </schema>
 
+<schema id="compliance-request" name="Compliance Request" purpose="Carry the evidence and the brief for one compliance check.">
+Evidence: <EVIDENCE>
+Task brief: <TASK_BRIEF>
+
+WHERE:
+- <EVIDENCE> is string; is non-empty; the inspected review evidence.
+- <TASK_BRIEF> is string; is non-empty; the accepted implementation scope.
+</schema>
+
 <schema id="compliance" name="Compliance" purpose="Carry the requirement-by-requirement compliance result.">
 <SPEC_COMPLIANCE>
 
@@ -82,8 +91,8 @@ THEN: process.review-task (TASK_BRIEF=$interface.review-request-input.TASK_BRIEF
 ACT Inspect <TASK_BRIEF>, <IMPLEMENTATION_REPORT>, and <DIFF> once and produce <EVIDENCE>. (TASK_BRIEF=$TASK_BRIEF, IMPLEMENTATION_REPORT=$IMPLEMENTATION_REPORT, DIFF=$DIFF) -> EVIDENCE
 </process>
 
-<process id="validate-compliance" name="Validate compliance" input="schema.review-evidence" output="schema.compliance">
-ACT Compare <EVIDENCE> with <TASK_BRIEF> and produce <SPEC_COMPLIANCE>. (EVIDENCE=$EVIDENCE, TASK_BRIEF=$interface.review-request-input.TASK_BRIEF) -> SPEC_COMPLIANCE
+<process id="validate-compliance" name="Validate compliance" input="schema.compliance-request" output="schema.compliance">
+ACT Compare <EVIDENCE> with <TASK_BRIEF> and produce <SPEC_COMPLIANCE>. (EVIDENCE=$EVIDENCE, TASK_BRIEF=$TASK_BRIEF) -> SPEC_COMPLIANCE
 </process>
 
 <process id="assess-evidence" name="Assess evidence" input="schema.review-evidence" output="schema.assessment">
@@ -92,7 +101,7 @@ ACT Assess <EVIDENCE> and produce <STRENGTHS>, <ISSUES>, and <ASSESSMENT>. (EVID
 
 <process id="review-task" name="Review task" input="schema.review-request">
 CALL process.read-evidence (TASK_BRIEF=$TASK_BRIEF, IMPLEMENTATION_REPORT=$IMPLEMENTATION_REPORT, DIFF=$DIFF) -> EVIDENCE
-CALL process.validate-compliance (EVIDENCE=$EVIDENCE) -> SPEC_COMPLIANCE
+CALL process.validate-compliance (EVIDENCE=$EVIDENCE, TASK_BRIEF=$TASK_BRIEF) -> SPEC_COMPLIANCE
 CALL process.assess-evidence (EVIDENCE=$EVIDENCE) -> STRENGTHS, ISSUES, ASSESSMENT
 EMIT interface.task-review-output (SPEC_COMPLIANCE=$SPEC_COMPLIANCE, STRENGTHS=$STRENGTHS, ISSUES=$ISSUES, ASSESSMENT=$ASSESSMENT)
 </process>

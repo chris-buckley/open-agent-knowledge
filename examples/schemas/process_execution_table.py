@@ -41,8 +41,8 @@ _ACCEPTED_BINDING = {
     "PROCESS_ID": "sync-docs",
     "PROCESS_NAME": "Sync docs",
     "STATUS": "OK",
-    "STARTED_AT": datetime(2026, 8, 31, 9, 0, tzinfo=timezone.utc),
-    "ENDED_AT": datetime(2026, 8, 31, 9, 1, tzinfo=timezone.utc),
+    "STARTED_AT": "2026-08-31T09:00:00Z",
+    "ENDED_AT": "2026-08-31T09:01:00Z",
     "DURATION_MS": 60000,
     "OUTCOME": "synced",
     "ARTIFACTS": "",
@@ -51,6 +51,8 @@ _ACCEPTED_BINDING = {
 _REJECTED_BINDINGS = (
     ("STATUS", "DONE"),
     ("STARTED_AT", "2026-08-31"),
+    ("STARTED_AT", "1.5"),
+    ("ENDED_AT", datetime(2026, 8, 31, 9, 1, tzinfo=timezone.utc)),
 )
 
 

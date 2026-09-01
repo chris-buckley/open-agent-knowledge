@@ -32,6 +32,7 @@ from oak import (
 
 SCHEMA_REVIEW_REQUEST = "schema.review-request"
 SCHEMA_REVIEW_EVIDENCE = "schema.review-evidence"
+SCHEMA_COMPLIANCE_REQUEST = "schema.compliance-request"
 SCHEMA_COMPLIANCE = "schema.compliance"
 SCHEMA_ASSESSMENT = "schema.assessment"
 SCHEMA_TASK_REVIEW = "schema.task-review"
@@ -84,6 +85,17 @@ review_evidence_schema = Schema(
     purpose="Carry the inspected evidence for one task-scoped review.",
     template="<EVIDENCE>",
     where=[where(PLACEHOLDER_EVIDENCE, Type(of="string"), NonEmpty(), description="the inspected review evidence")],
+)
+
+compliance_request_schema = Schema(
+    id="compliance-request",
+    name="Compliance Request",
+    purpose="Carry the evidence and the brief for one compliance check.",
+    template="Evidence: <EVIDENCE>\nTask brief: <TASK_BRIEF>",
+    where=[
+        where(PLACEHOLDER_EVIDENCE, Type(of="string"), NonEmpty(), description="the inspected review evidence"),
+        where(PLACEHOLDER_TASK_BRIEF, Type(of="string"), NonEmpty(), description="the accepted implementation scope"),
+    ],
 )
 
 compliance_schema = Schema(
@@ -151,14 +163,14 @@ read_evidence_process = Process(
 validate_compliance_process = Process(
     id="validate-compliance",
     name="Validate compliance",
-    input=SCHEMA_REVIEW_EVIDENCE,
+    input=SCHEMA_COMPLIANCE_REQUEST,
     output=SCHEMA_COMPLIANCE,
     steps=[
         ACT(
             "Compare <EVIDENCE> with <TASK_BRIEF> and produce <SPEC_COMPLIANCE>.",
             inputs=[
                 ValueBinding(placeholder=PLACEHOLDER_EVIDENCE, value=BindingValue(binding=PLACEHOLDER_EVIDENCE)),
-                ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=InterfaceValue(interface=INTERFACE_REVIEW_REQUEST_INPUT, placeholder=PLACEHOLDER_TASK_BRIEF)),
+                ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=BindingValue(binding=PLACEHOLDER_TASK_BRIEF)),
             ],
             outputs=[PLACEHOLDER_SPEC_COMPLIANCE],
         ),
@@ -195,7 +207,10 @@ review_task_process = Process(
         ),
         Call(
             process=PROCESS_VALIDATE_COMPLIANCE,
-            inputs=[ValueBinding(placeholder=PLACEHOLDER_EVIDENCE, value=BindingValue(binding=PLACEHOLDER_EVIDENCE))],
+            inputs=[
+                ValueBinding(placeholder=PLACEHOLDER_EVIDENCE, value=BindingValue(binding=PLACEHOLDER_EVIDENCE)),
+                ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=BindingValue(binding=PLACEHOLDER_TASK_BRIEF)),
+            ],
             outputs=[PLACEHOLDER_SPEC_COMPLIANCE],
         ),
         Call(
@@ -234,6 +249,7 @@ task_reviewer_node = Node(
     schemas=[
         review_request_schema,
         review_evidence_schema,
+        compliance_request_schema,
         compliance_schema,
         assessment_schema,
         task_review_schema,
