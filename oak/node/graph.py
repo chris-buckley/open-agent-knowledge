@@ -171,6 +171,15 @@ def _validate_value(registry: Mapping[str, Entry], source: Entry, value: Value) 
         return
     if not isinstance(value, InterfaceValue):
         return
+    if isinstance(source, Process) and source.input is not None:
+        raise rule_error(
+            "typed_process_interface_read",
+            "process {process} has an input schema and reads {interface}",
+            {
+                "process": source.id,
+                "interface": value.interface,
+            },
+        )
     interface = _target(registry, source, value.interface, Interface)
     if interface is None:
         return
@@ -371,32 +380,34 @@ def _act_contract(
 
 def validate_typed_value(entry: Constant | State, schema: Schema) -> None:
     """Validate one AS-bound entry value against its resolved schema."""
+    if entry.placeholder is None:
+        return
     source_type = type(entry).__name__.lower()
-    if entry.placeholder not in schema.placeholders:
-        raise rule_error(
-            "unknown_schema_placeholder",
-            "{source_type} {source} binds placeholder {placeholder} absent from schema {schema}",
-            {
-                "source_type": source_type,
-                "source": entry.id,
-                "placeholder": entry.placeholder,
-                "schema": schema.id,
-            },
-        )
-    where = next(item for item in schema.where if item.placeholder == entry.placeholder)
-    if where.references:
-        raise rule_error(
-            "unresolved_schema_binding",
-            "{source_type} {source} binds placeholder {placeholder} with a placeholder-valued bound",
-            {
-                "source_type": source_type,
-                "source": entry.id,
-                "placeholder": entry.placeholder,
-            },
-        )
     try:
         schema.bind_value(entry.placeholder, entry.value)
     except SchemaBindingError as error:
+        code = error.failures[0].code
+        if code == "unknown_binding":
+            raise rule_error(
+                "unknown_schema_placeholder",
+                "{source_type} {source} binds placeholder {placeholder} absent from schema {schema}",
+                {
+                    "source_type": source_type,
+                    "source": entry.id,
+                    "placeholder": entry.placeholder,
+                    "schema": schema.id,
+                },
+            ) from None
+        if code == "unresolved_binding":
+            raise rule_error(
+                "unresolved_schema_binding",
+                "{source_type} {source} binds placeholder {placeholder} with a placeholder-valued bound",
+                {
+                    "source_type": source_type,
+                    "source": entry.id,
+                    "placeholder": entry.placeholder,
+                },
+            ) from None
         raise rule_error(
             "invalid_schema_binding",
             "{source_type} {source} value fails schema {schema}: {reason}",

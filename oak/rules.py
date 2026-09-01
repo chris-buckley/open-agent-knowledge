@@ -37,6 +37,7 @@ _RULES = (
     AuthoringRule("unknown_interface_placeholder", "Read a placeholder present in the interface schema.", ("InterfaceValue",)),
     AuthoringRule("emit_schema_binding_mismatch", "Bind every interface schema placeholder exactly once when emitting.", ("Emit",)),
     AuthoringRule("invalid_static_schema_binding", "Make every statically known emission satisfy its interface schema.", ("Emit",)),
+    AuthoringRule("typed_process_interface_read", "Do not read an interface in a process with an input schema.", ("Process", "InterfaceValue")),
     AuthoringRule("process_call_cycle", "Keep the local process call graph acyclic.", ("Call",)),
     AuthoringRule("call_contract_mismatch", "Match each call's inputs and outputs to the called process schemas.", ("Call",)),
     AuthoringRule("process_output_binding_mismatch", "Make every process output schema placeholder visible after successful completion.", ("Process",)),

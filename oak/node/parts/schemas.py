@@ -660,6 +660,21 @@ def _error_message(
     return str(error)
 
 
+def _json_failure(
+    placeholder: str,
+    value: object,
+) -> BindingFailure | None:
+    try:
+        json.dumps(value, allow_nan=False)
+    except (TypeError, ValueError):
+        return BindingFailure(
+            "invalid_json_value",
+            placeholder,
+            f"{value!r} is not one JSON value",
+        )
+    return None
+
+
 class Schema(Entry):
     """One reusable information shape with one Where per placeholder."""
 
@@ -854,6 +869,14 @@ class Schema(Entry):
             if item.placeholder not in values:
                 continue
 
+            failure = _json_failure(
+                item.placeholder,
+                values[item.placeholder],
+            )
+            if failure is not None:
+                failures.append(failure)
+                continue
+
             for constraint in _validation_order(
                 item.constraints
             ):
@@ -918,24 +941,29 @@ class Schema(Entry):
                 ]
             )
 
+        if entry.references:
+            raise SchemaBindingError(
+                [
+                    BindingFailure(
+                        "unresolved_binding",
+                        placeholder,
+                        "constraints reference "
+                        + ", ".join(
+                            sorted(entry.references)
+                        ),
+                    )
+                ]
+            )
+
+        failure = _json_failure(placeholder, value)
+        if failure is not None:
+            raise SchemaBindingError([failure])
+
         failures: list[BindingFailure] = []
         values = {placeholder: value}
         for constraint in _validation_order(
             entry.constraints
         ):
-            if (
-                isinstance(
-                    constraint,
-                    _BOUND_CONSTRAINTS,
-                )
-                and isinstance(
-                    constraint.value,
-                    str,
-                )
-                and constraint.value not in values
-            ):
-                continue
-
             try:
                 constraint.check(value, values)
             except (
