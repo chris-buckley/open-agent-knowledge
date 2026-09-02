@@ -1,7 +1,5 @@
 """Built-in interpretation instructions for the OAK render."""
 
-from collections.abc import Iterator
-
 from oak.node.interpretation import (
     ACT_SCHEMA_INSTRUCTION,
     CONTRACT_INSTRUCTION,
@@ -13,18 +11,7 @@ from oak.node.interpretation import (
     TYPED_ENTRY_INSTRUCTION,
 )
 from oak.node.model import Node
-from oak.node.parts.processes import Act, Call, Foreach, If, Par, Step, While
-
-
-def _walk_steps(steps: list[Step]) -> Iterator[Step]:
-    for step in steps:
-        yield step
-        if isinstance(step, If):
-            yield from _walk_steps(step.then)
-            if step.otherwise is not None:
-                yield from _walk_steps(step.otherwise)
-        elif isinstance(step, (Foreach, While, Par)):
-            yield from _walk_steps(step.steps)
+from oak.node.parts.processes.steps import Act, Call, iter_steps
 
 
 def instruction_lines(node: Node) -> list[str]:
@@ -33,7 +20,7 @@ def instruction_lines(node: Node) -> list[str]:
     steps = tuple(
         step
         for process in node.processes
-        for step in _walk_steps(process.steps)
+        for step in iter_steps(process.steps)
     )
     if node.processes or node.triggers:
         lines.append(REFERENCE_INSTRUCTION)

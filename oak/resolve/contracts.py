@@ -4,19 +4,17 @@ from __future__ import annotations
 
 from pydantic_core import PydanticCustomError
 
-from oak.node import Node
-from oak.node.parts import (
-    Act,
-    Constant,
+from oak.node.model import Node
+from oak.node.parts.constants import Constant
+from oak.node.parts.processes.model import Process
+from oak.node.parts.processes.steps import Act, Emit, iter_steps, step_values
+from oak.node.parts.processes.values import (
     ConstantValue,
-    Emit,
     InterfaceValue,
     LiteralValue,
-    Process,
-    Schema,
-    SchemaBindingError,
-    step_values,
 )
+from oak.node.parts.schemas.binding import SchemaBindingError
+from oak.node.parts.schemas.model import Schema
 from oak.node.validation.processes import (
     validate_act_contract,
     validate_call_contract,
@@ -27,7 +25,6 @@ from oak.node.validation.values import validate_typed_value
 from oak.resolve.errors import raise_resolution
 from oak.resolve.graph import ResolvedGraph
 from oak.resolve.references import (
-    iter_steps,
     steps_targets_in_process,
     walk_calls,
 )

@@ -5,25 +5,25 @@ from __future__ import annotations
 from collections.abc import Iterable, Iterator
 
 from oak.base import Entry
-from oak.node import Node
-from oak.node.parts import (
+from oak.node.model import Node
+from oak.node.parts.constants import Constant
+from oak.node.parts.processes.conditions import condition_values
+from oak.node.parts.processes.model import Process
+from oak.node.parts.processes.steps import (
     Act,
     Assert,
     Call,
-    Constant,
-    ConstantValue,
     Emit,
     Foreach,
     If,
     Par,
-    Process,
-    Schema,
     Set,
     Step,
     While,
+    iter_steps,
 )
-from oak.node.parts.processes.conditions import condition_values
-from oak.node.parts.processes.values import Value
+from oak.node.parts.processes.values import ConstantValue, Value
+from oak.node.parts.schemas.model import Schema
 
 
 def value_targets(
@@ -150,49 +150,14 @@ def steps_targets_in_process(
         yield from step_references(step)
 
 
-def iter_steps(
-    steps: list[Step],
-) -> Iterator[Step]:
-    """Yield each step recursively in authored order."""
-    for step in steps:
-        yield step
-
-        if isinstance(step, If):
-            yield from iter_steps(step.then)
-
-            if step.otherwise is not None:
-                yield from iter_steps(step.otherwise)
-
-        elif isinstance(step, (Foreach, While, Par)):
-            yield from iter_steps(step.steps)
-
-
 def walk_calls(
     steps: list[Step],
 ) -> Iterator[Call]:
     """Yield each process call recursively in authored order."""
-    for step in steps:
-        if isinstance(step, Call):
-            yield step
-
-        elif isinstance(step, If):
-            yield from walk_calls(step.then)
-
-            if step.otherwise is not None:
-                yield from walk_calls(step.otherwise)
-
-        elif isinstance(step, Foreach):
-            yield from walk_calls(step.steps)
-
-        elif isinstance(step, While):
-            yield from walk_calls(step.steps)
-
-        elif isinstance(step, Par):
-            yield from walk_calls(step.steps)
+    return (step for step in iter_steps(steps) if isinstance(step, Call))
 
 
 __all__ = [
-    "iter_steps",
     "iter_targets",
     "step_references",
     "steps_targets_in_process",

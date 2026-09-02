@@ -2,6 +2,7 @@
 
 from oak.resolve.errors import ResolutionError, ResolutionFailure
 from oak.resolve.graph import ResolvedGraph
+from oak.resolve.references import iter_targets
 from oak.resolve.resolver import (
     DocumentLoader,
     DocumentSource,
@@ -14,5 +15,6 @@ __all__ = [
     "ResolvedGraph",
     "ResolutionError",
     "ResolutionFailure",
+    "iter_targets",
     "resolve",
 ]
