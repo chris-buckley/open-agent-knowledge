@@ -11,6 +11,7 @@ from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes import Process
 from oak.node.parts.schemas import Schema
 from oak.node.parts.triggers import Trigger
+from oak.node.structure import PART_ORDER
 from oak.render.oak.arrangement import schema_text
 from oak.render.oak.instructions import instruction_lines
 from oak.render.oak.styles import StyleName, styled_node
@@ -18,6 +19,28 @@ from oak.render.oak.syntax import constant_text, interface_body, named_value_lin
 from oak.surface import surface_for
 
 GroupingName = Literal["xml", "markdown"]
+
+_PART_SEPARATORS = {
+    "instructions": "\n",
+    "constants": "\n\n",
+    "schemas": "\n\n",
+    "state": "\n",
+    "triggers": "\n\n",
+    "processes": "\n\n",
+    "interfaces": "\n\n",
+}
+
+
+def _part_bodies(node: Node, schema, process, interface) -> dict[str, list[str]]:
+    return {
+        "instructions": instruction_lines(node),
+        "constants": [constant_text(item) for item in node.constants],
+        "schemas": [schema(item) for item in node.schemas],
+        "state": [named_value_line(item) for item in node.state],
+        "triggers": [trigger_body(item) for item in node.triggers],
+        "processes": [process(item) for item in node.processes],
+        "interfaces": [interface(item) for item in node.interfaces],
+    }
 
 
 def _xml_attributes(attributes: dict[str, str | None]) -> str:
@@ -62,16 +85,8 @@ def _xml_part(tag: str, bodies: list[str], separator: str = "\n") -> str:
 
 
 def _node_xml(node: Node) -> str:
-    parts = [
-        ("instructions", instruction_lines(node), "\n"),
-        ("constants", [constant_text(item) for item in node.constants], "\n\n"),
-        ("schemas", [schema_xml(item) for item in node.schemas], "\n\n"),
-        ("state", [named_value_line(item) for item in node.state], "\n"),
-        ("triggers", [trigger_body(item) for item in node.triggers], "\n\n"),
-        ("processes", [process_xml(item) for item in node.processes], "\n\n"),
-        ("interfaces", [interface_xml(item) for item in node.interfaces], "\n\n"),
-    ]
-    return "\n\n".join(_xml_part(tag, bodies, separator) for tag, bodies, separator in parts if bodies)
+    bodies = _part_bodies(node, schema_xml, process_xml, interface_xml)
+    return "\n\n".join(_xml_part(tag, bodies[tag], _PART_SEPARATORS[tag]) for tag in PART_ORDER if bodies[tag])
 
 
 def node_xml(node: Node, *, style: StyleName = "authored") -> str:
@@ -120,16 +135,8 @@ def _markdown_part(tag: str, bodies: list[str], separator: str = "\n") -> str:
 
 
 def _node_markdown(node: Node) -> str:
-    parts = [
-        ("instructions", instruction_lines(node), "\n"),
-        ("constants", [constant_text(item) for item in node.constants], "\n\n"),
-        ("schemas", [schema_markdown(item) for item in node.schemas], "\n\n"),
-        ("state", [named_value_line(item) for item in node.state], "\n"),
-        ("triggers", [trigger_body(item) for item in node.triggers], "\n\n"),
-        ("processes", [process_markdown(item) for item in node.processes], "\n\n"),
-        ("interfaces", [interface_markdown(item) for item in node.interfaces], "\n\n"),
-    ]
-    return "\n\n".join(_markdown_part(tag, bodies, separator) for tag, bodies, separator in parts if bodies)
+    bodies = _part_bodies(node, schema_markdown, process_markdown, interface_markdown)
+    return "\n\n".join(_markdown_part(tag, bodies[tag], _PART_SEPARATORS[tag]) for tag in PART_ORDER if bodies[tag])
 
 
 def node_markdown(node: Node, *, style: StyleName = "authored") -> str:

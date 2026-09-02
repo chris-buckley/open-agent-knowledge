@@ -1,7 +1,6 @@
 """The fixed OAK arrangement."""
 
 from oak.node.parts.schemas import Schema
-from oak.node.structure import PART_ORDER
 from oak.render.oak.syntax import WHERE_HEADING, where_line
 
 

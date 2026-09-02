@@ -60,6 +60,7 @@ from oak.node.parts.processes.operators import (
     reverse_operator,
 )
 from oak.node.parts.triggers import validate_trigger_contract
+from oak.node.structure import PART_ORDER
 from oak.rules import rule_error
 from oak.vocabulary.text.target_path import is_relative_target, target_id
 
@@ -82,13 +83,8 @@ class ToolContractLike(Protocol):
 
 def iter_entries(node: Node) -> Iterator[Entry]:
     """Yield one document's entries in OAK part order."""
-    yield from node.instructions
-    yield from node.constants
-    yield from node.schemas
-    yield from node.state
-    yield from node.triggers
-    yield from node.processes
-    yield from node.interfaces
+    for part in PART_ORDER:
+        yield from getattr(node, part)
 
 
 def entry_registry(node: Node) -> dict[str, Entry]:

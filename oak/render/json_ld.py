@@ -10,6 +10,7 @@ from pydantic_core import PydanticCustomError
 
 from oak.base import Entry
 from oak.node.model import Node
+from oak.node.structure import PART_ORDER
 from oak.node.parts import (
     Act,
     All,
@@ -386,7 +387,7 @@ def node_json_ld(node: Node, *, document: str, vocabulary: str) -> dict[str, obj
         "@id": document,
         "@type": "oak:Node",
     }
-    for field in ("instructions", "constants", "schemas", "state", "triggers", "processes", "interfaces"):
+    for field in PART_ORDER:
         entries = getattr(node, field)
         if entries:
             data[field] = [_entry(document, entry) for entry in entries]
