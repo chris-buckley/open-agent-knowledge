@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+from build.checks.architecture import validate_architecture
 from build.checks.execution import (
     validate_execution,
     validate_source_routing,
@@ -11,10 +12,7 @@ from build.checks.execution import (
 )
 from build.checks.human_examples import validate_human_examples
 from build.checks.metadata import validate_metadata
-from build.checks.outputs import (
-    validate_architecture,
-    validate_outputs,
-)
+from build.checks.outputs import validate_outputs
 from build.checks.parsing import validate_part_omission
 from build.checks.rendering import (
     validate_act_authoring,
