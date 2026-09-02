@@ -61,12 +61,11 @@ PLACEHOLDER_SCALED_BALANCE = "SCALED_BALANCE"
 PLACEHOLDER_TARGET = "TARGET"
 PLACEHOLDER_REFLECTION = "REFLECTION"
 
-growth_instructions = [
-    Instruction(
-        id="run-continuously",
-        body="Run this machine continuously: after each cycle commits, apply the same arrival again.",
-    )
-]
+run_continuously_instruction = Instruction(
+    id="run-continuously",
+    body="Run this machine continuously: after each cycle commits, apply the same arrival again.",
+)
+growth_instructions = [run_continuously_instruction]
 
 growth_rate_constant = Constant(
     id="growth-rate",

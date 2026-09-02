@@ -9,7 +9,14 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from oak import Instruction, Node, NonEmpty, Regex, Schema, SchemaBindingError, Type, parse, render, resolve, where
+from oak import Node, NonEmpty, Regex, Schema, SchemaBindingError, Type, parse, render, resolve, where
+from examples.schemas.repeat_marker import repeat_marker_instruction
+
+PLACEHOLDER_CHANGE_TITLE = "CHANGE_TITLE"
+PLACEHOLDER_CHANGE_DESCRIPTION = "CHANGE_DESCRIPTION"
+PLACEHOLDER_FILE_PATH = "FILE_PATH"
+PLACEHOLDER_LANG = "LANG"
+PLACEHOLDER_COMPLETE_CODE = "COMPLETE_CODE"
 
 code_changes_schema = Schema(
     id="code-changes",
@@ -29,31 +36,31 @@ code_changes_schema = Schema(
         "..."
     ),
     where=[
-        where("CHANGE_TITLE", Type(of="string"), NonEmpty(), description="the title for the set of changes"),
-        where("CHANGE_DESCRIPTION", Type(of="string"), NonEmpty(), description="one terse present-voice description of the change, never changelog style"),
-        where("FILE_PATH", Type(of="path"), Regex(pattern="^[A-Za-z0-9._\\-][A-Za-z0-9._/\\-]*$"), description="the repository-relative file path without parent traversal"),
-        where("LANG", Type(of="string"), NonEmpty(), description="one code language name for GitHub-flavored Markdown"),
-        where("COMPLETE_CODE", Type(of="string"), NonEmpty(), description="the complete file contents with terse present-voice comments"),
+        where(PLACEHOLDER_CHANGE_TITLE, Type(of="string"), NonEmpty(), description="the title for the set of changes"),
+        where(PLACEHOLDER_CHANGE_DESCRIPTION, Type(of="string"), NonEmpty(), description="one terse present-voice description of the change, never changelog style"),
+        where(PLACEHOLDER_FILE_PATH, Type(of="path"), Regex(pattern="^[A-Za-z0-9._\\-][A-Za-z0-9._/\\-]*$"), description="the repository-relative file path without parent traversal"),
+        where(PLACEHOLDER_LANG, Type(of="string"), NonEmpty(), description="one code language name for GitHub-flavored Markdown"),
+        where(PLACEHOLDER_COMPLETE_CODE, Type(of="string"), NonEmpty(), description="the complete file contents with terse present-voice comments"),
     ],
 )
 
 code_changes_node = Node(
-    instructions=[Instruction(id="repeat-marker", body="A ... line in a template marks repetition of the pattern above it.")],
+    instructions=[repeat_marker_instruction],
     schemas=[code_changes_schema],
 )
 
 TARGET = Path(__file__).with_suffix(".oak.md")
 
 _ACCEPTED_BINDING = {
-    "CHANGE_TITLE": "Omit empty parts",
-    "CHANGE_DESCRIPTION": "The render skips empty parts.",
-    "FILE_PATH": "oak/render/oak/groupings.py",
-    "LANG": "python",
-    "COMPLETE_CODE": "def _node_xml(node): ...",
+    PLACEHOLDER_CHANGE_TITLE: "Omit empty parts",
+    PLACEHOLDER_CHANGE_DESCRIPTION: "The render skips empty parts.",
+    PLACEHOLDER_FILE_PATH: "oak/render/oak/groupings.py",
+    PLACEHOLDER_LANG: "python",
+    PLACEHOLDER_COMPLETE_CODE: "def _node_xml(node): ...",
 }
 _REJECTED_BINDINGS = (
-    ("CHANGE_TITLE", ""),
-    ("FILE_PATH", "/etc/passwd"),
+    (PLACEHOLDER_CHANGE_TITLE, ""),
+    (PLACEHOLDER_FILE_PATH, "/etc/passwd"),
 )
 
 

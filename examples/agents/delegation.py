@@ -12,23 +12,32 @@ if str(ROOT) not in sys.path:
 from oak import (
     ACT,
     Arrival,
-    BindingValue,
     Call,
     Emit,
     Instruction,
     Interface,
-    InterfaceValue,
     Node,
     Process,
     ToolContract,
     Trigger,
-    ValueBinding,
     execute,
     parse,
     render,
     resolve,
 )
-from examples.agents.task_reviewer import task_reviewer_node
+from examples.agents.bindings import interface_bindings, local_bindings
+from examples.agents.task_reviewer import (
+    INTERFACE_REVIEW_REQUEST_INPUT as WORKER_REVIEW_REQUEST_INPUT,
+    PLACEHOLDER_ASSESSMENT,
+    PLACEHOLDER_DIFF,
+    PLACEHOLDER_EVIDENCE,
+    PLACEHOLDER_IMPLEMENTATION_REPORT,
+    PLACEHOLDER_ISSUES,
+    PLACEHOLDER_SPEC_COMPLIANCE,
+    PLACEHOLDER_STRENGTHS,
+    PLACEHOLDER_TASK_BRIEF,
+    task_reviewer_node,
+)
 
 SCHEMA_WORKER_REQUEST = "task_reviewer.oak.md#schema.review-request"
 SCHEMA_WORKER_RESULT = "task_reviewer.oak.md#schema.task-review"
@@ -41,28 +50,28 @@ TOOL_AGENT_REVIEWER = "agent.reviewer"
 WORKER_DOCUMENT = "examples/agents/task_reviewer.oak.md"
 EVENT_DELEGATION_REQUESTED = "Delegate the task review."
 
-REQUEST_PLACEHOLDERS = ("TASK_BRIEF", "IMPLEMENTATION_REPORT", "DIFF")
-RESULT_PLACEHOLDERS = ("SPEC_COMPLIANCE", "STRENGTHS", "ISSUES", "ASSESSMENT")
+SOURCE = "examples/agents/delegation.oak.md"
 
-delegation_instructions = [
-    Instruction(
-        id="preserve-result",
-        body="Return the worker task review unchanged.",
-    )
-]
+REQUEST_PLACEHOLDERS = (PLACEHOLDER_TASK_BRIEF, PLACEHOLDER_IMPLEMENTATION_REPORT, PLACEHOLDER_DIFF)
+RESULT_PLACEHOLDERS = (
+    PLACEHOLDER_SPEC_COMPLIANCE,
+    PLACEHOLDER_STRENGTHS,
+    PLACEHOLDER_ISSUES,
+    PLACEHOLDER_ASSESSMENT,
+)
+
+preserve_result_instruction = Instruction(
+    id="preserve-result",
+    body="Return the worker task review unchanged.",
+)
+delegation_instructions = [preserve_result_instruction]
 
 delegation_requested_trigger = Trigger(
     id="delegation-requested",
     event=EVENT_DELEGATION_REQUESTED,
     source=INTERFACE_REVIEW_REQUEST_INPUT,
     process=PROCESS_DELEGATE_REVIEW,
-    seed=[
-        ValueBinding(
-            placeholder=placeholder,
-            value=InterfaceValue(interface=INTERFACE_REVIEW_REQUEST_INPUT, placeholder=placeholder),
-        )
-        for placeholder in REQUEST_PLACEHOLDERS
-    ],
+    seed=interface_bindings(INTERFACE_REVIEW_REQUEST_INPUT, REQUEST_PLACEHOLDERS),
 )
 
 dispatch_review_process = Process(
@@ -76,10 +85,7 @@ dispatch_review_process = Process(
             "Review <TASK_BRIEF>, <IMPLEMENTATION_REPORT>, and <DIFF> in one worker agent and produce <SPEC_COMPLIANCE>, <STRENGTHS>, <ISSUES>, and <ASSESSMENT>.",
             input=SCHEMA_WORKER_REQUEST,
             output=SCHEMA_WORKER_RESULT,
-            inputs=[
-                ValueBinding(placeholder=placeholder, value=BindingValue(binding=placeholder))
-                for placeholder in REQUEST_PLACEHOLDERS
-            ],
+            inputs=local_bindings(REQUEST_PLACEHOLDERS),
             outputs=list(RESULT_PLACEHOLDERS),
         ),
     ],
@@ -92,18 +98,12 @@ delegate_review_process = Process(
     steps=[
         Call(
             process=PROCESS_DISPATCH_REVIEW,
-            inputs=[
-                ValueBinding(placeholder=placeholder, value=BindingValue(binding=placeholder))
-                for placeholder in REQUEST_PLACEHOLDERS
-            ],
+            inputs=local_bindings(REQUEST_PLACEHOLDERS),
             outputs=list(RESULT_PLACEHOLDERS),
         ),
         Emit(
             interface=INTERFACE_TASK_REVIEW_OUTPUT,
-            bindings=[
-                ValueBinding(placeholder=placeholder, value=BindingValue(binding=placeholder))
-                for placeholder in RESULT_PLACEHOLDERS
-            ],
+            bindings=local_bindings(RESULT_PLACEHOLDERS),
         ),
     ],
 )
@@ -132,21 +132,21 @@ delegation_node = Node(
 TARGET = Path(__file__).with_suffix(".oak.md")
 
 REQUEST_VALUES = {
-    "TASK_BRIEF": "Add one bounded while to the growth example.",
-    "IMPLEMENTATION_REPORT": "Added the while and regenerated the snapshot.",
-    "DIFF": "examples/agents/compound_growth.py: +12 -2",
+    PLACEHOLDER_TASK_BRIEF: "Add one bounded while to the growth example.",
+    PLACEHOLDER_IMPLEMENTATION_REPORT: "Added the while and regenerated the snapshot.",
+    PLACEHOLDER_DIFF: "examples/agents/compound_growth.py: +12 -2",
 }
 
 
 def _worker_act(step, _values):
-    if step.outputs == ["EVIDENCE"]:
-        return {"EVIDENCE": "The diff matches the report."}
-    if step.outputs == ["SPEC_COMPLIANCE"]:
-        return {"SPEC_COMPLIANCE": "Every requirement is met."}
+    if step.outputs == [PLACEHOLDER_EVIDENCE]:
+        return {PLACEHOLDER_EVIDENCE: "The diff matches the report."}
+    if step.outputs == [PLACEHOLDER_SPEC_COMPLIANCE]:
+        return {PLACEHOLDER_SPEC_COMPLIANCE: "Every requirement is met."}
     return {
-        "STRENGTHS": "Small bounded change.",
-        "ISSUES": "None found.",
-        "ASSESSMENT": "Accept.",
+        PLACEHOLDER_STRENGTHS: "Small bounded change.",
+        PLACEHOLDER_ISSUES: "None found.",
+        PLACEHOLDER_ASSESSMENT: "Accept.",
     }
 
 
@@ -154,8 +154,8 @@ def _reviewer_agent(_step, values):
     completed = execute(
         task_reviewer_node,
         Arrival(
-            source="interface.review-request-input",
-            interfaces={"interface.review-request-input": dict(values)},
+            source=WORKER_REVIEW_REQUEST_INPUT,
+            interfaces={WORKER_REVIEW_REQUEST_INPUT: dict(values)},
         ),
         {},
         act=_worker_act,
@@ -171,7 +171,7 @@ def build() -> str:
     """Render, parse, resolve across the worker, execute the dispatch, and round-trip."""
     rendered = render(delegation_node)
     parsed = parse(rendered)
-    resolve(parsed, source="examples/agents/delegation.oak.md", load=_load_worker)
+    resolve(parsed, source=SOURCE, load=_load_worker)
     if render(parsed) != rendered:
         raise RuntimeError("delegation example changed during render and parse")
     completed = execute(
@@ -190,7 +190,7 @@ def build() -> str:
                 output=SCHEMA_WORKER_RESULT,
             )
         },
-        source="examples/agents/delegation.oak.md",
+        source=SOURCE,
         load=_load_worker,
     )
     expected_review = _reviewer_agent(None, REQUEST_VALUES)

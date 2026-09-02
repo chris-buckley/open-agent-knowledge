@@ -11,11 +11,9 @@ if str(ROOT) not in sys.path:
 
 from oak import (
     ACT,
-    BindingValue,
     Emit,
     Instruction,
     Interface,
-    InterfaceValue,
     Node,
     NonEmpty,
     OneOf,
@@ -23,12 +21,12 @@ from oak import (
     Schema,
     Trigger,
     Type,
-    ValueBinding,
     parse,
     render,
     resolve,
     where,
 )
+from examples.agents.bindings import interface_bindings, local_bindings
 
 SCHEMA_AMENDMENT_REVIEW_REQUEST = "schema.amendment-review-request"
 SCHEMA_AMENDMENT_REVIEW = "schema.amendment-review"
@@ -62,27 +60,32 @@ REVIEW_PLACEHOLDERS = (
     PLACEHOLDER_EVIDENCE_REQUEST,
 )
 
+challenge_amendment_instruction = Instruction(
+    id="challenge-amendment",
+    body="Challenge the amendment against the supplied evidence and protected invariants.",
+)
+preserve_current_instruction = Instruction(
+    id="preserve-current",
+    body="Treat the current OAK document and protected invariants as read-only.",
+)
+request_evidence_instruction = Instruction(
+    id="request-evidence",
+    body="Request evidence when the amendment cannot yet be justified.",
+)
+reject_breach_instruction = Instruction(
+    id="reject-breach",
+    body="Reject an amendment that breaks a protected invariant.",
+)
+forbid_publication_instruction = Instruction(
+    id="forbid-publication",
+    body="Do not compile, ratify, or publish a successor.",
+)
 amendment_reviewer_instructions = [
-    Instruction(
-        id="challenge-amendment",
-        body="Challenge the amendment against the supplied evidence and protected invariants.",
-    ),
-    Instruction(
-        id="preserve-current",
-        body="Treat the current OAK document and protected invariants as read-only.",
-    ),
-    Instruction(
-        id="request-evidence",
-        body="Request evidence when the amendment cannot yet be justified.",
-    ),
-    Instruction(
-        id="reject-breach",
-        body="Reject an amendment that breaks a protected invariant.",
-    ),
-    Instruction(
-        id="forbid-publication",
-        body="Do not compile, ratify, or publish a successor.",
-    ),
+    challenge_amendment_instruction,
+    preserve_current_instruction,
+    request_evidence_instruction,
+    reject_breach_instruction,
+    forbid_publication_instruction,
 ]
 
 amendment_review_request_schema = Schema(
@@ -171,16 +174,7 @@ amendment_review_requested_trigger = Trigger(
     event=EVENT_AMENDMENT_REVIEW_REQUESTED,
     source=INTERFACE_REVIEW_REQUEST_INPUT,
     process=PROCESS_REVIEW_AMENDMENT,
-    seed=[
-        ValueBinding(
-            placeholder=placeholder,
-            value=InterfaceValue(
-                interface=INTERFACE_REVIEW_REQUEST_INPUT,
-                placeholder=placeholder,
-            ),
-        )
-        for placeholder in REQUEST_PLACEHOLDERS
-    ],
+    seed=interface_bindings(INTERFACE_REVIEW_REQUEST_INPUT, REQUEST_PLACEHOLDERS),
 )
 
 review_amendment_process = Process(
@@ -198,24 +192,12 @@ review_amendment_process = Process(
             ),
             input=SCHEMA_AMENDMENT_REVIEW_REQUEST,
             output=SCHEMA_AMENDMENT_REVIEW,
-            inputs=[
-                ValueBinding(
-                    placeholder=placeholder,
-                    value=BindingValue(binding=placeholder),
-                )
-                for placeholder in REQUEST_PLACEHOLDERS
-            ],
+            inputs=local_bindings(REQUEST_PLACEHOLDERS),
             outputs=list(REVIEW_PLACEHOLDERS),
         ),
         Emit(
             interface=INTERFACE_REVIEW_OUTPUT,
-            bindings=[
-                ValueBinding(
-                    placeholder=placeholder,
-                    value=BindingValue(binding=placeholder),
-                )
-                for placeholder in REVIEW_PLACEHOLDERS
-            ],
+            bindings=local_bindings(REVIEW_PLACEHOLDERS),
         ),
     ],
 )

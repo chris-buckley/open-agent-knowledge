@@ -12,6 +12,18 @@ if str(ROOT) not in sys.path:
 
 from oak import Node, NonEmpty, OneOf, Schema, SchemaBindingError, Type, parse, render, resolve, where
 
+PLACEHOLDER_PROCESS_ID = "PROCESS_ID"
+PLACEHOLDER_PROCESS_NAME = "PROCESS_NAME"
+PLACEHOLDER_STATUS = "STATUS"
+PLACEHOLDER_STARTED_AT = "STARTED_AT"
+PLACEHOLDER_ENDED_AT = "ENDED_AT"
+PLACEHOLDER_DURATION_MS = "DURATION_MS"
+PLACEHOLDER_OUTCOME = "OUTCOME"
+PLACEHOLDER_ARTIFACTS = "ARTIFACTS"
+PLACEHOLDER_ERRORS = "ERRORS"
+
+STATUS_OK = "OK"
+
 process_execution_table_schema = Schema(
     id="process-execution-table",
     name="Process Execution Table",
@@ -21,15 +33,15 @@ process_execution_table_schema = Schema(
         "| <PROCESS_ID> | <PROCESS_NAME> | <STATUS> | <STARTED_AT> | <ENDED_AT> | <DURATION_MS> | <OUTCOME> | <ARTIFACTS> | <ERRORS> |"
     ),
     where=[
-        where("PROCESS_ID", Type(of="string"), NonEmpty(), description="the process identifier"),
-        where("PROCESS_NAME", Type(of="string"), NonEmpty(), description="the process display name"),
-        where("STATUS", Type(of="string"), OneOf(values=["PENDING", "RUNNING", "OK", "WARN", "ERROR"]), description="the execution status"),
-        where("STARTED_AT", Type(of="datetime"), description="when the process started"),
-        where("ENDED_AT", Type(of="datetime"), description="when the process ended"),
-        where("DURATION_MS", Type(of="integer"), description="the run duration in milliseconds"),
-        where("OUTCOME", Type(of="string"), NonEmpty(), description="the result in one clause"),
-        where("ARTIFACTS", Type(of="string"), description="the produced artifacts, empty when none"),
-        where("ERRORS", Type(of="string"), description="the errors, empty when none"),
+        where(PLACEHOLDER_PROCESS_ID, Type(of="string"), NonEmpty(), description="the process identifier"),
+        where(PLACEHOLDER_PROCESS_NAME, Type(of="string"), NonEmpty(), description="the process display name"),
+        where(PLACEHOLDER_STATUS, Type(of="string"), OneOf(values=["PENDING", "RUNNING", STATUS_OK, "WARN", "ERROR"]), description="the execution status"),
+        where(PLACEHOLDER_STARTED_AT, Type(of="datetime"), description="when the process started"),
+        where(PLACEHOLDER_ENDED_AT, Type(of="datetime"), description="when the process ended"),
+        where(PLACEHOLDER_DURATION_MS, Type(of="integer"), description="the run duration in milliseconds"),
+        where(PLACEHOLDER_OUTCOME, Type(of="string"), NonEmpty(), description="the result in one clause"),
+        where(PLACEHOLDER_ARTIFACTS, Type(of="string"), description="the produced artifacts, empty when none"),
+        where(PLACEHOLDER_ERRORS, Type(of="string"), description="the errors, empty when none"),
     ],
 )
 
@@ -38,21 +50,21 @@ process_execution_table_node = Node(schemas=[process_execution_table_schema])
 TARGET = Path(__file__).with_suffix(".oak.md")
 
 _ACCEPTED_BINDING = {
-    "PROCESS_ID": "sync-docs",
-    "PROCESS_NAME": "Sync docs",
-    "STATUS": "OK",
-    "STARTED_AT": "2026-08-31T09:00:00Z",
-    "ENDED_AT": "2026-08-31T09:01:00Z",
-    "DURATION_MS": 60000,
-    "OUTCOME": "synced",
-    "ARTIFACTS": "",
-    "ERRORS": "",
+    PLACEHOLDER_PROCESS_ID: "sync-docs",
+    PLACEHOLDER_PROCESS_NAME: "Sync docs",
+    PLACEHOLDER_STATUS: STATUS_OK,
+    PLACEHOLDER_STARTED_AT: "2026-08-31T09:00:00Z",
+    PLACEHOLDER_ENDED_AT: "2026-08-31T09:01:00Z",
+    PLACEHOLDER_DURATION_MS: 60000,
+    PLACEHOLDER_OUTCOME: "synced",
+    PLACEHOLDER_ARTIFACTS: "",
+    PLACEHOLDER_ERRORS: "",
 }
 _REJECTED_BINDINGS = (
-    ("STATUS", "DONE"),
-    ("STARTED_AT", "2026-08-31"),
-    ("STARTED_AT", "1.5"),
-    ("ENDED_AT", datetime(2026, 8, 31, 9, 1, tzinfo=timezone.utc)),
+    (PLACEHOLDER_STATUS, "DONE"),
+    (PLACEHOLDER_STARTED_AT, "2026-08-31"),
+    (PLACEHOLDER_STARTED_AT, "1.5"),
+    (PLACEHOLDER_ENDED_AT, datetime(2026, 8, 31, 9, 1, tzinfo=timezone.utc)),
 )
 
 

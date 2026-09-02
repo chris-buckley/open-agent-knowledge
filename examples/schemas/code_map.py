@@ -9,7 +9,17 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from oak import AtLeast, Instruction, Node, NonEmpty, Regex, Schema, SchemaBindingError, Type, parse, render, resolve, where
+from oak import AtLeast, Node, NonEmpty, Regex, Schema, SchemaBindingError, Type, parse, render, resolve, where
+from examples.schemas.repeat_marker import repeat_marker_instruction
+
+PLACEHOLDER_AREA_TITLE = "AREA_TITLE"
+PLACEHOLDER_SHORT_DESC = "SHORT_DESC"
+PLACEHOLDER_REPO_NAME = "REPO_NAME"
+PLACEHOLDER_REL_PATH = "REL_PATH"
+PLACEHOLDER_LINE_FROM = "LINE_FROM"
+PLACEHOLDER_LINE_TO = "LINE_TO"
+PLACEHOLDER_LANG = "LANG"
+PLACEHOLDER_SNIPPET = "SNIPPET"
 
 code_map_schema = Schema(
     id="code-map",
@@ -25,35 +35,35 @@ code_map_schema = Schema(
         "..."
     ),
     where=[
-        where("AREA_TITLE", Type(of="string"), NonEmpty(), description="the title of the area being described"),
-        where("SHORT_DESC", Type(of="string"), NonEmpty(), description="one short description of the code snippet"),
-        where("REPO_NAME", Type(of="string"), Regex(pattern="^[A-Za-z0-9._\\-]+$"), description="one path segment naming the repository"),
-        where("REL_PATH", Type(of="path"), Regex(pattern="^[A-Za-z0-9._\\-][A-Za-z0-9._/\\-]*$"), description="the repository-relative file path without parent traversal"),
-        where("LINE_FROM", Type(of="integer"), AtLeast(value=1), description="the first snippet line number"),
-        where("LINE_TO", Type(of="integer"), AtLeast(value="LINE_FROM"), description="the last snippet line number"),
-        where("LANG", Type(of="string"), NonEmpty(), description="one code language name for GitHub-flavored Markdown"),
-        where("SNIPPET", Type(of="string"), NonEmpty(), description="the code lines from LINE_FROM to LINE_TO, each prefixed with its source line number"),
+        where(PLACEHOLDER_AREA_TITLE, Type(of="string"), NonEmpty(), description="the title of the area being described"),
+        where(PLACEHOLDER_SHORT_DESC, Type(of="string"), NonEmpty(), description="one short description of the code snippet"),
+        where(PLACEHOLDER_REPO_NAME, Type(of="string"), Regex(pattern="^[A-Za-z0-9._\\-]+$"), description="one path segment naming the repository"),
+        where(PLACEHOLDER_REL_PATH, Type(of="path"), Regex(pattern="^[A-Za-z0-9._\\-][A-Za-z0-9._/\\-]*$"), description="the repository-relative file path without parent traversal"),
+        where(PLACEHOLDER_LINE_FROM, Type(of="integer"), AtLeast(value=1), description="the first snippet line number"),
+        where(PLACEHOLDER_LINE_TO, Type(of="integer"), AtLeast(value=PLACEHOLDER_LINE_FROM), description="the last snippet line number"),
+        where(PLACEHOLDER_LANG, Type(of="string"), NonEmpty(), description="one code language name for GitHub-flavored Markdown"),
+        where(PLACEHOLDER_SNIPPET, Type(of="string"), NonEmpty(), description="the code lines from LINE_FROM to LINE_TO, each prefixed with its source line number"),
     ],
 )
 
 code_map_node = Node(
-    instructions=[Instruction(id="repeat-marker", body="A ... line in a template marks repetition of the pattern above it.")],
+    instructions=[repeat_marker_instruction],
     schemas=[code_map_schema],
 )
 
 TARGET = Path(__file__).with_suffix(".oak.md")
 
 _ACCEPTED_BINDING = {
-    "AREA_TITLE": "Part rendering",
-    "SHORT_DESC": "the part filter",
-    "REPO_NAME": "open-agent-knowledge",
-    "REL_PATH": "oak/render/oak/groupings.py",
-    "LINE_FROM": 66,
-    "LINE_TO": 75,
-    "LANG": "python",
-    "SNIPPET": "66: def _node_xml(node):",
+    PLACEHOLDER_AREA_TITLE: "Part rendering",
+    PLACEHOLDER_SHORT_DESC: "the part filter",
+    PLACEHOLDER_REPO_NAME: "open-agent-knowledge",
+    PLACEHOLDER_REL_PATH: "oak/render/oak/groupings.py",
+    PLACEHOLDER_LINE_FROM: 66,
+    PLACEHOLDER_LINE_TO: 75,
+    PLACEHOLDER_LANG: "python",
+    PLACEHOLDER_SNIPPET: "66: def _node_xml(node):",
 }
-_REJECTED_BINDINGS = (("LINE_TO", 1),)
+_REJECTED_BINDINGS = ((PLACEHOLDER_LINE_TO, 1),)
 
 
 def build() -> str:

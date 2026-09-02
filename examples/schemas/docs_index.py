@@ -9,7 +9,8 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from oak import Instruction, Node, NonEmpty, Schema, Type, parse, render, resolve, where
+from oak import Node, NonEmpty, Schema, Type, parse, render, resolve, where
+from examples.schemas.repeat_marker import repeat_marker_instruction
 
 docs_index_schema = Schema(
     id="docs-index",
@@ -42,7 +43,7 @@ docs_index_schema = Schema(
 )
 
 docs_index_node = Node(
-    instructions=[Instruction(id="repeat-marker", body="A ... line in a template marks repetition of the pattern above it.")],
+    instructions=[repeat_marker_instruction],
     schemas=[docs_index_schema],
 )
 

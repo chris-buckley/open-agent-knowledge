@@ -11,23 +11,21 @@ if str(ROOT) not in sys.path:
 
 from oak import (
     ACT,
-    BindingValue,
     Emit,
     Instruction,
     Interface,
-    InterfaceValue,
     Node,
     NonEmpty,
     Process,
     Schema,
     Trigger,
     Type,
-    ValueBinding,
     parse,
     render,
     resolve,
     where,
 )
+from examples.agents.bindings import interface_bindings, local_bindings
 
 SCHEMA_SUCCESSOR_VERIFICATION_REQUEST = "schema.successor-verification-request"
 SCHEMA_SUCCESSOR_PROOF = "schema.successor-proof"
@@ -66,27 +64,32 @@ PROOF_PLACEHOLDERS = (
     PLACEHOLDER_PROOF,
 )
 
+verify_independently_instruction = Instruction(
+    id="verify-independently",
+    body="Verify the candidate independently from the compiler that produced it.",
+)
+require_canonical_instruction = Instruction(
+    id="require-canonical",
+    body="Require the candidate to parse, resolve, and round-trip canonically.",
+)
+preserve_invariants_instruction = Instruction(
+    id="preserve-invariants",
+    body="Require every protected invariant and current instruction to remain true.",
+)
+enforce_scope_instruction = Instruction(
+    id="enforce-scope",
+    body="Require the candidate change to equal the accepted amendment exactly.",
+)
+forbid_publication_instruction = Instruction(
+    id="forbid-publication",
+    body="Do not alter, ratify, or publish the candidate.",
+)
 successor_verifier_instructions = [
-    Instruction(
-        id="verify-independently",
-        body="Verify the candidate independently from the compiler that produced it.",
-    ),
-    Instruction(
-        id="require-canonical",
-        body="Require the candidate to parse, resolve, and round-trip canonically.",
-    ),
-    Instruction(
-        id="preserve-invariants",
-        body="Require every protected invariant and current instruction to remain true.",
-    ),
-    Instruction(
-        id="enforce-scope",
-        body="Require the candidate change to equal the accepted amendment exactly.",
-    ),
-    Instruction(
-        id="forbid-publication",
-        body="Do not alter, ratify, or publish the candidate.",
-    ),
+    verify_independently_instruction,
+    require_canonical_instruction,
+    preserve_invariants_instruction,
+    enforce_scope_instruction,
+    forbid_publication_instruction,
 ]
 
 successor_verification_request_schema = Schema(
@@ -185,16 +188,7 @@ successor_verification_requested_trigger = Trigger(
     event=EVENT_SUCCESSOR_VERIFICATION_REQUESTED,
     source=INTERFACE_VERIFICATION_REQUEST_INPUT,
     process=PROCESS_VERIFY_SUCCESSOR,
-    seed=[
-        ValueBinding(
-            placeholder=placeholder,
-            value=InterfaceValue(
-                interface=INTERFACE_VERIFICATION_REQUEST_INPUT,
-                placeholder=placeholder,
-            ),
-        )
-        for placeholder in REQUEST_PLACEHOLDERS
-    ],
+    seed=interface_bindings(INTERFACE_VERIFICATION_REQUEST_INPUT, REQUEST_PLACEHOLDERS),
 )
 
 verify_successor_process = Process(
@@ -213,24 +207,12 @@ verify_successor_process = Process(
             ),
             input=SCHEMA_SUCCESSOR_VERIFICATION_REQUEST,
             output=SCHEMA_SUCCESSOR_PROOF,
-            inputs=[
-                ValueBinding(
-                    placeholder=placeholder,
-                    value=BindingValue(binding=placeholder),
-                )
-                for placeholder in REQUEST_PLACEHOLDERS
-            ],
+            inputs=local_bindings(REQUEST_PLACEHOLDERS),
             outputs=list(PROOF_PLACEHOLDERS),
         ),
         Emit(
             interface=INTERFACE_PROOF_OUTPUT,
-            bindings=[
-                ValueBinding(
-                    placeholder=placeholder,
-                    value=BindingValue(binding=placeholder),
-                )
-                for placeholder in PROOF_PLACEHOLDERS
-            ],
+            bindings=local_bindings(PROOF_PLACEHOLDERS),
         ),
     ],
 )
