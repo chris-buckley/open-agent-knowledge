@@ -36,7 +36,7 @@ PROCESS_REVIEW_AMENDMENT = "process.review-amendment"
 INTERFACE_REVIEW_REQUEST_INPUT = "interface.review-request-input"
 INTERFACE_REVIEW_OUTPUT = "interface.review-output"
 
-WHEN_AMENDMENT_REVIEW_REQUESTED = "An amendment review is requested."
+EVENT_AMENDMENT_REVIEW_REQUESTED = "An amendment review is requested."
 
 PLACEHOLDER_CURRENT_OAK = "CURRENT_OAK"
 PLACEHOLDER_AMENDMENT_ID = "AMENDMENT_ID"
@@ -168,9 +168,10 @@ amendment_review_schema = Schema(
 
 amendment_review_requested_trigger = Trigger(
     id="amendment-review-requested",
-    when=WHEN_AMENDMENT_REVIEW_REQUESTED,
-    then=PROCESS_REVIEW_AMENDMENT,
-    inputs=[
+    event=EVENT_AMENDMENT_REVIEW_REQUESTED,
+    source=INTERFACE_REVIEW_REQUEST_INPUT,
+    process=PROCESS_REVIEW_AMENDMENT,
+    seed=[
         ValueBinding(
             placeholder=placeholder,
             value=InterfaceValue(

@@ -1,9 +1,9 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and THEN omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-Each trigger contains GIVEN, WHEN, and THEN; WHEN matches first, GIVEN guards it, and THEN selects a process.
+Each trigger is one fact group: event carries the meaning, an optional source names the exact ingress interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both.
 
@@ -131,11 +131,8 @@ WHERE:
 </schemas>
 
 <triggers>
-<trigger id="implementation-requested">
-GIVEN: true
-WHEN: "An implementation task arrives."
-THEN: process.implement-task
-</trigger>
+trigger.implementation-requested.event := "An implementation task arrives."
+trigger.implementation-requested.process := process.implement-task
 </triggers>
 
 <processes>

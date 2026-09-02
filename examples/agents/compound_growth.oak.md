@@ -1,14 +1,14 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and THEN omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
 Conditions are typed trees; ALL, ANY, and NOT compose comparisons; ASSERT fails a false condition; FOREACH is sequential; WHILE tests before each bounded iteration; PAR outputs become visible only at JOIN.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
-Trigger inputs seed the selected process input schema; each seeded value validates before the process runs.
+Trigger seeds fill the selected process input schema; each seeded value validates before the process runs.
 AS binds one constant or state value to one schema placeholder; the value must satisfy that placeholder at resolution and before each state write commits.
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 State holds values that persist and can change while processes run.
-Each trigger contains GIVEN, WHEN, and THEN; WHEN matches first, GIVEN guards it, and THEN selects a process.
+Each trigger is one fact group: event carries the meaning, an optional source names the exact ingress interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both.
 
@@ -61,11 +61,9 @@ reflection-target AS schema.scaling.BALANCE: 800
 </state>
 
 <triggers>
-<trigger id="growth-requested">
-GIVEN: true
-WHEN: "Continue growing the balance."
-THEN: process.grow-balance (TARGET=$state.reflection-target)
-</trigger>
+trigger.growth-requested.event := "Continue growing the balance."
+trigger.growth-requested.process := process.grow-balance
+trigger.growth-requested.seed.TARGET := $state.reflection-target
 </triggers>
 
 <processes>

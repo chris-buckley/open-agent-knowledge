@@ -36,7 +36,7 @@ INTERFACE_VERIFICATION_REQUEST_INPUT = "interface.verification-request-input"
 INTERFACE_PROOF_OUTPUT = "interface.proof-output"
 
 TOOL_OAK_VERIFY_SUCCESSOR = "oak.verify-successor"
-WHEN_SUCCESSOR_VERIFICATION_REQUESTED = "A successor verification is requested."
+EVENT_SUCCESSOR_VERIFICATION_REQUESTED = "A successor verification is requested."
 
 PLACEHOLDER_CURRENT_OAK = "CURRENT_OAK"
 PLACEHOLDER_CANDIDATE_OAK = "CANDIDATE_OAK"
@@ -182,9 +182,10 @@ successor_proof_schema = Schema(
 
 successor_verification_requested_trigger = Trigger(
     id="successor-verification-requested",
-    when=WHEN_SUCCESSOR_VERIFICATION_REQUESTED,
-    then=PROCESS_VERIFY_SUCCESSOR,
-    inputs=[
+    event=EVENT_SUCCESSOR_VERIFICATION_REQUESTED,
+    source=INTERFACE_VERIFICATION_REQUEST_INPUT,
+    process=PROCESS_VERIFY_SUCCESSOR,
+    seed=[
         ValueBinding(
             placeholder=placeholder,
             value=InterfaceValue(

@@ -1,14 +1,15 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and THEN omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
 Conditions are typed trees; ALL, ANY, and NOT compose comparisons; ASSERT fails a false condition; FOREACH is sequential; WHILE tests before each bounded iteration; PAR outputs become visible only at JOIN.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
-Trigger inputs seed the selected process input schema; each seeded value validates before the process runs.
+Trigger seeds fill the selected process input schema; each seeded value validates before the process runs.
+A source-backed trigger fires on an arrival at its exact interface; its event text stays the semantic signpost.
 AS binds one constant or state value to one schema placeholder; the value must satisfy that placeholder at resolution and before each state write commits.
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 State holds values that persist and can change while processes run.
-Each trigger contains GIVEN, WHEN, and THEN; WHEN matches first, GIVEN guards it, and THEN selects a process.
+Each trigger is one fact group: event carries the meaning, an optional source names the exact ingress interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both.
 
@@ -160,17 +161,24 @@ pending-rationale AS schema.governance.RATIONALE: ""
 </state>
 
 <triggers>
-<trigger id="amendment-proposed">
-GIVEN: true
-WHEN: "An amendment is proposed."
-THEN: process.govern-succession (AMENDMENT_ID=$interface.amendment-input.AMENDMENT_ID, AMENDMENT=$interface.amendment-input.AMENDMENT, RATIONALE=$interface.amendment-input.RATIONALE, EVIDENCE=$interface.amendment-input.EVIDENCE, RESUME=false)
-</trigger>
+trigger.amendment-proposed.event := "An amendment is proposed."
+trigger.amendment-proposed.source := interface.amendment-input
+trigger.amendment-proposed.process := process.govern-succession
+trigger.amendment-proposed.seed.AMENDMENT_ID := $interface.amendment-input.AMENDMENT_ID
+trigger.amendment-proposed.seed.AMENDMENT := $interface.amendment-input.AMENDMENT
+trigger.amendment-proposed.seed.RATIONALE := $interface.amendment-input.RATIONALE
+trigger.amendment-proposed.seed.EVIDENCE := $interface.amendment-input.EVIDENCE
+trigger.amendment-proposed.seed.RESUME := false
 
-<trigger id="evidence-supplied">
-GIVEN: $state.review-status equals "needs-evidence"
-WHEN: "Evidence for the pending amendment is supplied."
-THEN: process.govern-succession (AMENDMENT_ID=$interface.evidence-input.AMENDMENT_ID, AMENDMENT=$state.pending-amendment, RATIONALE=$state.pending-rationale, EVIDENCE=$interface.evidence-input.EVIDENCE, RESUME=true)
-</trigger>
+trigger.evidence-supplied.event := "Evidence for the pending amendment is supplied."
+trigger.evidence-supplied.source := interface.evidence-input
+trigger.evidence-supplied.guard := $state.review-status equals "needs-evidence"
+trigger.evidence-supplied.process := process.govern-succession
+trigger.evidence-supplied.seed.AMENDMENT_ID := $interface.evidence-input.AMENDMENT_ID
+trigger.evidence-supplied.seed.AMENDMENT := $state.pending-amendment
+trigger.evidence-supplied.seed.RATIONALE := $state.pending-rationale
+trigger.evidence-supplied.seed.EVIDENCE := $interface.evidence-input.EVIDENCE
+trigger.evidence-supplied.seed.RESUME := true
 </triggers>
 
 <processes>

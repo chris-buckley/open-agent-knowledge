@@ -1,4 +1,4 @@
-"""Author one endless grow-and-reflect machine with schema-bound constants, state, trigger inputs, and tool contracts."""
+"""Author one endless grow-and-reflect machine with schema-bound constants, state, trigger seeds, and tool contracts."""
 
 from __future__ import annotations
 
@@ -53,7 +53,7 @@ PROCESS_GROW_BALANCE = "process.grow-balance"
 INTERFACE_REFLECTION_OUTPUT = "interface.reflection-output"
 
 TOOL_MATH_MULTIPLY = "math.multiply"
-WHEN_GROWTH_REQUESTED = "Continue growing the balance."
+EVENT_GROWTH_REQUESTED = "Continue growing the balance."
 
 PLACEHOLDER_BALANCE = "BALANCE"
 PLACEHOLDER_FACTOR = "FACTOR"
@@ -134,9 +134,9 @@ reflection_target_state = State(
 
 growth_requested_trigger = Trigger(
     id="growth-requested",
-    when=WHEN_GROWTH_REQUESTED,
-    then=PROCESS_GROW_BALANCE,
-    inputs=[
+    event=EVENT_GROWTH_REQUESTED,
+    process=PROCESS_GROW_BALANCE,
+    seed=[
         ValueBinding(placeholder=PLACEHOLDER_TARGET, value=StateValue(state=STATE_REFLECTION_TARGET)),
     ],
 )
@@ -261,7 +261,7 @@ def build() -> str:
     for _cycle in range(2):
         result = execute(
             parsed,
-            Arrival(when=WHEN_GROWTH_REQUESTED),
+            Arrival(event=EVENT_GROWTH_REQUESTED),
             state,
             act=_reflect_act,
             tools=tools,

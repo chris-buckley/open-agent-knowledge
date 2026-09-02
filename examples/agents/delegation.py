@@ -39,8 +39,7 @@ INTERFACE_TASK_REVIEW_OUTPUT = "interface.task-review-output"
 
 TOOL_AGENT_REVIEWER = "agent.reviewer"
 WORKER_DOCUMENT = "examples/agents/task_reviewer.oak.md"
-WORKER_ARRIVAL_WHEN = "A task review is requested."
-WHEN_DELEGATION_REQUESTED = "Delegate the task review."
+EVENT_DELEGATION_REQUESTED = "Delegate the task review."
 
 REQUEST_PLACEHOLDERS = ("TASK_BRIEF", "IMPLEMENTATION_REPORT", "DIFF")
 RESULT_PLACEHOLDERS = ("SPEC_COMPLIANCE", "STRENGTHS", "ISSUES", "ASSESSMENT")
@@ -54,9 +53,10 @@ delegation_instructions = [
 
 delegation_requested_trigger = Trigger(
     id="delegation-requested",
-    when=WHEN_DELEGATION_REQUESTED,
-    then=PROCESS_DELEGATE_REVIEW,
-    inputs=[
+    event=EVENT_DELEGATION_REQUESTED,
+    source=INTERFACE_REVIEW_REQUEST_INPUT,
+    process=PROCESS_DELEGATE_REVIEW,
+    seed=[
         ValueBinding(
             placeholder=placeholder,
             value=InterfaceValue(interface=INTERFACE_REVIEW_REQUEST_INPUT, placeholder=placeholder),
@@ -154,7 +154,7 @@ def _reviewer_agent(_step, values):
     completed = execute(
         task_reviewer_node,
         Arrival(
-            when=WORKER_ARRIVAL_WHEN,
+            source="interface.review-request-input",
             interfaces={"interface.review-request-input": dict(values)},
         ),
         {},
@@ -177,7 +177,7 @@ def build() -> str:
     completed = execute(
         parsed,
         Arrival(
-            when=WHEN_DELEGATION_REQUESTED,
+            source=INTERFACE_REVIEW_REQUEST_INPUT,
             interfaces={INTERFACE_REVIEW_REQUEST_INPUT: dict(REQUEST_VALUES)},
         ),
         {},

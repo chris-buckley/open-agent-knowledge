@@ -1,9 +1,10 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and THEN omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
-Trigger inputs seed the selected process input schema; each seeded value validates before the process runs.
-Each trigger contains GIVEN, WHEN, and THEN; WHEN matches first, GIVEN guards it, and THEN selects a process.
+Trigger seeds fill the selected process input schema; each seeded value validates before the process runs.
+A source-backed trigger fires on an arrival at its exact interface; its event text stays the semantic signpost.
+Each trigger is one fact group: event carries the meaning, an optional source names the exact ingress interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both.
 
@@ -11,11 +12,12 @@ Return the worker task review unchanged.
 </instructions>
 
 <triggers>
-<trigger id="delegation-requested">
-GIVEN: true
-WHEN: "Delegate the task review."
-THEN: process.delegate-review (TASK_BRIEF=$interface.review-request-input.TASK_BRIEF, IMPLEMENTATION_REPORT=$interface.review-request-input.IMPLEMENTATION_REPORT, DIFF=$interface.review-request-input.DIFF)
-</trigger>
+trigger.delegation-requested.event := "Delegate the task review."
+trigger.delegation-requested.source := interface.review-request-input
+trigger.delegation-requested.process := process.delegate-review
+trigger.delegation-requested.seed.TASK_BRIEF := $interface.review-request-input.TASK_BRIEF
+trigger.delegation-requested.seed.IMPLEMENTATION_REPORT := $interface.review-request-input.IMPLEMENTATION_REPORT
+trigger.delegation-requested.seed.DIFF := $interface.review-request-input.DIFF
 </triggers>
 
 <processes>

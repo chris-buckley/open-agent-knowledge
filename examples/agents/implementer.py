@@ -206,8 +206,8 @@ commit_convention_constant = Constant(
 
 implementation_requested_trigger = Trigger(
     id="implementation-requested",
-    when="An implementation task arrives.",
-    then=PROCESS_IMPLEMENT_TASK,
+    event="An implementation task arrives.",
+    process=PROCESS_IMPLEMENT_TASK,
 )
 
 plan_task_process = Process(

@@ -1,10 +1,11 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and THEN omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
-Trigger inputs seed the selected process input schema; each seeded value validates before the process runs.
+Trigger seeds fill the selected process input schema; each seeded value validates before the process runs.
+A source-backed trigger fires on an arrival at its exact interface; its event text stays the semantic signpost.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-Each trigger contains GIVEN, WHEN, and THEN; WHEN matches first, GIVEN guards it, and THEN selects a process.
+Each trigger is one fact group: event carries the meaning, an optional source names the exact ingress interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both.
 
@@ -50,11 +51,13 @@ WHERE:
 </schemas>
 
 <triggers>
-<trigger id="successor-verification-requested">
-GIVEN: true
-WHEN: "A successor verification is requested."
-THEN: process.verify-successor (CURRENT_OAK=$interface.verification-request-input.CURRENT_OAK, CANDIDATE_OAK=$interface.verification-request-input.CANDIDATE_OAK, AMENDMENT=$interface.verification-request-input.AMENDMENT, PROTECTED_INVARIANTS=$interface.verification-request-input.PROTECTED_INVARIANTS)
-</trigger>
+trigger.successor-verification-requested.event := "A successor verification is requested."
+trigger.successor-verification-requested.source := interface.verification-request-input
+trigger.successor-verification-requested.process := process.verify-successor
+trigger.successor-verification-requested.seed.CURRENT_OAK := $interface.verification-request-input.CURRENT_OAK
+trigger.successor-verification-requested.seed.CANDIDATE_OAK := $interface.verification-request-input.CANDIDATE_OAK
+trigger.successor-verification-requested.seed.AMENDMENT := $interface.verification-request-input.AMENDMENT
+trigger.successor-verification-requested.seed.PROTECTED_INVARIANTS := $interface.verification-request-input.PROTECTED_INVARIANTS
 </triggers>
 
 <processes>

@@ -48,7 +48,6 @@ from examples.agents.amendment_reviewer import (
     INTERFACE_REVIEW_REQUEST_INPUT as WORKER_REVIEW_REQUEST_INPUT,
     REVIEW_PLACEHOLDERS,
     REQUEST_PLACEHOLDERS as REVIEW_REQUEST_PLACEHOLDERS,
-    WHEN_AMENDMENT_REVIEW_REQUESTED,
     amendment_reviewer_node,
 )
 from examples.agents.successor_verifier import (
@@ -56,7 +55,6 @@ from examples.agents.successor_verifier import (
     PROOF_PLACEHOLDERS,
     REQUEST_PLACEHOLDERS as VERIFICATION_REQUEST_PLACEHOLDERS,
     TOOL_OAK_VERIFY_SUCCESSOR,
-    WHEN_SUCCESSOR_VERIFICATION_REQUESTED,
     successor_verifier_node,
 )
 
@@ -93,8 +91,8 @@ TOOL_AGENT_AMENDMENT_REVIEWER = "agent.amendment-reviewer"
 TOOL_AGENT_SUCCESSOR_VERIFIER = "agent.successor-verifier"
 TOOL_OAK_COMPILE_SUCCESSOR = "oak.compile-successor"
 
-WHEN_AMENDMENT_PROPOSED = "An amendment is proposed."
-WHEN_EVIDENCE_SUPPLIED = "Evidence for the pending amendment is supplied."
+EVENT_AMENDMENT_PROPOSED = "An amendment is proposed."
+EVENT_EVIDENCE_SUPPLIED = "Evidence for the pending amendment is supplied."
 
 PLACEHOLDER_CURRENT_OAK = "CURRENT_OAK"
 PLACEHOLDER_PROTECTED_INVARIANTS = "PROTECTED_INVARIANTS"
@@ -364,9 +362,10 @@ pending_rationale_state = State(id="pending-rationale", schema=SCHEMA_GOVERNANCE
 
 amendment_proposed_trigger = Trigger(
     id="amendment-proposed",
-    when=WHEN_AMENDMENT_PROPOSED,
-    then=PROCESS_GOVERN_SUCCESSION,
-    inputs=[
+    event=EVENT_AMENDMENT_PROPOSED,
+    source=INTERFACE_AMENDMENT_INPUT,
+    process=PROCESS_GOVERN_SUCCESSION,
+    seed=[
         *interface_bindings(INTERFACE_AMENDMENT_INPUT, AMENDMENT_PROPOSAL_PLACEHOLDERS),
         ValueBinding(placeholder=PLACEHOLDER_RESUME, value=LiteralValue(value=False)),
     ],
@@ -374,14 +373,15 @@ amendment_proposed_trigger = Trigger(
 
 evidence_supplied_trigger = Trigger(
     id="evidence-supplied",
-    given=Compare(
+    event=EVENT_EVIDENCE_SUPPLIED,
+    source=INTERFACE_EVIDENCE_INPUT,
+    guard=Compare(
         left=StateValue(state=STATE_REVIEW_STATUS),
         operator="equals",
         right=LiteralValue(value="needs-evidence"),
     ),
-    when=WHEN_EVIDENCE_SUPPLIED,
-    then=PROCESS_GOVERN_SUCCESSION,
-    inputs=[
+    process=PROCESS_GOVERN_SUCCESSION,
+    seed=[
         ValueBinding(
             placeholder=PLACEHOLDER_AMENDMENT_ID,
             value=InterfaceValue(interface=INTERFACE_EVIDENCE_INPUT, placeholder=PLACEHOLDER_AMENDMENT_ID),
@@ -740,7 +740,7 @@ def _amendment_reviewer_agent(_step, values):
     completed = execute(
         amendment_reviewer_node,
         Arrival(
-            when=WHEN_AMENDMENT_REVIEW_REQUESTED,
+            source=WORKER_REVIEW_REQUEST_INPUT,
             interfaces={WORKER_REVIEW_REQUEST_INPUT: dict(values)},
         ),
         {},
@@ -833,7 +833,7 @@ def _successor_verifier_agent(_step, values):
     completed = execute(
         successor_verifier_node,
         Arrival(
-            when=WHEN_SUCCESSOR_VERIFICATION_REQUESTED,
+            source=WORKER_VERIFICATION_REQUEST_INPUT,
             interfaces={WORKER_VERIFICATION_REQUEST_INPUT: dict(values)},
         ),
         {},
@@ -912,7 +912,7 @@ def build() -> str:
     review = execute(
         parsed,
         Arrival(
-            when=WHEN_AMENDMENT_PROPOSED,
+            source=INTERFACE_AMENDMENT_INPUT,
             interfaces={INTERFACE_AMENDMENT_INPUT: dict(AMENDMENT_VALUES)},
         ),
         INITIAL_STATE,
@@ -932,7 +932,7 @@ def build() -> str:
     succession = execute(
         parsed,
         Arrival(
-            when=WHEN_EVIDENCE_SUPPLIED,
+            source=INTERFACE_EVIDENCE_INPUT,
             interfaces={INTERFACE_EVIDENCE_INPUT: dict(EVIDENCE_VALUES)},
         ),
         review.state,

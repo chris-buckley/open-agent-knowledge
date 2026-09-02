@@ -1,10 +1,11 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and THEN omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
-Trigger inputs seed the selected process input schema; each seeded value validates before the process runs.
+Trigger seeds fill the selected process input schema; each seeded value validates before the process runs.
+A source-backed trigger fires on an arrival at its exact interface; its event text stays the semantic signpost.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-Each trigger contains GIVEN, WHEN, and THEN; WHEN matches first, GIVEN guards it, and THEN selects a process.
+Each trigger is one fact group: event carries the meaning, an optional source names the exact ingress interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both.
 
@@ -46,11 +47,15 @@ WHERE:
 </schemas>
 
 <triggers>
-<trigger id="amendment-review-requested">
-GIVEN: true
-WHEN: "An amendment review is requested."
-THEN: process.review-amendment (CURRENT_OAK=$interface.review-request-input.CURRENT_OAK, AMENDMENT_ID=$interface.review-request-input.AMENDMENT_ID, AMENDMENT=$interface.review-request-input.AMENDMENT, RATIONALE=$interface.review-request-input.RATIONALE, EVIDENCE=$interface.review-request-input.EVIDENCE, PROTECTED_INVARIANTS=$interface.review-request-input.PROTECTED_INVARIANTS)
-</trigger>
+trigger.amendment-review-requested.event := "An amendment review is requested."
+trigger.amendment-review-requested.source := interface.review-request-input
+trigger.amendment-review-requested.process := process.review-amendment
+trigger.amendment-review-requested.seed.CURRENT_OAK := $interface.review-request-input.CURRENT_OAK
+trigger.amendment-review-requested.seed.AMENDMENT_ID := $interface.review-request-input.AMENDMENT_ID
+trigger.amendment-review-requested.seed.AMENDMENT := $interface.review-request-input.AMENDMENT
+trigger.amendment-review-requested.seed.RATIONALE := $interface.review-request-input.RATIONALE
+trigger.amendment-review-requested.seed.EVIDENCE := $interface.review-request-input.EVIDENCE
+trigger.amendment-review-requested.seed.PROTECTED_INVARIANTS := $interface.review-request-input.PROTECTED_INVARIANTS
 </triggers>
 
 <processes>
