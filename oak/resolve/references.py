@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable, Iterator, Sequence
 
 from oak.node.model import Node
 from oak.node.parts.constants import Constant
@@ -25,91 +25,53 @@ from oak.node.parts.processes.steps import (
 from oak.node.parts.processes.values import ConstantValue, Value
 from oak.node.parts.schemas.model import Schema
 
+TypedTarget = tuple[str, type[Entry]]
 
-def value_targets(
-    values: Iterable[Value],
-) -> Iterator[tuple[str, type[Entry]]]:
+
+def value_targets(values: Iterable[Value]) -> Iterator[TypedTarget]:
     """Yield each externally resolvable target read by process values."""
     for value in values:
         if isinstance(value, ConstantValue):
             yield value.constant, Constant
 
 
-def step_references(
-    step: Step,
-) -> Iterator[tuple[str, type[Entry]]]:
+def step_references(step: Step) -> Iterator[TypedTarget]:
     """Yield every typed target used by one step and its children."""
-    if isinstance(step, Act):
-        if step.input is not None:
-            yield step.input, Schema
+    match step:
+        case Act():
+            if step.input is not None:
+                yield step.input, Schema
 
-        if step.output is not None:
-            yield step.output, Schema
+            if step.output is not None:
+                yield step.output, Schema
 
-        yield from value_targets(
-            binding.value
-            for binding in step.inputs
-        )
+            yield from value_targets(binding.value for binding in step.inputs)
 
-    elif isinstance(step, Set):
-        yield from value_targets(
-            (step.value,)
-        )
+        case Set() | Foreach():
+            yield from value_targets((step.value,))
 
-    elif isinstance(step, Emit):
-        yield from value_targets(
-            binding.value
-            for binding in step.bindings
-        )
+        case Emit():
+            yield from value_targets(binding.value for binding in step.bindings)
 
-    elif isinstance(step, If):
-        yield from value_targets(
-            condition_values(step.condition)
-        )
+        case If() | Assert() | While():
+            yield from value_targets(condition_values(step.condition))
 
-        for child in step.then:
-            yield from step_references(child)
+        case Call():
+            yield from value_targets(binding.value for binding in step.inputs)
+            yield step.process, Process
 
-        if step.otherwise is not None:
-            for child in step.otherwise:
-                yield from step_references(child)
+    match step:
+        case If():
+            yield from steps_targets_in_process(step.then)
 
-    elif isinstance(step, Assert):
-        yield from value_targets(
-            condition_values(step.condition)
-        )
+            if step.otherwise is not None:
+                yield from steps_targets_in_process(step.otherwise)
 
-    elif isinstance(step, Foreach):
-        yield from value_targets(
-            (step.value,)
-        )
-
-        for child in step.steps:
-            yield from step_references(child)
-
-    elif isinstance(step, While):
-        yield from value_targets(
-            condition_values(step.condition)
-        )
-
-        for child in step.steps:
-            yield from step_references(child)
-
-    elif isinstance(step, Par):
-        for child in step.steps:
-            yield from step_references(child)
-
-    elif isinstance(step, Call):
-        yield from value_targets(
-            binding.value
-            for binding in step.inputs
-        )
-        yield step.process, Process
+        case Foreach() | While() | Par():
+            yield from steps_targets_in_process(step.steps)
 
 
-def iter_targets(
-    node: Node,
-) -> Iterator[tuple[str, type[Entry]]]:
+def iter_targets(node: Node) -> Iterator[TypedTarget]:
     """Yield every resolvable typed target in one document."""
     for entry in (*node.constants, *node.state):
         if entry.schema_id is not None:
@@ -127,37 +89,28 @@ def iter_targets(
 
     for trigger in node.triggers:
         yield trigger.process, Process
-        yield from value_targets(
-            binding.value
-            for binding in trigger.seed
-        )
+        yield from value_targets(binding.value for binding in trigger.seed)
 
         if trigger.guard is not True:
-            yield from value_targets(
-                condition_values(trigger.guard)
-            )
+            yield from value_targets(condition_values(trigger.guard))
 
     for process in node.processes:
-        for step in process.steps:
-            yield from step_references(step)
+        yield from steps_targets_in_process(process.steps)
 
 
-def steps_targets_in_process(
-    steps: list[Step],
-) -> Iterator[tuple[str, type[Entry]]]:
+def steps_targets_in_process(steps: Sequence[Step]) -> Iterator[TypedTarget]:
     """Yield each typed target used by one process step sequence."""
     for step in steps:
         yield from step_references(step)
 
 
-def walk_calls(
-    steps: list[Step],
-) -> Iterator[Call]:
+def walk_calls(steps: Sequence[Step]) -> Iterator[Call]:
     """Yield each process call recursively in authored order."""
     return (step for step in iter_steps(steps) if isinstance(step, Call))
 
 
 __all__ = [
+    "TypedTarget",
     "iter_targets",
     "step_references",
     "steps_targets_in_process",

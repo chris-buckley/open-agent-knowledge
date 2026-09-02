@@ -3,10 +3,21 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Literal
 
 from oak.node.model import Node
+from oak.node.parts.processes.steps import (
+    Act,
+    Assert,
+    Fail,
+    Foreach,
+    If,
+    Par,
+    Step,
+    While,
+)
 
 StyleName = Literal["authored", "asd-ste100-9"]
 ASD_STE100_EDITION = "Issue 9, January 2025"
@@ -40,6 +51,7 @@ class StyleFailure:
     path: str
     code: str
     message: str
+
     def __str__(self) -> str:
         return f"[{self.code}] {self.path}: {self.message}"
 
@@ -48,7 +60,8 @@ class StyleError(ValueError):
     """Every failure collected while applying one controlled style."""
 
     code = "controlled_style_invalid"
-    def __init__(self, failures: list[StyleFailure]) -> None:
+
+    def __init__(self, failures: Sequence[StyleFailure]) -> None:
         self.failures = tuple(failures)
         super().__init__("\n".join(str(failure) for failure in self.failures))
 
@@ -81,28 +94,52 @@ def _validate(path: str, text: str) -> list[StyleFailure]:
     return failures
 
 
-def _style_steps(steps: list[dict[str, object]], path: str, failures: list[StyleFailure]) -> None:
+def _styled_text(text: str, path: str, failures: list[StyleFailure]) -> str:
+    rewritten = _rewrite(text)
+    failures.extend(_validate(path, rewritten))
+    return rewritten
+
+
+def _styled_steps(
+    steps: Sequence[Step],
+    path: str,
+    failures: list[StyleFailure],
+) -> list[Step]:
+    styled: list[Step] = []
+
     for index, step in enumerate(steps):
-        if not isinstance(step, dict):
-            continue
         step_path = f"{path}.{index}"
-        kind = step.get("kind")
-        if kind == "act":
-            text = _rewrite(str(step["instruction"])); step["instruction"] = text
-            failures.extend(_validate(f"{step_path}.instruction", text))
-        elif kind == "fail":
-            text = _rewrite(str(step["message"])); step["message"] = text
-            failures.extend(_validate(f"{step_path}.message", text))
-        elif kind == "assert" and step.get("message") is not None:
-            text = _rewrite(str(step["message"])); step["message"] = text
-            failures.extend(_validate(f"{step_path}.message", text))
-        if kind == "if":
-            _style_steps(step.get("then", []), f"{step_path}.then", failures)  # type: ignore[arg-type]
-            _style_steps(step.get("otherwise") or [], f"{step_path}.otherwise", failures)  # type: ignore[arg-type]
-        elif kind in {"foreach", "while"}:
-            _style_steps(step.get("steps", []), f"{step_path}.steps", failures)  # type: ignore[arg-type]
-        elif kind == "par":
-            _style_steps(step.get("steps", []), f"{step_path}.steps", failures)  # type: ignore[arg-type]
+
+        match step:
+            case Act():
+                instruction = _styled_text(step.instruction, f"{step_path}.instruction", failures)
+                styled.append(step.model_copy(update={"instruction": instruction}))
+
+            case Fail():
+                message = _styled_text(step.message, f"{step_path}.message", failures)
+                styled.append(step.model_copy(update={"message": message}))
+
+            case Assert() if step.message is not None:
+                message = _styled_text(step.message, f"{step_path}.message", failures)
+                styled.append(step.model_copy(update={"message": message}))
+
+            case If():
+                then = _styled_steps(step.then, f"{step_path}.then", failures)
+                otherwise = (
+                    None
+                    if step.otherwise is None
+                    else _styled_steps(step.otherwise, f"{step_path}.otherwise", failures)
+                )
+                styled.append(step.model_copy(update={"then": then, "otherwise": otherwise}))
+
+            case Foreach() | While() | Par():
+                children = _styled_steps(step.steps, f"{step_path}.steps", failures)
+                styled.append(step.model_copy(update={"steps": children}))
+
+            case _:
+                styled.append(step)
+
+    return styled
 
 
 def styled_node(node: Node, style: StyleName = "authored") -> Node:
@@ -111,16 +148,28 @@ def styled_node(node: Node, style: StyleName = "authored") -> Node:
         return node
     if style != "asd-ste100-9":
         raise ValueError(f"unknown OAK style {style}")
-    data = node.model_dump(mode="python", by_alias=True)
     failures: list[StyleFailure] = []
-    for index, instruction in enumerate(data.get("instructions", [])):
-        text = _rewrite(str(instruction["body"])); instruction["body"] = text
-        failures.extend(_validate(f"instructions.{index}.body", text))
-    for index, trigger in enumerate(data.get("triggers", [])):
-        text = _rewrite(str(trigger["event"])); trigger["event"] = text
-        failures.extend(_validate(f"triggers.{index}.event", text))
-    for index, process in enumerate(data.get("processes", [])):
-        _style_steps(process.get("steps", []), f"processes.{index}.steps", failures)
+    instructions = [
+        instruction.model_copy(
+            update={"body": _styled_text(instruction.body, f"instructions.{index}.body", failures)}
+        )
+        for index, instruction in enumerate(node.instructions)
+    ]
+    triggers = [
+        trigger.model_copy(
+            update={"event": _styled_text(trigger.event, f"triggers.{index}.event", failures)}
+        )
+        for index, trigger in enumerate(node.triggers)
+    ]
+    processes = [
+        process.model_copy(
+            update={"steps": _styled_steps(process.steps, f"processes.{index}.steps", failures)}
+        )
+        for index, process in enumerate(node.processes)
+    ]
     if failures:
         raise StyleError(failures)
-    return Node.model_validate(data)
+    styled = node.model_copy(
+        update={"instructions": instructions, "triggers": triggers, "processes": processes}
+    )
+    return Node.model_validate(styled.model_dump(mode="python", by_alias=True))

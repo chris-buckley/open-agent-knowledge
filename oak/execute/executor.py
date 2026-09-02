@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from copy import deepcopy
 
 from pydantic import JsonValue, ValidationError
+from pydantic_core import PydanticCustomError
 
 from oak.execute.context import ExecutionContext, ProcessFrame
 from oak.execute.models import (
@@ -126,22 +127,9 @@ def execute(
                 tool_registry,
             )
 
-        except Exception as error:
-            code = (
-                getattr(
-                    error,
-                    "type",
-                    None,
-                )
-                or getattr(
-                    error,
-                    "code",
-                    None,
-                )
-                or "tool_validation_failed"
-            )
+        except PydanticCustomError as error:
             raise ExecutionError(
-                str(code),
+                error.type,
                 str(error),
             ) from None
 

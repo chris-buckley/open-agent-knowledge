@@ -80,7 +80,8 @@ def _document_path(value: str) -> str:
     return value
 
 
-def _target_path(value: str) -> str:
+def validate_target_path(value: str) -> str:
+    """Return one target path after checking its document and entry parts."""
     document, marker, entry = value.rpartition("#")
 
     if marker:
@@ -103,7 +104,7 @@ TargetPath = Annotated[
         min_length=3,
         pattern=TARGET_PATH_PATTERN,
     ),
-    AfterValidator(_target_path),
+    AfterValidator(validate_target_path),
 ]
 
 

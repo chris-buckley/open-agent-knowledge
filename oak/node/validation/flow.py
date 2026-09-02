@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+from collections.abc import Set as AbstractSet
 from typing import TYPE_CHECKING
 
 from pydantic_core import PydanticCustomError
@@ -24,10 +26,7 @@ if TYPE_CHECKING:
     from oak.node.parts.processes.model import Process
 
 
-def _check_value(
-    value: Value,
-    visible: set[str],
-) -> None:
+def _check_value(value: Value, visible: AbstractSet[str]) -> None:
     if isinstance(value, BindingValue) and value.binding not in visible:
         raise PydanticCustomError(
             "unbound_process_binding",
@@ -36,27 +35,53 @@ def _check_value(
         )
 
 
-def _promote(
-    outputs: set[str],
-    visible: set[str],
-    label: str = "process",
+def _check_redefined(
+    outputs: AbstractSet[str],
+    visible: AbstractSet[str],
+    label: str,
 ) -> None:
     redefined = sorted(outputs & visible)
 
     if redefined:
         raise PydanticCustomError(
             "process_binding_redefined",
-            f"{label} redefines visible local bindings: {{bindings}}",
-            {"bindings": ", ".join(redefined)},
+            "{label} redefines visible local bindings: {bindings}",
+            {"label": label, "bindings": ", ".join(redefined)},
         )
 
+
+def _promote(outputs: AbstractSet[str], visible: set[str]) -> None:
+    _check_redefined(outputs, visible, "process")
     visible.update(outputs)
 
 
-def visible_bindings(
-    steps: list[Step],
-    initial: set[str],
-) -> set[str]:
+def _check_foreach(step: Foreach, visible: AbstractSet[str]) -> None:
+    if step.binding in visible:
+        raise PydanticCustomError(
+            "foreach_binding_redefined",
+            "FOREACH redefines visible binding {binding}",
+            {"binding": step.binding},
+        )
+
+    if isinstance(step.value, LiteralValue) and not isinstance(step.value.value, list):
+        raise PydanticCustomError(
+            "foreach_source_not_list",
+            "FOREACH literal source is not a list",
+        )
+
+
+def _parallel_outputs(step: Par, visible: AbstractSet[str]) -> set[str]:
+    outputs = {
+        output
+        for child in step.steps
+        if isinstance(child, Act)
+        for output in child.outputs
+    }
+    _check_redefined(outputs, visible, "PAR")
+    return outputs
+
+
+def visible_bindings(steps: Sequence[Step], initial: AbstractSet[str]) -> set[str]:
     """Return the bindings visible after one successful step sequence."""
     visible = set(initial)
     pending: set[str] | None = None
@@ -71,70 +96,35 @@ def visible_bindings(
         for value in step_values(step):
             _check_value(value, visible)
 
-        if isinstance(step, Act):
-            _promote(set(step.outputs), visible)
+        match step:
+            case Act() | Call():
+                _promote(set(step.outputs), visible)
 
-        elif isinstance(step, If):
-            visible_bindings(step.then, visible)
+            case If():
+                visible_bindings(step.then, visible)
 
-            if step.otherwise is not None:
-                visible_bindings(step.otherwise, visible)
+                if step.otherwise is not None:
+                    visible_bindings(step.otherwise, visible)
 
-        elif isinstance(step, Call):
-            _promote(set(step.outputs), visible)
+            case Foreach():
+                _check_foreach(step, visible)
+                visible_bindings(step.steps, visible | {step.binding})
 
-        elif isinstance(step, Foreach):
-            if step.binding in visible:
-                raise PydanticCustomError(
-                    "foreach_binding_redefined",
-                    "FOREACH redefines visible binding {binding}",
-                    {"binding": step.binding},
-                )
+            case While():
+                visible_bindings(step.steps, visible)
 
-            if isinstance(step.value, LiteralValue) and not isinstance(
-                step.value.value,
-                list,
-            ):
-                raise PydanticCustomError(
-                    "foreach_source_not_list",
-                    "FOREACH literal source is not a list",
-                )
+            case Par():
+                pending = _parallel_outputs(step, visible)
 
-            visible_bindings(
-                step.steps,
-                visible | {step.binding},
-            )
+            case Join():
+                if pending is None:
+                    raise PydanticCustomError(
+                        "join_without_par",
+                        "JOIN has no immediately preceding PAR",
+                    )
 
-        elif isinstance(step, While):
-            visible_bindings(step.steps, visible)
-
-        elif isinstance(step, Par):
-            outputs = {
-                output
-                for child in step.steps
-                if isinstance(child, Act)
-                for output in child.outputs
-            }
-            redefined = sorted(outputs & visible)
-
-            if redefined:
-                raise PydanticCustomError(
-                    "process_binding_redefined",
-                    "PAR redefines visible local bindings: {bindings}",
-                    {"bindings": ", ".join(redefined)},
-                )
-
-            pending = outputs
-
-        elif isinstance(step, Join):
-            if pending is None:
-                raise PydanticCustomError(
-                    "join_without_par",
-                    "JOIN has no immediately preceding PAR",
-                )
-
-            visible.update(pending)
-            pending = None
+                visible.update(pending)
+                pending = None
 
     if pending is not None:
         raise PydanticCustomError(
@@ -145,7 +135,7 @@ def visible_bindings(
     return visible
 
 
-def sequence_always_fails(steps: list[Step]) -> bool:
+def sequence_always_fails(steps: Sequence[Step]) -> bool:
     """Return whether one step sequence always ends in explicit failure."""
     for index, step in enumerate(steps):
         always_fails = isinstance(step, Fail)
@@ -180,10 +170,7 @@ def validate_process_flow(process: Process) -> None:
     sequence_always_fails(process.steps)
 
 
-def process_visible_bindings(
-    process: Process,
-    inputs: set[str],
-) -> set[str]:
+def process_visible_bindings(process: Process, inputs: AbstractSet[str]) -> set[str]:
     """Return every binding visible after successful process completion."""
     return visible_bindings(process.steps, inputs)
 

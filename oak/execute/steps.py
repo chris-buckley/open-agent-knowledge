@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from copy import deepcopy
 
 from pydantic import JsonValue
 
 from oak.execute.actions import invoke_action, run_parallel
 from oak.execute.context import ExecutionContext, ProcessFrame
-from oak.execute.models import ExecutionError, _JSON_ADAPTER
+from oak.execute.models import JSON_ADAPTER, Emission, ExecutionError
 from oak.execute.values import (
     evaluate_condition,
     resolve_value,
@@ -33,6 +33,7 @@ from oak.node.parts.processes.steps import (
     Step,
     While,
 )
+from oak.node.parts.processes.values import ValueBinding
 from oak.node.parts.schemas.binding import SchemaBindingError
 from oak.node.parts.schemas.model import Schema
 from oak.node.parts.state import State
@@ -46,11 +47,7 @@ def run_process(
     inputs: Mapping[str, JsonValue],
 ) -> dict[str, JsonValue]:
     """Invoke one process with one fresh local binding scope."""
-    input_schema = resolved_schema(
-        context,
-        document,
-        process.input,
-    )
+    input_schema = resolved_schema(context, document, process.input)
 
     if input_schema is None:
         if inputs:
@@ -69,36 +66,18 @@ def run_process(
                 f"process {process.id}: {error}",
             ) from None
 
-    frame = ProcessFrame(
-        document,
-        deepcopy(
-            dict(inputs)
-        ),
-    )
-    run_steps(
-        context,
-        frame,
-        process.steps,
-    )
-    output_schema = resolved_schema(
-        context,
-        document,
-        process.output,
-    )
+    frame = ProcessFrame(document, deepcopy(dict(inputs)))
+    run_steps(context, frame, process.steps)
+    output_schema = resolved_schema(context, document, process.output)
 
     if output_schema is None:
         return {}
 
-    names = [
-        item.placeholder
-        for item in output_schema.where
-    ]
+    placeholders = [clause.placeholder for clause in output_schema.where]
     outputs = {
-        name: deepcopy(
-            frame.bindings[name]
-        )
-        for name in names
-        if name in frame.bindings
+        placeholder: deepcopy(frame.bindings[placeholder])
+        for placeholder in placeholders
+        if placeholder in frame.bindings
     }
 
     try:
@@ -113,258 +92,192 @@ def run_process(
     return outputs
 
 
+def _bound_values(
+    context: ExecutionContext,
+    frame: ProcessFrame,
+    bindings: Sequence[ValueBinding],
+) -> dict[str, JsonValue]:
+    return {
+        binding.placeholder: resolve_value(context, frame, binding.value)
+        for binding in bindings
+    }
+
+
+def _run_act(context: ExecutionContext, frame: ProcessFrame, step: Act) -> None:
+    values = _bound_values(context, frame, step.inputs)
+    validate_schema_values(
+        context,
+        frame.document,
+        step.input,
+        values,
+        "invalid_act_input",
+    )
+    outputs = invoke_action(context, step, values)
+    validate_schema_values(
+        context,
+        frame.document,
+        step.output,
+        outputs,
+        "invalid_act_output",
+    )
+    frame.bindings.update(outputs)
+
+
+def _run_set(context: ExecutionContext, frame: ProcessFrame, step: Set) -> None:
+    identifier = target_id(step.state)
+    state_document, entry = context.graph.entry(frame.document, step.state, State)
+    key = context.graph.display_target(frame.document, "state", identifier)
+    resolved = JSON_ADAPTER.validate_python(resolve_value(context, frame, step.value))
+    validate_state_value(context, state_document, entry, resolved, key)
+    context.state[key] = resolved
+
+
+def _run_emit(context: ExecutionContext, frame: ProcessFrame, step: Emit) -> None:
+    identifier = target_id(step.interface)
+    _interface_document, interface = context.graph.entry(
+        frame.document,
+        step.interface,
+        Interface,
+    )
+    _schema_document, schema = context.graph.entry(
+        frame.document,
+        interface.schema_id,
+        Schema,
+    )
+    values = _bound_values(context, frame, step.bindings)
+
+    try:
+        schema.bind(values)
+
+    except SchemaBindingError as error:
+        raise ExecutionError(
+            "invalid_emission",
+            f"interface {identifier}: {error}",
+        ) from None
+
+    context.emissions.append(
+        context_emission(context, frame.document, identifier, values)
+    )
+
+
+def _run_if(context: ExecutionContext, frame: ProcessFrame, step: If) -> None:
+    selected = (
+        step.then
+        if evaluate_condition(context, frame, step.condition)
+        else step.otherwise
+    )
+
+    if selected is not None:
+        run_steps(context, frame.child(), selected)
+
+
+def _run_call(context: ExecutionContext, frame: ProcessFrame, step: Call) -> None:
+    values = _bound_values(context, frame, step.inputs)
+    target_document, process = context.graph.entry(
+        frame.document,
+        step.process,
+        Process,
+    )
+    outputs = run_process(context, target_document, process, values)
+
+    for name in step.outputs:
+        frame.bindings[name] = deepcopy(outputs[name])
+
+
+def _run_assert(context: ExecutionContext, frame: ProcessFrame, step: Assert) -> None:
+    if not evaluate_condition(context, frame, step.condition):
+        raise ExecutionError(
+            "assertion_failed",
+            step.message or "process assertion failed",
+        )
+
+
+def _run_foreach(context: ExecutionContext, frame: ProcessFrame, step: Foreach) -> None:
+    elements = resolve_value(context, frame, step.value)
+
+    if not isinstance(elements, list):
+        raise ExecutionError(
+            "foreach_source_not_list",
+            "FOREACH value is not a JSON list",
+        )
+
+    for element in elements:
+        child = frame.child()
+        child.bindings[step.binding] = deepcopy(element)
+        run_steps(context, child, step.steps)
+
+
+def _run_while(context: ExecutionContext, frame: ProcessFrame, step: While) -> None:
+    for _iteration in range(step.limit):
+        if not evaluate_condition(context, frame, step.condition):
+            return
+
+        run_steps(context, frame.child(), step.steps)
+
+    if evaluate_condition(context, frame, step.condition):
+        raise ExecutionError(
+            "while_limit_reached",
+            f"WHILE condition remains true after {step.limit} iterations",
+        )
+
+
+def _join(frame: ProcessFrame, pending: Sequence[Mapping[str, JsonValue]] | None) -> None:
+    if pending is None:
+        raise ExecutionError("join_without_par", "JOIN has no pending PAR")
+
+    for outputs in pending:
+        frame.bindings.update(outputs)
+
+
 def run_steps(
     context: ExecutionContext,
     frame: ProcessFrame,
-    steps: list[Step],
+    steps: Sequence[Step],
 ) -> None:
     """Run one process step sequence in authored order."""
-    pending: list[
-        dict[str, JsonValue]
-    ] | None = None
+    pending: list[dict[str, JsonValue]] | None = None
 
     for step in steps:
-        if isinstance(step, Act):
-            values = {
-                binding.placeholder: resolve_value(
-                    context,
-                    frame,
-                    binding.value,
-                )
-                for binding in step.inputs
-            }
-            validate_schema_values(
-                context,
-                frame.document,
-                step.input,
-                values,
-                "invalid_act_input",
-            )
-            outputs = invoke_action(
-                context,
-                step,
-                values,
-            )
-            validate_schema_values(
-                context,
-                frame.document,
-                step.output,
-                outputs,
-                "invalid_act_output",
-            )
-            frame.bindings.update(outputs)
+        match step:
+            case Act():
+                _run_act(context, frame, step)
 
-        elif isinstance(step, Set):
-            identifier = target_id(step.state)
-            state_document, entry = context.graph.entry(
-                frame.document,
-                step.state,
-                State,
-            )
-            key = context.graph.display_target(
-                frame.document,
-                "state",
-                identifier,
-            )
-            resolved = _JSON_ADAPTER.validate_python(
-                resolve_value(
-                    context,
-                    frame,
-                    step.value,
-                )
-            )
-            validate_state_value(
-                context,
-                state_document,
-                entry,
-                resolved,
-                key,
-            )
-            context.state[key] = resolved
+            case Set():
+                _run_set(context, frame, step)
 
-        elif isinstance(step, Emit):
-            identifier = target_id(step.interface)
-            _interface_document, interface = context.graph.entry(
-                frame.document,
-                step.interface,
-                Interface,
-            )
-            _schema_document, schema = context.graph.entry(
-                frame.document,
-                interface.schema_id,
-                Schema,
-            )
-            values = {
-                binding.placeholder: resolve_value(
-                    context,
-                    frame,
-                    binding.value,
-                )
-                for binding in step.bindings
-            }
+            case Emit():
+                _run_emit(context, frame, step)
 
-            try:
-                schema.bind(values)
+            case If():
+                _run_if(context, frame, step)
 
-            except SchemaBindingError as error:
-                raise ExecutionError(
-                    "invalid_emission",
-                    f"interface {identifier}: {error}",
-                ) from None
+            case Call():
+                _run_call(context, frame, step)
 
-            context.emissions.append(
-                context_emission(
-                    context,
-                    frame.document,
-                    identifier,
-                    values,
-                )
-            )
+            case Fail():
+                raise ExecutionError("process_failed", step.message)
 
-        elif isinstance(step, If):
-            selected = (
-                step.then
-                if evaluate_condition(
-                    context,
-                    frame,
-                    step.condition,
-                )
-                else step.otherwise
-            )
+            case Assert():
+                _run_assert(context, frame, step)
 
-            if selected is not None:
-                run_steps(
-                    context,
-                    frame.child(),
-                    selected,
-                )
+            case Foreach():
+                _run_foreach(context, frame, step)
 
-        elif isinstance(step, Call):
-            values = {
-                binding.placeholder: resolve_value(
-                    context,
-                    frame,
-                    binding.value,
-                )
-                for binding in step.inputs
-            }
-            target_document, process = context.graph.entry(
-                frame.document,
-                step.process,
-                Process,
-            )
-            outputs = run_process(
-                context,
-                target_document,
-                process,
-                values,
-            )
+            case While():
+                _run_while(context, frame, step)
 
-            for name in step.outputs:
-                frame.bindings[name] = deepcopy(
-                    outputs[name]
-                )
+            case Par():
+                pending = run_parallel(context, frame, step)
 
-        elif isinstance(step, Fail):
-            raise ExecutionError(
-                "process_failed",
-                step.message,
-            )
+            case Join():
+                _join(frame, pending)
+                pending = None
 
-        elif isinstance(step, Assert):
-            if not evaluate_condition(
-                context,
-                frame,
-                step.condition,
-            ):
-                raise ExecutionError(
-                    "assertion_failed",
-                    (
-                        step.message
-                        or "process assertion failed"
-                    ),
-                )
-
-        elif isinstance(step, Foreach):
-            items = resolve_value(
-                context,
-                frame,
-                step.value,
-            )
-
-            if not isinstance(items, list):
-                raise ExecutionError(
-                    "foreach_source_not_list",
-                    "FOREACH value is not a JSON list",
-                )
-
-            for item in items:
-                child = frame.child()
-                child.bindings[step.binding] = deepcopy(item)
-                run_steps(
-                    context,
-                    child,
-                    step.steps,
-                )
-
-        elif isinstance(step, While):
-            for _iteration in range(step.limit):
-                if not evaluate_condition(
-                    context,
-                    frame,
-                    step.condition,
-                ):
-                    break
-
-                run_steps(
-                    context,
-                    frame.child(),
-                    step.steps,
-                )
-
-            else:
-                if evaluate_condition(
-                    context,
-                    frame,
-                    step.condition,
-                ):
-                    raise ExecutionError(
-                        "while_limit_reached",
-                        (
-                            "WHILE condition remains true after "
-                            f"{step.limit} iterations"
-                        ),
-                    )
-
-        elif isinstance(step, Par):
-            pending = run_parallel(
-                context,
-                frame,
-                step,
-            )
-
-        elif isinstance(step, Join):
-            if pending is None:
-                raise ExecutionError(
-                    "join_without_par",
-                    "JOIN has no pending PAR",
-                )
-
-            for result in pending:
-                frame.bindings.update(result)
-
-            pending = None
-
-        else:
-            raise TypeError(
-                type(step).__name__
-            )
+            case _:
+                raise TypeError(type(step).__name__)
 
     if pending is not None:
-        raise ExecutionError(
-            "parallel_join_missing",
-            "PAR has no JOIN",
-        )
+        raise ExecutionError("parallel_join_missing", "PAR has no JOIN")
 
 
 def context_emission(
@@ -372,19 +285,11 @@ def context_emission(
     document: str,
     identifier: str,
     values: Mapping[str, JsonValue],
-):
+) -> Emission:
     """Build one emission at its root-relative interface target."""
-    from oak.execute.models import Emission
-
     return Emission(
-        interface=context.graph.display_target(
-            document,
-            "interface",
-            identifier,
-        ),
-        values=deepcopy(
-            dict(values)
-        ),
+        interface=context.graph.display_target(document, "interface", identifier),
+        values=deepcopy(dict(values)),
     )
 
 

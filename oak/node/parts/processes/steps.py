@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from typing import Annotated, Literal, Self
 
 from pydantic import ConfigDict, Field, PositiveInt, model_validator
@@ -877,7 +877,7 @@ def step_values(step: Step) -> list[Value]:
     return []
 
 
-def iter_steps(steps: list[Step]) -> Iterator[Step]:
+def iter_steps(steps: Sequence[Step]) -> Iterator[Step]:
     """Yield each step and its nested steps recursively in authored order."""
     for step in steps:
         yield step

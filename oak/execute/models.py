@@ -34,7 +34,7 @@ _BINDING_ADAPTER = TypeAdapter(
     dict[Placeholder, JsonValue],
     config=_STRICT,
 )
-_JSON_ADAPTER = TypeAdapter(
+JSON_ADAPTER = TypeAdapter(
     JsonValue,
     config=_STRICT,
 )
@@ -251,6 +251,7 @@ __all__ = [
     "ExecutionError",
     "ExecutionResult",
     "InterfaceArrivalTarget",
+    "JSON_ADAPTER",
     "ToolContract",
     "ToolHandler",
 ]
