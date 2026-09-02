@@ -5,15 +5,13 @@ from typing import Self
 from pydantic import ConfigDict, Field, model_validator
 
 from oak.base import OakModel
-from oak.node.parts import (
-    Constant,
-    Instruction,
-    Interface,
-    Process,
-    Schema,
-    State,
-    Trigger,
-)
+from oak.node.parts.constants import Constant
+from oak.node.parts.instructions import Instruction
+from oak.node.parts.interfaces import Interface
+from oak.node.parts.processes.model import Process
+from oak.node.parts.schemas.model import Schema
+from oak.node.parts.state import State
+from oak.node.parts.triggers import Trigger
 from oak.node.validation.node import validate_node
 
 _NODE_EXAMPLE = {

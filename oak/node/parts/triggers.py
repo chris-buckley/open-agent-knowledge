@@ -6,17 +6,18 @@ from pydantic import ConfigDict, Field, model_validator
 from pydantic_core import PydanticCustomError
 
 from oak.base import Entry
-from oak.node.parts.processes import (
-    BindingValue,
-    Condition,
+from oak.node.parts.processes.conditions import Condition, condition_values
+from oak.node.parts.processes.targets import (
     InterfaceTarget,
-    InterfaceValue,
     ProcessTarget,
+)
+from oak.node.parts.processes.values import (
+    BindingValue,
+    InterfaceValue,
     StateValue,
     ValueBinding,
-    condition_values,
 )
-from oak.vocabulary import NonBlankLine
+from oak.vocabulary.text.non_blank_line import NonBlankLine
 
 
 class Trigger(Entry):

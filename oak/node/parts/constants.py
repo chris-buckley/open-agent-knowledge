@@ -7,7 +7,7 @@ from pydantic import ConfigDict, Field, JsonValue, model_validator
 from oak.base import Entry
 from oak.node.parts.interfaces import SchemaTarget
 from oak.rules.validation import rule_error
-from oak.vocabulary import Placeholder
+from oak.vocabulary.text.placeholder import Placeholder
 
 ConstantForm = Literal["inline", "text", "json", "csv", "yaml"]
 
