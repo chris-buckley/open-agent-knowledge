@@ -1,5 +1,7 @@
 """Grouped interface entry parsing."""
 
+from __future__ import annotations
+
 from oak.node.parts.interfaces import Interface
 from oak.parse.errors import fail
 from oak.parse.grouping import GroupingName, parse_entries

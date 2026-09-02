@@ -1,5 +1,7 @@
 """Grouped process entry parsing."""
 
+from __future__ import annotations
+
 from oak.node.parts.processes import Process
 from oak.parse.cursor import Cursor
 from oak.parse.errors import fail
