@@ -484,12 +484,17 @@ def _is_submodule(
     package = ROOT.joinpath(
         *module.split(".")
     )
+    entries = {
+        entry.name
+        for entry in package.iterdir()
+    }
 
-    return (
-        package / f"{name}.py"
-    ).is_file() or (
-        package / name / "__init__.py"
-    ).is_file()
+    return f"{name}.py" in entries or (
+        name in entries
+        and (
+            package / name / "__init__.py"
+        ).is_file()
+    )
 
 
 def _imports_barrel(
