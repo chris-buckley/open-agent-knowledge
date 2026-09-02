@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Iterator, Mapping
 from itertools import combinations
-from typing import Protocol, TypeVar
+from typing import TYPE_CHECKING, Protocol, TypeVar
 
 from pydantic_core import PydanticCustomError
 
@@ -50,11 +50,20 @@ from oak.node.parts.processes import (
     validate_call_contract,
     validate_process_contract,
 )
+from oak.node.parts.processes.operators import (
+    ConditionOperator,
+    OrderedComparisonTypeError,
+    compare_values,
+    invert_operator,
+    json_equal,
+    ordered_pair,
+    reverse_operator,
+)
 from oak.node.parts.triggers import validate_trigger_contract
 from oak.rules import rule_error
 from oak.vocabulary.text.target_path import is_relative_target, target_id
 
-if False:
+if TYPE_CHECKING:
     from oak.node.model import Node
 
 TargetEntry = TypeVar("TargetEntry", bound=Entry)
@@ -209,22 +218,6 @@ def _validate_value(registry: Mapping[str, Entry], source: Entry, value: Value) 
         )
 
 
-def _json_equal(left: object, right: object) -> bool:
-    if isinstance(left, bool) or isinstance(right, bool):
-        return isinstance(left, bool) and isinstance(right, bool) and left == right
-    if isinstance(left, (int, float)) and isinstance(right, (int, float)):
-        return left == right
-    if isinstance(left, list) and isinstance(right, list):
-        return len(left) == len(right) and all(
-            _json_equal(a, b) for a, b in zip(left, right, strict=True)
-        )
-    if isinstance(left, dict) and isinstance(right, dict):
-        return left.keys() == right.keys() and all(
-            _json_equal(left[key], right[key]) for key in left
-        )
-    return type(left) is type(right) and left == right
-
-
 def _static_value(
     registry: Mapping[str, Entry],
     source: Entry,
@@ -246,40 +239,18 @@ def _same_dynamic_value(left: Value, right: Value) -> bool:
     )
 
 
-def _ordered_pair(
+def _compare_static(
+    operator: ConditionOperator,
     left: object,
     right: object,
-) -> tuple[int | float | str, int | float | str] | None:
-    if isinstance(left, bool) or isinstance(right, bool):
-        return None
-    if isinstance(left, (int, float)) and isinstance(right, (int, float)):
-        return left, right
-    if isinstance(left, str) and isinstance(right, str):
-        return left, right
-    return None
-
-
-def _compare_static(operator: str, left: object, right: object) -> bool:
-    if operator == "equals":
-        return _json_equal(left, right)
-    if operator == "not_equals":
-        return not _json_equal(left, right)
-    pair = _ordered_pair(left, right)
-    if pair is None:
+) -> bool:
+    try:
+        return compare_values(operator, left, right)
+    except OrderedComparisonTypeError as error:
         raise PydanticCustomError(
             "ordered_comparison_type_mismatch",
-            "ordered comparison needs two numbers or two strings",
-        )
-    a, b = pair
-    if operator == "less_than":
-        return a < b
-    if operator == "less_than_or_equal":
-        return a <= b
-    if operator == "greater_than":
-        return a > b
-    if operator == "greater_than_or_equal":
-        return a >= b
-    raise TypeError(f"unsupported comparison operator {operator}")
+            str(error),
+        ) from None
 
 
 def condition_result(
@@ -339,7 +310,7 @@ def _validate_condition(
         condition.operator not in ("equals", "not_equals")
         and left is not _STATIC_MISSING
         and right is not _STATIC_MISSING
-        and _ordered_pair(left, right) is None
+        and ordered_pair(left, right) is None
     ):
         raise PydanticCustomError(
             "ordered_comparison_type_mismatch",
@@ -638,28 +609,6 @@ def _validate_call_graph(processes: list[Process]) -> None:
             visit(process.id)
 
 
-def _invert_operator(operator: str) -> str | None:
-    return {
-        "equals": "not_equals",
-        "not_equals": "equals",
-        "less_than": "greater_than_or_equal",
-        "less_than_or_equal": "greater_than",
-        "greater_than": "less_than_or_equal",
-        "greater_than_or_equal": "less_than",
-    }.get(operator)
-
-
-def _reverse_operator(operator: str) -> str:
-    return {
-        "equals": "equals",
-        "not_equals": "not_equals",
-        "less_than": "greater_than",
-        "less_than_or_equal": "greater_than_or_equal",
-        "greater_than": "less_than",
-        "greater_than_or_equal": "less_than_or_equal",
-    }[operator]
-
-
 def _guard_atom(
     registry: Mapping[str, Entry],
     trigger: Trigger,
@@ -674,7 +623,7 @@ def _guard_atom(
         if static is not _STATIC_MISSING:
             return (
                 target_id(condition.right.state),
-                _reverse_operator(condition.operator),
+                reverse_operator(condition.operator),
                 static,
             )
     return None
@@ -703,8 +652,8 @@ def _guard_atoms(
         if atom is None:
             return None
         state, operator, value = atom
-        inverse = _invert_operator(operator)
-        return None if inverse is None else [(state, inverse, value)]
+        inverse = invert_operator(operator)
+        return [(state, inverse, value)]
     return None
 
 
@@ -727,7 +676,7 @@ def _range_bounds(
             if lower is None:
                 lower = value, inclusive
                 continue
-            pair = _ordered_pair(lower[0], value)
+            pair = ordered_pair(lower[0], value)
             if pair is None:
                 return None
             current, candidate = pair
@@ -739,7 +688,7 @@ def _range_bounds(
             if upper is None:
                 upper = value, inclusive
                 continue
-            pair = _ordered_pair(upper[0], value)
+            pair = ordered_pair(upper[0], value)
             if pair is None:
                 return None
             current, candidate = pair
@@ -758,7 +707,7 @@ def _atoms_conflict(
         equals = [atom[2] for atom in combined if atom[1] == "equals"]
         if equals:
             first = equals[0]
-            if any(not _json_equal(first, value) for value in equals[1:]):
+            if any(not json_equal(first, value) for value in equals[1:]):
                 return True
             if any(_atom_accepts(atom, first) is False for atom in combined):
                 return True
@@ -768,7 +717,7 @@ def _atoms_conflict(
         lower, upper = bounds
         if lower is None or upper is None:
             continue
-        pair = _ordered_pair(lower[0], upper[0])
+        pair = ordered_pair(lower[0], upper[0])
         if pair is None:
             continue
         lower_value, upper_value = pair

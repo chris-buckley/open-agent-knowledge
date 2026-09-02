@@ -10,6 +10,7 @@ from pydantic_core import PydanticCustomError
 
 from oak.base import DiscriminatedModel, Entry, OakModel
 from oak.node.parts.interfaces import SchemaTarget
+from oak.node.parts.processes.operators import ConditionOperator
 from oak.rules import rule_error
 from oak.vocabulary import NonBlankLine, Placeholder, ProcessName, TargetPath
 from oak.vocabulary.text.placeholder import placeholders_in
@@ -70,9 +71,6 @@ class ValueBinding(OakModel):
     model_config = ConfigDict(json_schema_extra={"examples": [{"placeholder": "REQUEST", "value": {"source": "interface", "interface": "interface.request", "placeholder": "REQUEST"}}]})
     placeholder: Placeholder = Field(description="The placeholder receiving the process value.", examples=["REQUEST"])
     value: Value = Field(description="The process value bound to the placeholder.", examples=[{"source": "literal", "value": "ready"}])
-
-
-ConditionOperator = Literal["equals", "not_equals", "less_than", "less_than_or_equal", "greater_than", "greater_than_or_equal"]
 
 
 class ConditionModel(DiscriminatedModel):

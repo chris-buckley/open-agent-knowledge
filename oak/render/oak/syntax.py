@@ -37,6 +37,7 @@ from oak.node.parts.processes import (
     ValueBinding,
     While,
 )
+from oak.node.parts.processes.operators import OPERATOR_TEXT
 from oak.node.parts.schemas import (
     AtLeast,
     AtMost,
@@ -187,16 +188,6 @@ def process_value_text(value: Value) -> str:
     raise TypeError(f"unsupported process value {type(value).__name__}")
 
 
-_OPERATOR_TEXT = {
-    "equals": "equals",
-    "not_equals": "does not equal",
-    "less_than": "is less than",
-    "less_than_or_equal": "is at most",
-    "greater_than": "is greater than",
-    "greater_than_or_equal": "is at least",
-}
-
-
 def condition_lines(condition: Condition, indent: int = 0) -> list[str]:
     """Return one recursive condition in prefix form."""
     surface_for(condition)
@@ -206,7 +197,7 @@ def condition_lines(condition: Condition, indent: int = 0) -> list[str]:
             prefix
             + process_value_text(condition.left)
             + " "
-            + _OPERATOR_TEXT[condition.operator]
+            + OPERATOR_TEXT[condition.operator]
             + " "
             + process_value_text(condition.right)
         ]

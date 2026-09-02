@@ -46,6 +46,10 @@ from oak.node.parts import (
     Value,
     While,
 )
+from oak.node.parts.processes.operators import (
+    OrderedComparisonTypeError,
+    compare_values,
+)
 from oak.resolve import DocumentLoader, ResolvedGraph, resolve
 from oak.vocabulary import NonBlankLine, Placeholder, TargetPath
 from oak.vocabulary.text.target_path import target_id, typed_target
@@ -201,18 +205,6 @@ class ExecutionError(RuntimeError):
         super().__init__(f"[{code}] {message}{suffix}")
 
 
-def _json_equal(left: object, right: object) -> bool:
-    if isinstance(left, bool) or isinstance(right, bool):
-        return isinstance(left, bool) and isinstance(right, bool) and left == right
-    if isinstance(left, (int, float)) and isinstance(right, (int, float)):
-        return left == right
-    if isinstance(left, list) and isinstance(right, list):
-        return len(left) == len(right) and all(_json_equal(a, b) for a, b in zip(left, right, strict=True))
-    if isinstance(left, dict) and isinstance(right, dict):
-        return left.keys() == right.keys() and all(_json_equal(left[key], right[key]) for key in left)
-    return type(left) is type(right) and left == right
-
-
 def _resolve_value(
     graph: ResolvedGraph,
     document: str,
@@ -245,23 +237,6 @@ def _resolve_value(
     raise TypeError(type(value).__name__)
 
 
-def _ordered(operator: str, left: object, right: object) -> bool:
-    if isinstance(left, bool) or isinstance(right, bool):
-        raise ExecutionError("ordered_comparison_type_mismatch", "ordered comparison needs two numbers or two strings")
-    if isinstance(left, (int, float)) and isinstance(right, (int, float)):
-        a, b = left, right
-    elif isinstance(left, str) and isinstance(right, str):
-        a, b = left, right
-    else:
-        raise ExecutionError("ordered_comparison_type_mismatch", "ordered comparison needs two numbers or two strings")
-    return {
-        "less_than": a < b,
-        "less_than_or_equal": a <= b,
-        "greater_than": a > b,
-        "greater_than_or_equal": a >= b,
-    }[operator]
-
-
 def _condition(
     graph: ResolvedGraph,
     document: str,
@@ -271,13 +246,29 @@ def _condition(
     bindings: Mapping[str, JsonValue],
 ) -> bool:
     if isinstance(condition, Compare):
-        left = _resolve_value(graph, document, condition.left, state, interfaces, bindings)
-        right = _resolve_value(graph, document, condition.right, state, interfaces, bindings)
-        if condition.operator == "equals":
-            return _json_equal(left, right)
-        if condition.operator == "not_equals":
-            return not _json_equal(left, right)
-        return _ordered(condition.operator, left, right)
+        left = _resolve_value(
+            graph,
+            document,
+            condition.left,
+            state,
+            interfaces,
+            bindings,
+        )
+        right = _resolve_value(
+            graph,
+            document,
+            condition.right,
+            state,
+            interfaces,
+            bindings,
+        )
+        try:
+            return compare_values(condition.operator, left, right)
+        except OrderedComparisonTypeError as error:
+            raise ExecutionError(
+                "ordered_comparison_type_mismatch",
+                str(error),
+            ) from None
     if isinstance(condition, All):
         for child in condition.conditions:
             if not _condition(graph, document, child, state, interfaces, bindings):
