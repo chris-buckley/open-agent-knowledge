@@ -16,12 +16,7 @@ from oak.node.parts.processes.targets import (
     ProcessTarget,
     StateTarget,
 )
-from oak.node.parts.processes.values import (
-    BindingValue,
-    LiteralValue,
-    Value,
-    ValueBinding,
-)
+from oak.node.parts.processes.values import Value, ValueBinding
 from oak.vocabulary import NonBlankLine, Placeholder
 from oak.vocabulary.text.placeholder import placeholders_in
 
@@ -130,7 +125,10 @@ class Act(StepModel):
 
     @model_validator(mode="after")
     def placeholders(self) -> Self:
-        input_names = [item.placeholder for item in self.inputs]
+        input_names = [
+            item.placeholder
+            for item in self.inputs
+        ]
         output_names = list(self.outputs)
         duplicate_inputs = sorted(
             name
@@ -142,38 +140,78 @@ class Act(StepModel):
             for name, count in Counter(output_names).items()
             if count > 1
         )
+
         if duplicate_inputs:
             raise PydanticCustomError(
                 "duplicate_act_input",
                 "act repeats input placeholders: {placeholders}",
-                {"placeholders": ", ".join(duplicate_inputs)},
+                {
+                    "placeholders": ", ".join(
+                        duplicate_inputs
+                    )
+                },
             )
+
         if duplicate_outputs:
             raise PydanticCustomError(
                 "duplicate_act_output",
                 "act repeats output placeholders: {placeholders}",
-                {"placeholders": ", ".join(duplicate_outputs)},
+                {
+                    "placeholders": ", ".join(
+                        duplicate_outputs
+                    )
+                },
             )
-        overlap = sorted(set(input_names) & set(output_names))
+
+        overlap = sorted(
+            set(input_names)
+            & set(output_names)
+        )
+
         if overlap:
             raise PydanticCustomError(
                 "act_binding_overlap",
                 "act uses placeholders as both inputs and outputs: {placeholders}",
-                {"placeholders": ", ".join(overlap)},
+                {
+                    "placeholders": ", ".join(
+                        overlap
+                    )
+                },
             )
-        declared = set(input_names) | set(output_names)
-        used = placeholders_in(self.instruction)
-        missing = sorted(used - declared)
-        unused = sorted(declared - used)
+
+        declared = (
+            set(input_names)
+            | set(output_names)
+        )
+        used = placeholders_in(
+            self.instruction
+        )
+        missing = sorted(
+            used - declared
+        )
+        unused = sorted(
+            declared - used
+        )
+
         if missing or unused:
             raise PydanticCustomError(
                 "act_placeholder_mismatch",
-                "act instruction and bindings differ; missing: {missing}; unused: {unused}",
+                (
+                    "act instruction and bindings differ; "
+                    "missing: {missing}; unused: {unused}"
+                ),
                 {
-                    "missing": ", ".join(missing) or "none",
-                    "unused": ", ".join(unused) or "none",
+                    "missing": (
+                        ", ".join(missing)
+                        or "none"
+                    ),
+                    "unused": (
+                        ", ".join(unused)
+                        or "none"
+                    ),
                 },
             )
+
         return self
 
 
@@ -263,18 +301,27 @@ class Emit(StepModel):
 
     @model_validator(mode="after")
     def placeholders(self) -> Self:
-        names = [item.placeholder for item in self.bindings]
+        names = [
+            item.placeholder
+            for item in self.bindings
+        ]
         duplicates = sorted(
             name
             for name, count in Counter(names).items()
             if count > 1
         )
+
         if duplicates:
             raise PydanticCustomError(
                 "duplicate_emit_placeholder",
                 "emit repeats placeholders: {placeholders}",
-                {"placeholders": ", ".join(duplicates)},
+                {
+                    "placeholders": ", ".join(
+                        duplicates
+                    )
+                },
             )
+
         return self
 
 
@@ -696,13 +743,16 @@ class Par(StepModel):
     @model_validator(mode="after")
     def parallel_steps(self) -> Self:
         acts: list[Act] = []
+
         for step in self.steps:
             if not isinstance(step, Act) or step.tool is None:
                 raise PydanticCustomError(
                     "parallel_step_not_tool_act",
                     "PAR contains a step that is not an exact named-tool act",
                 )
+
             acts.append(step)
+
         outputs = [
             output
             for act in acts
@@ -713,12 +763,18 @@ class Par(StepModel):
             for name, count in Counter(outputs).items()
             if count > 1
         )
+
         if duplicates:
             raise PydanticCustomError(
                 "parallel_output_collision",
                 "PAR repeats outputs: {outputs}",
-                {"outputs": ", ".join(duplicates)},
+                {
+                    "outputs": ", ".join(
+                        duplicates
+                    )
+                },
             )
+
         return self
 
 
@@ -762,14 +818,22 @@ If.model_rebuild(
         "Condition": Condition,
     }
 )
-Foreach.model_rebuild(_types_namespace={"Step": Step})
+Foreach.model_rebuild(
+    _types_namespace={
+        "Step": Step,
+    }
+)
 While.model_rebuild(
     _types_namespace={
         "Step": Step,
         "Condition": Condition,
     }
 )
-Par.model_rebuild(_types_namespace={"Step": Step})
+Par.model_rebuild(
+    _types_namespace={
+        "Step": Step,
+    }
+)
 
 
 def step_values(step: Step) -> list[Value]:
@@ -779,22 +843,28 @@ def step_values(step: Step) -> list[Value]:
             binding.value
             for binding in step.inputs
         ]
+
     if isinstance(step, Set):
         return [step.value]
+
     if isinstance(step, Emit):
         return [
             binding.value
             for binding in step.bindings
         ]
+
     if isinstance(step, (If, Assert, While)):
         return condition_values(step.condition)
+
     if isinstance(step, Call):
         return [
             binding.value
             for binding in step.inputs
         ]
+
     if isinstance(step, Foreach):
         return [step.value]
+
     if isinstance(step, Par):
         return [
             binding.value
@@ -802,237 +872,8 @@ def step_values(step: Step) -> list[Value]:
             if isinstance(child, Act)
             for binding in child.inputs
         ]
+
     return []
-
-
-def _check_value(
-    value: Value,
-    visible: set[str],
-) -> None:
-    if (
-        isinstance(
-            value,
-            BindingValue,
-        )
-        and value.binding not in visible
-    ):
-        raise PydanticCustomError(
-            "unbound_process_binding",
-            "process reads unbound local binding {binding}",
-            {
-                "binding": value.binding,
-            },
-        )
-
-
-def _promote(
-    outputs: set[str],
-    visible: set[str],
-    label: str = "process",
-) -> None:
-    redefined = sorted(
-        outputs & visible
-    )
-    if redefined:
-        raise PydanticCustomError(
-            "process_binding_redefined",
-            (
-                f"{label} redefines visible local "
-                "bindings: {bindings}"
-            ),
-            {
-                "bindings": ", ".join(
-                    redefined
-                )
-            },
-        )
-    visible.update(outputs)
-
-
-def visible_bindings(
-    steps: list[Step],
-    initial: set[str],
-) -> set[str]:
-    """Return the bindings visible after one successful step sequence."""
-    visible = set(initial)
-    pending: set[str] | None = None
-
-    for step in steps:
-        if (
-            pending is not None
-            and not isinstance(
-                step,
-                Join,
-            )
-        ):
-            raise PydanticCustomError(
-                "parallel_join_not_adjacent",
-                "a step occurs between PAR and JOIN",
-            )
-
-        for value in step_values(step):
-            _check_value(
-                value,
-                visible,
-            )
-
-        if isinstance(
-            step,
-            Act,
-        ):
-            _promote(
-                set(step.outputs),
-                visible,
-            )
-        elif isinstance(
-            step,
-            If,
-        ):
-            visible_bindings(
-                step.then,
-                visible,
-            )
-            if step.otherwise is not None:
-                visible_bindings(
-                    step.otherwise,
-                    visible,
-                )
-        elif isinstance(
-            step,
-            Call,
-        ):
-            _promote(
-                set(step.outputs),
-                visible,
-            )
-        elif isinstance(
-            step,
-            Foreach,
-        ):
-            if step.binding in visible:
-                raise PydanticCustomError(
-                    "foreach_binding_redefined",
-                    "FOREACH redefines visible binding {binding}",
-                    {
-                        "binding": step.binding,
-                    },
-                )
-            if (
-                isinstance(
-                    step.value,
-                    LiteralValue,
-                )
-                and not isinstance(
-                    step.value.value,
-                    list,
-                )
-            ):
-                raise PydanticCustomError(
-                    "foreach_source_not_list",
-                    "FOREACH literal source is not a list",
-                )
-            visible_bindings(
-                step.steps,
-                visible | {step.binding},
-            )
-        elif isinstance(
-            step,
-            While,
-        ):
-            visible_bindings(
-                step.steps,
-                visible,
-            )
-        elif isinstance(
-            step,
-            Par,
-        ):
-            outputs = {
-                output
-                for child in step.steps
-                if isinstance(
-                    child,
-                    Act,
-                )
-                for output in child.outputs
-            }
-            redefined = sorted(
-                outputs & visible
-            )
-            if redefined:
-                raise PydanticCustomError(
-                    "process_binding_redefined",
-                    "PAR redefines visible local bindings: {bindings}",
-                    {
-                        "bindings": ", ".join(
-                            redefined
-                        )
-                    },
-                )
-            pending = outputs
-        elif isinstance(
-            step,
-            Join,
-        ):
-            if pending is None:
-                raise PydanticCustomError(
-                    "join_without_par",
-                    "JOIN has no immediately preceding PAR",
-                )
-            visible.update(pending)
-            pending = None
-
-    if pending is not None:
-        raise PydanticCustomError(
-            "parallel_join_missing",
-            "PAR has no following JOIN",
-        )
-
-    return visible
-
-
-def sequence_always_fails(
-    steps: list[Step],
-) -> bool:
-    """Return whether one step sequence always ends in explicit failure."""
-    for index, step in enumerate(steps):
-        always_fails = isinstance(
-            step,
-            Fail,
-        )
-        if isinstance(
-            step,
-            If,
-        ):
-            always_fails = (
-                sequence_always_fails(
-                    step.then
-                )
-                and step.otherwise is not None
-                and sequence_always_fails(
-                    step.otherwise
-                )
-            )
-        elif isinstance(
-            step,
-            While,
-        ):
-            sequence_always_fails(
-                step.steps
-            )
-
-        if always_fails:
-            if index + 1 < len(steps):
-                raise PydanticCustomError(
-                    "unreachable_process_step",
-                    (
-                        "a process step follows a path "
-                        "that always fails"
-                    ),
-                )
-            return True
-
-    return False
 
 
 __all__ = [
@@ -1049,7 +890,5 @@ __all__ = [
     "Step",
     "StepModel",
     "While",
-    "sequence_always_fails",
     "step_values",
-    "visible_bindings",
 ]

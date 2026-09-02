@@ -1,18 +1,13 @@
 """The process entry model and its local flow validation."""
 
-from __future__ import annotations
-
 from typing import Literal, Self
 
 from pydantic import ConfigDict, Field, model_validator
 
 from oak.base import Entry
 from oak.node.parts.interfaces import SchemaTarget
-from oak.node.parts.processes.steps import (
-    Step,
-    sequence_always_fails,
-    visible_bindings,
-)
+from oak.node.parts.processes.steps import Step
+from oak.node.validation.flow import validate_process_flow
 from oak.vocabulary import ProcessName
 
 
@@ -109,29 +104,10 @@ class Process(Entry):
 
     @model_validator(mode="after")
     def control_flow(self) -> Self:
-        if self.input is None:
-            visible_bindings(
-                self.steps,
-                set(),
-            )
-        sequence_always_fails(
-            self.steps
-        )
+        validate_process_flow(self)
         return self
-
-
-def process_visible_bindings(
-    process: Process,
-    inputs: set[str],
-) -> set[str]:
-    """Return every binding visible after successful process completion."""
-    return visible_bindings(
-        process.steps,
-        inputs,
-    )
 
 
 __all__ = [
     "Process",
-    "process_visible_bindings",
 ]
