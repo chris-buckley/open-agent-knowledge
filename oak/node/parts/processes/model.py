@@ -10,7 +10,7 @@ from oak.base import Entry
 from oak.node.parts.interfaces import SchemaTarget
 from oak.node.parts.processes.steps import Step
 from oak.node.validation.flow import validate_process_flow
-from oak.vocabulary import ProcessName
+from oak.vocabulary.text.process_name import ProcessName
 
 
 class Process(Entry):

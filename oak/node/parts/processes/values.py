@@ -12,7 +12,7 @@ from oak.node.parts.processes.targets import (
     InterfaceTarget,
     StateTarget,
 )
-from oak.vocabulary import Placeholder
+from oak.vocabulary.text.placeholder import Placeholder
 
 
 class ValueModel(DiscriminatedModel):

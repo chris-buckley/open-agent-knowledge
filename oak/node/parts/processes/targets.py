@@ -4,8 +4,11 @@ from typing import Annotated
 
 from pydantic import AfterValidator
 
-from oak.vocabulary import TargetPath
-from oak.vocabulary.text.target_path import local_target, typed_target
+from oak.vocabulary.text.target_path import (
+    TargetPath,
+    local_target,
+    typed_target,
+)
 
 ConstantTarget = Annotated[
     TargetPath,

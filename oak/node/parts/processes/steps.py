@@ -18,8 +18,8 @@ from oak.node.parts.processes.targets import (
     StateTarget,
 )
 from oak.node.parts.processes.values import Value, ValueBinding
-from oak.vocabulary import NonBlankLine, Placeholder
-from oak.vocabulary.text.placeholder import placeholders_in
+from oak.vocabulary.text.non_blank_line import NonBlankLine
+from oak.vocabulary.text.placeholder import Placeholder, placeholders_in
 
 
 class StepModel(DiscriminatedModel):
