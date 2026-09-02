@@ -21,8 +21,8 @@ from oak.node.parts.schemas.constraints import (
     Type,
 )
 from oak.rules.validation import rule_error
-from oak.vocabulary import NonBlankLine, Placeholder
-from oak.vocabulary.text.placeholder import placeholders_in
+from oak.vocabulary.text.non_blank_line import NonBlankLine
+from oak.vocabulary.text.placeholder import Placeholder, placeholders_in
 
 
 class Where(OakModel):

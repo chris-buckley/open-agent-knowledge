@@ -15,14 +15,10 @@ from pydantic import (
 
 from oak.base import DiscriminatedModel
 from oak.rules.validation import rule_error
-from oak.vocabulary import (
-    DATATYPE_ADAPTERS,
-    Datatype,
-    NonBlankLine,
-    Placeholder,
-    RegexPattern,
-)
-from oak.vocabulary.text.regex_pattern import rust_regex_adapter
+from oak.vocabulary.datatypes.names import DATATYPE_ADAPTERS, Datatype
+from oak.vocabulary.text.non_blank_line import NonBlankLine
+from oak.vocabulary.text.placeholder import Placeholder
+from oak.vocabulary.text.regex_pattern import RegexPattern, rust_regex_adapter
 
 NonEmptyText = Annotated[
     str,
