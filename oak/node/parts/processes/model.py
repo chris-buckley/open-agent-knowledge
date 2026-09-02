@@ -1,5 +1,7 @@
 """The process entry model and its local flow validation."""
 
+from __future__ import annotations
+
 from typing import Literal, Self
 
 from pydantic import ConfigDict, Field, model_validator
