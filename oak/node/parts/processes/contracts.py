@@ -1,5 +1,7 @@
 """Resolved schema contracts for process entries and steps."""
 
+from __future__ import annotations
+
 from oak.node.parts.processes.model import (
     Process,
     process_visible_bindings,

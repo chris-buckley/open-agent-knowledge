@@ -1,5 +1,7 @@
 """Process value models and placeholder bindings."""
 
+from __future__ import annotations
+
 from typing import Annotated, Literal
 
 from pydantic import ConfigDict, Field, JsonValue

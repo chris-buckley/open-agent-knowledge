@@ -1,7 +1,5 @@
 """Schema binding diagnostics and datatype-first binding evaluation."""
 
-from __future__ import annotations
-
 import json
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
@@ -105,7 +103,7 @@ def _json_failure(
 
 
 def bind_schema(
-    schema: Schema,
+    schema: "Schema",
     values: Mapping[str, object],
 ) -> None:
     """Validate one complete placeholder binding."""
@@ -187,7 +185,7 @@ def bind_schema(
 
 
 def bind_schema_value(
-    schema: Schema,
+    schema: "Schema",
     placeholder: str,
     value: object,
 ) -> None:
