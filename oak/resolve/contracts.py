@@ -13,8 +13,8 @@ from oak.node.parts.processes.values import (
     InterfaceValue,
     LiteralValue,
 )
-from oak.node.parts.schemas.binding import SchemaBindingError
 from oak.node.parts.schemas.model import Schema
+from oak.node.validation.contracts import find_cycle, inspect_emit_contract
 from oak.node.validation.processes import (
     validate_act_contract,
     validate_call_contract,
@@ -134,12 +134,20 @@ def validate_relative_interfaces(
         for step in iter_steps(process.steps):
             if isinstance(step, Emit) and step.interface in schemas:
                 schema = schemas[step.interface]
-                bound = {
-                    binding.placeholder
-                    for binding in step.bindings
-                }
+                contract = inspect_emit_contract(
+                    schema,
+                    (
+                        binding.placeholder
+                        for binding in step.bindings
+                    ),
+                    static_emit_values(
+                        graph,
+                        document,
+                        step,
+                    ),
+                )
 
-                if bound != schema.placeholders:
+                if not contract.placeholders_match:
                     raise_resolution(
                         "emit_schema_binding_mismatch",
                         document,
@@ -150,26 +158,16 @@ def validate_relative_interfaces(
                         ),
                     )
 
-                static_values = static_emit_values(
-                    graph,
-                    document,
-                    step,
-                )
-
-                if static_values is not None:
-                    try:
-                        schema.bind(static_values)
-
-                    except SchemaBindingError as error:
-                        raise_resolution(
-                            "invalid_static_schema_binding",
-                            document,
-                            step.interface,
-                            (
-                                f"process {process.id} emits an invalid "
-                                f"static binding: {error}"
-                            ),
-                        )
+                if contract.binding_error is not None:
+                    raise_resolution(
+                        "invalid_static_schema_binding",
+                        document,
+                        step.interface,
+                        (
+                            f"process {process.id} emits an invalid "
+                            f"static binding: {contract.binding_error}"
+                        ),
+                    )
 
             for value in step_values(step):
                 if (
@@ -393,50 +391,23 @@ def call_edges(
 
 def validate_call_cycles(graph: ResolvedGraph) -> None:
     """Reject a cycle formed by resolved process calls."""
-    edges = call_edges(graph)
-    state: dict[
-        tuple[str, str],
-        int,
-    ] = {}
-    stack: list[
-        tuple[str, str]
-    ] = []
+    cycle = find_cycle(
+        call_edges(graph)
+    )
 
-    def visit(
-        current: tuple[str, str],
-    ) -> None:
-        state[current] = 1
-        stack.append(current)
+    if cycle is None:
+        return
 
-        for target in edges.get(current, []):
-            target_state = state.get(
-                target,
-                0,
-            )
-
-            if target_state == 0:
-                visit(target)
-
-            elif target_state == 1:
-                start = stack.index(target)
-                cycle = stack[start:] + [target]
-                text = " -> ".join(
-                    f"{document}#process.{identifier}"
-                    for document, identifier in cycle
-                )
-                raise_resolution(
-                    "cross_document_process_call_cycle",
-                    current[0],
-                    text,
-                    "resolved process calls form a cycle",
-                )
-
-        stack.pop()
-        state[current] = 2
-
-    for process in edges:
-        if state.get(process, 0) == 0:
-            visit(process)
+    text = " -> ".join(
+        f"{document}#process.{identifier}"
+        for document, identifier in cycle
+    )
+    raise_resolution(
+        "cross_document_process_call_cycle",
+        cycle[-2][0],
+        text,
+        "resolved process calls form a cycle",
+    )
 
 
 __all__ = [

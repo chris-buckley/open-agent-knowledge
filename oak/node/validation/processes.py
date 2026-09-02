@@ -24,9 +24,9 @@ from oak.node.parts.processes.steps import (
     While,
     step_values,
 )
-from oak.node.parts.schemas.binding import SchemaBindingError
 from oak.node.parts.state import State
 from oak.node.validation.conditions import condition_result, validate_condition
+from oak.node.validation.contracts import find_cycle, inspect_emit_contract
 from oak.node.validation.flow import (
     process_visible_bindings,
     sequence_always_fails,
@@ -337,13 +337,20 @@ def validate_process_steps(
             if schema is None:
                 continue
 
-            authored = {
-                binding.placeholder
-                for binding in step.bindings
-            }
-            expected = schema.placeholders
+            contract = inspect_emit_contract(
+                schema,
+                (
+                    binding.placeholder
+                    for binding in step.bindings
+                ),
+                _static_emit_values(
+                    index,
+                    process,
+                    step,
+                ),
+            )
 
-            if authored != expected:
+            if not contract.placeholders_match:
                 raise PydanticCustomError(
                     "emit_schema_binding_mismatch",
                     (
@@ -354,43 +361,29 @@ def validate_process_steps(
                         "process": process.id,
                         "interface": interface.id,
                         "missing": (
-                            ", ".join(
-                                sorted(expected - authored)
-                            )
+                            ", ".join(contract.missing)
                             or "none"
                         ),
                         "unused": (
-                            ", ".join(
-                                sorted(authored - expected)
-                            )
+                            ", ".join(contract.unused)
                             or "none"
                         ),
                     },
                 )
 
-            static_values = _static_emit_values(
-                index,
-                process,
-                step,
-            )
-
-            if static_values is not None:
-                try:
-                    schema.bind(static_values)
-
-                except SchemaBindingError as error:
-                    raise PydanticCustomError(
-                        "invalid_static_schema_binding",
-                        (
-                            "process {process} emits an invalid static binding "
-                            "through interface {interface}: {reason}"
-                        ),
-                        {
-                            "process": process.id,
-                            "interface": interface.id,
-                            "reason": str(error),
-                        },
-                    ) from None
+            if contract.binding_error is not None:
+                raise PydanticCustomError(
+                    "invalid_static_schema_binding",
+                    (
+                        "process {process} emits an invalid static binding "
+                        "through interface {interface}: {reason}"
+                    ),
+                    {
+                        "process": process.id,
+                        "interface": interface.id,
+                        "reason": str(contract.binding_error),
+                    },
+                ) from None
 
             continue
 
@@ -625,35 +618,18 @@ def validate_local_call_cycles(processes: list[Process]) -> None:
         process.id: list(_calls(process.steps))
         for process in processes
     }
-    state: dict[str, int] = {}
-    stack: list[str] = []
+    cycle = find_cycle(graph)
 
-    def visit(process_id: str) -> None:
-        state[process_id] = 1
-        stack.append(process_id)
+    if cycle is None:
+        return
 
-        for target in graph[process_id]:
-            target_state = state.get(target, 0)
-
-            if target_state == 0:
-                visit(target)
-
-            elif target_state == 1:
-                start = stack.index(target)
-                cycle = stack[start:] + [target]
-
-                raise PydanticCustomError(
-                    "process_call_cycle",
-                    "process call cycle: {cycle}",
-                    {"cycle": " -> ".join(cycle)},
-                )
-
-        stack.pop()
-        state[process_id] = 2
-
-    for process in processes:
-        if state.get(process.id, 0) == 0:
-            visit(process.id)
+    raise PydanticCustomError(
+        "process_call_cycle",
+        "process call cycle: {cycle}",
+        {
+            "cycle": " -> ".join(cycle),
+        },
+    )
 
 
 __all__ = [
