@@ -24,7 +24,7 @@ from oak.node.parts.processes.steps import (
     While,
     step_values,
 )
-from oak.node.parts.schemas import SchemaBindingError
+from oak.node.parts.schemas.binding import SchemaBindingError
 from oak.node.parts.state import State
 from oak.node.validation.conditions import condition_result, validate_condition
 from oak.node.validation.flow import (

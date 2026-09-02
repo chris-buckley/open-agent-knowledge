@@ -24,7 +24,7 @@ def iter_entries(node: Node) -> Iterator[Entry]:
         yield from getattr(node, part)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, eq=False)
 class NodeIndex(Mapping[str, Entry]):
     """One node's unique local entries indexed by id."""
 

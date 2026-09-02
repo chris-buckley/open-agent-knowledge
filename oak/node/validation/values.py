@@ -18,7 +18,8 @@ from oak.node.parts.processes.values import (
     StateValue,
     Value,
 )
-from oak.node.parts.schemas import Schema, SchemaBindingError
+from oak.node.parts.schemas.binding import SchemaBindingError
+from oak.node.parts.schemas.model import Schema
 from oak.node.parts.state import State
 from oak.rules import rule_error
 
