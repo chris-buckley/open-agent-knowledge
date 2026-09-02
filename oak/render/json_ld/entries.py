@@ -49,19 +49,6 @@ _STEP_TYPES = {
     "join": "Join",
 }
 
-_STEP_TYPES = {
-    "act": "Act",
-    "set": "Set",
-    "emit": "Emit",
-    "if": "If",
-    "call": "Call",
-    "fail": "Fail",
-    "assert": "Assert",
-    "foreach": "Foreach",
-    "while": "While",
-    "par": "Par",
-    "join": "Join",
-}
 
 
 def _target_reference(document: str, target: str) -> Fields:
