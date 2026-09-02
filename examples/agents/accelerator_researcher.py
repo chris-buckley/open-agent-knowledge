@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import sys
+import threading
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -102,7 +103,8 @@ accelerator_researcher_instructions = [
         ("start-par-together", "Start every PAR child in one turn before you wait for any result."),
         ("separate-duties", "Do not research or verify claims yourself."),
         ("report-confirmed", "Report only claims that survived the challenge."),
-        ("write-plainly", "Write the report in plain words and expand each acronym the first time it appears."),
+        ("write-plainly", "Write the report in plain words."),
+        ("expand-acronyms", "Expand each acronym the first time it appears."),
         ("keep-links", "End each finding with the link that proves it."),
         ("keep-brief", "Keep the report brief: one line per finding."),
     )
@@ -313,7 +315,7 @@ WORKER_DOCUMENTS = {
 
 QUESTION_TEXT = "Which Microsoft solution accelerators help build a multi-agent customer service assistant on Azure?"
 REPOSITORY_FINDING_TEXT = (
-    "Multi-Agent Custom Automation Engine orchestrates a group of AI agents on Azure Container Apps. "
+    "Multi-Agent Custom Automation Engine orchestrates a group of artificial intelligence (AI) agents on Azure Container Apps. "
     "https://github.com/microsoft/Multi-Agent-Custom-Automation-Engine-Solution-Accelerator"
 )
 WEB_FINDING_TEXT = "The accelerator hub lists Customer Chatbot as actively maintained. https://accelerators.ms/#accelerators"
@@ -323,8 +325,8 @@ DOCS_FINDING_TEXT = (
 )
 REFUTED_CLAIM_TEXT = "Customer Chatbot is actively maintained: the hub label is not commit evidence. https://accelerators.ms/#accelerators"
 TLDR_TEXT = (
-    "Start from the Multi-Agent Custom Automation Engine accelerator and add Azure AI Foundry Agent Service "
-    "connected agents for the customer service flow."
+    "Start from the Multi-Agent Custom Automation Engine accelerator and add connected agents from the "
+    "Foundry Agent Service for the customer service flow."
 )
 DROPPED_CLAIM_TEXT = "The hub calls Customer Chatbot actively maintained, but no commit history backs that. https://accelerators.ms/#accelerators"
 WORKER_TEXTS = {
@@ -333,6 +335,11 @@ WORKER_TEXTS = {
     PLACEHOLDER_DOCS_FINDINGS: DOCS_FINDING_TEXT,
     PLACEHOLDER_CONFIRMED_FINDINGS: REPOSITORY_FINDING_TEXT + "\n" + DOCS_FINDING_TEXT,
     PLACEHOLDER_REFUTED_CLAIMS: REFUTED_CLAIM_TEXT,
+}
+RESEARCH_REQUEST_VALUES = {PLACEHOLDER_QUESTION: QUESTION_TEXT}
+CHALLENGE_REQUEST_VALUES = {
+    **RESEARCH_REQUEST_VALUES,
+    **{name: WORKER_TEXTS[name] for name in SOURCE_FINDINGS_PLACEHOLDERS},
 }
 EXPECTED_REPORT = Emission(
     interface=INTERFACE_RESEARCH_REPORT_OUTPUT,
@@ -345,11 +352,17 @@ EXPECTED_REPORT = Emission(
 
 
 def _worker_act(step, _values):
-    return {name: WORKER_TEXTS.get(name, "three candidates") for name in step.outputs}
+    return {name: WORKER_TEXTS[name] for name in step.outputs}
 
 
-def _agent(node: Node, request_input: str):
+def _agent(node: Node, request_input: str, expected: dict[str, str], barrier: threading.Barrier | None = None):
+    """Dispatch one worker: check its exact request, meet the other PAR children at the barrier, then run it."""
+
     def dispatch(_step, values):
+        if dict(values) != expected:
+            raise RuntimeError(f"{request_input} received an unexpected request")
+        if barrier is not None:
+            barrier.wait()
         completed = execute(
             node,
             Arrival(source=request_input, interfaces={request_input: dict(values)}),
@@ -380,9 +393,11 @@ def _load_worker(path: str) -> Node | None:
 
 
 def _tool_registry() -> dict[str, ToolContract]:
+    """Register the four workers; the three researchers must all be running before any one proceeds."""
+    barrier = threading.Barrier(3, timeout=10)
     return {
         TOOL_AGENT_GITHUB_RESEARCHER: ToolContract(
-            _agent(github_researcher.github_researcher_node, github_researcher.INTERFACE_RESEARCH_REQUEST_INPUT),
+            _agent(github_researcher.github_researcher_node, github_researcher.INTERFACE_RESEARCH_REQUEST_INPUT, RESEARCH_REQUEST_VALUES, barrier),
             frozenset(REQUEST_PLACEHOLDERS),
             frozenset({PLACEHOLDER_REPOSITORY_FINDINGS}),
             True,
@@ -390,7 +405,7 @@ def _tool_registry() -> dict[str, ToolContract]:
             output=SCHEMA_GITHUB_RESULT,
         ),
         TOOL_AGENT_WEB_RESEARCHER: ToolContract(
-            _agent(web_researcher.web_researcher_node, web_researcher.INTERFACE_RESEARCH_REQUEST_INPUT),
+            _agent(web_researcher.web_researcher_node, web_researcher.INTERFACE_RESEARCH_REQUEST_INPUT, RESEARCH_REQUEST_VALUES, barrier),
             frozenset(REQUEST_PLACEHOLDERS),
             frozenset({PLACEHOLDER_WEB_FINDINGS}),
             True,
@@ -398,7 +413,7 @@ def _tool_registry() -> dict[str, ToolContract]:
             output=SCHEMA_WEB_RESULT,
         ),
         TOOL_AGENT_DOCS_RESEARCHER: ToolContract(
-            _agent(docs_researcher.docs_researcher_node, docs_researcher.INTERFACE_RESEARCH_REQUEST_INPUT),
+            _agent(docs_researcher.docs_researcher_node, docs_researcher.INTERFACE_RESEARCH_REQUEST_INPUT, RESEARCH_REQUEST_VALUES, barrier),
             frozenset(REQUEST_PLACEHOLDERS),
             frozenset({PLACEHOLDER_DOCS_FINDINGS}),
             True,
@@ -406,7 +421,7 @@ def _tool_registry() -> dict[str, ToolContract]:
             output=SCHEMA_DOCS_RESULT,
         ),
         TOOL_AGENT_FINDINGS_CHALLENGER: ToolContract(
-            _agent(findings_challenger.findings_challenger_node, findings_challenger.INTERFACE_CHALLENGE_REQUEST_INPUT),
+            _agent(findings_challenger.findings_challenger_node, findings_challenger.INTERFACE_CHALLENGE_REQUEST_INPUT, CHALLENGE_REQUEST_VALUES),
             frozenset(CHALLENGE_REQUEST_PLACEHOLDERS),
             frozenset(VERIFIED_FINDINGS_PLACEHOLDERS),
             input=SCHEMA_CHALLENGE_REQUEST,
@@ -426,7 +441,7 @@ def build() -> str:
         parsed,
         Arrival(
             source=INTERFACE_RESEARCH_REQUEST_INPUT,
-            interfaces={INTERFACE_RESEARCH_REQUEST_INPUT: {PLACEHOLDER_QUESTION: QUESTION_TEXT}},
+            interfaces={INTERFACE_RESEARCH_REQUEST_INPUT: dict(RESEARCH_REQUEST_VALUES)},
         ),
         {},
         act=_write_report_act,

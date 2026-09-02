@@ -15,7 +15,8 @@ Treat a custom agent's final message as the outputs of its ACT line.
 Start every PAR child in one turn before you wait for any result.
 Do not research or verify claims yourself.
 Report only claims that survived the challenge.
-Write the report in plain words and expand each acronym the first time it appears.
+Write the report in plain words.
+Expand each acronym the first time it appears.
 End each finding with the link that proves it.
 Keep the report brief: one line per finding.
 </instructions>
