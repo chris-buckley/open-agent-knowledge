@@ -163,7 +163,7 @@ def _parse_surface(surface, text: str):
     if model is State:
         return _named_values(lines, 1, constants=False)[0]
     if model is Trigger:
-        return _triggers(lines, 1, "xml")[0]
+        return _triggers(lines, 1)[0]
     if model is Process:
         return _processes(lines, 1, "xml")[0]
     if model is Interface:
@@ -324,8 +324,8 @@ def _validate_resolution() -> None:
                 triggers=[
                     Trigger(
                         id="invalid",
-                        when="A name arrives.",
-                        then="target.oak.md#process.normalise",
+                        event="A name arrives.",
+                        process="target.oak.md#process.normalise",
                     )
                 ]
             ),
@@ -468,7 +468,7 @@ def _validate_resolution() -> None:
 def _validate_execution() -> None:
     parallel = Node(
         state=[State(id="done", value=False)],
-        triggers=[Trigger(id="run-trigger", when="Run parallel work.", then="process.run")],
+        triggers=[Trigger(id="run-trigger", event="Run parallel work.", process="process.run")],
         processes=[
             Process(
                 id="run",
@@ -510,7 +510,7 @@ def _validate_execution() -> None:
     }
     result = execute(
         parallel,
-        Arrival(when="Run parallel work."),
+        Arrival(event="Run parallel work."),
         {"state.done": False},
         act=lambda _step, _values: {},
         tools=tools,
@@ -521,7 +521,7 @@ def _validate_execution() -> None:
     raw, normal = _contract_schemas()
     contract = Node(
         schemas=[raw, normal],
-        triggers=[Trigger(id="name", when="A name arrives.", then="process.handle")],
+        triggers=[Trigger(id="name", event="A name arrives.", process="process.handle")],
         processes=[
             _normalise_process(),
             Process(
@@ -562,7 +562,7 @@ def _validate_execution() -> None:
 
     result = execute(
         contract,
-        Arrival(when="A name arrives.", interfaces={"interface.request": {"RAW_NAME": " ada "}}),
+        Arrival(event="A name arrives.", interfaces={"interface.request": {"RAW_NAME": " ada "}}),
         {},
         act=lambda _step, values: {"NORMAL_NAME": values["RAW_NAME"].strip().title()},
     )
@@ -573,7 +573,7 @@ def _validate_execution() -> None:
         execute(
             contract,
             Arrival(
-                when="A name arrives.",
+                event="A name arrives.",
                 interfaces={"interface.request": {"RAW_NAME": "Ada"}},
             ),
             {},
@@ -655,8 +655,8 @@ def _validate_while() -> None:
         triggers=[
             Trigger(
                 id="count-requested",
-                when="Count to two.",
-                then="process.advance-count",
+                event="Count to two.",
+                process="process.advance-count",
             )
         ],
         processes=[
@@ -722,7 +722,7 @@ def _validate_while() -> None:
     )
     completed = execute(
         progress,
-        Arrival(when="Count to two."),
+        Arrival(event="Count to two."),
         {"state.current-count": 0},
         tools={"counter.next": tool},
     )
@@ -744,7 +744,7 @@ def _validate_while() -> None:
         raise RuntimeError("WHILE state, emissions, or fresh iteration scope is wrong")
     skipped = execute(
         progress,
-        Arrival(when="Count to two."),
+        Arrival(event="Count to two."),
         {"state.current-count": 2},
         tools={"counter.next": tool},
     )
@@ -756,8 +756,8 @@ def _validate_while() -> None:
         triggers=[
             Trigger(
                 id="poll-requested",
-                when="Poll without progress.",
-                then="process.poll-job",
+                event="Poll without progress.",
+                process="process.poll-job",
             )
         ],
         processes=[
@@ -781,7 +781,7 @@ def _validate_while() -> None:
     try:
         execute(
             limited,
-            Arrival(when="Poll without progress."),
+            Arrival(event="Poll without progress."),
             {"state.status": "pending"},
             act=lambda _step, _values: {},
         )
@@ -966,11 +966,24 @@ def _expect_rule(code: str, author) -> None:
 def _validate_contract_rules() -> None:
     raw, normal = _contract_schemas()
 
-    def trigger_input() -> None:
+    def trigger_seed_mismatch() -> None:
         Node(
             schemas=[raw, normal],
-            triggers=[Trigger(id="invalid", when="A name arrives.", then="process.normalise")],
+            triggers=[Trigger(id="invalid", event="A name arrives.", process="process.normalise")],
             processes=[_normalise_process()],
+        )
+
+    def trigger_event_overlap() -> None:
+        Node(
+            schemas=[raw, normal],
+            triggers=[
+                Trigger(id="first", event="A name arrives.", process="process.handle"),
+                Trigger(id="second", event="A name arrives.", process="process.handle"),
+            ],
+            processes=[
+                _normalise_process(),
+                Process(id="handle", name="Handle request", steps=[Call(process="process.normalise", inputs=[ValueBinding(placeholder="RAW_NAME", value=LiteralValue(value="Ada"))], outputs=["NORMAL_NAME"])]),
+            ],
         )
 
     def output_missing() -> None:
@@ -1044,9 +1057,38 @@ def _validate_contract_rules() -> None:
     def trigger_binding_read() -> None:
         Trigger(
             id="invalid",
-            when="A name arrives.",
-            then="process.normalise",
-            inputs=[ValueBinding(placeholder="RAW_NAME", value=BindingValue(binding="RAW_NAME"))],
+            event="A name arrives.",
+            process="process.normalise",
+            seed=[ValueBinding(placeholder="RAW_NAME", value=BindingValue(binding="RAW_NAME"))],
+        )
+
+    def trigger_source_out() -> None:
+        Node(
+            schemas=[raw, normal],
+            interfaces=[Interface(id="name-output", direction="out", schema="schema.raw-name")],
+            triggers=[
+                Trigger(
+                    id="invalid",
+                    event="A name arrives.",
+                    source="interface.name-output",
+                    process="process.handle",
+                )
+            ],
+            processes=[
+                _normalise_process(),
+                Process(id="handle", name="Handle request", steps=[Call(process="process.normalise", inputs=[ValueBinding(placeholder="RAW_NAME", value=LiteralValue(value="Ada"))], outputs=["NORMAL_NAME"])]),
+            ],
+        )
+
+    def trigger_source_overlap() -> None:
+        Node(
+            schemas=[raw, normal],
+            interfaces=[Interface(id="name-input", direction="in", schema="schema.raw-name")],
+            triggers=[
+                Trigger(id="first", event="A name arrives.", source="interface.name-input", process="process.normalise", seed=[ValueBinding(placeholder="RAW_NAME", value=InterfaceValue(interface="interface.name-input", placeholder="RAW_NAME"))]),
+                Trigger(id="second", event="Another name arrives.", source="interface.name-input", process="process.normalise", seed=[ValueBinding(placeholder="RAW_NAME", value=InterfaceValue(interface="interface.name-input", placeholder="RAW_NAME"))]),
+            ],
+            processes=[_normalise_process()],
         )
 
     def typed_interface_read() -> None:
@@ -1108,7 +1150,8 @@ def _validate_contract_rules() -> None:
     else:
         raise RuntimeError("bind accepted a non-JSON quantity value")
 
-    _expect_rule("trigger_contract_mismatch", trigger_input)
+    _expect_rule("trigger_contract_mismatch", trigger_seed_mismatch)
+    _expect_rule("overlapping_trigger_guards", trigger_event_overlap)
     _expect_rule("process_output_binding_mismatch", output_missing)
     _expect_rule("call_contract_mismatch", call_mismatch)
     _expect_rule("act_schema_mismatch", act_mismatch)
@@ -1116,8 +1159,50 @@ def _validate_contract_rules() -> None:
     _expect_rule("unknown_schema_placeholder", typed_constant_unknown)
     _expect_rule("incomplete_schema_binding", incomplete_binding)
     _expect_rule("invalid_act_instruction", reserved_instruction)
-    _expect_rule("invalid_trigger_input_value", trigger_binding_read)
+    _expect_rule("invalid_trigger_seed_value", trigger_binding_read)
+    _expect_rule("trigger_source_not_ingress", trigger_source_out)
+    _expect_rule("overlapping_trigger_guards", trigger_source_overlap)
     _expect_rule("typed_process_interface_read", typed_interface_read)
+
+
+def _validate_source_routing() -> None:
+    raw, _normal = _contract_schemas()
+    routed = Node(
+        schemas=[raw],
+        state=[State(id="route", value="")],
+        triggers=[
+            Trigger(id="event-routed", event="A name arrives.", process="process.mark-event"),
+            Trigger(id="source-routed", event="A name arrives by wire.", source="interface.request", process="process.mark-source"),
+        ],
+        processes=[
+            Process(id="mark-event", name="Mark event", steps=[Set(state="state.route", value=LiteralValue(value="event"))]),
+            Process(id="mark-source", name="Mark source", steps=[Set(state="state.route", value=LiteralValue(value="source"))]),
+        ],
+        interfaces=[Interface(id="request", direction="in", schema="schema.raw-name")],
+    )
+    payload = {"interface.request": {"RAW_NAME": "Ada"}}
+    by_event = execute(routed, Arrival(event="A name arrives.", interfaces=payload), {"state.route": ""})
+    by_source = execute(routed, Arrival(source="interface.request", interfaces=payload), {"state.route": ""})
+    if by_event.state["state.route"] != "event" or by_source.state["state.route"] != "source":
+        raise RuntimeError("arrival routing selected the wrong trigger")
+    idle = execute(routed, Arrival(event="A name arrives by wire.", interfaces=payload), {"state.route": ""})
+    if idle.state["state.route"] != "":
+        raise RuntimeError("an event arrival fired a source-backed trigger")
+    try:
+        execute(routed, Arrival(source="interface.request"), {"state.route": ""})
+    except ExecutionError as error:
+        if error.code != "invalid_arrival_source":
+            raise RuntimeError(f"expected invalid_arrival_source, got {error.code}") from None
+    else:
+        raise RuntimeError("a source arrival without its payload executed")
+    for values in ({}, {"event": "A name arrives.", "source": "interface.request"}):
+        try:
+            Arrival(**values)
+        except ValidationError as error:
+            if "invalid_arrival_selector" not in {str(item["type"]) for item in error.errors()}:
+                raise RuntimeError(f"expected invalid_arrival_selector, got {error}") from None
+        else:
+            raise RuntimeError("an arrival accepted an invalid selector pair")
 
 
 def _validate_json_ld_style_display() -> None:
@@ -1226,6 +1311,7 @@ def validate_examples() -> None:
     _validate_part_omission()
     _validate_act_authoring()
     _validate_contract_rules()
+    _validate_source_routing()
     _validate_json_ld_style_display()
     _validate_human_examples()
     _freshness_gates()

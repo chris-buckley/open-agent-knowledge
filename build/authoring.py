@@ -118,9 +118,8 @@ def tree() -> Node:
         triggers=[
             Trigger(
                 id="source-supplied",
-                given=True,
-                when="Any source material is supplied with this prompt.",
-                then="process.write-oak",
+                event="Any source material is supplied with this prompt.",
+                process="process.write-oak",
             )
         ],
         processes=[

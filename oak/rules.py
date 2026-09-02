@@ -41,15 +41,16 @@ _RULES = (
     AuthoringRule("process_call_cycle", "Keep the local process call graph acyclic.", ("Call",)),
     AuthoringRule("call_contract_mismatch", "Match each call's inputs and outputs to the called process schemas.", ("Call",)),
     AuthoringRule("process_output_binding_mismatch", "Make every process output schema placeholder visible after successful completion.", ("Process",)),
-    AuthoringRule("trigger_contract_mismatch", "Bind each selected process input schema placeholder exactly once in trigger inputs.", ("Trigger",)),
-    AuthoringRule("invalid_trigger_input_value", "Do not read a local binding in a trigger input.", ("Trigger",)),
+    AuthoringRule("trigger_contract_mismatch", "Bind each selected process input schema placeholder exactly once in trigger seeds.", ("Trigger",)),
+    AuthoringRule("invalid_trigger_seed_value", "Do not read a local binding in a trigger seed.", ("Trigger",)),
+    AuthoringRule("trigger_source_not_ingress", "Select only an in or inout local interface as a trigger source.", ("Trigger", "Interface")),
     AuthoringRule("dead_process_branch", "Remove a process branch that cannot run.", ("If", "While")),
     AuthoringRule("unreachable_process_step", "Remove a process step after a path that always fails.", ("Process",)),
     AuthoringRule("condition_group_too_short", "Give each ALL or ANY condition at least two children.", ("All", "Any")),
     AuthoringRule("ordered_comparison_type_mismatch", "Order only two numbers or two strings without coercion.", ("Compare",)),
     AuthoringRule("trigger_guard_missing_state", "Give every non-true trigger guard at least one state read.", ("Trigger",)),
     AuthoringRule("invalid_trigger_guard_value", "Do not read an interface or local binding in a trigger guard.", ("Trigger",)),
-    AuthoringRule("overlapping_trigger_guards", "Make equal trigger WHEN values provably disjoint.", ("Trigger",)),
+    AuthoringRule("overlapping_trigger_guards", "Make equal trigger events and equal trigger sources provably disjoint.", ("Trigger",)),
     AuthoringRule("assertion_always_fails", "Remove or repair an assertion that is statically false.", ("Assert",)),
     AuthoringRule("redundant_assertion", "Remove an assertion that is statically true.", ("Assert",)),
     AuthoringRule("foreach_source_not_list", "Give FOREACH a value that resolves to a JSON list.", ("Foreach",)),
@@ -97,7 +98,7 @@ SOURCE_GUIDANCE = (
     GuidanceRule("map-constants", "Map stable values needed during use to constants."),
     GuidanceRule("map-schemas", "Map reusable information shapes and output contracts to schemas."),
     GuidanceRule("map-state", "Map values that can change while the knowledge runs to state."),
-    GuidanceRule("map-triggers", "Map arrival reasons, state guards, and selected processes to triggers."),
+    GuidanceRule("map-triggers", "Map arrival events, ingress sources, state guards, and selected processes to triggers."),
     GuidanceRule("map-processes", "Map ordered ways to perform tasks to processes."),
     GuidanceRule("map-interfaces", "Map verifiable document-boundary crossings to interfaces."),
     GuidanceRule("omit-part", "Omit a part when the source provides no justified entry."),
@@ -174,7 +175,7 @@ ACT_GUIDANCE = (
 TYPED_BINDING_GUIDANCE = (
     GuidanceRule("bind-entry", "Bind a constant or state value to one schema placeholder with `AS` when a schema constrains it."),
     GuidanceRule("type-act", "Give an act input and output schema targets when its values must validate at the action boundary."),
-    GuidanceRule("seed-trigger", "Seed a typed trigger-selected process through trigger inputs, one binding per input schema placeholder."),
+    GuidanceRule("seed-trigger", "Seed a typed trigger-selected process through trigger seeds, one binding per input schema placeholder."),
 )
 
 DELEGATION_GUIDANCE = (

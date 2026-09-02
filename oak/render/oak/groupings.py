@@ -34,9 +34,8 @@ def schema_xml(schema: Schema) -> str:
     return _xml_element(descriptor.tag or "schema", {"id": schema.id, "name": schema.name, "purpose": schema.purpose}, schema_text(schema))
 
 
-def trigger_xml(trigger: Trigger) -> str:
-    descriptor = surface_for(trigger)
-    return _xml_element(descriptor.tag or "trigger", {"id": trigger.id}, "\n".join(trigger_lines(trigger)))
+def trigger_body(trigger: Trigger) -> str:
+    return "\n".join(trigger_lines(trigger))
 
 
 def process_xml(process: Process) -> str:
@@ -68,7 +67,7 @@ def _node_xml(node: Node) -> str:
         ("constants", [constant_text(item) for item in node.constants], "\n\n"),
         ("schemas", [schema_xml(item) for item in node.schemas], "\n\n"),
         ("state", [named_value_line(item) for item in node.state], "\n"),
-        ("triggers", [trigger_xml(item) for item in node.triggers], "\n\n"),
+        ("triggers", [trigger_body(item) for item in node.triggers], "\n\n"),
         ("processes", [process_xml(item) for item in node.processes], "\n\n"),
         ("interfaces", [interface_xml(item) for item in node.interfaces], "\n\n"),
     ]
@@ -93,11 +92,6 @@ def _markdown_entry(tag: str, attributes: dict[str, str | None], text: str) -> s
 def schema_markdown(schema: Schema) -> str:
     descriptor = surface_for(schema)
     return _markdown_entry(descriptor.tag or "schema", {"id": schema.id, "name": schema.name, "purpose": schema.purpose}, schema_text(schema))
-
-
-def trigger_markdown(trigger: Trigger) -> str:
-    descriptor = surface_for(trigger)
-    return _markdown_entry(descriptor.tag or "trigger", {"id": trigger.id}, "\n".join(trigger_lines(trigger)))
 
 
 def process_markdown(process: Process) -> str:
@@ -131,7 +125,7 @@ def _node_markdown(node: Node) -> str:
         ("constants", [constant_text(item) for item in node.constants], "\n\n"),
         ("schemas", [schema_markdown(item) for item in node.schemas], "\n\n"),
         ("state", [named_value_line(item) for item in node.state], "\n"),
-        ("triggers", [trigger_markdown(item) for item in node.triggers], "\n\n"),
+        ("triggers", [trigger_body(item) for item in node.triggers], "\n\n"),
         ("processes", [process_markdown(item) for item in node.processes], "\n\n"),
         ("interfaces", [interface_markdown(item) for item in node.interfaces], "\n\n"),
     ]

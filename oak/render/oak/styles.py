@@ -113,8 +113,8 @@ def styled_node(node: Node, style: StyleName = "authored") -> Node:
         text = _rewrite(str(instruction["body"])); instruction["body"] = text
         failures.extend(_validate(f"instructions.{index}.body", text))
     for index, trigger in enumerate(data.get("triggers", [])):
-        text = _rewrite(str(trigger["when"])); trigger["when"] = text
-        failures.extend(_validate(f"triggers.{index}.when", text))
+        text = _rewrite(str(trigger["event"])); trigger["event"] = text
+        failures.extend(_validate(f"triggers.{index}.event", text))
     for index, process in enumerate(data.get("processes", [])):
         _style_steps(process.get("steps", []), f"processes.{index}.steps", failures)
     if failures:

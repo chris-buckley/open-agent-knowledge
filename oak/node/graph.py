@@ -784,10 +784,10 @@ def _guards_disjoint(
     left: Trigger,
     right: Trigger,
 ) -> bool:
-    if left.given is True or right.given is True:
+    if left.guard is True or right.guard is True:
         return False
-    left_atoms = _guard_atoms(registry, left, left.given)
-    right_atoms = _guard_atoms(registry, right, right.given)
+    left_atoms = _guard_atoms(registry, left, left.guard)
+    right_atoms = _guard_atoms(registry, right, right.guard)
     if left_atoms is None or right_atoms is None:
         return False
     return _atoms_conflict(left_atoms, right_atoms)
@@ -797,11 +797,19 @@ def _validate_triggers(
     registry: Mapping[str, Entry],
     triggers: list[Trigger],
 ) -> None:
-    by_when: dict[str, list[Trigger]] = defaultdict(list)
+    by_key: dict[tuple[str, str], list[Trigger]] = defaultdict(list)
     for trigger in triggers:
-        process = _target(registry, trigger, trigger.then, Process)
-        for binding in trigger.inputs:
+        process = _target(registry, trigger, trigger.process, Process)
+        for binding in trigger.seed:
             _validate_value(registry, trigger, binding.value)
+        if trigger.source is not None:
+            interface = _target(registry, trigger, trigger.source, Interface)
+            if interface is not None and interface.direction not in ("in", "inout"):
+                raise rule_error(
+                    "trigger_source_not_ingress",
+                    "trigger {trigger} source {interface} is not an in or inout interface",
+                    {"trigger": trigger.id, "interface": trigger.source},
+                )
         if process is not None:
             input_schema = _process_schema(registry, process, process.input)
             if process.input is None or input_schema is not None:
@@ -809,19 +817,22 @@ def _validate_triggers(
                     trigger,
                     None if input_schema is None else input_schema.placeholders,
                 )
-        if trigger.given is not True:
-            _validate_condition(registry, trigger, trigger.given)
-        by_when[trigger.when].append(trigger)
-    for when, group in by_when.items():
+        if trigger.guard is not True:
+            _validate_condition(registry, trigger, trigger.guard)
+        if trigger.source is None:
+            by_key[("event", trigger.event)].append(trigger)
+        else:
+            by_key[("source", trigger.source)].append(trigger)
+    for (kind, key), group in by_key.items():
         for left, right in combinations(group, 2):
             if not _guards_disjoint(registry, left, right):
                 raise PydanticCustomError(
                     "overlapping_trigger_guards",
                     (
-                        "triggers {left} and {right} share WHEN {when} "
+                        "triggers {left} and {right} share {kind} {key} "
                         "without provably disjoint guards"
                     ),
-                    {"left": left.id, "right": right.id, "when": when},
+                    {"left": left.id, "right": right.id, "kind": kind, "key": key},
                 )
 
 

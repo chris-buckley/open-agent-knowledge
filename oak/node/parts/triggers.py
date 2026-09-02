@@ -9,6 +9,7 @@ from oak.base import Entry
 from oak.node.parts.processes import (
     BindingValue,
     Condition,
+    InterfaceTarget,
     InterfaceValue,
     ProcessTarget,
     StateValue,
@@ -23,13 +24,13 @@ def validate_trigger_contract(
     trigger: "Trigger",
     inputs: set[str] | None,
 ) -> None:
-    """Validate one trigger against the selected process input schema."""
-    authored = [binding.placeholder for binding in trigger.inputs]
+    """Validate one trigger seed against the selected process input schema."""
+    authored = [binding.placeholder for binding in trigger.seed]
     if inputs is None:
         if authored:
             raise rule_error(
                 "trigger_contract_mismatch",
-                "trigger {trigger} binds inputs but its process has no input schema",
+                "trigger {trigger} seeds a process that has no input schema",
                 {"trigger": trigger.id},
             )
         return
@@ -38,7 +39,7 @@ def validate_trigger_contract(
     raise rule_error(
         "trigger_contract_mismatch",
         (
-            "trigger {trigger} inputs differ from the process input schema; "
+            "trigger {trigger} seeds differ from the process input schema; "
             "missing: {missing}; unused: {unused}"
         ),
         {
@@ -50,7 +51,7 @@ def validate_trigger_contract(
 
 
 class Trigger(Entry):
-    """One GIVEN, WHEN, and THEN signpost to a process."""
+    """One outside event routed to one process."""
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -58,14 +59,15 @@ class Trigger(Entry):
                 {
                     "part": "triggers",
                     "id": "write-oak-trigger",
-                    "given": True,
-                    "when": "Source material arrives to write OAK.",
-                    "then": "process.write-oak",
+                    "event": "Source material arrives to write OAK.",
+                    "process": "process.write-oak",
                 },
                 {
                     "part": "triggers",
                     "id": "ready-trigger",
-                    "given": {
+                    "event": "A request arrives.",
+                    "source": "interface.request",
+                    "guard": {
                         "kind": "compare",
                         "left": {
                             "source": "state",
@@ -77,8 +79,17 @@ class Trigger(Entry):
                             "value": "ready",
                         },
                     },
-                    "when": "A request arrives.",
-                    "then": "process.run",
+                    "process": "process.run",
+                    "seed": [
+                        {
+                            "placeholder": "REQUEST",
+                            "value": {
+                                "source": "interface",
+                                "interface": "interface.request",
+                                "placeholder": "REQUEST",
+                            },
+                        }
+                    ],
                 },
             ]
         }
@@ -89,9 +100,24 @@ class Trigger(Entry):
         description="The entry part discriminator.",
         examples=["triggers"],
     )
-    given: Literal[True] | Condition = Field(
+    event: NonBlankLine = Field(
+        description=(
+            "The semantic signpost matched exactly "
+            "when the trigger has no source."
+        ),
+        examples=["Source material arrives to write OAK."],
+    )
+    source: InterfaceTarget | None = Field(
+        default=None,
+        description=(
+            "The optional local in or inout interface whose arrival "
+            "fires the trigger."
+        ),
+        examples=["interface.request"],
+    )
+    guard: Literal[True] | Condition = Field(
         default=True,
-        description="True or the recursive state guard checked after WHEN.",
+        description="True or the recursive state guard checked after the match.",
         examples=[
             True,
             {
@@ -108,20 +134,16 @@ class Trigger(Entry):
             },
         ],
     )
-    when: NonBlankLine = Field(
-        description="Why the interpreter enters the knowledge.",
-        examples=["Source material arrives to write OAK."],
-    )
-    then: ProcessTarget = Field(
+    process: ProcessTarget = Field(
         description="The local or relative process target selected by the trigger.",
         examples=[
             "process.write-oak",
             "../shared/processes.oak.md#process.write-oak",
         ],
     )
-    inputs: list[ValueBinding] = Field(
+    seed: list[ValueBinding] = Field(
         default_factory=list,
-        description="The input bindings that seed the selected process input schema.",
+        description="The seed bindings that fill the selected process input schema.",
         examples=[
             [
                 {
@@ -137,23 +159,23 @@ class Trigger(Entry):
     )
 
     @model_validator(mode="after")
-    def valid_inputs(self) -> Self:
+    def valid_seed(self) -> Self:
         if any(
             isinstance(binding.value, BindingValue)
-            for binding in self.inputs
+            for binding in self.seed
         ):
             raise PydanticCustomError(
-                "invalid_trigger_input_value",
-                "trigger input cannot read a local binding",
+                "invalid_trigger_seed_value",
+                "trigger seed cannot read a local binding",
             )
         return self
 
     @model_validator(mode="after")
-    def guard(self) -> Self:
-        if self.given is True:
+    def valid_guard(self) -> Self:
+        if self.guard is True:
             return self
 
-        values = condition_values(self.given)
+        values = condition_values(self.guard)
 
         if any(
             isinstance(value, (InterfaceValue, BindingValue))

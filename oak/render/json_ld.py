@@ -122,6 +122,7 @@ def _context(document: str, vocabulary: str) -> dict[str, object]:
             "inputs",
             "outputs",
             "bindings",
+            "seed",
             "conditions",
             "thenSteps",
             "otherwise",
@@ -132,7 +133,6 @@ def _context(document: str, vocabulary: str) -> dict[str, object]:
         for name in (
             "schema",
             "process",
-            "then",
             "constant",
             "stateTarget",
             "interface",
@@ -155,8 +155,8 @@ def _context(document: str, vocabulary: str) -> dict[str, object]:
         "placeholder": "oak:placeholder",
         "description": "oak:description",
         "direction": "oak:direction",
-        "given": "oak:given",
-        "when": "oak:when",
+        "event": "oak:event",
+        "guard": "oak:guard",
         "kind": "oak:kind",
         "source": "oak:source",
         "operator": "oak:operator",
@@ -342,12 +342,15 @@ def _entry(document: str, entry: Entry) -> dict[str, object]:
         node = {
             "@id": entry_id(document, "trigger", entry.id),
             "@type": "oak:Trigger",
-            "given": True if entry.given is True else _condition(document, entry.given),
-            "when": entry.when,
-            "then": {"@id": target_id(document, entry.then)},
+            "event": entry.event,
         }
-        if entry.inputs:
-            node["inputs"] = [_binding(document, binding) for binding in entry.inputs]
+        if entry.source is not None:
+            node["source"] = {"@id": target_id(document, entry.source)}
+        if entry.guard is not True:
+            node["guard"] = _condition(document, entry.guard)
+        node["process"] = {"@id": target_id(document, entry.process)}
+        if entry.seed:
+            node["seed"] = [_binding(document, binding) for binding in entry.seed]
         return node
     if isinstance(entry, Process):
         node: dict[str, object] = {

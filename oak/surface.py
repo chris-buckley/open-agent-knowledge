@@ -189,7 +189,7 @@ SURFACES = (
     _surface("step-par", Par, "PAR:\n  <STEPS>", rendered=("steps",), fixed=("kind",)),
     _surface("step-join", Join, "JOIN", fixed=("kind",)),
     _surface("process", Process, '<process id="<ID>" name="<NAME>" input="<INPUT>" output="<OUTPUT>">\n<STEPS>\n</process>', rendered=("id", "name", "input", "output", "steps"), fixed=("part",), part="processes", tag="process"),
-    _surface("trigger", Trigger, '<trigger id="<ID>">\nGIVEN: <GIVEN>\nWHEN: <WHEN>\nTHEN: <THEN> (<INPUTS>)\n</trigger>', rendered=("id", "given", "when", "then", "inputs"), fixed=("part",), part="triggers", tag="trigger"),
+    _surface("trigger", Trigger, 'trigger.<ID>.event := <EVENT>\ntrigger.<ID>.source := <SOURCE>\ntrigger.<ID>.guard := <GUARD>\ntrigger.<ID>.process := <PROCESS>\ntrigger.<ID>.seed.<SEED>', rendered=("id", "event", "source", "guard", "process", "seed"), fixed=("part",), part="triggers"),
     _surface("interface", Interface, '<interface id="<ID>" direction="<DIRECTION>" schema="<SCHEMA_ID>">\n<DESCRIPTION>\n</interface>', rendered=("id", "direction", "schema_id", "description"), fixed=("part",), part="interfaces", tag="interface"),
     _surface("node", Node, "<instructions>\n<INSTRUCTIONS>\n</instructions>\n\n<constants>\n<CONSTANTS>\n</constants>\n\n<schemas>\n<SCHEMAS>\n</schemas>\n\n<state>\n<STATE>\n</state>\n\n<triggers>\n<TRIGGERS>\n</triggers>\n\n<processes>\n<PROCESSES>\n</processes>\n\n<interfaces>\n<INTERFACES>\n</interfaces>", rendered=("instructions", "constants", "schemas", "state", "triggers", "processes", "interfaces")),
 )

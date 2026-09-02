@@ -843,45 +843,104 @@ def _processes(lines: list[str], start: int, grouping: GroupingName) -> list[Pro
     return result
 
 
-def _triggers(lines: list[str], start: int, grouping: GroupingName) -> list[Trigger]:
-    result = []
-    for attributes, body, number in _entries(lines, start, "trigger", grouping, "triggers"):
-        if "id" not in attributes:
-            _fail("trigger_id", "triggers", number, "trigger needs id")
-        if not body or not body[0].startswith("GIVEN:"):
-            _fail("trigger_given", f"triggers.{attributes['id']}", number + 1, "trigger starts with GIVEN")
-        index = 1
-        given_text = body[0][len("GIVEN:") :].strip()
-        if given_text == "true":
-            given: object = True
-        elif given_text:
-            given = _compare(given_text, f"triggers.{attributes['id']}.given", number + 1)
-        else:
-            given, index = _condition(body, 1, 2, f"triggers.{attributes['id']}.given", number + 1)
-        if index >= len(body) or not body[index].startswith("WHEN: "):
-            _fail("trigger_when", f"triggers.{attributes['id']}", number + index + 1, "trigger needs WHEN")
-        when = _json_value(body[index][6:], f"triggers.{attributes['id']}.when", number + index + 1)
-        if not isinstance(when, str):
-            _fail("trigger_when", f"triggers.{attributes['id']}", number + index + 1, "WHEN must be a JSON string")
-        index += 1
-        if index >= len(body) or not body[index].startswith("THEN: "):
-            _fail("trigger_then", f"triggers.{attributes['id']}", number + index + 1, "trigger needs THEN")
-        then = body[index][6:]
-        inputs = []
-        split_at = then.find(" (")
-        if split_at != -1:
-            parsed = _suffix(then[split_at + 1 :])
-            if parsed is None:
-                _fail("trigger_inputs", f"triggers.{attributes['id']}", number + index + 1, "THEN needs one (bindings) suffix")
-            suffix_bindings, suffix_outputs = parsed
-            if suffix_outputs:
-                _fail("trigger_inputs", f"triggers.{attributes['id']}", number + index + 1, "THEN accepts no outputs")
-            inputs = _suffix_bindings(suffix_bindings, f"triggers.{attributes['id']}", number + index + 1)
-            then = then[:split_at]
-        index += 1
-        if index != len(body):
-            _fail("trigger_trailing", f"triggers.{attributes['id']}", number + index + 1, "content follows THEN")
-        result.append(Trigger(id=attributes["id"], given=given, when=when, then=then, inputs=inputs))
+_TRIGGER_FACT = re.compile(
+    r"^trigger\.([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\."
+    r"(event|source|guard|process|seed\.(" + PLACEHOLDER_SYNTAX.body + r")) :=(.*)$"
+)
+
+
+def _triggers(lines: list[str], start: int) -> list[Trigger]:
+    chunks: list[tuple[int, list[str]]] = []
+    current: list[str] = []
+    current_start = 0
+    for offset, line in enumerate(lines):
+        if line == "":
+            if not current:
+                _fail("trigger_separator", "triggers", start + offset, "one blank line separates triggers")
+            chunks.append((current_start, current))
+            current = []
+            continue
+        if not current:
+            current_start = offset
+        current.append(line)
+    if current:
+        chunks.append((current_start, current))
+    elif chunks:
+        _fail("trigger_separator", "triggers", start + len(lines) - 1, "one blank line separates triggers")
+    result: list[Trigger] = []
+    seen: set[str] = set()
+    for chunk_start, chunk in chunks:
+        number = start + chunk_start
+        identifier: str | None = None
+        event: str | None = None
+        source: str | None = None
+        guard: object = True
+        process: str | None = None
+        seed: list[ValueBinding] = []
+        stage = 0
+        index = 0
+        while index < len(chunk):
+            line_number = number + index
+            match = _TRIGGER_FACT.fullmatch(chunk[index])
+            if match is None:
+                _fail("trigger_fact", "triggers", line_number, "trigger fact must be trigger.<id>.<fact> := <value>")
+            entry_id, field, placeholder, rest = match.group(1), match.group(2), match.group(3), match.group(4)
+            if identifier is None:
+                if entry_id in seen:
+                    _fail("trigger_fact", f"triggers.{entry_id}", line_number, "one trigger's facts stay contiguous")
+                identifier = entry_id
+                seen.add(entry_id)
+            elif entry_id != identifier:
+                _fail("trigger_fact", f"triggers.{identifier}", line_number, "one trigger's facts stay contiguous")
+            path = f"triggers.{identifier}"
+            if rest and (not rest.startswith(" ") or rest == " " or rest.startswith("  ")):
+                _fail("trigger_fact", path, line_number, "one space follows :=")
+            value = rest[1:]
+            if field == "guard":
+                if stage not in (1, 2):
+                    _fail("trigger_order", path, line_number, "guard follows event and source")
+                if value:
+                    guard = _compare(value, path + ".guard", line_number)
+                    index += 1
+                else:
+                    guard, index = _condition(chunk, index + 1, 2, path + ".guard", number)
+                stage = 3
+                continue
+            if not value:
+                _fail("trigger_fact", path, line_number, "trigger fact needs one value")
+            if field == "event":
+                if stage != 0:
+                    _fail("trigger_order", path, line_number, "event opens one trigger")
+                parsed = _json_value(value, path + ".event", line_number)
+                if not isinstance(parsed, str):
+                    _fail("trigger_event", path, line_number, "event must be a JSON string")
+                event = parsed
+                stage = 1
+            elif field == "source":
+                if stage != 1:
+                    _fail("trigger_order", path, line_number, "source follows event")
+                source = value
+                stage = 2
+            elif field == "process":
+                if stage not in (1, 2, 3):
+                    _fail("trigger_order", path, line_number, "process follows event, source, and guard")
+                process = value
+                stage = 4
+            else:
+                if stage != 4:
+                    _fail("trigger_order", path, line_number, "seeds follow process")
+                if any(binding.placeholder == placeholder for binding in seed):
+                    _fail("trigger_seed", path, line_number, "seed placeholders are unique")
+                seed.append(
+                    ValueBinding(
+                        placeholder=placeholder,
+                        value=_value(value, path + ".seed." + placeholder, line_number),
+                    )
+                )
+            index += 1
+        if process is None:
+            _fail("trigger_process", f"triggers.{identifier}", number + len(chunk), "trigger needs process")
+        result.append(Trigger(id=identifier, event=event, source=source, guard=guard, process=process, seed=seed))
     return result
 
 
@@ -921,7 +980,7 @@ def parse(source: str | bytes, *, grouping: GroupingName | None = None) -> Node:
         "constants": lambda body, start: _named_values(body, start, constants=True),
         "schemas": lambda body, start: _schemas(body, start, grouping),
         "state": lambda body, start: _named_values(body, start, constants=False),
-        "triggers": lambda body, start: _triggers(body, start, grouping),
+        "triggers": lambda body, start: _triggers(body, start),
         "processes": lambda body, start: _processes(body, start, grouping),
         "interfaces": lambda body, start: _interfaces(body, start, grouping),
     }

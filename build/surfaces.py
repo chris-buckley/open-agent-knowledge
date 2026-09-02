@@ -48,7 +48,7 @@ from oak.node.parts import (
     While,
     where,
 )
-from oak.render.oak.groupings import interface_xml, process_xml, schema_xml, trigger_xml
+from oak.render.oak.groupings import interface_xml, process_xml, schema_xml, trigger_body
 from oak.render.oak.syntax import (
     binding_line,
     condition_text,
@@ -197,7 +197,7 @@ def surface_example(surface: Surface, *, grouping: str = "xml") -> str:
     if isinstance(value, State):
         return named_value_line(value)
     if isinstance(value, Trigger):
-        return trigger_xml(value)
+        return trigger_body(value)
     if isinstance(value, Process):
         return process_xml(value)
     if isinstance(value, Interface):

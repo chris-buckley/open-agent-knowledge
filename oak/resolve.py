@@ -172,10 +172,10 @@ def iter_targets(node: Node) -> Iterator[tuple[str, type[Entry]]]:
         if process.output is not None:
             yield process.output, Schema
     for trigger in node.triggers:
-        yield trigger.then, Process
-        yield from _value_targets(binding.value for binding in trigger.inputs)
-        if trigger.given is not True:
-            yield from _value_targets(_condition_values(trigger.given))
+        yield trigger.process, Process
+        yield from _value_targets(binding.value for binding in trigger.seed)
+        if trigger.guard is not True:
+            yield from _value_targets(_condition_values(trigger.guard))
     for process in node.processes:
         for step in process.steps:
             yield from _step_references(step)
@@ -297,7 +297,7 @@ def _validate_relative_interfaces(graph: ResolvedGraph, document: str, node: Nod
     if not schemas:
         return
     for trigger in node.triggers:
-        for binding in trigger.inputs:
+        for binding in trigger.seed:
             value = binding.value
             if (
                 isinstance(value, InterfaceValue)
@@ -368,14 +368,14 @@ def _validate_contracts(graph: ResolvedGraph) -> None:
             except PydanticCustomError as error:
                 _contract_error(document, entry.schema_id, error)
         for trigger in node.triggers:
-            target_document, process = graph.entry(document, trigger.then, Process)
+            target_document, process = graph.entry(document, trigger.process, Process)
             try:
                 validate_trigger_contract(
                     trigger,
                     None if process.input is None else _schema_names(graph, target_document, process.input),
                 )
             except PydanticCustomError as error:
-                _contract_error(document, trigger.then, error)
+                _contract_error(document, trigger.process, error)
         for process in node.processes:
             for step in _iter_steps(process.steps):
                 if not isinstance(step, Act) or (step.input is None and step.output is None):

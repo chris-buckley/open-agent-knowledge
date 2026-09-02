@@ -344,24 +344,28 @@ def process_lines(process: Process) -> list[str]:
 
 
 def trigger_lines(trigger: object) -> list[str]:
-    """Return one complete trigger triple."""
+    """Return one complete trigger fact group."""
     from oak.node.parts.triggers import Trigger
 
     if not isinstance(trigger, Trigger):
         raise TypeError("trigger_lines needs Trigger")
     surface_for(trigger)
-    if trigger.given is True:
-        lines = ["GIVEN: true"]
-    else:
-        condition = condition_lines(trigger.given)
+    prefix = f"trigger.{trigger.id}."
+    lines = [prefix + "event := " + value_text(trigger.event)]
+    if trigger.source is not None:
+        lines.append(prefix + "source := " + trigger.source)
+    if trigger.guard is not True:
+        condition = condition_lines(trigger.guard)
         if len(condition) == 1:
-            lines = ["GIVEN: " + condition[0]]
+            lines.append(prefix + "guard := " + condition[0])
         else:
-            lines = ["GIVEN:", *("  " + line for line in condition)]
-    then_line = "THEN: " + trigger.then
-    if trigger.inputs:
-        then_line += " " + _suffix_text(trigger.inputs, [])
-    lines.extend(("WHEN: " + value_text(trigger.when), then_line))
+            lines.append(prefix + "guard :=")
+            lines.extend("  " + line for line in condition)
+    lines.append(prefix + "process := " + trigger.process)
+    lines.extend(
+        prefix + "seed." + binding.placeholder + " := " + process_value_text(binding.value)
+        for binding in trigger.seed
+    )
     return lines
 
 

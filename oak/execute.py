@@ -6,9 +6,10 @@ from collections.abc import Callable, Mapping
 from concurrent.futures import Future, ThreadPoolExecutor
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Annotated
+from typing import Annotated, Self
 
-from pydantic import AfterValidator, ConfigDict, Field, JsonValue, TypeAdapter, ValidationError
+from pydantic import AfterValidator, ConfigDict, Field, JsonValue, TypeAdapter, ValidationError, model_validator
+from pydantic_core import PydanticCustomError
 
 from oak.base import OakModel
 from oak.node import Node
@@ -72,32 +73,55 @@ class ToolContract:
 
 
 class Arrival(OakModel):
-    """One trigger arrival and its active input values."""
+    """One outside occurrence: an event text or one ingress interface arrival."""
 
     model_config = ConfigDict(
         json_schema_extra={
             "examples": [
                 {
-                    "when": "A command line arrives.",
+                    "event": "A command line arrives.",
                     "interfaces": {
                         "interface.stdin": {
                             "COMMAND": "pwd",
                         }
                     },
-                }
+                },
+                {
+                    "source": "interface.stdin",
+                    "interfaces": {
+                        "interface.stdin": {
+                            "COMMAND": "pwd",
+                        }
+                    },
+                },
             ]
         }
     )
 
-    when: NonBlankLine = Field(
-        description="The arrival reason matched against trigger WHEN text.",
+    event: NonBlankLine | None = Field(
+        default=None,
+        description="The event text matched exactly against source-less triggers.",
         examples=["A command line arrives."],
+    )
+    source: InterfaceArrivalTarget | None = Field(
+        default=None,
+        description="The ingress interface matched exactly against source-backed triggers.",
+        examples=["interface.stdin"],
     )
     interfaces: dict[InterfaceArrivalTarget, dict[Placeholder, JsonValue]] = Field(
         default_factory=dict,
         description="The active input bindings by root-relative interface target.",
         examples=[{"interface.stdin": {"COMMAND": "pwd"}}],
     )
+
+    @model_validator(mode="after")
+    def one_selector(self) -> Self:
+        if (self.event is None) == (self.source is None):
+            raise PydanticCustomError(
+                "invalid_arrival_selector",
+                "an arrival needs exactly one of event or source",
+            )
+        return self
 
 
 class Emission(OakModel):
@@ -618,20 +642,25 @@ def execute(
             key = graph.display_target(document, "state", entry.id)
             _validate_state_value(graph, document, entry, working_state[key], key)
     active = _active_interfaces(graph, arrival)
+    if arrival.source is not None and arrival.source not in arrival.interfaces:
+        raise ExecutionError("invalid_arrival_source", f"arrival source {arrival.source} carries no payload")
     matches: list[Trigger] = []
     for trigger in node.triggers:
-        if trigger.when != arrival.when:
+        if trigger.source is None:
+            if trigger.event != arrival.event:
+                continue
+        elif trigger.source != arrival.source:
             continue
-        if trigger.given is True or _condition(graph, graph.root, trigger.given, working_state, active, {}):
+        if trigger.guard is True or _condition(graph, graph.root, trigger.guard, working_state, active, {}):
             matches.append(trigger)
     if len(matches) > 1:
         raise ExecutionError("ambiguous_trigger_match", "arrival matches triggers " + ", ".join(item.id for item in matches))
     if not matches:
         return ExecutionResult(state=working_state)
-    process_document, process = graph.entry(graph.root, matches[0].then, Process)
+    process_document, process = graph.entry(graph.root, matches[0].process, Process)
     seeded = {
         binding.placeholder: _resolve_value(graph, graph.root, binding.value, working_state, active, {})
-        for binding in matches[0].inputs
+        for binding in matches[0].seed
     }
     emissions: list[Emission] = []
     _run_process(
