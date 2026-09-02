@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Sequence
 
 from oak.node.parts.schemas.constraints import (
     AtLeast,
@@ -192,13 +193,13 @@ def parse_where(
     description = None
 
     for segment in body.split("; "):
-        item = parse_constraint(
+        constraint = parse_constraint(
             segment,
             path,
             line,
         )
 
-        if item is None:
+        if constraint is None:
             if description is not None:
                 fail(
                     "where_description",
@@ -210,7 +211,7 @@ def parse_where(
             description = segment
 
         else:
-            constraints.append(item)
+            constraints.append(constraint)
 
     if not constraints:
         fail(
@@ -229,12 +230,12 @@ def parse_where(
 
 
 def parse_schemas(
-    lines: list[str],
+    lines: Sequence[str],
     start: int,
     grouping: GroupingName,
 ) -> list[Schema]:
     """Parse every grouped schema entry."""
-    result = []
+    schemas = []
 
     for (
         attributes,
@@ -267,7 +268,7 @@ def parse_schemas(
                 "schema body needs the generated WHERE separator",
             )
 
-        result.append(
+        schemas.append(
             Schema(
                 id=attributes["id"],
                 name=attributes.get("name"),
@@ -292,7 +293,7 @@ def parse_schemas(
             )
         )
 
-    return result
+    return schemas
 
 
 __all__ = [

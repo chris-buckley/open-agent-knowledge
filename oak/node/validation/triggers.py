@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Sequence
+from collections.abc import Set as AbstractSet
 from itertools import combinations
 
 from pydantic_core import PydanticCustomError
@@ -40,7 +42,7 @@ GuardAtom = tuple[str, ConditionOperator, object]
 
 def validate_trigger_contract(
     trigger: Trigger,
-    inputs: set[str] | None,
+    inputs: AbstractSet[str] | None,
 ) -> None:
     """Validate one trigger seed against the selected process input schema."""
     authored = [
@@ -198,7 +200,7 @@ def _atom_accepts(
 
 
 def _range_bounds(
-    atoms: list[GuardAtom],
+    atoms: Sequence[GuardAtom],
 ) -> tuple[
     tuple[object, bool] | None,
     tuple[object, bool] | None,
@@ -273,8 +275,8 @@ def _range_bounds(
 
 
 def _atoms_conflict(
-    left: list[GuardAtom],
-    right: list[GuardAtom],
+    left: Sequence[GuardAtom],
+    right: Sequence[GuardAtom],
 ) -> bool:
     states = {
         atom[0]
@@ -380,7 +382,7 @@ def _guards_disjoint(
 
 def validate_triggers(
     index: NodeIndex,
-    triggers: list[Trigger],
+    triggers: Sequence[Trigger],
 ) -> None:
     """Validate trigger targets, contracts, guards, and overlap."""
     by_key: dict[

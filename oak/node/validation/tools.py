@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator, Mapping, Sequence
 from typing import TYPE_CHECKING, Protocol
 
 from pydantic_core import PydanticCustomError
@@ -31,7 +31,7 @@ class ToolContractLike(Protocol):
 
 
 def _walk_steps(
-    steps: list[Step],
+    steps: Sequence[Step],
     *,
     parallel: bool = False,
 ) -> Iterator[tuple[Step, bool]]:

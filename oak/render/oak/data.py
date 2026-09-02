@@ -8,6 +8,7 @@ import json
 
 import yaml
 
+from collections.abc import Mapping, Sequence
 from oak.node.parts.constants import Constant
 from oak.node.parts.schemas.constraints import (
     AtLeast,
@@ -238,7 +239,7 @@ def _block(
 
 
 def _csv_body(
-    value: list[dict[str, object]],
+    value: Sequence[Mapping[str, object]],
 ) -> str:
     stream = io.StringIO(
         newline=""

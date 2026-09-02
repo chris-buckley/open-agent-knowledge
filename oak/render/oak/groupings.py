@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping, Sequence
 from typing import Literal
 from xml.sax.saxutils import quoteattr
 
@@ -32,7 +33,7 @@ def _interface_body(
 
 
 def _xml_attributes(
-    attributes: dict[
+    attributes: Mapping[
         str,
         str | None,
     ],
@@ -49,7 +50,7 @@ def _xml_attributes(
 
 def _xml_element(
     tag: str,
-    attributes: dict[
+    attributes: Mapping[
         str,
         str | None,
     ],
@@ -130,7 +131,7 @@ def interface_xml(
 
 def _xml_part(
     tag: str,
-    bodies: list[str],
+    bodies: Sequence[str],
     separator: str = "\n",
 ) -> str:
     return _xml_element(
@@ -168,7 +169,7 @@ def node_xml(
 
 
 def _markdown_attributes(
-    attributes: dict[
+    attributes: Mapping[
         str,
         str | None,
     ],
@@ -188,7 +189,7 @@ def _markdown_attributes(
 
 def _markdown_entry(
     tag: str,
-    attributes: dict[
+    attributes: Mapping[
         str,
         str | None,
     ],
@@ -269,7 +270,7 @@ def interface_markdown(
 
 def _markdown_part(
     tag: str,
-    bodies: list[str],
+    bodies: Sequence[str],
     separator: str = "\n",
 ) -> str:
     text = separator.join(bodies)

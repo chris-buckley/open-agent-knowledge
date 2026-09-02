@@ -304,39 +304,39 @@ def surface_example(
     grouping: str = "xml",
 ) -> str:
     """Render one canonical example of one surface."""
-    value = _instance(surface)
+    instance = _instance(surface)
 
-    if isinstance(value, Node):
+    if isinstance(instance, Node):
         from oak.render import render
 
         return render(
-            value,
+            instance,
             grouping=grouping,
         )
 
-    if isinstance(value, Instruction):
-        return value.body
+    if isinstance(instance, Instruction):
+        return instance.body
 
-    if isinstance(value, Constant):
-        return constant_text(value)
+    if isinstance(instance, Constant):
+        return constant_text(instance)
 
-    if isinstance(value, Schema):
-        return schema_xml(value)
+    if isinstance(instance, Schema):
+        return schema_xml(instance)
 
-    if isinstance(value, State):
-        return named_value_line(value)
+    if isinstance(instance, State):
+        return named_value_line(instance)
 
-    if isinstance(value, Trigger):
-        return trigger_body(value)
+    if isinstance(instance, Trigger):
+        return trigger_body(instance)
 
-    if isinstance(value, Process):
-        return process_xml(value)
+    if isinstance(instance, Process):
+        return process_xml(instance)
 
-    if isinstance(value, Interface):
-        return interface_xml(value)
+    if isinstance(instance, Interface):
+        return interface_xml(instance)
 
     if isinstance(
-        value,
+        instance,
         (
             Type,
             OneOf,
@@ -349,13 +349,13 @@ def surface_example(
             AtMost,
         ),
     ):
-        return constraint_text(value)
+        return constraint_text(instance)
 
-    if isinstance(value, Where):
-        return where_line(value)
+    if isinstance(instance, Where):
+        return where_line(instance)
 
     if isinstance(
-        value,
+        instance,
         (
             LiteralValue,
             ConstantValue,
@@ -364,13 +364,13 @@ def surface_example(
             BindingValue,
         ),
     ):
-        return process_value_text(value)
+        return process_value_text(instance)
 
-    if isinstance(value, ValueBinding):
-        return binding_line(value)
+    if isinstance(instance, ValueBinding):
+        return binding_line(instance)
 
     if isinstance(
-        value,
+        instance,
         (
             Compare,
             All,
@@ -378,10 +378,10 @@ def surface_example(
             Not,
         ),
     ):
-        return condition_text(value)
+        return condition_text(instance)
 
     if isinstance(
-        value,
+        instance,
         (
             Act,
             Set,
@@ -397,11 +397,11 @@ def surface_example(
         ),
     ):
         return "\n".join(
-            step_lines(value)
+            step_lines(instance)
         )
 
     raise TypeError(
-        type(value).__name__
+        type(instance).__name__
     )
 
 

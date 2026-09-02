@@ -6,6 +6,7 @@ import csv
 import io
 import json
 import re
+from collections.abc import Sequence
 
 import yaml
 
@@ -35,7 +36,7 @@ _INLINE_NAMED_VALUE = re.compile(
 
 
 def parse_instructions(
-    lines: list[str],
+    lines: Sequence[str],
     start: int,
 ) -> list[Instruction]:
     """Parse authored instructions after stripping the exact preamble."""
@@ -150,7 +151,7 @@ def _block_body(
 
 
 def parse_constants(
-    lines: list[str],
+    lines: Sequence[str],
     start: int,
 ) -> list[Constant]:
     """Parse inline and block constants."""
@@ -270,7 +271,7 @@ def _inline_named_value(
 
 
 def parse_state(
-    lines: list[str],
+    lines: Sequence[str],
     start: int,
 ) -> list[State]:
     """Parse inline state entries."""

@@ -1,5 +1,7 @@
 """Validation rule records, sorted lookup, and Pydantic errors."""
 
+from collections.abc import Mapping
+
 from pydantic_core import PydanticCustomError
 
 from oak.rules.model import AuthoringRule
@@ -342,7 +344,7 @@ RULES_BY_CODE = {
 def rule_error(
     code: str,
     message: str,
-    context: dict[str, object] | None = None,
+    context: Mapping[str, object] | None = None,
 ) -> PydanticCustomError:
     """Return one registered Pydantic authoring error."""
     if code not in RULES_BY_CODE:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Sequence
 
 from oak.node.parts.processes.values import (
     BindingValue,
@@ -271,7 +272,7 @@ def parse_act_attributes(
 
 
 def parse_suffix_bindings(
-    bindings: list[tuple[str, str]],
+    bindings: Sequence[tuple[str, str]],
     path: str,
     line: int,
 ) -> list[ValueBinding]:

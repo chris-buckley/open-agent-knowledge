@@ -2,18 +2,20 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from oak.node.parts.interfaces import Interface
 from oak.parse.errors import fail
 from oak.parse.grouping import GroupingName, parse_entries
 
 
 def parse_interfaces(
-    lines: list[str],
+    lines: Sequence[str],
     start: int,
     grouping: GroupingName,
 ) -> list[Interface]:
     """Parse every grouped interface entry."""
-    result = []
+    interfaces = []
 
     for (
         attributes,
@@ -40,7 +42,7 @@ def parse_interfaces(
                 )
 
         description = "\n".join(body) or None
-        result.append(
+        interfaces.append(
             Interface(
                 id=attributes["id"],
                 direction=attributes["direction"],
@@ -49,7 +51,7 @@ def parse_interfaces(
             )
         )
 
-    return result
+    return interfaces
 
 
 __all__ = [

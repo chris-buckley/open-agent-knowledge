@@ -59,7 +59,7 @@ def validation_failures(
     error: ValidationError,
 ) -> list[ParseFailure]:
     """Translate Pydantic details into stable parse failures."""
-    result = []
+    failures = []
 
     for detail in error.errors(
         include_url=False,
@@ -70,7 +70,7 @@ def validation_failures(
             str(part)
             for part in detail["loc"]
         ) or "$"
-        result.append(
+        failures.append(
             ParseFailure(
                 str(detail["type"]),
                 path,
@@ -79,7 +79,7 @@ def validation_failures(
             )
         )
 
-    return result
+    return failures
 
 
 def parse(

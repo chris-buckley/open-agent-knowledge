@@ -71,7 +71,7 @@ def constraint_node(
     constraint: Constraint,
 ) -> dict[str, object]:
     """Return one schema constraint node."""
-    data = constraint.model_dump(
+    fields = constraint.model_dump(
         mode="json",
         exclude={"kind"},
         exclude_unset=True,
@@ -90,7 +90,7 @@ def constraint_node(
             str,
         )
     ):
-        data["value"] = {
+        fields["value"] = {
             "@id": where_id(
                 document,
                 schema,
@@ -105,7 +105,7 @@ def constraint_node(
                 constraint.kind
             ]
         ),
-        **data,
+        **fields,
     }
 
 

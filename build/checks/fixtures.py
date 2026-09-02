@@ -16,21 +16,21 @@ from oak.node.parts.schemas.model import Schema, where
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def normalized(value: OakModel) -> object:
+def normalized(model: OakModel) -> object:
     """Return one model dump with generated instruction ids removed."""
-    data = value.model_dump(
+    dump = model.model_dump(
         mode="json",
         by_alias=True,
     )
 
-    if isinstance(value, Instruction):
-        data.pop("id", None)
+    if isinstance(model, Instruction):
+        dump.pop("id", None)
 
-    if isinstance(value, Node):
-        for instruction in data.get("instructions", []):
+    if isinstance(model, Node):
+        for instruction in dump.get("instructions", []):
             instruction.pop("id", None)
 
-    return data
+    return dump
 
 
 def contract_schemas() -> tuple[Schema, Schema]:

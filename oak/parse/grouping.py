@@ -5,6 +5,7 @@ from __future__ import annotations
 import html
 import json
 import re
+from collections.abc import Sequence
 from typing import Literal
 
 from oak.node.structure import PART_ORDER
@@ -249,8 +250,8 @@ def _markdown_attributes(
             "markdown attributes must start with ;",
         )
 
-    for item in tail[1:].split(";"):
-        if "=" not in item:
+    for attribute in tail[1:].split(";"):
+        if "=" not in attribute:
             fail(
                 "entry_attribute",
                 path,
@@ -258,7 +259,7 @@ def _markdown_attributes(
                 "markdown attribute needs =",
             )
 
-        key, raw = item.split(
+        key, raw = attribute.split(
             "=",
             1,
         )
@@ -287,7 +288,7 @@ def _markdown_attributes(
 
 
 def parse_entries(
-    lines: list[str],
+    lines: Sequence[str],
     start: int,
     tag: str,
     grouping: GroupingName,

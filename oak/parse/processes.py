@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from oak.node.parts.processes.model import Process
 from oak.parse.cursor import Cursor
 from oak.parse.errors import fail
@@ -10,12 +12,12 @@ from oak.parse.steps import parse_steps
 
 
 def parse_processes(
-    lines: list[str],
+    lines: Sequence[str],
     start: int,
     grouping: GroupingName,
 ) -> list[Process]:
     """Parse every grouped process entry."""
-    result = []
+    processes = []
 
     for (
         attributes,
@@ -58,7 +60,7 @@ def parse_processes(
                 "unparsed process text",
             )
 
-        result.append(
+        processes.append(
             Process(
                 id=attributes["id"],
                 name=attributes["name"],
@@ -68,7 +70,7 @@ def parse_processes(
             )
         )
 
-    return result
+    return processes
 
 
 __all__ = [
