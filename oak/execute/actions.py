@@ -167,15 +167,15 @@ def run_parallel(
             strict=True,
         ):
             try:
-                result = future.result()
+                outputs = future.result()
                 validate_schema_values(
                     context,
                     frame.document,
                     child.output,
-                    result,
+                    outputs,
                     "invalid_act_output",
                 )
-                results.append(result)
+                results.append(outputs)
 
             except Exception as error:
                 results.append(None)

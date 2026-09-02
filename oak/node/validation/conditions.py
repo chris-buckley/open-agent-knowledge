@@ -114,16 +114,16 @@ def condition_result(
         unknown = False
 
         for child in condition.conditions:
-            result = condition_result(
+            decision = condition_result(
                 index,
                 source,
                 child,
             )
 
-            if result is False:
+            if decision is False:
                 return False
 
-            if result is None:
+            if decision is None:
                 unknown = True
 
         return None if unknown else True
@@ -132,30 +132,30 @@ def condition_result(
         unknown = False
 
         for child in condition.conditions:
-            result = condition_result(
+            decision = condition_result(
                 index,
                 source,
                 child,
             )
 
-            if result is True:
+            if decision is True:
                 return True
 
-            if result is None:
+            if decision is None:
                 unknown = True
 
         return None if unknown else False
 
     if isinstance(condition, Not):
-        result = condition_result(
+        decision = condition_result(
             index,
             source,
             condition.condition,
         )
         return (
             None
-            if result is None
-            else not result
+            if decision is None
+            else not decision
         )
 
     raise TypeError(
