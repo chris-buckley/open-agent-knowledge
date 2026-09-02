@@ -19,7 +19,7 @@ from build.surfaces import (
     AUTHORABLE_MODELS,
     model_examples,
     model_schema,
-    model_surfaces,
+    parse_surface,
     slug,
     surface_example,
     surface_instance,
@@ -28,44 +28,33 @@ from oak import (
     ACT,
     Act,
     All,
-    Any,
     Arrival,
     Assert,
     AtLeast,
-    AtMost,
     BindingValue,
     Call,
     Compare,
     Constant,
-    ConstantValue,
     DateTime,
     DottedPath,
     Emit,
     Emission,
     ExecutionError,
     ExecutionResult,
-    Fail,
     Foreach,
-    If,
     Instruction,
     Interface,
     InterfaceValue,
     Join,
-    Lines,
-    ListOf,
     LiteralValue,
-    MaxChars,
     Node,
     NonBlankLine,
     NonEmpty,
-    Not,
-    OneOf,
     Par,
     Placeholder,
     Process,
     ProcessName,
     Quantity,
-    Regex,
     RegexPattern,
     ResolutionError,
     Schema,
@@ -81,7 +70,6 @@ from oak import (
     Unit,
     ValueBinding,
     ValueReference,
-    Where,
     While,
     datetime_text,
     execute,
@@ -93,7 +81,8 @@ from oak import (
     where,
 )
 from oak.base import OakModel
-from oak.parse import OakParseError, _binding, _condition, _constraint, _interfaces, _named_values, _processes, _schemas, _steps, _triggers, _value, _where
+from oak.parse import OakParseError
+from oak.parse.fragments import parse_fragment
 from oak.rules import ACT_GUIDANCE, DECOMPOSITION_GUIDANCE, DELEGATION_GUIDANCE, ENTRY_ID_GUIDANCE, NAMING_GUIDANCE, RULES
 from oak.surface import SURFACES, surface_for
 
@@ -118,6 +107,7 @@ TEXT_EXAMPLES = (
 )
 
 _STRICT = ConfigDict(strict=True, regex_engine="rust-regex")
+_MARKDOWN_FENCE = "~" * 4
 
 
 def _field_model(model: type[OakModel], name: str) -> type[OakModel]:
@@ -147,40 +137,6 @@ def _validate_metadata() -> None:
             example_model = _field_model(model, name)
             for example in field.examples:
                 example_model.model_validate({"value": example})
-
-
-def _parse_surface(surface, text: str):
-    model = surface.model
-    lines = text.splitlines()
-    if model is Node:
-        return parse(text)
-    if model is Instruction:
-        return Instruction(id="generated", body=text)
-    if model is Constant:
-        return _named_values(lines, 1, constants=True)[0]
-    if model is Schema:
-        return _schemas(lines, 1, "xml")[0]
-    if model is State:
-        return _named_values(lines, 1, constants=False)[0]
-    if model is Trigger:
-        return _triggers(lines, 1)[0]
-    if model is Process:
-        return _processes(lines, 1, "xml")[0]
-    if model is Interface:
-        return _interfaces(lines, 1, "xml")[0]
-    if model in (Type, OneOf, Regex, NonEmpty, MaxChars, Lines, ListOf, AtLeast, AtMost):
-        return _constraint(text, surface.id, 1)
-    if model is Where:
-        return _where(text, surface.id, 1)
-    if model in (LiteralValue, ConstantValue, StateValue, InterfaceValue, BindingValue):
-        return _value(text, surface.id, 1)
-    if model is ValueBinding:
-        return _binding(text, surface.id, 1)
-    if model in (Compare, All, Any, Not):
-        return _condition(lines, 0, 0, surface.id, 1)[0]
-    if model in (Act, Set, Emit, If, Call, Fail, Assert, Foreach, While, Par, Join):
-        return _steps(lines, 0, 0, surface.id, 1)[0][0]
-    raise TypeError(model.__name__)
 
 
 def _normalized(value: OakModel) -> object:
@@ -220,7 +176,7 @@ def _freshness_gates() -> None:
 
     for surface in SURFACES:
         original = surface_instance(surface)
-        rebuilt = _parse_surface(surface, surface_example(surface))
+        rebuilt = parse_surface(surface, surface_example(surface))
         if _normalized(original) != _normalized(rebuilt):
             raise RuntimeError(f"freshness gate 6 failed for {surface.id}")
 
@@ -804,9 +760,9 @@ def _validate_part_omission() -> None:
     state_preamble = "State holds values that persist and can change while processes run."
     expected_renders = {
         ("single", "xml"): "<instructions>\nRecord the mode.\n</instructions>",
-        ("single", "markdown"): "~~~~instructions\nRecord the mode.\n~~~~",
+        ("single", "markdown"): f"{_MARKDOWN_FENCE}instructions\nRecord the mode.\n{_MARKDOWN_FENCE}",
         ("sparse", "xml"): f'<instructions>\n{state_preamble}\n</instructions>\n\n<state>\nmode: "idle"\n</state>',
-        ("sparse", "markdown"): f'~~~~instructions\n{state_preamble}\n~~~~\n\n~~~~state\nmode: "idle"\n~~~~',
+        ("sparse", "markdown"): f'{_MARKDOWN_FENCE}instructions\n{state_preamble}\n{_MARKDOWN_FENCE}\n\n{_MARKDOWN_FENCE}state\nmode: "idle"\n{_MARKDOWN_FENCE}',
     }
     for name, node in (("single", single), ("sparse", sparse)):
         for grouping in ("xml", "markdown"):
@@ -899,7 +855,7 @@ def _validate_act_authoring() -> None:
         line = "\n".join(step_lines(step))
         if line != expected:
             raise RuntimeError(f"suffix render changed: {line}")
-        parsed = _steps([line], 0, 0, "suffix", 1)[0][0]
+        parsed = parse_fragment(type(step), line, path="suffix")
         if parsed.model_dump() != step.model_dump():
             raise RuntimeError(f"suffix parse changed: {line}")
 
