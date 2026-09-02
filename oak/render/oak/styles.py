@@ -35,6 +35,8 @@ _SENTENCE_END = re.compile(r"[.!?](?=\s|$)")
 
 @dataclass(frozen=True, slots=True)
 class StyleFailure:
+    """One controlled-style failure at one rendered text path."""
+
     path: str
     code: str
     message: str
@@ -43,6 +45,8 @@ class StyleFailure:
 
 
 class StyleError(ValueError):
+    """Every failure collected while applying one controlled style."""
+
     code = "controlled_style_invalid"
     def __init__(self, failures: list[StyleFailure]) -> None:
         self.failures = tuple(failures)
