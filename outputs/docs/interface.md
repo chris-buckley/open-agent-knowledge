@@ -3,6 +3,7 @@ Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 
 Interface: One crossing of information at the active document boundary.
+Select only an in or inout local interface as a trigger source.
 </instructions>
 
 <constants>

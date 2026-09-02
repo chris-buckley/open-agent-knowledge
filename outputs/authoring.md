@@ -1,8 +1,8 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and THEN omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-Each trigger contains GIVEN, WHEN, and THEN; WHEN matches first, GIVEN guards it, and THEN selects a process.
+Each trigger is one fact group: event carries the meaning, an optional source names the exact ingress interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both.
 
@@ -11,7 +11,7 @@ Map directives, policies, interpretation rules, and required behaviour to instru
 Map stable values needed during use to constants.
 Map reusable information shapes and output contracts to schemas.
 Map values that can change while the knowledge runs to state.
-Map arrival reasons, state guards, and selected processes to triggers.
+Map arrival events, ingress sources, state guards, and selected processes to triggers.
 Map ordered ways to perform tasks to processes.
 Map verifiable document-boundary crossings to interfaces.
 Omit a part when the source provides no justified entry.
@@ -73,7 +73,7 @@ Do not expose `ACT.use`.
 Add no second helper for interpreter-native work.
 Bind a constant or state value to one schema placeholder with `AS` when a schema constrains it.
 Give an act input and output schema targets when its values must validate at the action boundary.
-Seed a typed trigger-selected process through trigger inputs, one binding per input schema placeholder.
+Seed a typed trigger-selected process through trigger seeds, one binding per input schema placeholder.
 Model each subagent as one worker OAK document with one in interface and one out interface.
 Treat the worker in interface schema as the request contract and the worker out interface schema as the result contract.
 Type each dispatch process with relative targets to the worker request and result schemas as its input and output schemas.
@@ -123,13 +123,13 @@ Make every schema-bound value satisfy its placeholder constraints.
 Make every statically known emission satisfy its interface schema.
 Give each TEXT constant one string value.
 Do not read an interface or local binding in a trigger guard.
-Do not read a local binding in a trigger input.
+Do not read a local binding in a trigger seed.
 Make every WHERE example satisfy its local constraints.
 Put JOIN immediately after one PAR.
 Give each lines constraint a minimum, maximum, or both.
 Target an entry that exists in the current OAK document.
 Order only two numbers or two strings without coercion.
-Make equal trigger WHEN values provably disjoint.
+Make equal trigger events and equal trigger sources provably disjoint.
 Follow a final PAR with JOIN.
 Put no step between PAR and JOIN.
 Give every PAR child a distinct output binding.
@@ -141,8 +141,9 @@ Make every process output schema placeholder visible after successful completion
 Remove an assertion that is statically true.
 Match a named tool's declared placeholder sets and schema targets.
 Use a tool in PAR only when its supplied registry confirms parallel use.
-Bind each selected process input schema placeholder exactly once in trigger inputs.
+Bind each selected process input schema placeholder exactly once in trigger seeds.
 Give every non-true trigger guard at least one state read.
+Select only an in or inout local interface as a trigger source.
 Do not read an interface in a process with an input schema.
 Read only a visible prior process-local binding.
 Reference only another placeholder in the same schema.
@@ -175,7 +176,10 @@ xml_triggers_part = "<triggers>", lf, text_body, "</triggers>" ;
 xml_processes_part = "<processes>", lf, text_body, "</processes>" ;
 xml_interfaces_part = "<interfaces>", lf, text_body, "</interfaces>" ;
 xml_body_entry = "<", entry_tag, attributes, ">", lf, text_body, "</", entry_tag, ">" ;
-entry_tag = "schema" | "trigger" | "process" | "interface" ;
+entry_tag = "schema" | "process" | "interface" ;
+trigger_fact = "trigger.", slug_id, ".", trigger_field, " := ", trigger_value ;
+trigger_field = "event" | "source" | "guard" | "process" | ( "seed.", placeholder ) ;
+trigger_value = ? one field-typed value; a composite guard continues on indented condition lines ? ;
 constant = inline_constant | text_constant | json_constant | csv_constant | yaml_constant ;
 inline_constant = slug_id, [ as_clause ], ": ", json_value ;
 text_constant = slug_id, [ as_clause ], ": TEXT<<", lf, text_body, ">>" ;
@@ -276,11 +280,11 @@ surface_step_join = ? JOIN ? ;
 surface_process = ? <process id="<ID>" name="<NAME>" input="<INPUT>" output="<OUTPUT>">
 <STEPS>
 </process> ? ;
-surface_trigger = ? <trigger id="<ID>">
-GIVEN: <GIVEN>
-WHEN: <WHEN>
-THEN: <THEN> (<INPUTS>)
-</trigger> ? ;
+surface_trigger = ? trigger.<ID>.event := <EVENT>
+trigger.<ID>.source := <SOURCE>
+trigger.<ID>.guard := <GUARD>
+trigger.<ID>.process := <PROCESS>
+trigger.<ID>.seed.<SEED> ? ;
 surface_interface = ? <interface id="<ID>" direction="<DIRECTION>" schema="<SCHEMA_ID>">
 <DESCRIPTION>
 </interface> ? ;
@@ -697,19 +701,20 @@ WHERE:
 - <STEPS> is string; is non-empty; The typed process steps in authored order..
 </schema>
 
-<schema id="trigger" name="Trigger" purpose="One GIVEN, WHEN, and THEN signpost to a process.">
-<trigger id="<ID>">
-GIVEN: <GIVEN>
-WHEN: <WHEN>
-THEN: <THEN> (<INPUTS>)
-</trigger>
+<schema id="trigger" name="Trigger" purpose="One outside event routed to one process.">
+trigger.<ID>.event := <EVENT>
+trigger.<ID>.source := <SOURCE>
+trigger.<ID>.guard := <GUARD>
+trigger.<ID>.process := <PROCESS>
+trigger.<ID>.seed.<SEED>
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
-- <GIVEN> is string; True or the recursive state guard checked after WHEN..
-- <WHEN> is string; is non-empty; Why the interpreter enters the knowledge..
-- <THEN> is string; is non-empty; The local or relative process target selected by the trigger..
-- <INPUTS> is string; The input bindings that seed the selected process input schema..
+- <EVENT> is string; is non-empty; The semantic signpost matched exactly when the trigger has no source..
+- <SOURCE> is string; The optional local in or inout interface whose arrival fires the trigger..
+- <GUARD> is string; True or the recursive state guard checked after the match..
+- <PROCESS> is string; is non-empty; The local or relative process target selected by the trigger..
+- <SEED> is string; The seed bindings that fill the selected process input schema..
 </schema>
 
 <schema id="interface" name="Interface" purpose="One crossing of information at the active document boundary.">
@@ -772,11 +777,8 @@ WHERE:
 </schemas>
 
 <triggers>
-<trigger id="source-supplied">
-GIVEN: true
-WHEN: "Any source material is supplied with this prompt."
-THEN: process.write-oak
-</trigger>
+trigger.source-supplied.event := "Any source material is supplied with this prompt."
+trigger.source-supplied.process := process.write-oak
 </triggers>
 
 <processes>

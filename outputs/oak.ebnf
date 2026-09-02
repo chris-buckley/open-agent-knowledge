@@ -32,7 +32,10 @@ markdown_processes_part = "~~~~processes", lf, text_body, "~~~~" ;
 markdown_interfaces_part = "~~~~interfaces", lf, text_body, "~~~~" ;
 xml_body_entry = "<", entry_tag, attributes, ">", lf, text_body, "</", entry_tag, ">" ;
 markdown_body_entry = "~~~", entry_tag, markdown_attributes, lf, text_body, "~~~" ;
-entry_tag = "schema" | "trigger" | "process" | "interface" ;
+entry_tag = "schema" | "process" | "interface" ;
+trigger_fact = "trigger.", slug_id, ".", trigger_field, " := ", trigger_value ;
+trigger_field = "event" | "source" | "guard" | "process" | ( "seed.", placeholder ) ;
+trigger_value = ? one field-typed value; a composite guard continues on indented condition lines ? ;
 constant = inline_constant | text_constant | json_constant | csv_constant | yaml_constant ;
 inline_constant = slug_id, [ as_clause ], ": ", json_value ;
 text_constant = slug_id, [ as_clause ], ": TEXT<<", lf, text_body, ">>" ;
@@ -134,11 +137,11 @@ surface_step_join = ? JOIN ? ;
 surface_process = ? <process id="<ID>" name="<NAME>" input="<INPUT>" output="<OUTPUT>">
 <STEPS>
 </process> ? ;
-surface_trigger = ? <trigger id="<ID>">
-GIVEN: <GIVEN>
-WHEN: <WHEN>
-THEN: <THEN> (<INPUTS>)
-</trigger> ? ;
+surface_trigger = ? trigger.<ID>.event := <EVENT>
+trigger.<ID>.source := <SOURCE>
+trigger.<ID>.guard := <GUARD>
+trigger.<ID>.process := <PROCESS>
+trigger.<ID>.seed.<SEED> ? ;
 surface_interface = ? <interface id="<ID>" direction="<DIRECTION>" schema="<SCHEMA_ID>">
 <DESCRIPTION>
 </interface> ? ;
