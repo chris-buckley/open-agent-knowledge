@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from oak.base import Entry
 from oak.node.parts.constants import Constant
+from oak.node.parts.entry import Entry
 from oak.node.parts.instructions import Instruction
 from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes.model import Process

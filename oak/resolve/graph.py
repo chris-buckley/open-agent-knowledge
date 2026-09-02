@@ -6,8 +6,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import TypeVar
 
-from oak.base import Entry
 from oak.node.model import Node
+from oak.node.parts.entry import Entry
 from oak.resolve.errors import raise_resolution
 from oak.resolve.paths import (
     display_target,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from oak.node.parts.processes import (
+from oak.node.parts.processes.steps import (
     Act,
     Assert,
     Call,

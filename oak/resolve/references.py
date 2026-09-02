@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
 
-from oak.base import Entry
 from oak.node.model import Node
 from oak.node.parts.constants import Constant
+from oak.node.parts.entry import Entry
 from oak.node.parts.processes.conditions import condition_values
 from oak.node.parts.processes.model import Process
 from oak.node.parts.processes.steps import (

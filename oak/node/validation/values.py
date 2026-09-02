@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING
 
 from pydantic_core import PydanticCustomError
 
-from oak.base import Entry
 from oak.node.index import NodeIndex
 from oak.node.parts.constants import Constant
+from oak.node.parts.entry import Entry
 from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes.model import Process
 from oak.node.parts.processes.values import (

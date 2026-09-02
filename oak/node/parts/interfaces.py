@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import AfterValidator, ConfigDict, Field
 
-from oak.base import Entry
+from oak.node.parts.entry import Entry
 from oak.vocabulary.text.non_blank_line import NonBlankLine
 from oak.vocabulary.text.target_path import TargetPath, typed_target
 

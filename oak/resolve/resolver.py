@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 
-from oak.base import Entry
 from oak.node.index import NodeIndex
 from oak.node.model import Node
+from oak.node.parts.entry import Entry
 from oak.parse.document import parse
 from oak.parse.errors import OakParseError
 from oak.resolve.contracts import (

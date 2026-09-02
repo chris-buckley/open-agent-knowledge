@@ -6,7 +6,8 @@ from typing import Literal, Self
 
 from pydantic import ConfigDict, Field, ValidationError, model_validator
 
-from oak.base import Entry, OakModel
+from oak.base import OakModel
+from oak.node.parts.entry import Entry
 from oak.node.parts.schemas.binding import (
     _error_message,
     bind_schema,

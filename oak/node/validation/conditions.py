@@ -2,8 +2,8 @@
 
 from pydantic_core import PydanticCustomError
 
-from oak.base import Entry
 from oak.node.index import NodeIndex
+from oak.node.parts.entry import Entry
 from oak.node.parts.processes.conditions import (
     All,
     Any,

@@ -7,31 +7,35 @@ from oak.node.model import Node
 from oak.node.parts.constants import Constant
 from oak.node.parts.instructions import Instruction
 from oak.node.parts.interfaces import Interface
-from oak.node.parts.processes import (
-    Act,
+from oak.node.parts.processes.conditions import (
     All,
     Any,
-    Assert,
-    BindingValue,
-    Call,
     Compare,
-    ConstantValue,
+    Not,
+)
+from oak.node.parts.processes.model import Process
+from oak.node.parts.processes.steps import (
+    Act,
+    Assert,
+    Call,
     Emit,
     Fail,
     Foreach,
     If,
-    InterfaceValue,
     Join,
-    LiteralValue,
-    Not,
     Par,
-    Process,
     Set,
-    StateValue,
-    ValueBinding,
     While,
 )
-from oak.node.parts.schemas import (
+from oak.node.parts.processes.values import (
+    BindingValue,
+    ConstantValue,
+    InterfaceValue,
+    LiteralValue,
+    StateValue,
+    ValueBinding,
+)
+from oak.node.parts.schemas.constraints import (
     AtLeast,
     AtMost,
     Lines,
@@ -40,10 +44,9 @@ from oak.node.parts.schemas import (
     NonEmpty,
     OneOf,
     Regex,
-    Schema,
     Type,
-    Where,
 )
+from oak.node.parts.schemas.model import Schema, Where
 from oak.node.parts.state import State
 from oak.node.parts.triggers import Trigger
 from oak.parse.conditions import parse_condition

@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import re
 
-from oak.node.parts.schemas import (
+from oak.node.parts.schemas.constraints import (
     AtLeast,
     AtMost,
     Constraint,
@@ -15,10 +15,9 @@ from oak.node.parts.schemas import (
     NonEmpty,
     OneOf,
     Regex,
-    Schema,
     Type,
-    Where,
 )
+from oak.node.parts.schemas.model import Schema, Where
 from oak.parse.data import parse_json_value
 from oak.parse.errors import fail
 from oak.parse.grouping import GroupingName, parse_entries

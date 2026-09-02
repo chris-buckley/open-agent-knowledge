@@ -6,7 +6,7 @@ from typing import Literal, Self
 
 from pydantic import ConfigDict, Field, model_validator
 
-from oak.base import Entry
+from oak.node.parts.entry import Entry
 from oak.node.parts.interfaces import SchemaTarget
 from oak.node.parts.processes.steps import Step
 from oak.node.validation.flow import validate_process_flow

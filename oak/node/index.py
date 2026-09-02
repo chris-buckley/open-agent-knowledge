@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, TypeVar
 
 from pydantic_core import PydanticCustomError
 
-from oak.base import Entry
+from oak.node.parts.entry import Entry
 from oak.node.structure import PART_ORDER
 from oak.vocabulary.text.target_path import is_relative_target, target_id
 

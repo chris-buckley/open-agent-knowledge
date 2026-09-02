@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from oak.node.parts.processes import (
+from oak.node.parts.processes.conditions import (
     All,
     Any,
     Compare,

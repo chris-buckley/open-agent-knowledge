@@ -120,22 +120,6 @@ _EXPECTED_ROOT_EXPORTS = (
     "where",
 )
 
-_REQUIRED_EXPLICIT_EXPORTS = (
-    "oak/__init__.py",
-    "oak/node/__init__.py",
-    "oak/node/parts/__init__.py",
-    "oak/node/parts/processes/__init__.py",
-    "oak/node/parts/schemas/__init__.py",
-    "oak/parse/__init__.py",
-    "oak/resolve/__init__.py",
-    "oak/execute/__init__.py",
-    "oak/rules/__init__.py",
-    "oak/surface/__init__.py",
-    "oak/render/__init__.py",
-    "oak/render/oak/__init__.py",
-    "oak/render/json_ld/__init__.py",
-)
-
 _OBSOLETE_MODULE_PATHS = (
     "oak/parse.py",
     "oak/resolve.py",
@@ -482,7 +466,55 @@ def _validate_dependency_direction() -> None:
     )
 
 
-def _validate_root_barrel_imports() -> None:
+def _is_package(
+    module: str,
+) -> bool:
+    return (
+        ROOT.joinpath(
+            *module.split(".")
+        )
+        / "__init__.py"
+    ).is_file()
+
+
+def _is_submodule(
+    module: str,
+    name: str,
+) -> bool:
+    package = ROOT.joinpath(
+        *module.split(".")
+    )
+
+    return (
+        package / f"{name}.py"
+    ).is_file() or (
+        package / name / "__init__.py"
+    ).is_file()
+
+
+def _imports_barrel(
+    module: str,
+    names: tuple[str, ...],
+) -> bool:
+    if module == "oak":
+        return True
+
+    if not _matches_prefix(
+        module,
+        "oak",
+    ) or not _is_package(module):
+        return False
+
+    return not names or any(
+        not _is_submodule(
+            module,
+            name,
+        )
+        for name in names
+    )
+
+
+def _validate_leaf_imports() -> None:
     root_init = (
         ROOT
         / "oak"
@@ -497,15 +529,18 @@ def _validate_root_barrel_imports() -> None:
 
         for (
             module,
-            _names,
+            names,
             line,
         ) in _import_references(path):
-            if module != "oak":
+            if not _imports_barrel(
+                module,
+                names,
+            ):
                 continue
 
             raise RuntimeError(
                 f"{_relative_path(path)}:{line} "
-                "imports through the root oak barrel"
+                f"imports through the package barrel {module}"
             )
 
 
@@ -557,58 +592,68 @@ def _validate_private_parser_imports() -> None:
             )
 
 
+def _export_value(
+    statement: ast.stmt,
+) -> ast.expr | None:
+    if isinstance(
+        statement,
+        ast.Assign,
+    ):
+        targets = tuple(
+            statement.targets
+        )
+        value = statement.value
+
+    elif isinstance(
+        statement,
+        ast.AnnAssign,
+    ):
+        targets = (
+            statement.target,
+        )
+        value = statement.value
+
+    else:
+        return None
+
+    if any(
+        isinstance(target, ast.Name)
+        and target.id == "__all__"
+        for target in targets
+    ):
+        return value
+
+    return None
+
+
 def _all_assignments(
     tree: ast.Module,
 ) -> tuple[ast.expr, ...]:
     values: list[ast.expr] = []
 
     for statement in tree.body:
-        if isinstance(
-            statement,
-            ast.Assign,
+        if (
+            isinstance(
+                statement,
+                ast.AugAssign,
+            )
+            and isinstance(
+                statement.target,
+                ast.Name,
+            )
+            and statement.target.id
+            == "__all__"
         ):
-            if any(
-                isinstance(target, ast.Name)
-                and target.id == "__all__"
-                for target in statement.targets
-            ):
-                values.append(
-                    statement.value
-                )
+            raise RuntimeError(
+                "__all__ must not use augmented assignment"
+            )
 
-        elif isinstance(
-            statement,
-            ast.AnnAssign,
-        ):
-            if (
-                isinstance(
-                    statement.target,
-                    ast.Name,
-                )
-                and statement.target.id
-                == "__all__"
-                and statement.value
-                is not None
-            ):
-                values.append(
-                    statement.value
-                )
+        value = _export_value(
+            statement
+        )
 
-        elif isinstance(
-            statement,
-            ast.AugAssign,
-        ):
-            if (
-                isinstance(
-                    statement.target,
-                    ast.Name,
-                )
-                and statement.target.id
-                == "__all__"
-            ):
-                raise RuntimeError(
-                    "__all__ must not use augmented assignment"
-                )
+        if value is not None:
+            values.append(value)
 
     return tuple(values)
 
@@ -687,7 +732,7 @@ def _validate_explicit_exports() -> None:
     ):
         _literal_exports(
             path,
-            required=False,
+            required=path.name == "__init__.py",
         )
 
         for node in ast.walk(
@@ -707,19 +752,6 @@ def _validate_explicit_exports() -> None:
                     f"{_relative_path(path)}:{node.lineno} "
                     "uses a wildcard import"
                 )
-
-    for relative in _REQUIRED_EXPLICIT_EXPORTS:
-        path = ROOT / relative
-
-        if not path.is_file():
-            raise RuntimeError(
-                f"required package export file is absent: {relative}"
-            )
-
-        _literal_exports(
-            path,
-            required=True,
-        )
 
     root_exports = _literal_exports(
         ROOT / "oak" / "__init__.py",
@@ -751,6 +783,51 @@ def _validate_explicit_exports() -> None:
             "root exports differ; "
             f"missing={missing} unknown={unknown}"
         )
+
+
+def _validate_initializer_purity() -> None:
+    for path in _python_files(
+        ROOT / "oak"
+    ):
+        if path.name != "__init__.py":
+            continue
+
+        for index, statement in enumerate(
+            _syntax_tree(path).body
+        ):
+            if isinstance(
+                statement,
+                (
+                    ast.Import,
+                    ast.ImportFrom,
+                ),
+            ):
+                continue
+
+            if (
+                index == 0
+                and isinstance(
+                    statement,
+                    ast.Expr,
+                )
+                and isinstance(
+                    statement.value,
+                    ast.Constant,
+                )
+                and isinstance(
+                    statement.value.value,
+                    str,
+                )
+            ):
+                continue
+
+            if _export_value(statement) is not None:
+                continue
+
+            raise RuntimeError(
+                f"{_relative_path(path)}:{statement.lineno} "
+                "holds logic in a package initializer"
+            )
 
 
 def _validate_guard_independence() -> None:
@@ -964,9 +1041,10 @@ def validate_architecture() -> None:
     """Verify dependency direction, exports, and obsolete implementation."""
     _validate_guard_independence()
     _validate_dependency_direction()
-    _validate_root_barrel_imports()
+    _validate_leaf_imports()
     _validate_private_parser_imports()
     _validate_explicit_exports()
+    _validate_initializer_purity()
     _validate_obsolete_paths_and_imports()
     _validate_cleanup_tokens()
     _validate_shared_symbol_ownership()

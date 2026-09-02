@@ -5,7 +5,7 @@ from typing import Literal, Self
 from pydantic import ConfigDict, Field, model_validator
 from pydantic_core import PydanticCustomError
 
-from oak.base import Entry
+from oak.node.parts.entry import Entry
 from oak.node.parts.processes.conditions import Condition, condition_values
 from oak.node.parts.processes.targets import (
     InterfaceTarget,

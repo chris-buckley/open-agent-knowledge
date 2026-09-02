@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from oak.node.parts.processes import ValueBinding
+from oak.node.parts.processes.values import ValueBinding
 from oak.node.parts.triggers import Trigger
 from oak.parse.conditions import parse_compare, parse_condition
 from oak.parse.cursor import Cursor
