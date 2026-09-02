@@ -13,6 +13,7 @@ from oak.node.parts.processes.values import (
     InterfaceValue,
     LiteralValue,
 )
+from oak.node.parts.schemas.binding import SchemaBindingError
 from oak.node.parts.schemas.model import Schema
 from oak.node.validation.contracts import find_cycle, inspect_emit_contract
 from oak.node.validation.processes import (
@@ -134,18 +135,31 @@ def validate_relative_interfaces(
         for step in iter_steps(process.steps):
             if isinstance(step, Emit) and step.interface in schemas:
                 schema = schemas[step.interface]
-                contract = inspect_emit_contract(
-                    schema,
-                    (
-                        binding.placeholder
-                        for binding in step.bindings
-                    ),
-                    static_emit_values(
-                        graph,
+
+                try:
+                    contract = inspect_emit_contract(
+                        schema,
+                        (
+                            binding.placeholder
+                            for binding in step.bindings
+                        ),
+                        static_emit_values(
+                            graph,
+                            document,
+                            step,
+                        ),
+                    )
+
+                except SchemaBindingError as error:
+                    raise_resolution(
+                        "invalid_static_schema_binding",
                         document,
-                        step,
-                    ),
-                )
+                        step.interface,
+                        (
+                            f"process {process.id} emits an invalid "
+                            f"static binding: {error}"
+                        ),
+                    )
 
                 if not contract.placeholders_match:
                     raise_resolution(
@@ -155,17 +169,6 @@ def validate_relative_interfaces(
                         (
                             f"process {process.id} emit bindings differ from "
                             "the resolved interface schema placeholders"
-                        ),
-                    )
-
-                if contract.binding_error is not None:
-                    raise_resolution(
-                        "invalid_static_schema_binding",
-                        document,
-                        step.interface,
-                        (
-                            f"process {process.id} emits an invalid "
-                            f"static binding: {contract.binding_error}"
                         ),
                     )
 

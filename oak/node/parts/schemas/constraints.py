@@ -14,7 +14,7 @@ from pydantic import (
 )
 
 from oak.base import DiscriminatedModel
-from oak.rules import rule_error
+from oak.rules.validation import rule_error
 from oak.vocabulary import (
     DATATYPE_ADAPTERS,
     Datatype,

@@ -20,7 +20,7 @@ from oak.node.parts.schemas.constraints import (
     NonEmptyText,
     Type,
 )
-from oak.rules import rule_error
+from oak.rules.validation import rule_error
 from oak.vocabulary import NonBlankLine, Placeholder
 from oak.vocabulary.text.placeholder import placeholders_in
 

@@ -11,7 +11,7 @@ from oak.node.structure import PART_ORDER
 from oak.parse.cursor import Cursor
 from oak.parse.data import BLOCK_CONSTANT_OPEN
 from oak.parse.errors import fail
-from oak.surface import entry_surface
+from oak.surface.registry import entry_surface
 
 GroupingName = Literal["xml", "markdown"]
 ParsedEntry = tuple[dict[str, str], list[str], int]

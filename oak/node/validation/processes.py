@@ -24,6 +24,7 @@ from oak.node.parts.processes.steps import (
     While,
     step_values,
 )
+from oak.node.parts.schemas.binding import SchemaBindingError
 from oak.node.parts.state import State
 from oak.node.validation.conditions import condition_result, validate_condition
 from oak.node.validation.contracts import find_cycle, inspect_emit_contract
@@ -39,7 +40,7 @@ from oak.node.validation.values import (
     static_value,
     validate_value,
 )
-from oak.rules import rule_error
+from oak.rules.validation import rule_error
 from oak.vocabulary.text.target_path import is_relative_target, target_id
 
 
@@ -337,18 +338,33 @@ def validate_process_steps(
             if schema is None:
                 continue
 
-            contract = inspect_emit_contract(
-                schema,
-                (
-                    binding.placeholder
-                    for binding in step.bindings
-                ),
-                _static_emit_values(
-                    index,
-                    process,
-                    step,
-                ),
-            )
+            try:
+                contract = inspect_emit_contract(
+                    schema,
+                    (
+                        binding.placeholder
+                        for binding in step.bindings
+                    ),
+                    _static_emit_values(
+                        index,
+                        process,
+                        step,
+                    ),
+                )
+
+            except SchemaBindingError as error:
+                raise PydanticCustomError(
+                    "invalid_static_schema_binding",
+                    (
+                        "process {process} emits an invalid static binding "
+                        "through interface {interface}: {reason}"
+                    ),
+                    {
+                        "process": process.id,
+                        "interface": interface.id,
+                        "reason": str(error),
+                    },
+                ) from None
 
             if not contract.placeholders_match:
                 raise PydanticCustomError(
@@ -370,20 +386,6 @@ def validate_process_steps(
                         ),
                     },
                 )
-
-            if contract.binding_error is not None:
-                raise PydanticCustomError(
-                    "invalid_static_schema_binding",
-                    (
-                        "process {process} emits an invalid static binding "
-                        "through interface {interface}: {reason}"
-                    ),
-                    {
-                        "process": process.id,
-                        "interface": interface.id,
-                        "reason": str(contract.binding_error),
-                    },
-                ) from None
 
             continue
 

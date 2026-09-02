@@ -6,7 +6,6 @@ from collections.abc import Hashable, Iterable, Mapping
 from dataclasses import dataclass
 from typing import TypeVar
 
-from oak.node.parts.schemas.binding import SchemaBindingError
 from oak.node.parts.schemas.model import Schema
 
 CycleNode = TypeVar(
@@ -17,11 +16,10 @@ CycleNode = TypeVar(
 
 @dataclass(frozen=True, slots=True)
 class EmitContractResult:
-    """The structural or static-value failure of one resolved emit contract."""
+    """The placeholder mismatch of one resolved emit contract."""
 
     missing: tuple[str, ...] = ()
     unused: tuple[str, ...] = ()
-    binding_error: SchemaBindingError | None = None
 
     @property
     def placeholders_match(self) -> bool:
@@ -34,7 +32,7 @@ def inspect_emit_contract(
     placeholders: Iterable[str],
     values: Mapping[str, object] | None,
 ) -> EmitContractResult:
-    """Inspect one emit against its looked-up schema and static values."""
+    """Inspect one emit against its looked-up schema; a static value that fails the schema raises SchemaBindingError."""
     authored = set(placeholders)
     expected = schema.placeholders
     missing = tuple(
@@ -54,16 +52,8 @@ def inspect_emit_contract(
             unused=unused,
         )
 
-    if values is None:
-        return EmitContractResult()
-
-    try:
+    if values is not None:
         schema.bind(values)
-
-    except SchemaBindingError as error:
-        return EmitContractResult(
-            binding_error=error,
-        )
 
     return EmitContractResult()
 

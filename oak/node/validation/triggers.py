@@ -32,7 +32,7 @@ from oak.node.validation.values import (
     static_value,
     validate_value,
 )
-from oak.rules import rule_error
+from oak.rules.validation import rule_error
 from oak.vocabulary.text.target_path import target_id
 
 GuardAtom = tuple[str, ConditionOperator, object]
