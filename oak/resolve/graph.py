@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import TypeVar
 
 from oak.base import Entry
-from oak.node import Node
+from oak.node.model import Node
 from oak.resolve.errors import raise_resolution
 from oak.resolve.paths import (
     display_target,
