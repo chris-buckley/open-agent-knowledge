@@ -78,7 +78,7 @@ authoring surface,"the OAK text an interpreter or human writes; Pydantic is the 
 surface descriptor,"one declarative authored text variant that drives rendering, parsing, EBNF, authoring generation, and documentation generation"
 vocabulary,"how information is conveyed without ambiguity inside every render: text shapes, datatypes, units, time, and display forms; where the core schema and Rust regex checks run"
 grouping,"the delimiters that group the parts and body entries of one OAK document (xml tags|markdown fences)"
-trigger,"the entry that signposts knowledge to the outside; it contains GIVEN, WHEN, and THEN and selects one process"
+trigger,"the entry that signposts knowledge to the outside; its facts are one event, one optional source, one optional guard, one process, and seeds"
 APS,"Agnostic Prompt Standard, the legacy standard that OAK succeeds; its skill snapshot is in `legacy-snapshot-aps`"
 package,"the Pydantic models, defaults, parser, resolver, executor, surface descriptors, and renderers the PRD builds; it is the `oak` directory"
 render,"a representation of one OAK document (OAK|JSON-LD); OAK is the opinionated default, the successor of APS"

@@ -58,7 +58,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 19. Reject a process name outside `ProcessName`.
 20. Reject a non-true trigger guard that reads no state value.
 21. Reject a trigger guard that reads an (interface|local binding).
-22. Reject equal trigger `when` values unless every guard pair is provably disjoint.
+22. Reject equal trigger events or equal trigger sources unless every guard pair is provably disjoint.
 23. Reject an (ALL|ANY) condition with fewer than two children.
 24. Reject an ordered comparison outside two numbers or two strings.
 25. Reject an assertion that is statically (false|true).
@@ -69,14 +69,15 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 30. Reject an unresolved relative target when explicit resolution is requested.
 31. Reject an unknown tool or a named-tool act that conflicts with its supplied registry contract.
 32. Reject a par tool whose supplied registry does not confirm parallel use.
-33. Reject a trigger whose input set differs from the selected process input schema, including inputs on a process without one.
+33. Reject a trigger whose seed set differs from the selected process input schema, including seeds on a process without one.
 34. Reject a process that cannot supply every output schema placeholder after successful completion.
 35. Reject a call whose input set differs from the called process input schema or whose output set differs from its output schema.
 36. Reject a while with no steps or a limit less than one.
-37. Reject a trigger input that reads a local binding.
+37. Reject a trigger seed that reads a local binding.
 38. Reject an act whose inputs differ from its input schema placeholders or whose outputs differ from its output schema placeholders.
 39. Reject a schema binding without both a schema target and a placeholder, with a placeholder absent from the schema, with a placeholder-valued bound, or with a value that fails the placeholder constraints.
 40. Reject an interface read in a process with an input schema.
+41. Reject a trigger source that is not one local in or inout interface.
 
 ## Structure
 
@@ -207,24 +208,27 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 
 ## Triggers
 
-- Triggers route intent to knowledge.
-- A trigger contains one `given`, one `when`, one `then`, and one input binding list.
-- Give `given` either true or one recursive condition.
-- Default direct Pydantic trigger authoring to `given=true`.
-- Render `GIVEN` in every trigger.
-- Require each `when` value to use `NonBlankLine`.
-- Give `then` one local or relative process target.
-- Give each trigger input one value binding whose value is not a local binding.
-- Require the trigger input set to equal the selected process input schema placeholder set, empty when it declares none.
-- Resolve trigger input values from the root document, validate them through the process input schema, and seed them as the initial process-local bindings.
-- Match trigger `when` by exact string equality.
-- Evaluate `given` only after `when` matches.
+- Triggers route outside events to knowledge.
+- A trigger contains one `event`, one optional `source`, one `guard`, one `process`, and one `seed` binding list.
+- Require each `event` value to use `NonBlankLine`.
+- The event stays the semantic signpost for the interpreter.
+- Give `source` one local in or inout interface target.
+- Give `guard` either true or one recursive condition.
+- Default direct Pydantic trigger authoring to `guard=true`.
+- Give `process` one local or relative process target.
+- Give each seed one value binding whose value is not a local binding.
+- Require the seed set to equal the selected process input schema placeholder set, empty when it declares none.
+- Resolve seed values from the root document, validate them through the process input schema, and seed them as the initial process-local bindings.
+- Match a source-less trigger by exact `event` string equality.
+- Match a source-backed trigger by its exact arrival interface, without an event comparison.
+- Do not infer a source from seeds.
+- Evaluate `guard` only after the match.
 - Evaluate a condition tree in authored order with short-circuiting.
 - Run no process when no trigger matches.
-- Run the `then` process when exactly one trigger matches.
+- Run the selected process when exactly one trigger matches.
 - Fail with `ambiguous_trigger_match` when multiple triggers match.
-- Prove equal-when guards disjoint only from compatible state equality, exclusion, and range constraints.
-- Treat every unproved equal-when guard pair as overlapping.
+- Prove equal-key guards disjoint only from compatible state equality, exclusion, and range constraints.
+- Treat every unproved equal-key guard pair as overlapping.
 - Reject a non-true trigger guard without a state read with `trigger_guard_missing_state`.
 - Reject a trigger guard that reads an interface or local binding with `invalid_trigger_guard_value`.
 - Triggers are optional.
@@ -238,7 +242,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Give each process one `ProcessName`, optional input and output schema targets, and one or more steps.
 - Use each input schema placeholder as one initial process-local binding.
 - Require every output schema placeholder to be visible after successful process completion.
-- Seed a trigger-selected process input from its trigger inputs.
+- Seed a trigger-selected process input from its trigger seeds.
 - Reject an interface read in a process that declares an input schema.
 - Author the first process-name word as the action and the second as its object.
 - Execute process steps in authored order.
@@ -312,7 +316,8 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Commit state writes and interface emissions after successful top-level completion.
 - Discard state writes and interface emissions after failure.
 - Do not claim rollback for external tool effects.
-- Represent one arrival as one `when` value and zero or more input interface bindings.
+- Represent one arrival as exactly one `event` text or one `source` interface, and zero or more input interface bindings.
+- Require a source arrival to carry its source interface payload.
 - Validate each active input binding before trigger selection.
 - Require the supplied state target set to equal the resolved authored state target set.
 - Execute one cycle with `execute(document, arrival, state, act=..., tools=...)`.
@@ -355,7 +360,10 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Define `DottedPath` as one local (constant|schema|state|process|interface) target or one local interface placeholder path.
 - Define `ValueReference` as `$` followed by one (constant target|local state target|local interface placeholder path|Placeholder).
 - `$` reads a process value.
-- Use `TargetPath` without `$` for each (SET|CALL|EMIT|THEN|schema) target.
+- Use `TargetPath` without `$` for each (SET|CALL|EMIT|schema|trigger fact) target.
+- Address each trigger fact as `trigger.`, the trigger id, `.`, and one fact name.
+- Assign each expression-valued trigger fact with ` := `.
+- JSON named values keep `: `.
 - Define a schema binding clause as ` AS `, one schema target, `.`, and one placeholder.
 - Delimit each placeholder with `<` and `>` in schema templates, `Where` lines, and act instructions.
 - Render each binding target and act output as a bare placeholder.
@@ -479,7 +487,7 @@ NODE
 
 - Bind a constant or state value to one schema placeholder with `AS` when a schema constrains it.
 - Give an act input and output schema targets when its values must validate at the action boundary.
-- Seed a typed trigger-selected process through trigger inputs, one binding per input schema placeholder.
+- Seed a typed trigger-selected process through trigger seeds, one binding per input schema placeholder.
 
 ### Delegation
 
@@ -556,8 +564,11 @@ NODE
 - Render each authored instruction as its text after built-in instructions.
 - Separate the interpretation preamble from authored instructions with one blank line.
 - Generate built-in instructions only for authored features present in the node.
-- Render each trigger as one body entry with `id`, `GIVEN`, `WHEN`, and `THEN`.
-- End `THEN` with one binding suffix only when the trigger has inputs.
+- Render each trigger as one fact group: one `trigger.<id>.<fact> := <value>` line per fact.
+- Order trigger facts as event, source, guard, process, then seeds in authored order.
+- Omit the source fact and the guard fact when absent.
+- Render a composite guard as indented condition lines under its guard fact.
+- Separate trigger fact groups with one blank line.
 - Render each state and inline constant as its id, an optional schema binding clause, `: `, and one JSON value.
 - Render each block constant with its id, an optional schema binding clause, its form opener, body, and closing line.
 - Render each process with its id, name, optional input and output schema targets, and typed steps.
@@ -625,7 +636,7 @@ NODE
 - Define one root context with `@base` and the `oak` prefix.
 - Render each entry, `Where`, constraint, condition, process value, and step kind as `@type`.
 - Render `where`, `constraints`, `examples`, `steps`, `inputs`, `outputs`, `bindings`, `conditions`, `thenSteps`, and `otherwise` as ordered lists.
-- Render trigger `then` as an id-valued process target and trigger inputs as one ordered binding list when present.
+- Render trigger `process` and `source` as id-valued targets and trigger seeds as one ordered binding list when present.
 - Render process, act, constant, and state schema targets as id-valued schema targets.
 - Render each constant and state schema binding with its `placeholder`.
 - Render call process as an id-valued process target.
@@ -685,10 +696,11 @@ NODE
 - Keep agent examples under `examples/agents` and ported format schemas under `examples/schemas`.
 - Grow one balance per bounded cycle and emit one reflection to the chat in `examples/agents/compound_growth.py`.
 - Exercise `ACT`, `ACT.tool`, bounded while, canonical OAK, parsing, resolution, and execution in `examples/agents/compound_growth.py`.
-- Exercise schema-bound constants, state, trigger inputs, act schemas, and a typed tool contract in `examples/agents/compound_growth.py`.
+- Exercise schema-bound constants, state, trigger seeds, act schemas, and a typed tool contract in `examples/agents/compound_growth.py`.
 - Encode the extracted implementer instructions in `examples/agents/implementer.py`.
 - Encode the extracted task reviewer instructions in `examples/agents/task_reviewer.py`.
-- Seed each trigger-selected reviewer and coordinator process from interface-sourced trigger inputs.
+- Seed each trigger-selected reviewer and coordinator process from interface-sourced trigger seeds.
+- Fire each worker and coordinator trigger from its source interface arrival.
 - Encode each ported legacy format as one constrained schema document under `examples/schemas`.
 - Bind one accepted and one rejected value set per ported constraint kind across `examples/schemas`.
 - Dispatch the task reviewer as one worker agent with a schema-typed agent contract from `examples/agents/delegation.py`.
