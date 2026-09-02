@@ -1,0 +1,209 @@
+"""Static condition evaluation and ordered-operand validation."""
+
+from pydantic_core import PydanticCustomError
+
+from oak.base import Entry
+from oak.node.index import NodeIndex
+from oak.node.parts.processes.conditions import (
+    All,
+    Any,
+    Compare,
+    Condition,
+    Not,
+    condition_values,
+)
+from oak.node.parts.processes.operators import (
+    ConditionOperator,
+    OrderedComparisonTypeError,
+    compare_values,
+    ordered_pair,
+)
+from oak.node.parts.processes.values import (
+    BindingValue,
+    ConstantValue,
+    InterfaceValue,
+    StateValue,
+    Value,
+)
+from oak.node.validation.values import (
+    STATIC_MISSING,
+    static_value,
+    validate_value,
+)
+
+
+def _same_dynamic_value(
+    left: Value,
+    right: Value,
+) -> bool:
+    return (
+        type(left) is type(right)
+        and isinstance(
+            left,
+            (
+                ConstantValue,
+                StateValue,
+                InterfaceValue,
+                BindingValue,
+            ),
+        )
+        and left == right
+    )
+
+
+def compare_static(
+    operator: ConditionOperator,
+    left: object,
+    right: object,
+) -> bool:
+    """Evaluate one statically known comparison with stable diagnostics."""
+    try:
+        return compare_values(
+            operator,
+            left,
+            right,
+        )
+
+    except OrderedComparisonTypeError as error:
+        raise PydanticCustomError(
+            "ordered_comparison_type_mismatch",
+            str(error),
+        ) from None
+
+
+def condition_result(
+    index: NodeIndex,
+    source: Entry,
+    condition: Condition,
+) -> bool | None:
+    """Return one statically known condition result when possible."""
+    if isinstance(condition, Compare):
+        if _same_dynamic_value(
+            condition.left,
+            condition.right,
+        ):
+            if condition.operator == "equals":
+                return True
+
+            if condition.operator == "not_equals":
+                return False
+
+            return None
+
+        left = static_value(
+            index,
+            source,
+            condition.left,
+        )
+        right = static_value(
+            index,
+            source,
+            condition.right,
+        )
+
+        if left is STATIC_MISSING or right is STATIC_MISSING:
+            return None
+
+        return compare_static(
+            condition.operator,
+            left,
+            right,
+        )
+
+    if isinstance(condition, All):
+        unknown = False
+
+        for child in condition.conditions:
+            result = condition_result(
+                index,
+                source,
+                child,
+            )
+
+            if result is False:
+                return False
+
+            if result is None:
+                unknown = True
+
+        return None if unknown else True
+
+    if isinstance(condition, Any):
+        unknown = False
+
+        for child in condition.conditions:
+            result = condition_result(
+                index,
+                source,
+                child,
+            )
+
+            if result is True:
+                return True
+
+            if result is None:
+                unknown = True
+
+        return None if unknown else False
+
+    if isinstance(condition, Not):
+        result = condition_result(
+            index,
+            source,
+            condition.condition,
+        )
+        return (
+            None
+            if result is None
+            else not result
+        )
+
+    raise TypeError(
+        f"unsupported condition {type(condition).__name__}"
+    )
+
+
+def validate_condition(
+    index: NodeIndex,
+    source: Entry,
+    condition: Condition,
+) -> None:
+    """Validate every value and ordered comparison in one condition."""
+    for value in condition_values(condition):
+        validate_value(
+            index,
+            source,
+            value,
+        )
+
+    if not isinstance(condition, Compare):
+        return
+
+    left = static_value(
+        index,
+        source,
+        condition.left,
+    )
+    right = static_value(
+        index,
+        source,
+        condition.right,
+    )
+
+    if (
+        condition.operator not in ("equals", "not_equals")
+        and left is not STATIC_MISSING
+        and right is not STATIC_MISSING
+        and ordered_pair(left, right) is None
+    ):
+        raise PydanticCustomError(
+            "ordered_comparison_type_mismatch",
+            "ordered comparison needs two numbers or two strings",
+        )
+
+
+__all__ = [
+    "compare_static",
+    "condition_result",
+    "validate_condition",
+]
