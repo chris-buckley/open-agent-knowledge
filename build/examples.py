@@ -906,14 +906,20 @@ def _validate_act_authoring() -> None:
 
 def _validate_human_examples() -> None:
     from examples.agents import (
+        accelerator_researcher,
         amendment_reviewer,
         compound_growth,
         delegation,
+        docs_researcher,
+        findings_challenger,
+        github_researcher,
         implementer,
         successor,
         successor_verifier,
         task_reviewer,
+        web_researcher,
     )
+    from examples.agents.copilot import agent_text
     from examples.schemas import (
         api_coverage_table,
         code_changes,
@@ -928,13 +934,18 @@ def _validate_human_examples() -> None:
     )
 
     examples = (
+        accelerator_researcher,
         amendment_reviewer,
         compound_growth,
         delegation,
+        docs_researcher,
+        findings_challenger,
+        github_researcher,
         implementer,
         successor_verifier,
         successor,
         task_reviewer,
+        web_researcher,
         api_coverage_table,
         code_changes,
         code_map,
@@ -951,6 +962,11 @@ def _validate_human_examples() -> None:
         target = module.TARGET
         if not target.is_file() or target.read_text(encoding="utf-8") != rendered:
             raise RuntimeError(f"example snapshot is missing or stale: {target}")
+        agent = getattr(module, "AGENT", None)
+        if agent is not None and (
+            not agent.is_file() or agent.read_text(encoding="utf-8") != agent_text(module.AGENT_FRONTMATTER, rendered)
+        ):
+            raise RuntimeError(f"agent file is missing or stale: {agent}")
 
 
 def _expect_rule(code: str, author) -> None:
