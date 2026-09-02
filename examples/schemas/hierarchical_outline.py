@@ -13,6 +13,9 @@ from oak import Node, NonEmpty, Schema, SchemaBindingError, Regex, Type, parse, 
 from examples.schemas.repeat_marker import repeat_marker_instruction
 
 PLACEHOLDER_OUTLINE_TITLE = "OUTLINE_TITLE"
+PLACEHOLDER_LEVEL_1_NUMBER = "LEVEL_1_NUMBER"
+PLACEHOLDER_LEVEL_2_NUMBER = "LEVEL_2_NUMBER"
+PLACEHOLDER_LEVEL_3_NUMBER = "LEVEL_3_NUMBER"
 PLACEHOLDER_STATEMENT = "STATEMENT"
 
 hierarchical_outline_schema = Schema(
@@ -30,9 +33,9 @@ hierarchical_outline_schema = Schema(
     ),
     where=[
         where(PLACEHOLDER_OUTLINE_TITLE, Type(of="string"), NonEmpty(), description="the title for the outline"),
-        where("LEVEL_1_NUMBER", Type(of="string"), Regex(pattern="^[0-9]+$"), description="the level one number"),
-        where("LEVEL_2_NUMBER", Type(of="string"), Regex(pattern="^[0-9]+\\.[0-9]+$"), description="the level two number"),
-        where("LEVEL_3_NUMBER", Type(of="string"), Regex(pattern="^[0-9]+\\.[0-9]+\\.[0-9]+$"), examples=["1.1.1", "1.1.2"], description="the level three number at the maximum depth"),
+        where(PLACEHOLDER_LEVEL_1_NUMBER, Type(of="string"), Regex(pattern="^[0-9]+$"), description="the level one number"),
+        where(PLACEHOLDER_LEVEL_2_NUMBER, Type(of="string"), Regex(pattern="^[0-9]+\\.[0-9]+$"), description="the level two number"),
+        where(PLACEHOLDER_LEVEL_3_NUMBER, Type(of="string"), Regex(pattern="^[0-9]+\\.[0-9]+\\.[0-9]+$"), examples=["1.1.1", "1.1.2"], description="the level three number at the maximum depth"),
         where(PLACEHOLDER_STATEMENT, Type(of="string"), NonEmpty(), description="one atomic statement without obvious content"),
     ],
 )
@@ -46,12 +49,12 @@ TARGET = Path(__file__).with_suffix(".oak.md")
 
 _ACCEPTED_BINDING = {
     PLACEHOLDER_OUTLINE_TITLE: "Plan",
-    "LEVEL_1_NUMBER": "1",
-    "LEVEL_2_NUMBER": "1.1",
-    "LEVEL_3_NUMBER": "1.1.1",
+    PLACEHOLDER_LEVEL_1_NUMBER: "1",
+    PLACEHOLDER_LEVEL_2_NUMBER: "1.1",
+    PLACEHOLDER_LEVEL_3_NUMBER: "1.1.1",
     PLACEHOLDER_STATEMENT: "Define the goal.",
 }
-_REJECTED_BINDINGS = (("LEVEL_1_NUMBER", "one"),)
+_REJECTED_BINDINGS = ((PLACEHOLDER_LEVEL_1_NUMBER, "one"),)
 
 
 def build() -> str:

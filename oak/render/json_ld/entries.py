@@ -35,6 +35,34 @@ from oak.render.json_ld.values import (
 
 Fields = dict[str, object]
 
+_STEP_TYPES = {
+    "act": "Act",
+    "set": "Set",
+    "emit": "Emit",
+    "if": "If",
+    "call": "Call",
+    "fail": "Fail",
+    "assert": "Assert",
+    "foreach": "Foreach",
+    "while": "While",
+    "par": "Par",
+    "join": "Join",
+}
+
+_STEP_TYPES = {
+    "act": "Act",
+    "set": "Set",
+    "emit": "Emit",
+    "if": "If",
+    "call": "Call",
+    "fail": "Fail",
+    "assert": "Assert",
+    "foreach": "Foreach",
+    "while": "While",
+    "par": "Par",
+    "join": "Join",
+}
+
 
 def _target_reference(document: str, target: str) -> Fields:
     return {"@id": target_id(document, target)}
@@ -176,7 +204,7 @@ def _step_fields(document: str, step: Step) -> Fields:
 def step_node(document: str, step: Step) -> Fields:
     """Return one typed process step node."""
     return {
-        "@type": f"oak:{type(step).__name__}",
+        "@type": "oak:" + _STEP_TYPES[step.kind],
         **_step_fields(document, step),
     }
 

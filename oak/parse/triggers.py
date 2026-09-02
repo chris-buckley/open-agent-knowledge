@@ -158,7 +158,7 @@ def _fact_value(rest: str, path: str, line_number: int) -> str:
     return rest[1:]
 
 
-def _parse_trigger(chunk: list[str], number: int, seen: set[str]) -> Trigger:
+def _parse_trigger(chunk: Sequence[str], number: int, seen: set[str]) -> Trigger:
     cursor = Cursor(chunk, "triggers", number)
     draft: _TriggerDraft | None = None
 

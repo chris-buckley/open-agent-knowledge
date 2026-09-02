@@ -24,9 +24,30 @@ from oak.render.json_ld.identifiers import target_id, where_id
 
 Fields = dict[str, object]
 
-
-def _oak_type(model: object) -> str:
-    return f"oak:{type(model).__name__}"
+_CONSTRAINT_TYPES = {
+    "type": "Type",
+    "one_of": "OneOf",
+    "regex": "Regex",
+    "non_empty": "NonEmpty",
+    "max_chars": "MaxChars",
+    "lines": "Lines",
+    "list_of": "ListOf",
+    "at_least": "AtLeast",
+    "at_most": "AtMost",
+}
+_VALUE_TYPES = {
+    "literal": "LiteralValue",
+    "constant": "ConstantValue",
+    "state": "StateValue",
+    "interface": "InterfaceValue",
+    "binding": "BindingValue",
+}
+_CONDITION_TYPES = {
+    "compare": "Compare",
+    "all": "All",
+    "any": "Any",
+    "not": "Not",
+}
 
 
 def json_literal(value: object) -> Fields:
@@ -41,7 +62,7 @@ def constraint_node(document: str, schema: Schema, constraint: Constraint) -> Fi
     if isinstance(constraint, (AtLeast, AtMost)) and isinstance(constraint.value, str):
         fields["value"] = {"@id": where_id(document, schema, constraint.value)}
 
-    return {"@type": _oak_type(constraint), **fields}
+    return {"@type": "oak:" + _CONSTRAINT_TYPES[constraint.kind], **fields}
 
 
 def _value_fields(document: str, value: Value) -> Fields:
@@ -69,13 +90,13 @@ def _value_fields(document: str, value: Value) -> Fields:
 
 def value_node(document: str, value: Value) -> Fields:
     """Return one process value node."""
-    return {"@type": _oak_type(value), **_value_fields(document, value)}
+    return {"@type": "oak:" + _VALUE_TYPES[value.source], **_value_fields(document, value)}
 
 
 def binding_node(document: str, binding: ValueBinding) -> Fields:
     """Return one process value binding node."""
     return {
-        "@type": _oak_type(binding),
+        "@type": "oak:ValueBinding",
         "placeholder": binding.placeholder,
         "value": value_node(document, binding.value),
     }
@@ -105,7 +126,7 @@ def _condition_fields(document: str, condition: Condition) -> Fields:
 
 def condition_node(document: str, condition: Condition) -> Fields:
     """Return one recursive condition node."""
-    return {"@type": _oak_type(condition), **_condition_fields(document, condition)}
+    return {"@type": "oak:" + _CONDITION_TYPES[condition.kind], **_condition_fields(document, condition)}
 
 
 __all__ = [

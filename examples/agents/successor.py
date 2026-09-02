@@ -47,7 +47,6 @@ from oak import (
     where,
 )
 from examples.agents.bindings import interface_bindings, local_bindings
-from examples.agents.bindings import interface_bindings, local_bindings
 from examples.agents.amendment_reviewer import (
     INTERFACE_REVIEW_REQUEST_INPUT as WORKER_REVIEW_REQUEST_INPUT,
     REVIEW_PLACEHOLDERS,
@@ -335,7 +334,12 @@ successor_publication_schema = Schema(
         "Proof: <PROOF>"
     ),
     where=[
-        where(PLACEHOLDER_DECISION, Type(of="string"), OneOf(values=["accept"]), description="the ratified amendment decision"),
+        where(
+            PLACEHOLDER_DECISION,
+            Type(of="string"),
+            OneOf(values=[DECISION_ACCEPT]),
+            description="the ratified amendment decision",
+        ),
         where(PLACEHOLDER_PRIOR_REVISION, Type(of="integer"), AtLeast(value=1), description="the revision that the successor replaces"),
         where(PLACEHOLDER_NEXT_REVISION, Type(of="integer"), AtLeast(value=2), description="the published successor revision"),
         required_text(PLACEHOLDER_AMENDMENT_ID, "the ratified amendment identifier"),
@@ -371,11 +375,36 @@ protected_invariants_constant = Constant(
     placeholder=PLACEHOLDER_PROTECTED_INVARIANTS,
     value=PROTECTED_INVARIANTS_TEXT,
 )
-current_revision_state = State(id="current-revision", schema=SCHEMA_GOVERNANCE, placeholder=PLACEHOLDER_REVISION, value=13)
-review_status_state = State(id="review-status", schema=SCHEMA_GOVERNANCE, placeholder=PLACEHOLDER_STATUS, value=STATUS_IDLE)
-pending_amendment_id_state = State(id="pending-amendment-id", schema=SCHEMA_GOVERNANCE, placeholder=PLACEHOLDER_AMENDMENT_ID, value="")
-pending_amendment_state = State(id="pending-amendment", schema=SCHEMA_GOVERNANCE, placeholder=PLACEHOLDER_AMENDMENT, value="")
-pending_rationale_state = State(id="pending-rationale", schema=SCHEMA_GOVERNANCE, placeholder=PLACEHOLDER_RATIONALE, value="")
+current_revision_state = State(
+    id="current-revision",
+    schema=SCHEMA_GOVERNANCE,
+    placeholder=PLACEHOLDER_REVISION,
+    value=13,
+)
+review_status_state = State(
+    id="review-status",
+    schema=SCHEMA_GOVERNANCE,
+    placeholder=PLACEHOLDER_STATUS,
+    value=STATUS_IDLE,
+)
+pending_amendment_id_state = State(
+    id="pending-amendment-id",
+    schema=SCHEMA_GOVERNANCE,
+    placeholder=PLACEHOLDER_AMENDMENT_ID,
+    value="",
+)
+pending_amendment_state = State(
+    id="pending-amendment",
+    schema=SCHEMA_GOVERNANCE,
+    placeholder=PLACEHOLDER_AMENDMENT,
+    value="",
+)
+pending_rationale_state = State(
+    id="pending-rationale",
+    schema=SCHEMA_GOVERNANCE,
+    placeholder=PLACEHOLDER_RATIONALE,
+    value="",
+)
 
 amendment_proposed_trigger = Trigger(
     id="amendment-proposed",

@@ -5,10 +5,10 @@ from __future__ import annotations
 import csv
 import io
 import json
+from collections.abc import Mapping, Sequence
 
 import yaml
 
-from collections.abc import Mapping, Sequence
 from oak.node.parts.constants import Constant
 from oak.node.parts.schemas.constraints import (
     AtLeast,

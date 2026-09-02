@@ -305,103 +305,52 @@ def surface_example(
     """Render one canonical example of one surface."""
     instance = _matching_example(surface)
 
-    if isinstance(instance, Node):
-        from oak.render import render
+    match instance:
+        case Node():
+            from oak.render import render
 
-        return render(
-            instance,
-            grouping=grouping,
-        )
+            return render(instance, grouping=grouping)
 
-    if isinstance(instance, Instruction):
-        return instance.body
+        case Instruction():
+            return instance.body
 
-    if isinstance(instance, Constant):
-        return constant_text(instance)
+        case Constant():
+            return constant_text(instance)
 
-    if isinstance(instance, Schema):
-        return schema_xml(instance)
+        case Schema():
+            return schema_xml(instance)
 
-    if isinstance(instance, State):
-        return named_value_line(instance)
+        case State():
+            return named_value_line(instance)
 
-    if isinstance(instance, Trigger):
-        return trigger_body(instance)
+        case Trigger():
+            return trigger_body(instance)
 
-    if isinstance(instance, Process):
-        return process_xml(instance)
+        case Process():
+            return process_xml(instance)
 
-    if isinstance(instance, Interface):
-        return interface_xml(instance)
+        case Interface():
+            return interface_xml(instance)
 
-    if isinstance(
-        instance,
-        (
-            Type,
-            OneOf,
-            Regex,
-            NonEmpty,
-            MaxChars,
-            Lines,
-            ListOf,
-            AtLeast,
-            AtMost,
-        ),
-    ):
-        return constraint_text(instance)
+        case Type() | OneOf() | Regex() | NonEmpty() | MaxChars() | Lines() | ListOf() | AtLeast() | AtMost():
+            return constraint_text(instance)
 
-    if isinstance(instance, Where):
-        return where_line(instance)
+        case Where():
+            return where_line(instance)
 
-    if isinstance(
-        instance,
-        (
-            LiteralValue,
-            ConstantValue,
-            StateValue,
-            InterfaceValue,
-            BindingValue,
-        ),
-    ):
-        return process_value_text(instance)
+        case LiteralValue() | ConstantValue() | StateValue() | InterfaceValue() | BindingValue():
+            return process_value_text(instance)
 
-    if isinstance(instance, ValueBinding):
-        return binding_line(instance)
+        case ValueBinding():
+            return binding_line(instance)
 
-    if isinstance(
-        instance,
-        (
-            Compare,
-            All,
-            Any,
-            Not,
-        ),
-    ):
-        return condition_text(instance)
+        case Compare() | All() | Any() | Not():
+            return condition_text(instance)
 
-    if isinstance(
-        instance,
-        (
-            Act,
-            Set,
-            Emit,
-            If,
-            Call,
-            Fail,
-            Assert,
-            Foreach,
-            While,
-            Par,
-            Join,
-        ),
-    ):
-        return "\n".join(
-            step_lines(instance)
-        )
+        case Act() | Set() | Emit() | If() | Call() | Fail() | Assert() | Foreach() | While() | Par() | Join():
+            return "\n".join(step_lines(instance))
 
-    raise TypeError(
-        type(instance).__name__
-    )
+    raise TypeError(type(instance).__name__)
 
 
 def surface_grammar(

@@ -251,7 +251,6 @@ __all__ = [
     "ExecutionError",
     "ExecutionResult",
     "InterfaceArrivalTarget",
-    "JSON_ADAPTER",
     "ToolContract",
     "ToolHandler",
 ]

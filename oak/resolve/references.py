@@ -110,7 +110,6 @@ def walk_calls(steps: Sequence[Step]) -> Iterator[Call]:
 
 
 __all__ = [
-    "TypedTarget",
     "iter_targets",
     "step_references",
     "steps_targets_in_process",

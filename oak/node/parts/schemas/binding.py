@@ -190,7 +190,7 @@ def bind_schema_value(
     value: object,
 ) -> None:
     """Validate one value against one schema placeholder."""
-    entry = next(
+    clause = next(
         (
             clause
             for clause in schema.where
@@ -198,7 +198,7 @@ def bind_schema_value(
         ),
         None,
     )
-    if entry is None:
+    if clause is None:
         raise SchemaBindingError(
             [
                 BindingFailure(
@@ -209,7 +209,7 @@ def bind_schema_value(
             ]
         )
 
-    if entry.references:
+    if clause.references:
         raise SchemaBindingError(
             [
                 BindingFailure(
@@ -217,7 +217,7 @@ def bind_schema_value(
                     placeholder,
                     "constraints reference "
                     + ", ".join(
-                        sorted(entry.references)
+                        sorted(clause.references)
                     ),
                 )
             ]
@@ -237,7 +237,7 @@ def bind_schema_value(
         placeholder: value,
     }
     for constraint in _validation_order(
-        entry.constraints
+        clause.constraints
     ):
         try:
             constraint.check(

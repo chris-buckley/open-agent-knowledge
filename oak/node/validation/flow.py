@@ -45,8 +45,8 @@ def _check_redefined(
     if redefined:
         raise PydanticCustomError(
             "process_binding_redefined",
-            "{label} redefines visible local bindings: {bindings}",
-            {"label": label, "bindings": ", ".join(redefined)},
+            f"{label} redefines visible local bindings: {{bindings}}",
+            {"bindings": ", ".join(redefined)},
         )
 
 
