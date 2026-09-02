@@ -36,8 +36,14 @@ def _document(prefix: str) -> list[str]:
 
 def _parts(prefix: str) -> list[str]:
     if prefix == "xml":
-        return [f'xml_{part}_part = "<{part}>", lf, text_body, "</{part}>" ;' for part in PART_ORDER]
-    return [f'markdown_{part}_part = "~~~~{part}", lf, text_body, "~~~~" ;' for part in PART_ORDER]
+        return [
+            f'xml_{part}_part = "<{part}>", lf, text_body, "</{part}>" ;'
+            for part in PART_ORDER
+        ]
+    return [
+        f'markdown_{part}_part = "~~~~{part}", lf, text_body, "~~~~" ;'
+        for part in PART_ORDER
+    ]
 
 
 _BODY_ENTRIES = {

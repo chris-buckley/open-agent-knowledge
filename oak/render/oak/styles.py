@@ -80,7 +80,7 @@ def _rewrite(text: str) -> str:
     return text
 
 
-def _validate(path: str, text: str) -> list[StyleFailure]:
+def _style_failures(path: str, text: str) -> list[StyleFailure]:
     failures: list[StyleFailure] = []
     if "\n" in text or "\r" in text:
         failures.append(StyleFailure(path, "ste_line_count", "text must be one line"))
@@ -96,7 +96,7 @@ def _validate(path: str, text: str) -> list[StyleFailure]:
 
 def _styled_text(text: str, path: str, failures: list[StyleFailure]) -> str:
     rewritten = _rewrite(text)
-    failures.extend(_validate(path, rewritten))
+    failures.extend(_style_failures(path, rewritten))
     return rewritten
 
 

@@ -6,6 +6,12 @@ from collections import defaultdict
 from collections.abc import Sequence
 from collections.abc import Set as AbstractSet
 from itertools import combinations
+from typing import NamedTuple
+from typing import NamedTuple
+from typing import NamedTuple
+from typing import NamedTuple
+from typing import NamedTuple
+from typing import NamedTuple
 
 from pydantic_core import PydanticCustomError
 
@@ -37,7 +43,19 @@ from oak.node.validation.values import (
 from oak.rules.validation import rule_error
 from oak.vocabulary.text.target_path import target_id
 
-GuardAtom = tuple[str, ConditionOperator, object]
+class GuardAtom(NamedTuple):
+    """One guard comparison pinned to one state target."""
+
+    state: str
+    operator: ConditionOperator
+    operand: object
+
+
+class Bound(NamedTuple):
+    """One range endpoint and whether it is inclusive."""
+
+    operand: object
+    inclusive: bool
 
 
 def validate_trigger_contract(
@@ -100,11 +118,7 @@ def _guard_atom(
         )
 
         if static is not STATIC_MISSING:
-            return (
-                target_id(condition.left.state),
-                condition.operator,
-                static,
-            )
+            return GuardAtom(target_id(condition.left.state), condition.operator, static)
 
     if isinstance(condition.right, StateValue):
         static = static_value(
@@ -114,7 +128,7 @@ def _guard_atom(
         )
 
         if static is not STATIC_MISSING:
-            return (
+            return GuardAtom(
                 target_id(condition.right.state),
                 reverse_operator(condition.operator),
                 static,
@@ -141,7 +155,7 @@ def _guard_atoms(
         )
 
     if isinstance(condition, All):
-        result: list[GuardAtom] = []
+        atoms: list[GuardAtom] = []
 
         for child in condition.conditions:
             child_atoms = _guard_atoms(
@@ -153,9 +167,9 @@ def _guard_atoms(
             if child_atoms is None:
                 return None
 
-            result.extend(child_atoms)
+            atoms.extend(child_atoms)
 
-        return result
+        return atoms
 
     if isinstance(condition, Not):
         if not isinstance(condition.condition, Compare):
@@ -170,14 +184,7 @@ def _guard_atoms(
         if atom is None:
             return None
 
-        state, operator, value = atom
-        return [
-            (
-                state,
-                invert_operator(operator),
-                value,
-            )
-        ]
+        return [GuardAtom(atom.state, invert_operator(atom.operator), atom.operand)]
 
     return None
 
@@ -186,14 +193,8 @@ def _atom_accepts(
     atom: GuardAtom,
     candidate: object,
 ) -> bool | None:
-    _, operator, value = atom
-
     try:
-        return compare_static(
-            operator,
-            candidate,
-            value,
-        )
+        return compare_static(atom.operator, candidate, atom.operand)
 
     except PydanticCustomError:
         return None
@@ -201,12 +202,9 @@ def _atom_accepts(
 
 def _range_bounds(
     atoms: Sequence[GuardAtom],
-) -> tuple[
-    tuple[object, bool] | None,
-    tuple[object, bool] | None,
-] | None:
-    lower: tuple[object, bool] | None = None
-    upper: tuple[object, bool] | None = None
+) -> tuple[Bound | None, Bound | None] | None:
+    lower: Bound | None = None
+    upper: Bound | None = None
 
     for _, operator, value in atoms:
         if operator in (
@@ -216,11 +214,11 @@ def _range_bounds(
             inclusive = operator == "greater_than_or_equal"
 
             if lower is None:
-                lower = value, inclusive
+                lower = Bound(value, inclusive)
                 continue
 
             pair = ordered_pair(
-                lower[0],
+                lower.operand,
                 value,
             )
 
@@ -234,10 +232,10 @@ def _range_bounds(
                 or (
                     candidate == current
                     and not inclusive
-                    and lower[1]
+                    and lower.inclusive
                 )
             ):
-                lower = value, inclusive
+                lower = Bound(value, inclusive)
 
             continue
 
@@ -248,11 +246,11 @@ def _range_bounds(
             inclusive = operator == "less_than_or_equal"
 
             if upper is None:
-                upper = value, inclusive
+                upper = Bound(value, inclusive)
                 continue
 
             pair = ordered_pair(
-                upper[0],
+                upper.operand,
                 value,
             )
 
@@ -266,10 +264,10 @@ def _range_bounds(
                 or (
                     candidate == current
                     and not inclusive
-                    and upper[1]
+                    and upper.inclusive
                 )
             ):
-                upper = value, inclusive
+                upper = Bound(value, inclusive)
 
     return lower, upper
 
@@ -279,23 +277,23 @@ def _atoms_conflict(
     right: Sequence[GuardAtom],
 ) -> bool:
     states = {
-        atom[0]
+        atom.state
         for atom in left
     } & {
-        atom[0]
+        atom.state
         for atom in right
     }
 
     for state in states:
         combined = [
             atom
-            for atom in left + right
-            if atom[0] == state
+            for atom in (*left, *right)
+            if atom.state == state
         ]
         equals = [
-            atom[2]
+            atom.operand
             for atom in combined
-            if atom[1] == "equals"
+            if atom.operator == "equals"
         ]
 
         if equals:
@@ -331,8 +329,8 @@ def _atoms_conflict(
             continue
 
         pair = ordered_pair(
-            lower[0],
-            upper[0],
+            lower.operand,
+            upper.operand,
         )
 
         if pair is None:
@@ -344,8 +342,8 @@ def _atoms_conflict(
             return True
 
         if lower_value == upper_value and not (
-            lower[1]
-            and upper[1]
+            lower.inclusive
+            and upper.inclusive
         ):
             return True
 

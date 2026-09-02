@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from oak.node.parts.processes.model import Process
 
 
-def _check_value(value: Value, visible: AbstractSet[str]) -> None:
+def _check_binding_visible(value: Value, visible: AbstractSet[str]) -> None:
     if isinstance(value, BindingValue) and value.binding not in visible:
         raise PydanticCustomError(
             "unbound_process_binding",
@@ -50,7 +50,7 @@ def _check_redefined(
         )
 
 
-def _promote(outputs: AbstractSet[str], visible: set[str]) -> None:
+def _promote_outputs(outputs: AbstractSet[str], visible: set[str]) -> None:
     _check_redefined(outputs, visible, "process")
     visible.update(outputs)
 
@@ -94,11 +94,11 @@ def visible_bindings(steps: Sequence[Step], initial: AbstractSet[str]) -> set[st
             )
 
         for value in step_values(step):
-            _check_value(value, visible)
+            _check_binding_visible(value, visible)
 
         match step:
             case Act() | Call():
-                _promote(set(step.outputs), visible)
+                _promote_outputs(set(step.outputs), visible)
 
             case If():
                 visible_bindings(step.then, visible)

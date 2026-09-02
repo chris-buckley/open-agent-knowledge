@@ -109,7 +109,7 @@ def parse_binding(
     )
 
 
-def _suffix_value(
+def _suffix_value_end(
     source: str,
     position: int,
 ) -> int | None:
@@ -178,7 +178,7 @@ def parse_suffix(
                 return None
 
             value_start = end + 1
-            value_end = _suffix_value(
+            value_end = _suffix_value_end(
                 source,
                 value_start,
             )

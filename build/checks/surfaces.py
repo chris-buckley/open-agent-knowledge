@@ -9,15 +9,54 @@ from build.docs import documents
 from build.surfaces import (
     AUTHORABLE_MODELS,
     model_examples,
-    parse_surface,
     slug,
     surface_example,
     surface_instance,
 )
+from oak.base import OakModel
+from oak.base import OakModel
+from oak.base import OakModel
+from oak.base import OakModel
+from oak.base import OakModel
 from oak.parse.document import parse
+from oak.parse.fragments import parse_fragment
+from oak.parse.fragments import parse_fragment
+from oak.parse.fragments import parse_fragment
+from oak.parse.fragments import parse_fragment
+from oak.parse.fragments import parse_fragment
 from oak.render import render
 from oak.rules.validation import RULES
+from oak.surface.model import Surface
+from oak.surface.model import Surface
+from oak.surface.model import Surface
+from oak.surface.model import Surface
+from oak.surface.model import Surface
 from oak.surface.registry import SURFACES, surface_for
+
+
+def parse_surface(surface: Surface, text: str, *, grouping: str = "xml") -> OakModel:
+    """Parse one rendered surface through the intentional fragment API."""
+    return parse_fragment(surface.model, text, grouping=grouping, path=surface.id)
+
+
+def parse_surface(surface: Surface, text: str, *, grouping: str = "xml") -> OakModel:
+    """Parse one rendered surface through the intentional fragment API."""
+    return parse_fragment(surface.model, text, grouping=grouping, path=surface.id)
+
+
+def parse_surface(surface: Surface, text: str, *, grouping: str = "xml") -> OakModel:
+    """Parse one rendered surface through the intentional fragment API."""
+    return parse_fragment(surface.model, text, grouping=grouping, path=surface.id)
+
+
+def parse_surface(surface: Surface, text: str, *, grouping: str = "xml") -> OakModel:
+    """Parse one rendered surface through the intentional fragment API."""
+    return parse_fragment(surface.model, text, grouping=grouping, path=surface.id)
+
+
+def parse_surface(surface: Surface, text: str, *, grouping: str = "xml") -> OakModel:
+    """Parse one rendered surface through the intentional fragment API."""
+    return parse_fragment(surface.model, text, grouping=grouping, path=surface.id)
 
 
 def validate_surfaces() -> None:

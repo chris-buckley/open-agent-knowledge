@@ -71,96 +71,76 @@ def compare_static(
         ) from None
 
 
+def _static_compare(index: NodeIndex, source: Entry, condition: Compare) -> bool | None:
+    if _same_dynamic_value(condition.left, condition.right):
+        if condition.operator == "equals":
+            return True
+
+        if condition.operator == "not_equals":
+            return False
+
+        return None
+
+    left = static_value(index, source, condition.left)
+    right = static_value(index, source, condition.right)
+
+    if left is STATIC_MISSING or right is STATIC_MISSING:
+        return None
+
+    return compare_static(condition.operator, left, right)
+
+
+def _static_all(index: NodeIndex, source: Entry, condition: All) -> bool | None:
+    unknown = False
+
+    for child in condition.conditions:
+        decision = condition_result(index, source, child)
+
+        if decision is False:
+            return False
+
+        if decision is None:
+            unknown = True
+
+    return None if unknown else True
+
+
+def _static_any(index: NodeIndex, source: Entry, condition: Any) -> bool | None:
+    unknown = False
+
+    for child in condition.conditions:
+        decision = condition_result(index, source, child)
+
+        if decision is True:
+            return True
+
+        if decision is None:
+            unknown = True
+
+    return None if unknown else False
+
+
 def condition_result(
     index: NodeIndex,
     source: Entry,
     condition: Condition,
 ) -> bool | None:
     """Return one statically known condition result when possible."""
-    if isinstance(condition, Compare):
-        if _same_dynamic_value(
-            condition.left,
-            condition.right,
-        ):
-            if condition.operator == "equals":
-                return True
+    match condition:
+        case Compare():
+            return _static_compare(index, source, condition)
 
-            if condition.operator == "not_equals":
-                return False
+        case All():
+            return _static_all(index, source, condition)
 
-            return None
+        case Any():
+            return _static_any(index, source, condition)
 
-        left = static_value(
-            index,
-            source,
-            condition.left,
-        )
-        right = static_value(
-            index,
-            source,
-            condition.right,
-        )
+        case Not():
+            decision = condition_result(index, source, condition.condition)
+            return None if decision is None else not decision
 
-        if left is STATIC_MISSING or right is STATIC_MISSING:
-            return None
-
-        return compare_static(
-            condition.operator,
-            left,
-            right,
-        )
-
-    if isinstance(condition, All):
-        unknown = False
-
-        for child in condition.conditions:
-            decision = condition_result(
-                index,
-                source,
-                child,
-            )
-
-            if decision is False:
-                return False
-
-            if decision is None:
-                unknown = True
-
-        return None if unknown else True
-
-    if isinstance(condition, Any):
-        unknown = False
-
-        for child in condition.conditions:
-            decision = condition_result(
-                index,
-                source,
-                child,
-            )
-
-            if decision is True:
-                return True
-
-            if decision is None:
-                unknown = True
-
-        return None if unknown else False
-
-    if isinstance(condition, Not):
-        decision = condition_result(
-            index,
-            source,
-            condition.condition,
-        )
-        return (
-            None
-            if decision is None
-            else not decision
-        )
-
-    raise TypeError(
-        f"unsupported condition {type(condition).__name__}"
-    )
+    raise TypeError(f"unsupported condition {type(condition).__name__}")
 
 
 def validate_condition(

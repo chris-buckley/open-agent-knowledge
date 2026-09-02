@@ -11,7 +11,7 @@ from oak.node.interpretation import (
     TYPED_ENTRY_INSTRUCTION,
 )
 from oak.node.model import Node
-from oak.node.parts.processes.steps import Act, Call, iter_steps
+from oak.node.parts.processes.steps import Act, Assert, Call, Foreach, Join, Par, While, iter_steps
 
 
 def instruction_lines(node: Node) -> list[str]:
@@ -24,14 +24,17 @@ def instruction_lines(node: Node) -> list[str]:
     )
     if node.processes or node.triggers:
         lines.append(REFERENCE_INSTRUCTION)
-    if any(step.kind in {"assert", "foreach", "while", "par", "join"} for step in steps):
+    if any(isinstance(step, (Assert, Foreach, While, Par, Join)) for step in steps):
         lines.append(CONTROL_INSTRUCTION)
     if (
         any(process.input is not None or process.output is not None for process in node.processes)
         or any(isinstance(step, Call) and (step.inputs or step.outputs) for step in steps)
     ):
         lines.append(CONTRACT_INSTRUCTION)
-    if any(isinstance(step, Act) and (step.input is not None or step.output is not None) for step in steps):
+    if any(
+        isinstance(step, Act) and (step.input is not None or step.output is not None)
+        for step in steps
+    ):
         lines.append(ACT_SCHEMA_INSTRUCTION)
     if any(trigger.seed for trigger in node.triggers):
         lines.append(TRIGGER_SEED_INSTRUCTION)

@@ -178,6 +178,20 @@ ImportReference = tuple[
 ]
 
 
+def validate_architecture() -> None:
+    """Verify dependency direction, exports, and obsolete implementation."""
+    _validate_guard_independence()
+    _validate_dependency_direction()
+    _validate_leaf_imports()
+    _validate_private_parser_imports()
+    _validate_explicit_exports()
+    _validate_initializer_purity()
+    _validate_obsolete_paths_and_imports()
+    _validate_cleanup_tokens()
+    _validate_shared_symbol_ownership()
+    _validate_no_pytest_dependency()
+
+
 def _python_files(
     directory: Path,
 ) -> Iterator[Path]:
@@ -339,7 +353,7 @@ def _matches_prefix(
     )
 
 
-def _reference_matches(
+def _matching_target(
     module: str,
     names: tuple[str, ...],
     prefixes: Iterable[str],
@@ -369,7 +383,7 @@ def _reject_dependencies(
             names,
             line,
         ) in _import_references(path):
-            matched = _reference_matches(
+            matched = _matching_target(
                 module,
                 names,
                 prefixes,
@@ -843,7 +857,7 @@ def _validate_guard_independence() -> None:
     ) in _import_references(
         _ARCHITECTURE_PATH
     ):
-        matched = _reference_matches(
+        matched = _matching_target(
             module,
             names,
             (
@@ -896,7 +910,7 @@ def _validate_obsolete_paths_and_imports() -> None:
             names,
             line,
         ) in _import_references(path):
-            matched = _reference_matches(
+            matched = _matching_target(
                 module,
                 names,
                 _OBSOLETE_IMPORTS,
@@ -933,7 +947,7 @@ def _validate_cleanup_tokens() -> None:
 def _assigned_names(
     path: Path,
 ) -> set[str]:
-    result: set[str] = set()
+    names: set[str] = set()
 
     for statement in _syntax_tree(path).body:
         targets: tuple[ast.expr, ...] = ()
@@ -959,11 +973,11 @@ def _assigned_names(
                 target,
                 ast.Name,
             ):
-                result.add(
+                names.add(
                     target.id
                 )
 
-    return result
+    return names
 
 
 def _validate_shared_symbol_ownership() -> None:
@@ -1020,7 +1034,7 @@ def _validate_no_pytest_dependency() -> None:
             names,
             line,
         ) in _import_references(path):
-            matched = _reference_matches(
+            matched = _matching_target(
                 module,
                 names,
                 ("pytest",),
@@ -1041,19 +1055,6 @@ def _validate_no_pytest_dependency() -> None:
             "the refactor created a tests directory"
         )
 
-
-def validate_architecture() -> None:
-    """Verify dependency direction, exports, and obsolete implementation."""
-    _validate_guard_independence()
-    _validate_dependency_direction()
-    _validate_leaf_imports()
-    _validate_private_parser_imports()
-    _validate_explicit_exports()
-    _validate_initializer_purity()
-    _validate_obsolete_paths_and_imports()
-    _validate_cleanup_tokens()
-    _validate_shared_symbol_ownership()
-    _validate_no_pytest_dependency()
 
 
 __all__ = [

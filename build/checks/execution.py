@@ -136,14 +136,14 @@ def validate_execution() -> None:
             True,
         ),
     }
-    result = execute(
+    parallel_execution = execute(
         parallel,
         Arrival(event="Run parallel work."),
         {"state.done": False},
         act=lambda _step, _values: {},
         tools=tools,
     )
-    if result.state != {"state.done": True}:
+    if parallel_execution.state != {"state.done": True}:
         raise RuntimeError(
             "parallel or foreach execution failed"
         )
@@ -218,7 +218,7 @@ def validate_execution() -> None:
                 "round trip changed text"
             )
 
-    result = execute(
+    contract_execution = execute(
         contract,
         Arrival(
             event="A name arrives.",
@@ -233,7 +233,7 @@ def validate_execution() -> None:
             "NORMAL_NAME": values["RAW_NAME"].strip().title()
         },
     )
-    if result.emissions != [
+    if contract_execution.emissions != [
         Emission(
             interface="interface.result",
             values={"NORMAL_NAME": "Ada"},

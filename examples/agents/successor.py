@@ -27,8 +27,10 @@ from oak import (
     LiteralValue,
     Node,
     NonEmpty,
+    OakParseError,
     OneOf,
     Process,
+    ResolutionError,
     Schema,
     Set,
     State,
@@ -776,13 +778,13 @@ def _verify_successor_tool(_step, values):
     try:
         current, candidate = parse(current_text), parse(candidate_text)
         parses = True
-    except Exception:
+    except OakParseError:
         pass
     if candidate is not None:
         try:
             resolve(candidate)
             resolves = True
-        except Exception:
+        except ResolutionError:
             pass
         canonical = render(candidate) == candidate_text
     invariants_preserved = scope_exact = False

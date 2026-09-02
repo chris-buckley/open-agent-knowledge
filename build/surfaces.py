@@ -47,7 +47,6 @@ from oak.node.parts import (
     While,
     where,
 )
-from oak.parse.fragments import parse_fragment
 from oak.render.oak.data import (
     constant_text,
     constraint_text,
@@ -192,7 +191,7 @@ def field_description(
     return field.description
 
 
-def _guaranteed(
+def _always_non_empty(
     surface: Surface,
     name: str,
 ) -> bool:
@@ -262,7 +261,7 @@ def surface_schema(
                 Type(of="string"),
                 *(
                     [NonEmpty()]
-                    if _guaranteed(
+                    if _always_non_empty(
                         surface,
                         field.name,
                     )
@@ -279,7 +278,7 @@ def surface_schema(
     )
 
 
-def _instance(
+def _matching_example(
     surface: Surface,
 ) -> OakModel:
     matches = [
@@ -304,7 +303,7 @@ def surface_example(
     grouping: str = "xml",
 ) -> str:
     """Render one canonical example of one surface."""
-    instance = _instance(surface)
+    instance = _matching_example(surface)
 
     if isinstance(instance, Node):
         from oak.render import render
@@ -405,21 +404,6 @@ def surface_example(
     )
 
 
-def parse_surface(
-    surface: Surface,
-    text: str,
-    *,
-    grouping: str = "xml",
-) -> OakModel:
-    """Parse one rendered surface through the intentional fragment API."""
-    return parse_fragment(
-        surface.model,
-        text,
-        grouping=grouping,
-        path=surface.id,
-    )
-
-
 def surface_grammar(
     surface: Surface,
 ) -> str:
@@ -434,27 +418,8 @@ def surface_grammar(
     )
 
 
-def model_surfaces(
-    model: type[OakModel],
-) -> tuple[Surface, ...]:
-    """Return every surface for one authorable model."""
-    return tuple(
-        surface
-        for surface in SURFACES
-        if surface.model is model
-    )
-
-
-def all_surface_schemas() -> list[Schema]:
-    """Return every generated surface schema."""
-    return [
-        surface_schema(surface)
-        for surface in SURFACES
-    ]
-
-
 def surface_instance(
     surface: Surface,
 ) -> OakModel:
     """Return the validated model example selected by one surface."""
-    return _instance(surface)
+    return _matching_example(surface)

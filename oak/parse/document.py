@@ -138,7 +138,7 @@ def parse(
         ),
     }
 
-    data: dict[str, object] = {}
+    node_fields: dict[str, object] = {}
 
     for part in PART_ORDER:
         if part not in parts:
@@ -147,7 +147,7 @@ def parse(
         body, start = parts[part]
 
         try:
-            data[part] = part_parsers[part](
+            node_fields[part] = part_parsers[part](
                 body,
                 start,
             )
@@ -164,7 +164,7 @@ def parse(
         raise OakParseError(failures)
 
     try:
-        return Node.model_validate(data)
+        return Node.model_validate(node_fields)
     except ValidationError as error:
         raise OakParseError(
             validation_failures(error)

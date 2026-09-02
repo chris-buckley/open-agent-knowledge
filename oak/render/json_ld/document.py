@@ -27,7 +27,7 @@ def node_json_ld(
     vocabulary = vocabulary_iri(
         vocabulary
     )
-    data: dict[str, object] = {
+    document_node: dict[str, object] = {
         "@context": json_ld_context(
             document,
             vocabulary,
@@ -43,7 +43,7 @@ def node_json_ld(
         )
 
         if entries:
-            data[field] = [
+            document_node[field] = [
                 entry_node(
                     document,
                     entry,
@@ -51,7 +51,7 @@ def node_json_ld(
                 for entry in entries
             ]
 
-    return data
+    return document_node
 
 
 def schema_json_ld(

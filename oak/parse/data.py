@@ -95,7 +95,7 @@ def parse_csv_value(
             str(error),
         )
 
-    result: list[dict[str, object]] = []
+    converted_rows: list[dict[str, object]] = []
 
     for row in rows:
         converted: dict[str, object] = {}
@@ -114,9 +114,9 @@ def parse_csv_value(
             except json.JSONDecodeError:
                 converted[key] = value
 
-        result.append(converted)
+        converted_rows.append(converted)
 
-    return result
+    return converted_rows
 
 
 def _block_body(
@@ -160,7 +160,7 @@ def parse_constants(
         "constants",
         start,
     )
-    result: list[Constant] = []
+    constants: list[Constant] = []
 
     while not cursor.at_end:
         if cursor.peek() == "":
@@ -216,7 +216,7 @@ def parse_constants(
                     )
                 constant_form = "yaml"
 
-            result.append(
+            constants.append(
                 Constant(
                     id=identifier,
                     form=constant_form,
@@ -228,7 +228,7 @@ def parse_constants(
             continue
 
         identifier, schema_target, placeholder, value = _inline_named_value(line, "constants", number)
-        result.append(
+        constants.append(
             Constant(
                 id=identifier,
                 schema=schema_target,
@@ -238,7 +238,7 @@ def parse_constants(
         )
         cursor.advance()
 
-    return result
+    return constants
 
 
 def _inline_named_value(
@@ -280,7 +280,7 @@ def parse_state(
         "state",
         start,
     )
-    result: list[State] = []
+    states: list[State] = []
 
     while not cursor.at_end:
         if cursor.peek() == "":
@@ -309,7 +309,7 @@ def parse_state(
             )
 
         identifier, schema_target, placeholder, value = _inline_named_value(line, "state", number)
-        result.append(
+        states.append(
             State(
                 id=identifier,
                 schema=schema_target,
@@ -319,7 +319,7 @@ def parse_state(
         )
         cursor.advance()
 
-    return result
+    return states
 
 
 __all__ = [

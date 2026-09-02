@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import NoReturn
 
@@ -12,7 +13,7 @@ from oak.parse.errors import fail
 class Cursor:
     """One current position in one source line sequence."""
 
-    lines: list[str]
+    lines: Sequence[str]
     path: str
     first_line: int
     index: int = 0

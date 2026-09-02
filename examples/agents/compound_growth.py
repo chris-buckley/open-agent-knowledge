@@ -259,15 +259,15 @@ def build() -> str:
     state = {STATE_CURRENT_BALANCE: 100, STATE_REFLECTION_TARGET: 800}
     emissions = []
     for _cycle in range(2):
-        result = execute(
+        cycle_execution = execute(
             parsed,
             Arrival(event=EVENT_GROWTH_REQUESTED),
             state,
             act=_reflect_act,
             tools=tools,
         )
-        state = dict(result.state)
-        emissions.extend(result.emissions)
+        state = dict(cycle_execution.state)
+        emissions.extend(cycle_execution.emissions)
     if len(emissions) != 2:
         raise RuntimeError("compound growth did not emit one reflection per cycle")
     if not (

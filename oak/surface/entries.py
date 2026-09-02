@@ -1,4 +1,4 @@
-"""Instruction, data, schema, trigger, interface, and node surfaces."""
+"""Instruction, constant, schema, state, trigger, interface, and node surface descriptors."""
 
 from __future__ import annotations
 
