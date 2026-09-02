@@ -132,20 +132,20 @@ def bind_schema(
         )
     )
 
-    for item in schema.where:
-        if item.placeholder not in values:
+    for clause in schema.where:
+        if clause.placeholder not in values:
             continue
 
         failure = _json_failure(
-            item.placeholder,
-            values[item.placeholder],
+            clause.placeholder,
+            values[clause.placeholder],
         )
         if failure is not None:
             failures.append(failure)
             continue
 
         for constraint in _validation_order(
-            item.constraints
+            clause.constraints
         ):
             if (
                 isinstance(
@@ -162,7 +162,7 @@ def bind_schema(
 
             try:
                 constraint.check(
-                    values[item.placeholder],
+                    values[clause.placeholder],
                     values,
                 )
             except (
@@ -175,7 +175,7 @@ def bind_schema(
                             "constraint_"
                             f"{constraint.kind}"
                         ),
-                        item.placeholder,
+                        clause.placeholder,
                         _error_message(error),
                     )
                 )
@@ -192,9 +192,9 @@ def bind_schema_value(
     """Validate one value against one schema placeholder."""
     entry = next(
         (
-            item
-            for item in schema.where
-            if item.placeholder == placeholder
+            clause
+            for clause in schema.where
+            if clause.placeholder == placeholder
         ),
         None,
     )

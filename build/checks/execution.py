@@ -622,7 +622,7 @@ def validate_source_routing() -> None:
             )
         ],
     )
-    payload = {
+    interface_values = {
         "interface.request": {
             "RAW_NAME": "Ada",
         }
@@ -631,7 +631,7 @@ def validate_source_routing() -> None:
         routed,
         Arrival(
             event="A name arrives.",
-            interfaces=payload,
+            interfaces=interface_values,
         ),
         {"state.route": ""},
     )
@@ -639,7 +639,7 @@ def validate_source_routing() -> None:
         routed,
         Arrival(
             source="interface.request",
-            interfaces=payload,
+            interfaces=interface_values,
         ),
         {"state.route": ""},
     )
@@ -655,7 +655,7 @@ def validate_source_routing() -> None:
         routed,
         Arrival(
             event="A name arrives by wire.",
-            interfaces=payload,
+            interfaces=interface_values,
         ),
         {"state.route": ""},
     )

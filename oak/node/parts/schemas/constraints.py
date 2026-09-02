@@ -382,12 +382,12 @@ class ListOf(ConstraintModel):
                 f"{value!r} is not text"
             )
 
-        for item in value.split(
+        for element in value.split(
             self.separator
         ):
             _validate_text(
                 self.item,
-                item,
+                element,
             )
 
 
