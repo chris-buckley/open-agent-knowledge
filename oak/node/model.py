@@ -14,6 +14,7 @@ from oak.node.parts import (
     State,
     Trigger,
 )
+from oak.node.validation.node import validate_node
 
 _NODE_EXAMPLE = {
     "instructions": [
@@ -69,7 +70,5 @@ class Node(OakModel):
 
     @model_validator(mode="after")
     def graph(self) -> Self:
-        from oak.node.graph import validate_graph
-
-        validate_graph(self)
+        validate_node(self)
         return self
