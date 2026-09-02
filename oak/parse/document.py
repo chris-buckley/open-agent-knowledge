@@ -6,7 +6,7 @@ from collections.abc import Callable
 
 from pydantic import ValidationError
 
-from oak.node import Node
+from oak.node.model import Node
 from oak.node.structure import PART_ORDER
 from oak.parse.data import (
     parse_constants,

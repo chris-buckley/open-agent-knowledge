@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from oak.base import OakModel
-from oak.node import Node
+from oak.node.model import Node
 from oak.node.parts.constants import Constant
 from oak.node.parts.instructions import Instruction
 from oak.node.parts.interfaces import Interface
