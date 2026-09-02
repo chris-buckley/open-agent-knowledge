@@ -12,7 +12,7 @@ from oak.execute.models import (
     Emission,
     ToolContract,
 )
-from oak.resolve import ResolvedGraph
+from oak.resolve.graph import ResolvedGraph
 
 ActiveInterfaces = Mapping[
     tuple[str, str],

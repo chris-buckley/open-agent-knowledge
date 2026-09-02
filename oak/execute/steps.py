@@ -17,7 +17,9 @@ from oak.execute.values import (
     validate_schema_values,
     validate_state_value,
 )
-from oak.node.parts import (
+from oak.node.parts.interfaces import Interface
+from oak.node.parts.processes.model import Process
+from oak.node.parts.processes.steps import (
     Act,
     Assert,
     Call,
@@ -25,17 +27,15 @@ from oak.node.parts import (
     Fail,
     Foreach,
     If,
-    Interface,
     Join,
     Par,
-    Process,
-    Schema,
-    SchemaBindingError,
     Set,
-    State,
     Step,
     While,
 )
+from oak.node.parts.schemas.binding import SchemaBindingError
+from oak.node.parts.schemas.model import Schema
+from oak.node.parts.state import State
 from oak.vocabulary.text.target_path import target_id
 
 

@@ -18,8 +18,9 @@ from pydantic_core import PydanticCustomError
 
 from oak.base import OakModel
 from oak.node.parts.processes.steps import Act
-from oak.vocabulary import NonBlankLine, Placeholder, TargetPath
-from oak.vocabulary.text.target_path import typed_target
+from oak.vocabulary.text.non_blank_line import NonBlankLine
+from oak.vocabulary.text.placeholder import Placeholder
+from oak.vocabulary.text.target_path import TargetPath, typed_target
 
 _STRICT = ConfigDict(
     strict=True,

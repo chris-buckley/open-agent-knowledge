@@ -9,27 +9,23 @@ from pydantic import JsonValue
 
 from oak.execute.context import ExecutionContext, ProcessFrame
 from oak.execute.models import ExecutionError
-from oak.node.parts import (
-    All,
-    Any,
-    BindingValue,
-    Compare,
-    Condition,
-    Constant,
-    ConstantValue,
-    InterfaceValue,
-    LiteralValue,
-    Not,
-    Schema,
-    SchemaBindingError,
-    State,
-    StateValue,
-    Value,
-)
+from oak.node.parts.constants import Constant
+from oak.node.parts.processes.conditions import All, Any, Compare, Condition, Not
 from oak.node.parts.processes.operators import (
     OrderedComparisonTypeError,
     compare_values,
 )
+from oak.node.parts.processes.values import (
+    BindingValue,
+    ConstantValue,
+    InterfaceValue,
+    LiteralValue,
+    StateValue,
+    Value,
+)
+from oak.node.parts.schemas.binding import SchemaBindingError
+from oak.node.parts.schemas.model import Schema
+from oak.node.parts.state import State
 from oak.vocabulary.text.target_path import target_id
 
 

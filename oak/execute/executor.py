@@ -11,7 +11,6 @@ from oak.execute.context import ExecutionContext, ProcessFrame
 from oak.execute.models import (
     ActHandler,
     Arrival,
-    Emission,
     ExecutionError,
     ExecutionResult,
     ToolContract,
@@ -23,17 +22,15 @@ from oak.execute.values import (
     resolve_value,
     validate_state_value,
 )
-from oak.node import Node
-from oak.node.parts import (
-    Interface,
-    Process,
-    Schema,
-    SchemaBindingError,
-    Trigger,
-)
+from oak.node.model import Node
+from oak.node.parts.interfaces import Interface
+from oak.node.parts.processes.model import Process
+from oak.node.parts.schemas.binding import SchemaBindingError
+from oak.node.parts.schemas.model import Schema
+from oak.node.parts.triggers import Trigger
 from oak.node.validation.tools import validate_tools
-from oak.resolve import DocumentLoader, ResolvedGraph, resolve
-from oak.vocabulary.text.target_path import target_id
+from oak.resolve.graph import ResolvedGraph
+from oak.resolve.resolver import DocumentLoader, resolve
 
 
 def active_interfaces(
