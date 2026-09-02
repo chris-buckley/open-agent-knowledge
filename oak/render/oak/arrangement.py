@@ -1,17 +1,8 @@
 """The fixed OAK arrangement."""
 
 from oak.node.parts.schemas import Schema
+from oak.node.structure import PART_ORDER
 from oak.render.oak.syntax import WHERE_HEADING, where_line
-
-PART_ORDER = (
-    "instructions",
-    "constants",
-    "schemas",
-    "state",
-    "triggers",
-    "processes",
-    "interfaces",
-)
 
 
 def schema_text(schema: Schema) -> str:

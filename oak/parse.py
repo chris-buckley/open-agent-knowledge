@@ -14,6 +14,7 @@ import yaml
 from pydantic import ValidationError
 
 from oak.node import Node
+from oak.node.interpretation import BUILT_IN_INSTRUCTIONS
 from oak.node.parts import (
     Act,
     All,
@@ -54,8 +55,8 @@ from oak.node.parts import (
     Where,
     While,
 )
-from oak.render.oak.arrangement import PART_ORDER
-from oak.render.oak.instructions import BUILT_IN_INSTRUCTIONS
+from oak.node.parts.processes.operators import OPERATOR_PHRASES
+from oak.node.structure import PART_ORDER
 from oak.surface import entry_surface
 from oak.vocabulary.text.placeholder import PLACEHOLDER_SYNTAX
 
@@ -469,18 +470,8 @@ def _value(source: str, path: str, line: int):
     return BindingValue(binding=target)
 
 
-_OPERATOR_PHRASES = (
-    (" does not equal ", "not_equals"),
-    (" is less than ", "less_than"),
-    (" is at most ", "less_than_or_equal"),
-    (" is greater than ", "greater_than"),
-    (" is at least ", "greater_than_or_equal"),
-    (" equals ", "equals"),
-)
-
-
 def _compare(source: str, path: str, line: int) -> Compare:
-    for phrase, operator in _OPERATOR_PHRASES:
+    for phrase, operator in OPERATOR_PHRASES:
         if phrase in source:
             left, right = source.split(phrase, 1)
             return Compare(left=_value(left, path, line), operator=operator, right=_value(right, path, line))
