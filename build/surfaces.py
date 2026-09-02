@@ -48,21 +48,23 @@ from oak.node.parts import (
     where,
 )
 from oak.parse.fragments import parse_fragment
+from oak.render.oak.data import (
+    constant_text,
+    constraint_text,
+    named_value_line,
+    where_line,
+)
 from oak.render.oak.groupings import (
     interface_xml,
     process_xml,
     schema_xml,
     trigger_body,
 )
-from oak.render.oak.syntax import (
+from oak.render.oak.processes import (
     binding_line,
     condition_text,
-    constant_text,
-    constraint_text,
-    named_value_line,
     process_value_text,
     step_lines,
-    where_line,
 )
 from oak.surface import SURFACES, Surface
 

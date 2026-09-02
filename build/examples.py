@@ -83,7 +83,14 @@ from oak import (
 from oak.base import OakModel
 from oak.parse import OakParseError
 from oak.parse.fragments import parse_fragment
-from oak.rules import ACT_GUIDANCE, DECOMPOSITION_GUIDANCE, DELEGATION_GUIDANCE, ENTRY_ID_GUIDANCE, NAMING_GUIDANCE, RULES
+from oak.rules import (
+    ACT_GUIDANCE,
+    DECOMPOSITION_GUIDANCE,
+    DELEGATION_GUIDANCE,
+    ENTRY_ID_GUIDANCE,
+    NAMING_GUIDANCE,
+    RULES,
+)
 from oak.surface import SURFACES, surface_for
 
 METADATA_MODELS = (
@@ -96,56 +103,177 @@ METADATA_MODELS = (
 )
 
 TEXT_EXAMPLES = (
-    (SlugId, ("triage-decision", "stdin", "mode")),
-    (Placeholder, ("COMMAND", "NEXT_ACTION")),
-    (TargetPath, ("process.route", "../shared/processes.oak.md#process.route")),
-    (DottedPath, ("constant.policy", "state.mode", "interface.stdin.COMMAND")),
-    (ValueReference, ("$constant.policy", "$state.mode", "$interface.stdin.COMMAND", "$RESULT")),
-    (ProcessName, ("Route command", "Write OAK")),
-    (NonBlankLine, ("Use the supplied schema.",)),
-    (RegexPattern, ("^[0-9]+$",)),
+    (
+        SlugId,
+        (
+            "triage-decision",
+            "stdin",
+            "mode",
+        ),
+    ),
+    (
+        Placeholder,
+        (
+            "COMMAND",
+            "NEXT_ACTION",
+        ),
+    ),
+    (
+        TargetPath,
+        (
+            "process.route",
+            "../shared/processes.oak.md#process.route",
+        ),
+    ),
+    (
+        DottedPath,
+        (
+            "constant.policy",
+            "state.mode",
+            "interface.stdin.COMMAND",
+        ),
+    ),
+    (
+        ValueReference,
+        (
+            "$constant.policy",
+            "$state.mode",
+            "$interface.stdin.COMMAND",
+            "$RESULT",
+        ),
+    ),
+    (
+        ProcessName,
+        (
+            "Route command",
+            "Write OAK",
+        ),
+    ),
+    (
+        NonBlankLine,
+        (
+            "Use the supplied schema.",
+        ),
+    ),
+    (
+        RegexPattern,
+        (
+            "^[0-9]+$",
+        ),
+    ),
 )
 
-_STRICT = ConfigDict(strict=True, regex_engine="rust-regex")
+_STRICT = ConfigDict(
+    strict=True,
+    regex_engine="rust-regex",
+)
 _MARKDOWN_FENCE = "~" * 4
 
 
-def _field_model(model: type[OakModel], name: str) -> type[OakModel]:
+def _field_model(
+    model: type[OakModel],
+    name: str,
+) -> type[OakModel]:
     field = model.model_fields[name]
-    annotation = Annotated[field.annotation, *field.metadata] if field.metadata else field.annotation
-    return create_model(f"{model.__name__}{name.title()}Example", __base__=OakModel, value=(annotation, ...))
+    annotation = (
+        Annotated[
+            field.annotation,
+            *field.metadata,
+        ]
+        if field.metadata
+        else field.annotation
+    )
+    return create_model(
+        f"{model.__name__}{name.title()}Example",
+        __base__=OakModel,
+        value=(
+            annotation,
+            ...,
+        ),
+    )
 
 
 def _validate_text_examples() -> None:
     for annotation, examples in TEXT_EXAMPLES:
-        adapter = TypeAdapter(annotation, config=_STRICT)
+        adapter = TypeAdapter(
+            annotation,
+            config=_STRICT,
+        )
+
         for example in examples:
-            adapter.validate_python(example)
+            adapter.validate_python(
+                example
+            )
 
 
 def _validate_metadata() -> None:
     for model in METADATA_MODELS:
         schema = model_schema(model)
-        if not schema.get("title") or not schema.get("description"):
-            raise RuntimeError(f"{model.__name__} lacks title or description")
+
+        if (
+            not schema.get("title")
+            or not schema.get("description")
+        ):
+            raise RuntimeError(
+                f"{model.__name__} lacks title or description"
+            )
+
         model_examples(model)
+
         for name, field in model.model_fields.items():
             if not field.description:
-                raise RuntimeError(f"{model.__name__}.{name} has no description")
+                raise RuntimeError(
+                    f"{model.__name__}.{name} has no description"
+                )
+
             if not field.examples:
-                raise RuntimeError(f"{model.__name__}.{name} has no examples")
-            example_model = _field_model(model, name)
+                raise RuntimeError(
+                    f"{model.__name__}.{name} has no examples"
+                )
+
+            example_model = _field_model(
+                model,
+                name,
+            )
+
             for example in field.examples:
-                example_model.model_validate({"value": example})
+                example_model.model_validate(
+                    {
+                        "value": example,
+                    }
+                )
 
 
-def _normalized(value: OakModel) -> object:
-    data = value.model_dump(mode="json", by_alias=True)
-    if isinstance(value, Instruction):
-        data.pop("id", None)
-    if isinstance(value, Node):
-        for instruction in data.get("instructions", []):
-            instruction.pop("id", None)
+def _normalized(
+    value: OakModel,
+) -> object:
+    data = value.model_dump(
+        mode="json",
+        by_alias=True,
+    )
+
+    if isinstance(
+        value,
+        Instruction,
+    ):
+        data.pop(
+            "id",
+            None,
+        )
+
+    if isinstance(
+        value,
+        Node,
+    ):
+        for instruction in data.get(
+            "instructions",
+            [],
+        ):
+            instruction.pop(
+                "id",
+                None,
+            )
+
     return data
 
 
@@ -154,58 +282,132 @@ def _freshness_gates() -> None:
     from build import docs as docs_build
     from build.docs import documents
 
-    expected_names = {slug(model.__name__) + ".md" for model in AUTHORABLE_MODELS}
+    expected_names = {
+        slug(model.__name__)
+        + ".md"
+        for model in AUTHORABLE_MODELS
+    }
+
     if set(documents()) != expected_names:
-        raise RuntimeError("freshness gate 1 failed")
+        raise RuntimeError(
+            "freshness gate 1 failed"
+        )
 
     for model in AUTHORABLE_MODELS:
-        for instance in model_examples(model):
+        for instance in model_examples(
+            model
+        ):
             surface_for(instance)
 
     for surface in SURFACES:
-        rendered = [field.name for field in surface.fields if field.role == "rendered"]
-        if len(rendered) != len(set(rendered)):
-            raise RuntimeError(f"freshness gate 3 failed for {surface.id}")
+        rendered = [
+            field.name
+            for field in surface.fields
+            if field.role == "rendered"
+        ]
+
+        if len(rendered) != len(
+            set(rendered)
+        ):
+            raise RuntimeError(
+                "freshness gate 3 failed "
+                f"for {surface.id}"
+            )
 
     for surface in SURFACES:
-        if {field.name for field in surface.fields} != set(surface.model.model_fields):
-            raise RuntimeError(f"freshness gate 4 failed for {surface.id}")
+        if {
+            field.name
+            for field in surface.fields
+        } != set(
+            surface.model.model_fields
+        ):
+            raise RuntimeError(
+                "freshness gate 4 failed "
+                f"for {surface.id}"
+            )
 
     for surface in SURFACES:
         surface_example(surface)
 
     for surface in SURFACES:
-        original = surface_instance(surface)
-        rebuilt = parse_surface(surface, surface_example(surface))
-        if _normalized(original) != _normalized(rebuilt):
-            raise RuntimeError(f"freshness gate 6 failed for {surface.id}")
+        original = surface_instance(
+            surface
+        )
+        rebuilt = parse_surface(
+            surface,
+            surface_example(surface),
+        )
 
-    parsed_docs = {name: parse(text) for name, text in documents().items()}
+        if _normalized(
+            original
+        ) != _normalized(
+            rebuilt
+        ):
+            raise RuntimeError(
+                "freshness gate 6 failed "
+                f"for {surface.id}"
+            )
+
+    parsed_docs = {
+        name: parse(text)
+        for name, text in documents().items()
+    }
 
     for name, node in parsed_docs.items():
-        if render(node, grouping="xml") + "\n" != documents()[name]:
-            raise RuntimeError(f"freshness gate 8 failed for {name}")
+        if (
+            render(
+                node,
+                grouping="xml",
+            )
+            + "\n"
+            != documents()[name]
+        ):
+            raise RuntimeError(
+                "freshness gate 8 failed "
+                f"for {name}"
+            )
 
     if not (
-        docs_build.SURFACE_SOURCE is authoring_build.SURFACE_SOURCE is SURFACES
-        and docs_build.RULE_SOURCE is authoring_build.RULE_SOURCE is RULES
+        docs_build.SURFACE_SOURCE
+        is authoring_build.SURFACE_SOURCE
+        is SURFACES
+        and docs_build.RULE_SOURCE
+        is authoring_build.RULE_SOURCE
+        is RULES
     ):
-        raise RuntimeError("freshness gate 9 failed")
+        raise RuntimeError(
+            "freshness gate 9 failed"
+        )
 
     _validate_outputs()
 
 
-def _contract_schemas() -> tuple[Schema, Schema]:
+def _contract_schemas() -> tuple[
+    Schema,
+    Schema,
+]:
     return (
         Schema(
             id="raw-name",
             template="<RAW_NAME>",
-            where=[where("RAW_NAME", Type(of="string"), NonEmpty())],
+            where=[
+                where(
+                    "RAW_NAME",
+                    Type(of="string"),
+                    NonEmpty(),
+                )
+            ],
         ),
         Schema(
             id="normal-name",
             template="<NORMAL_NAME>",
-            where=[where("NORMAL_NAME", Type(of="string"), NonEmpty())],
+            where=[
+                where(
+                    "NORMAL_NAME",
+                    Type(of="string"),
+                    NonEmpty(),
+                )
+            ],
         ),
     )
 
@@ -218,29 +420,85 @@ def _normalise_process() -> Process:
         output="schema.normal-name",
         steps=[
             Act(
-                instruction="Normalise <RAW_NAME> into <NORMAL_NAME>.",
+                instruction=(
+                    "Normalise <RAW_NAME> "
+                    "into <NORMAL_NAME>."
+                ),
                 inputs=[
                     ValueBinding(
                         placeholder="RAW_NAME",
-                        value=BindingValue(binding="RAW_NAME"),
+                        value=BindingValue(
+                            binding="RAW_NAME"
+                        ),
                     )
                 ],
-                outputs=["NORMAL_NAME"],
+                outputs=[
+                    "NORMAL_NAME"
+                ],
             )
         ],
     )
 
 
 def _validate_resolution() -> None:
-    shared = Node(schemas=[Schema(id="shared", template="<VALUE>", where=[where("VALUE", Type(of="string"))])])
-    root = Node(interfaces=[Interface(id="shared", direction="in", schema="shared.oak.md#schema.shared")])
-    graph = resolve(root, source="root.oak.md", load=lambda path: shared if path == "shared.oak.md" else None)
-    _document, schema = graph.entry("root.oak.md", "shared.oak.md#schema.shared", Schema)
+    shared = Node(
+        schemas=[
+            Schema(
+                id="shared",
+                template="<VALUE>",
+                where=[
+                    where(
+                        "VALUE",
+                        Type(of="string"),
+                    )
+                ],
+            )
+        ]
+    )
+    root = Node(
+        interfaces=[
+            Interface(
+                id="shared",
+                direction="in",
+                schema=(
+                    "shared.oak.md"
+                    "#schema.shared"
+                ),
+            )
+        ]
+    )
+    graph = resolve(
+        root,
+        source="root.oak.md",
+        load=(
+            lambda path: (
+                shared
+                if path == "shared.oak.md"
+                else None
+            )
+        ),
+    )
+    _document, schema = graph.entry(
+        "root.oak.md",
+        "shared.oak.md#schema.shared",
+        Schema,
+    )
+
     if schema.id != "shared":
-        raise RuntimeError("resolution selected the wrong schema")
+        raise RuntimeError(
+            "resolution selected the wrong schema"
+        )
 
     raw, normal = _contract_schemas()
-    target = Node(schemas=[raw, normal], processes=[_normalise_process()])
+    target = Node(
+        schemas=[
+            raw,
+            normal,
+        ],
+        processes=[
+            _normalise_process()
+        ],
+    )
     caller = Node(
         processes=[
             Process(
@@ -248,18 +506,43 @@ def _validate_resolution() -> None:
                 name="Handle request",
                 steps=[
                     Call(
-                        process="target.oak.md#process.normalise",
-                        inputs=[ValueBinding(placeholder="RAW_NAME", value=LiteralValue(value="Ada"))],
-                        outputs=["NORMAL_NAME"],
+                        process=(
+                            "target.oak.md"
+                            "#process.normalise"
+                        ),
+                        inputs=[
+                            ValueBinding(
+                                placeholder=(
+                                    "RAW_NAME"
+                                ),
+                                value=LiteralValue(
+                                    value="Ada"
+                                ),
+                            )
+                        ],
+                        outputs=[
+                            "NORMAL_NAME"
+                        ],
                     )
                 ],
             )
         ]
     )
-    def loader(path: str) -> Node | None:
-        return target if path == "target.oak.md" else None
 
-    resolve(caller, source="root.oak.md", load=loader)
+    def loader(
+        path: str,
+    ) -> Node | None:
+        return (
+            target
+            if path == "target.oak.md"
+            else None
+        )
+
+    resolve(
+        caller,
+        source="root.oak.md",
+        load=loader,
+    )
 
     failures = (
         (
@@ -269,7 +552,14 @@ def _validate_resolution() -> None:
                     Process(
                         id="handle",
                         name="Handle request",
-                        steps=[Call(process="target.oak.md#process.normalise")],
+                        steps=[
+                            Call(
+                                process=(
+                                    "target.oak.md"
+                                    "#process.normalise"
+                                )
+                            )
+                        ],
                     )
                 ]
             ),
@@ -281,7 +571,10 @@ def _validate_resolution() -> None:
                     Trigger(
                         id="invalid",
                         event="A name arrives.",
-                        process="target.oak.md#process.normalise",
+                        process=(
+                            "target.oak.md"
+                            "#process.normalise"
+                        ),
                     )
                 ]
             ),
@@ -293,7 +586,10 @@ def _validate_resolution() -> None:
                     Interface(
                         id="request-input",
                         direction="in",
-                        schema="target.oak.md#schema.raw-name",
+                        schema=(
+                            "target.oak.md"
+                            "#schema.raw-name"
+                        ),
                     )
                 ],
                 processes=[
@@ -302,17 +598,29 @@ def _validate_resolution() -> None:
                         name="Read request",
                         steps=[
                             Act(
-                                instruction="Read <MISSING> and produce <NOTE>.",
+                                instruction=(
+                                    "Read <MISSING> "
+                                    "and produce <NOTE>."
+                                ),
                                 inputs=[
                                     ValueBinding(
-                                        placeholder="MISSING",
+                                        placeholder=(
+                                            "MISSING"
+                                        ),
                                         value=InterfaceValue(
-                                            interface="interface.request-input",
-                                            placeholder="MISSING",
+                                            interface=(
+                                                "interface."
+                                                "request-input"
+                                            ),
+                                            placeholder=(
+                                                "MISSING"
+                                            ),
                                         ),
                                     )
                                 ],
-                                outputs=["NOTE"],
+                                outputs=[
+                                    "NOTE"
+                                ],
                             )
                         ],
                     )
@@ -326,7 +634,10 @@ def _validate_resolution() -> None:
                     Interface(
                         id="result-output",
                         direction="out",
-                        schema="target.oak.md#schema.normal-name",
+                        schema=(
+                            "target.oak.md"
+                            "#schema.normal-name"
+                        ),
                     )
                 ],
                 processes=[
@@ -334,13 +645,29 @@ def _validate_resolution() -> None:
                         id="emit-result",
                         name="Emit result",
                         steps=[
-                            Act(instruction="Produce <WRONG>.", outputs=["WRONG"]),
+                            Act(
+                                instruction=(
+                                    "Produce <WRONG>."
+                                ),
+                                outputs=[
+                                    "WRONG"
+                                ],
+                            ),
                             Emit(
-                                interface="interface.result-output",
+                                interface=(
+                                    "interface."
+                                    "result-output"
+                                ),
                                 bindings=[
                                     ValueBinding(
-                                        placeholder="WRONG",
-                                        value=BindingValue(binding="WRONG"),
+                                        placeholder=(
+                                            "WRONG"
+                                        ),
+                                        value=BindingValue(
+                                            binding=(
+                                                "WRONG"
+                                            )
+                                        ),
                                     )
                                 ],
                             ),
@@ -356,7 +683,10 @@ def _validate_resolution() -> None:
                     Interface(
                         id="result-output",
                         direction="out",
-                        schema="target.oak.md#schema.normal-name",
+                        schema=(
+                            "target.oak.md"
+                            "#schema.normal-name"
+                        ),
                     )
                 ],
                 processes=[
@@ -365,11 +695,18 @@ def _validate_resolution() -> None:
                         name="Emit blank",
                         steps=[
                             Emit(
-                                interface="interface.result-output",
+                                interface=(
+                                    "interface."
+                                    "result-output"
+                                ),
                                 bindings=[
                                     ValueBinding(
-                                        placeholder="NORMAL_NAME",
-                                        value=LiteralValue(value=""),
+                                        placeholder=(
+                                            "NORMAL_NAME"
+                                        ),
+                                        value=LiteralValue(
+                                            value=""
+                                        ),
                                     )
                                 ],
                             )
@@ -379,29 +716,55 @@ def _validate_resolution() -> None:
             ),
         ),
     )
+
     for code, invalid in failures:
         try:
-            resolve(invalid, source="root.oak.md", load=loader)
+            resolve(
+                invalid,
+                source="root.oak.md",
+                load=loader,
+            )
+
         except ResolutionError as error:
             if error.code != code:
-                raise RuntimeError(f"expected {code}, got {error.code}") from None
+                raise RuntimeError(
+                    f"expected {code}, "
+                    f"got {error.code}"
+                ) from None
+
         else:
-            raise RuntimeError(f"expected {code}")
+            raise RuntimeError(
+                f"expected {code}"
+            )
 
     relative_contract = Node(
         processes=[
             Process(
                 id="invalid",
                 name="Build result",
-                input="target.oak.md#schema.raw-name",
-                output="target.oak.md#schema.normal-name",
+                input=(
+                    "target.oak.md"
+                    "#schema.raw-name"
+                ),
+                output=(
+                    "target.oak.md"
+                    "#schema.normal-name"
+                ),
                 steps=[
                     Act(
-                        instruction="Read <RAW_NAME>.",
+                        instruction=(
+                            "Read <RAW_NAME>."
+                        ),
                         inputs=[
                             ValueBinding(
-                                placeholder="RAW_NAME",
-                                value=BindingValue(binding="RAW_NAME"),
+                                placeholder=(
+                                    "RAW_NAME"
+                                ),
+                                value=BindingValue(
+                                    binding=(
+                                        "RAW_NAME"
+                                    )
+                                ),
                             )
                         ],
                     )
@@ -409,22 +772,47 @@ def _validate_resolution() -> None:
             )
         ]
     )
+
     try:
-        resolve(relative_contract, source="root.oak.md", load=loader)
+        resolve(
+            relative_contract,
+            source="root.oak.md",
+            load=loader,
+        )
+
     except ResolutionError as error:
-        if error.code != "process_output_binding_mismatch":
+        if (
+            error.code
+            != "process_output_binding_mismatch"
+        ):
             raise RuntimeError(
-                "expected process_output_binding_mismatch, "
+                "expected "
+                "process_output_binding_mismatch, "
                 f"got {error.code}"
             ) from None
+
     else:
-        raise RuntimeError("expected process_output_binding_mismatch")
+        raise RuntimeError(
+            "expected "
+            "process_output_binding_mismatch"
+        )
 
 
 def _validate_execution() -> None:
     parallel = Node(
-        state=[State(id="done", value=False)],
-        triggers=[Trigger(id="run-trigger", event="Run parallel work.", process="process.run")],
+        state=[
+            State(
+                id="done",
+                value=False,
+            )
+        ],
+        triggers=[
+            Trigger(
+                id="run-trigger",
+                event="Run parallel work.",
+                process="process.run",
+            )
+        ],
         processes=[
             Process(
                 id="run",
@@ -432,52 +820,143 @@ def _validate_execution() -> None:
                 steps=[
                     Par(
                         steps=[
-                            Act(tool="tool-a", instruction="Produce <A>.", outputs=["A"]),
-                            Act(tool="tool-b", instruction="Produce <B>.", outputs=["B"]),
+                            Act(
+                                tool="tool-a",
+                                instruction=(
+                                    "Produce <A>."
+                                ),
+                                outputs=[
+                                    "A"
+                                ],
+                            ),
+                            Act(
+                                tool="tool-b",
+                                instruction=(
+                                    "Produce <B>."
+                                ),
+                                outputs=[
+                                    "B"
+                                ],
+                            ),
                         ]
                     ),
                     Join(),
                     Assert(
                         condition=All(
                             conditions=[
-                                Compare(left=BindingValue(binding="A"), operator="not_equals", right=LiteralValue(value="")),
-                                Compare(left=BindingValue(binding="B"), operator="not_equals", right=LiteralValue(value="")),
+                                Compare(
+                                    left=BindingValue(
+                                        binding="A"
+                                    ),
+                                    operator=(
+                                        "not_equals"
+                                    ),
+                                    right=LiteralValue(
+                                        value=""
+                                    ),
+                                ),
+                                Compare(
+                                    left=BindingValue(
+                                        binding="B"
+                                    ),
+                                    operator=(
+                                        "not_equals"
+                                    ),
+                                    right=LiteralValue(
+                                        value=""
+                                    ),
+                                ),
                             ]
                         )
                     ),
                     Foreach(
                         binding="ITEM",
-                        value=LiteralValue(value=[1, 2]),
+                        value=LiteralValue(
+                            value=[
+                                1,
+                                2,
+                            ]
+                        ),
                         steps=[
                             Act(
-                                instruction="Record <ITEM>.",
-                                inputs=[ValueBinding(placeholder="ITEM", value=BindingValue(binding="ITEM"))],
+                                instruction=(
+                                    "Record <ITEM>."
+                                ),
+                                inputs=[
+                                    ValueBinding(
+                                        placeholder=(
+                                            "ITEM"
+                                        ),
+                                        value=BindingValue(
+                                            binding=(
+                                                "ITEM"
+                                            )
+                                        ),
+                                    )
+                                ],
                             )
                         ],
                     ),
-                    Set(state="state.done", value=LiteralValue(value=True)),
+                    Set(
+                        state="state.done",
+                        value=LiteralValue(
+                            value=True
+                        ),
+                    ),
                 ],
             )
         ],
     )
     tools = {
-        "tool-a": ToolContract(lambda _step, _values: {"A": "a"}, frozenset(), frozenset({"A"}), True),
-        "tool-b": ToolContract(lambda _step, _values: {"B": "b"}, frozenset(), frozenset({"B"}), True),
+        "tool-a": ToolContract(
+            lambda _step, _values: {
+                "A": "a"
+            },
+            frozenset(),
+            frozenset({"A"}),
+            True,
+        ),
+        "tool-b": ToolContract(
+            lambda _step, _values: {
+                "B": "b"
+            },
+            frozenset(),
+            frozenset({"B"}),
+            True,
+        ),
     }
     result = execute(
         parallel,
-        Arrival(event="Run parallel work."),
-        {"state.done": False},
+        Arrival(
+            event="Run parallel work."
+        ),
+        {
+            "state.done": False,
+        },
         act=lambda _step, _values: {},
         tools=tools,
     )
-    if result.state != {"state.done": True}:
-        raise RuntimeError("parallel or foreach execution failed")
+
+    if result.state != {
+        "state.done": True,
+    }:
+        raise RuntimeError(
+            "parallel or foreach execution failed"
+        )
 
     raw, normal = _contract_schemas()
     contract = Node(
-        schemas=[raw, normal],
-        triggers=[Trigger(id="name", event="A name arrives.", process="process.handle")],
+        schemas=[
+            raw,
+            normal,
+        ],
+        triggers=[
+            Trigger(
+                id="name",
+                event="A name arrives.",
+                process="process.handle",
+            )
+        ],
         processes=[
             _normalise_process(),
             Process(
@@ -485,21 +964,42 @@ def _validate_execution() -> None:
                 name="Handle request",
                 steps=[
                     Call(
-                        process="process.normalise",
+                        process=(
+                            "process.normalise"
+                        ),
                         inputs=[
                             ValueBinding(
-                                placeholder="RAW_NAME",
-                                value=InterfaceValue(interface="interface.request", placeholder="RAW_NAME"),
+                                placeholder=(
+                                    "RAW_NAME"
+                                ),
+                                value=InterfaceValue(
+                                    interface=(
+                                        "interface.request"
+                                    ),
+                                    placeholder=(
+                                        "RAW_NAME"
+                                    ),
+                                ),
                             )
                         ],
-                        outputs=["NORMAL_NAME"],
+                        outputs=[
+                            "NORMAL_NAME"
+                        ],
                     ),
                     Emit(
-                        interface="interface.result",
+                        interface=(
+                            "interface.result"
+                        ),
                         bindings=[
                             ValueBinding(
-                                placeholder="NORMAL_NAME",
-                                value=BindingValue(binding="NORMAL_NAME"),
+                                placeholder=(
+                                    "NORMAL_NAME"
+                                ),
+                                value=BindingValue(
+                                    binding=(
+                                        "NORMAL_NAME"
+                                    )
+                                ),
                             )
                         ],
                     ),
@@ -507,46 +1007,120 @@ def _validate_execution() -> None:
             ),
         ],
         interfaces=[
-            Interface(id="request", direction="in", schema="schema.raw-name"),
-            Interface(id="result", direction="out", schema="schema.normal-name"),
+            Interface(
+                id="request",
+                direction="in",
+                schema="schema.raw-name",
+            ),
+            Interface(
+                id="result",
+                direction="out",
+                schema="schema.normal-name",
+            ),
         ],
     )
-    for grouping in ("xml", "markdown"):
-        rendered = render(contract, grouping=grouping)
-        if render(parse(rendered), grouping=grouping) != rendered:
-            raise RuntimeError(f"process contract {grouping} round trip changed text")
+
+    for grouping in (
+        "xml",
+        "markdown",
+    ):
+        rendered = render(
+            contract,
+            grouping=grouping,
+        )
+
+        if (
+            render(
+                parse(rendered),
+                grouping=grouping,
+            )
+            != rendered
+        ):
+            raise RuntimeError(
+                "process contract "
+                f"{grouping} round trip "
+                "changed text"
+            )
 
     result = execute(
         contract,
-        Arrival(event="A name arrives.", interfaces={"interface.request": {"RAW_NAME": " ada "}}),
+        Arrival(
+            event="A name arrives.",
+            interfaces={
+                "interface.request": {
+                    "RAW_NAME": " ada ",
+                }
+            },
+        ),
         {},
-        act=lambda _step, values: {"NORMAL_NAME": values["RAW_NAME"].strip().title()},
+        act=(
+            lambda _step, values: {
+                "NORMAL_NAME": (
+                    values["RAW_NAME"]
+                    .strip()
+                    .title()
+                )
+            }
+        ),
     )
-    if result.emissions != [Emission(interface="interface.result", values={"NORMAL_NAME": "Ada"})]:
-        raise RuntimeError("process contract execution failed")
+
+    if result.emissions != [
+        Emission(
+            interface="interface.result",
+            values={
+                "NORMAL_NAME": "Ada",
+            },
+        )
+    ]:
+        raise RuntimeError(
+            "process contract execution failed"
+        )
 
     try:
         execute(
             contract,
             Arrival(
                 event="A name arrives.",
-                interfaces={"interface.request": {"RAW_NAME": "Ada"}},
+                interfaces={
+                    "interface.request": {
+                        "RAW_NAME": "Ada",
+                    }
+                },
             ),
             {},
-            act=lambda _step, _values: {"NORMAL_NAME": ""},
+            act=lambda _step, _values: {
+                "NORMAL_NAME": ""
+            },
         )
+
     except ExecutionError as error:
-        if error.code != "invalid_process_output":
+        if (
+            error.code
+            != "invalid_process_output"
+        ):
             raise RuntimeError(
-                f"expected invalid_process_output, got {error.code}"
+                "expected invalid_process_output, "
+                f"got {error.code}"
             ) from None
+
     else:
-        raise RuntimeError("expected invalid_process_output")
+        raise RuntimeError(
+            "expected invalid_process_output"
+        )
 
 
 def _validate_while() -> None:
     recursive = Node(
-        state=[State(id="status", value="pending"), State(id="attempts", value=0)],
+        state=[
+            State(
+                id="status",
+                value="pending",
+            ),
+            State(
+                id="attempts",
+                value=0,
+            ),
+        ],
         processes=[
             Process(
                 id="wait-job",
@@ -556,14 +1130,30 @@ def _validate_while() -> None:
                         condition=All(
                             conditions=[
                                 Compare(
-                                    left=StateValue(state="state.status"),
-                                    operator="not_equals",
-                                    right=LiteralValue(value="complete"),
+                                    left=StateValue(
+                                        state=(
+                                            "state.status"
+                                        )
+                                    ),
+                                    operator=(
+                                        "not_equals"
+                                    ),
+                                    right=LiteralValue(
+                                        value="complete"
+                                    ),
                                 ),
                                 Compare(
-                                    left=StateValue(state="state.attempts"),
-                                    operator="less_than",
-                                    right=LiteralValue(value=3),
+                                    left=StateValue(
+                                        state=(
+                                            "state.attempts"
+                                        )
+                                    ),
+                                    operator=(
+                                        "less_than"
+                                    ),
+                                    right=LiteralValue(
+                                        value=3
+                                    ),
                                 ),
                             ]
                         ),
@@ -571,7 +1161,9 @@ def _validate_while() -> None:
                         steps=[
                             Set(
                                 state="state.status",
-                                value=LiteralValue(value="complete"),
+                                value=LiteralValue(
+                                    value="complete"
+                                ),
                             )
                         ],
                     )
@@ -580,39 +1172,78 @@ def _validate_while() -> None:
         ],
     )
     rendered = render(recursive)
-    if "WHILE LIMIT 3:" not in rendered or render(parse(rendered)) != rendered:
-        raise RuntimeError("recursive WHILE render or parse failed")
+
+    if (
+        "WHILE LIMIT 3:"
+        not in rendered
+        or render(
+            parse(rendered)
+        )
+        != rendered
+    ):
+        raise RuntimeError(
+            "recursive WHILE render or parse failed"
+        )
+
     linked = json.loads(
         render(
             recursive,
             render="json-ld",
-            document="https://example.org/oak/while.oak.md",
-            vocabulary="https://example.org/oak#",
+            document=(
+                "https://example.org/"
+                "oak/while.oak.md"
+            ),
+            vocabulary=(
+                "https://example.org/oak#"
+            ),
         )
     )
-    while_step = linked["processes"][0]["steps"][0]
+    while_step = (
+        linked["processes"][0]
+        ["steps"][0]
+    )
+
     if not (
-        while_step["@type"] == "oak:While"
+        while_step["@type"]
+        == "oak:While"
         and while_step["limit"] == 3
-        and while_step["condition"]["@type"] == "oak:All"
-        and len(while_step["steps"]) == 1
+        and while_step["condition"]["@type"]
+        == "oak:All"
+        and len(
+            while_step["steps"]
+        )
+        == 1
     ):
-        raise RuntimeError("WHILE JSON-LD is wrong")
+        raise RuntimeError(
+            "WHILE JSON-LD is wrong"
+        )
 
     progress = Node(
         schemas=[
             Schema(
                 id="progress-count",
                 template="<NEXT>",
-                where=[where("NEXT", Type(of="integer"))],
+                where=[
+                    where(
+                        "NEXT",
+                        Type(of="integer"),
+                    )
+                ],
             )
         ],
-        state=[State(id="current-count", value=0)],
+        state=[
+            State(
+                id="current-count",
+                value=0,
+            )
+        ],
         triggers=[
             Trigger(
                 id="count-requested",
                 event="Count to two.",
-                process="process.advance-count",
+                process=(
+                    "process.advance-count"
+                ),
             )
         ],
         processes=[
@@ -622,33 +1253,68 @@ def _validate_while() -> None:
                 steps=[
                     While(
                         condition=Compare(
-                            left=StateValue(state="state.current-count"),
-                            operator="less_than",
-                            right=LiteralValue(value=2),
+                            left=StateValue(
+                                state=(
+                                    "state."
+                                    "current-count"
+                                )
+                            ),
+                            operator=(
+                                "less_than"
+                            ),
+                            right=LiteralValue(
+                                value=2
+                            ),
                         ),
                         limit=3,
                         steps=[
                             ACT.tool(
                                 "counter.next",
-                                "Increment <COUNT> and produce <NEXT>.",
+                                (
+                                    "Increment <COUNT> "
+                                    "and produce <NEXT>."
+                                ),
                                 inputs=[
                                     ValueBinding(
-                                        placeholder="COUNT",
-                                        value=StateValue(state="state.current-count"),
+                                        placeholder=(
+                                            "COUNT"
+                                        ),
+                                        value=StateValue(
+                                            state=(
+                                                "state."
+                                                "current-count"
+                                            )
+                                        ),
                                     )
                                 ],
-                                outputs=["NEXT"],
+                                outputs=[
+                                    "NEXT"
+                                ],
                             ),
                             Set(
-                                state="state.current-count",
-                                value=BindingValue(binding="NEXT"),
+                                state=(
+                                    "state."
+                                    "current-count"
+                                ),
+                                value=BindingValue(
+                                    binding="NEXT"
+                                ),
                             ),
                             Emit(
-                                interface="interface.progress-count-output",
+                                interface=(
+                                    "interface."
+                                    "progress-count-output"
+                                ),
                                 bindings=[
                                     ValueBinding(
-                                        placeholder="NEXT",
-                                        value=BindingValue(binding="NEXT"),
+                                        placeholder=(
+                                            "NEXT"
+                                        ),
+                                        value=BindingValue(
+                                            binding=(
+                                                "NEXT"
+                                            )
+                                        ),
                                     )
                                 ],
                             ),
@@ -659,17 +1325,31 @@ def _validate_while() -> None:
         ],
         interfaces=[
             Interface(
-                id="progress-count-output",
+                id=(
+                    "progress-count-output"
+                ),
                 direction="out",
-                schema="schema.progress-count",
+                schema=(
+                    "schema.progress-count"
+                ),
             )
         ],
     )
     calls: list[int] = []
 
-    def next_count(_step, values):
-        calls.append(values["COUNT"])
-        return {"NEXT": values["COUNT"] + 1}
+    def next_count(
+        _step,
+        values,
+    ):
+        calls.append(
+            values["COUNT"]
+        )
+        return {
+            "NEXT": (
+                values["COUNT"]
+                + 1
+            )
+        }
 
     tool = ToolContract(
         next_count,
@@ -678,41 +1358,85 @@ def _validate_while() -> None:
     )
     completed = execute(
         progress,
-        Arrival(event="Count to two."),
-        {"state.current-count": 0},
-        tools={"counter.next": tool},
+        Arrival(
+            event="Count to two."
+        ),
+        {
+            "state.current-count": 0,
+        },
+        tools={
+            "counter.next": tool,
+        },
     )
+
     if not (
         calls == [0, 1]
-        and completed.state["state.current-count"] == 2
+        and completed.state[
+            "state.current-count"
+        ]
+        == 2
         and completed.emissions
         == [
             Emission(
-                interface="interface.progress-count-output",
-                values={"NEXT": 1},
+                interface=(
+                    "interface."
+                    "progress-count-output"
+                ),
+                values={
+                    "NEXT": 1,
+                },
             ),
             Emission(
-                interface="interface.progress-count-output",
-                values={"NEXT": 2},
+                interface=(
+                    "interface."
+                    "progress-count-output"
+                ),
+                values={
+                    "NEXT": 2,
+                },
             ),
         ]
     ):
-        raise RuntimeError("WHILE state, emissions, or fresh iteration scope is wrong")
+        raise RuntimeError(
+            "WHILE state, emissions, "
+            "or fresh iteration scope is wrong"
+        )
+
     skipped = execute(
         progress,
-        Arrival(event="Count to two."),
-        {"state.current-count": 2},
-        tools={"counter.next": tool},
+        Arrival(
+            event="Count to two."
+        ),
+        {
+            "state.current-count": 2,
+        },
+        tools={
+            "counter.next": tool,
+        },
     )
-    if calls != [0, 1] or skipped.emissions:
-        raise RuntimeError("WHILE did not test its condition before the first iteration")
+
+    if (
+        calls != [0, 1]
+        or skipped.emissions
+    ):
+        raise RuntimeError(
+            "WHILE did not test its condition "
+            "before the first iteration"
+        )
 
     limited = Node(
-        state=[State(id="status", value="pending")],
+        state=[
+            State(
+                id="status",
+                value="pending",
+            )
+        ],
         triggers=[
             Trigger(
                 id="poll-requested",
-                event="Poll without progress.",
+                event=(
+                    "Poll without progress."
+                ),
                 process="process.poll-job",
             )
         ],
@@ -723,141 +1447,460 @@ def _validate_while() -> None:
                 steps=[
                     While(
                         condition=Compare(
-                            left=StateValue(state="state.status"),
-                            operator="not_equals",
-                            right=LiteralValue(value="complete"),
+                            left=StateValue(
+                                state="state.status"
+                            ),
+                            operator=(
+                                "not_equals"
+                            ),
+                            right=LiteralValue(
+                                value="complete"
+                            ),
                         ),
                         limit=2,
-                        steps=[ACT("Wait for the next status.")],
+                        steps=[
+                            ACT(
+                                "Wait for the "
+                                "next status."
+                            )
+                        ],
                     )
                 ],
             )
         ],
     )
+
     try:
         execute(
             limited,
-            Arrival(event="Poll without progress."),
-            {"state.status": "pending"},
+            Arrival(
+                event=(
+                    "Poll without progress."
+                )
+            ),
+            {
+                "state.status": "pending",
+            },
             act=lambda _step, _values: {},
         )
+
     except ExecutionError as error:
-        if error.code != "while_limit_reached":
+        if (
+            error.code
+            != "while_limit_reached"
+        ):
             raise RuntimeError(
-                f"expected while_limit_reached, got {error.code}"
+                "expected while_limit_reached, "
+                f"got {error.code}"
             ) from None
+
     else:
-        raise RuntimeError("expected while_limit_reached")
+        raise RuntimeError(
+            "expected while_limit_reached"
+        )
 
 
 def _validate_part_omission() -> None:
-    if render(Node(), grouping="xml") != "" or render(Node(), grouping="markdown") != "":
-        raise RuntimeError("empty node must render as one empty document")
-    if parse("").model_dump() != Node().model_dump():
-        raise RuntimeError("empty document must parse as one empty node")
-    single = Node(instructions=[Instruction(id="record", body="Record the mode.")])
-    sparse = Node(state=[State(id="mode", value="idle")])
-    state_preamble = "State holds values that persist and can change while processes run."
-    expected_renders = {
-        ("single", "xml"): "<instructions>\nRecord the mode.\n</instructions>",
-        ("single", "markdown"): f"{_MARKDOWN_FENCE}instructions\nRecord the mode.\n{_MARKDOWN_FENCE}",
-        ("sparse", "xml"): f'<instructions>\n{state_preamble}\n</instructions>\n\n<state>\nmode: "idle"\n</state>',
-        ("sparse", "markdown"): f'{_MARKDOWN_FENCE}instructions\n{state_preamble}\n{_MARKDOWN_FENCE}\n\n{_MARKDOWN_FENCE}state\nmode: "idle"\n{_MARKDOWN_FENCE}',
-    }
-    for name, node in (("single", single), ("sparse", sparse)):
-        for grouping in ("xml", "markdown"):
-            rendered = render(node, grouping=grouping)
-            if rendered != expected_renders[name, grouping]:
-                raise RuntimeError(f"{name} {grouping} render changed")
-            if _normalized(parse(rendered)) != _normalized(node):
-                raise RuntimeError(f"{name} {grouping} parse changed")
-    invalid_documents = (
-        ('<state>\nmode: "idle"\n</state>\n\n<constants>\nlimit: 1\n</constants>', "part_order"),
-        ('<state>\nmode: "idle"\n</state>\n\n<state>\nmode: "idle"\n</state>', "part_order"),
-        ('<constants>\nlimit: 1\n</constants>\n<state>\nmode: "idle"\n</state>', "part_separator"),
+    if (
+        render(
+            Node(),
+            grouping="xml",
+        )
+        != ""
+        or render(
+            Node(),
+            grouping="markdown",
+        )
+        != ""
+    ):
+        raise RuntimeError(
+            "empty node must render "
+            "as one empty document"
+        )
+
+    if (
+        parse("").model_dump()
+        != Node().model_dump()
+    ):
+        raise RuntimeError(
+            "empty document must parse "
+            "as one empty node"
+        )
+
+    single = Node(
+        instructions=[
+            Instruction(
+                id="record",
+                body="Record the mode.",
+            )
+        ]
     )
+    sparse = Node(
+        state=[
+            State(
+                id="mode",
+                value="idle",
+            )
+        ]
+    )
+    state_preamble = (
+        "State holds values that persist "
+        "and can change while processes run."
+    )
+    expected_renders = {
+        (
+            "single",
+            "xml",
+        ): (
+            "<instructions>\n"
+            "Record the mode.\n"
+            "</instructions>"
+        ),
+        (
+            "single",
+            "markdown",
+        ): (
+            f"{_MARKDOWN_FENCE}instructions\n"
+            "Record the mode.\n"
+            f"{_MARKDOWN_FENCE}"
+        ),
+        (
+            "sparse",
+            "xml",
+        ): (
+            "<instructions>\n"
+            f"{state_preamble}\n"
+            "</instructions>\n\n"
+            "<state>\n"
+            'mode: "idle"\n'
+            "</state>"
+        ),
+        (
+            "sparse",
+            "markdown",
+        ): (
+            f"{_MARKDOWN_FENCE}instructions\n"
+            f"{state_preamble}\n"
+            f"{_MARKDOWN_FENCE}\n\n"
+            f"{_MARKDOWN_FENCE}state\n"
+            'mode: "idle"\n'
+            f"{_MARKDOWN_FENCE}"
+        ),
+    }
+
+    for name, node in (
+        (
+            "single",
+            single,
+        ),
+        (
+            "sparse",
+            sparse,
+        ),
+    ):
+        for grouping in (
+            "xml",
+            "markdown",
+        ):
+            rendered = render(
+                node,
+                grouping=grouping,
+            )
+
+            if rendered != expected_renders[
+                name,
+                grouping,
+            ]:
+                raise RuntimeError(
+                    f"{name} {grouping} "
+                    "render changed"
+                )
+
+            if _normalized(
+                parse(rendered)
+            ) != _normalized(node):
+                raise RuntimeError(
+                    f"{name} {grouping} "
+                    "parse changed"
+                )
+
+    invalid_documents = (
+        (
+            (
+                "<state>\n"
+                'mode: "idle"\n'
+                "</state>\n\n"
+                "<constants>\n"
+                "limit: 1\n"
+                "</constants>"
+            ),
+            "part_order",
+        ),
+        (
+            (
+                "<state>\n"
+                'mode: "idle"\n'
+                "</state>\n\n"
+                "<state>\n"
+                'mode: "idle"\n'
+                "</state>"
+            ),
+            "part_order",
+        ),
+        (
+            (
+                "<constants>\n"
+                "limit: 1\n"
+                "</constants>\n"
+                "<state>\n"
+                'mode: "idle"\n'
+                "</state>"
+            ),
+            "part_separator",
+        ),
+    )
+
     for source, code in invalid_documents:
         try:
             parse(source)
+
         except OakParseError as error:
-            if error.failures[0].code != code:
-                raise RuntimeError(f"expected {code}, got {error.failures[0].code}") from None
+            if (
+                error.failures[0].code
+                != code
+            ):
+                raise RuntimeError(
+                    f"expected {code}, got "
+                    f"{error.failures[0].code}"
+                ) from None
+
         else:
-            raise RuntimeError(f"expected {code}")
+            raise RuntimeError(
+                f"expected {code}"
+            )
 
 
 def _validate_act_authoring() -> None:
-    from oak.render.oak.syntax import step_lines
+    from oak.render.oak.processes import step_lines
 
     native = ACT(
-        "Classify <REPORT> and produce <SEVERITY>.",
+        (
+            "Classify <REPORT> "
+            "and produce <SEVERITY>."
+        ),
         inputs=[
             ValueBinding(
                 placeholder="REPORT",
                 value=InterfaceValue(
-                    interface="interface.report",
+                    interface=(
+                        "interface.report"
+                    ),
                     placeholder="REPORT",
                 ),
             )
         ],
-        outputs=["SEVERITY"],
+        outputs=[
+            "SEVERITY"
+        ],
     )
     exact = ACT.tool(
         "jobs.status",
-        "Read <JOB_ID> and produce <STATUS>.",
+        (
+            "Read <JOB_ID> "
+            "and produce <STATUS>."
+        ),
         inputs=[
             ValueBinding(
                 placeholder="JOB_ID",
-                value=StateValue(state="state.job-id"),
+                value=StateValue(
+                    state="state.job-id"
+                ),
             )
         ],
-        outputs=["STATUS"],
+        outputs=[
+            "STATUS"
+        ],
     )
-    if not isinstance(native, Act) or native.tool is not None:
-        raise RuntimeError("ACT did not return one interpreter-native Act")
-    if not isinstance(exact, Act) or exact.tool != "jobs.status":
-        raise RuntimeError("ACT.tool did not return one exact named-tool Act")
-    if hasattr(ACT, "infer") or hasattr(ACT, "use"):
-        raise RuntimeError("ACT exposes a forbidden helper")
-    if "\n".join(step_lines(native)) != (
-        "ACT Classify <REPORT> and produce <SEVERITY>. (REPORT=$interface.report.REPORT) -> SEVERITY"
+
+    if (
+        not isinstance(
+            native,
+            Act,
+        )
+        or native.tool is not None
     ):
-        raise RuntimeError("ACT changed interpreter-native OAK syntax")
-    if "\n".join(step_lines(exact)) != (
-        'ACT TOOL "jobs.status": Read <JOB_ID> and produce <STATUS>. (JOB_ID=$state.job-id) -> STATUS'
+        raise RuntimeError(
+            "ACT did not return one "
+            "interpreter-native Act"
+        )
+
+    if (
+        not isinstance(
+            exact,
+            Act,
+        )
+        or exact.tool != "jobs.status"
     ):
-        raise RuntimeError("ACT.tool changed exact named-tool OAK syntax")
+        raise RuntimeError(
+            "ACT.tool did not return one "
+            "exact named-tool Act"
+        )
+
+    if (
+        hasattr(
+            ACT,
+            "infer",
+        )
+        or hasattr(
+            ACT,
+            "use",
+        )
+    ):
+        raise RuntimeError(
+            "ACT exposes a forbidden helper"
+        )
+
+    if "\n".join(
+        step_lines(native)
+    ) != (
+        "ACT Classify <REPORT> and produce "
+        "<SEVERITY>. "
+        "(REPORT=$interface.report.REPORT) "
+        "-> SEVERITY"
+    ):
+        raise RuntimeError(
+            "ACT changed interpreter-native "
+            "OAK syntax"
+        )
+
+    if "\n".join(
+        step_lines(exact)
+    ) != (
+        'ACT TOOL "jobs.status": '
+        "Read <JOB_ID> and produce <STATUS>. "
+        "(JOB_ID=$state.job-id) -> STATUS"
+    ):
+        raise RuntimeError(
+            "ACT.tool changed exact "
+            "named-tool OAK syntax"
+        )
+
     combos = (
-        (ACT("Wait."), "ACT Wait. ()"),
         (
-            ACT("Read <NOTE>.", inputs=[ValueBinding(placeholder="NOTE", value=LiteralValue(value=1))]),
-            "ACT Read <NOTE>. (NOTE=1)",
+            ACT("Wait."),
+            "ACT Wait. ()",
         ),
-        (ACT("Produce <NOTE>.", outputs=["NOTE"]), "ACT Produce <NOTE>. () -> NOTE"),
-        (Call(process="process.run"), "CALL process.run ()"),
         (
-            ACT("Produce <NOTE>.", output="schema.note", outputs=["NOTE"]),
-            'ACT output="schema.note": Produce <NOTE>. () -> NOTE',
+            ACT(
+                "Read <NOTE>.",
+                inputs=[
+                    ValueBinding(
+                        placeholder="NOTE",
+                        value=LiteralValue(
+                            value=1
+                        ),
+                    )
+                ],
+            ),
+            (
+                "ACT Read <NOTE>. "
+                "(NOTE=1)"
+            ),
+        ),
+        (
+            ACT(
+                "Produce <NOTE>.",
+                outputs=[
+                    "NOTE"
+                ],
+            ),
+            (
+                "ACT Produce <NOTE>. "
+                "() -> NOTE"
+            ),
+        ),
+        (
+            Call(
+                process="process.run"
+            ),
+            "CALL process.run ()",
+        ),
+        (
+            ACT(
+                "Produce <NOTE>.",
+                output="schema.note",
+                outputs=[
+                    "NOTE"
+                ],
+            ),
+            (
+                'ACT output="schema.note": '
+                "Produce <NOTE>. "
+                "() -> NOTE"
+            ),
         ),
         (
             ACT.tool(
                 "jobs.status",
-                "Read <JOB_ID> and produce <STATUS>.",
+                (
+                    "Read <JOB_ID> "
+                    "and produce <STATUS>."
+                ),
                 input="schema.job",
                 output="schema.status",
-                inputs=[ValueBinding(placeholder="JOB_ID", value=StateValue(state="state.job-id"))],
-                outputs=["STATUS"],
+                inputs=[
+                    ValueBinding(
+                        placeholder=(
+                            "JOB_ID"
+                        ),
+                        value=StateValue(
+                            state=(
+                                "state.job-id"
+                            )
+                        ),
+                    )
+                ],
+                outputs=[
+                    "STATUS"
+                ],
             ),
-            'ACT TOOL "jobs.status" input="schema.job" output="schema.status": Read <JOB_ID> and produce <STATUS>. (JOB_ID=$state.job-id) -> STATUS',
+            (
+                'ACT TOOL "jobs.status" '
+                'input="schema.job" '
+                'output="schema.status": '
+                "Read <JOB_ID> "
+                "and produce <STATUS>. "
+                "(JOB_ID=$state.job-id) "
+                "-> STATUS"
+            ),
         ),
     )
+
     for step, expected in combos:
-        line = "\n".join(step_lines(step))
+        line = "\n".join(
+            step_lines(step)
+        )
+
         if line != expected:
-            raise RuntimeError(f"suffix render changed: {line}")
-        parsed = parse_fragment(type(step), line, path="suffix")
-        if parsed.model_dump() != step.model_dump():
-            raise RuntimeError(f"suffix parse changed: {line}")
+            raise RuntimeError(
+                "suffix render changed: "
+                f"{line}"
+            )
+
+        parsed = parse_fragment(
+            type(step),
+            line,
+            path="suffix",
+        )
+
+        if (
+            parsed.model_dump()
+            != step.model_dump()
+        ):
+            raise RuntimeError(
+                "suffix parse changed: "
+                f"{line}"
+            )
 
 
 def _validate_human_examples() -> None:
@@ -902,21 +1945,45 @@ def _validate_human_examples() -> None:
         process_execution_table,
         smeac_plan,
     )
+
     for module in examples:
         rendered = module.build()
         target = module.TARGET
-        if not target.is_file() or target.read_text(encoding="utf-8") != rendered:
-            raise RuntimeError(f"example snapshot is missing or stale: {target}")
+
+        if (
+            not target.is_file()
+            or target.read_text(
+                encoding="utf-8"
+            )
+            != rendered
+        ):
+            raise RuntimeError(
+                "example snapshot is "
+                f"missing or stale: {target}"
+            )
 
 
-def _expect_rule(code: str, author) -> None:
+def _expect_rule(
+    code: str,
+    author,
+) -> None:
     try:
         author()
+
     except ValidationError as error:
-        if code not in {str(item["type"]) for item in error.errors()}:
-            raise RuntimeError(f"expected {code}, got {error}") from None
+        if code not in {
+            str(item["type"])
+            for item in error.errors()
+        }:
+            raise RuntimeError(
+                f"expected {code}, got {error}"
+            ) from None
+
         return
-    raise RuntimeError(f"expected {code}")
+
+    raise RuntimeError(
+        f"expected {code}"
+    )
 
 
 def _validate_contract_rules() -> None:
@@ -924,37 +1991,102 @@ def _validate_contract_rules() -> None:
 
     def trigger_seed_mismatch() -> None:
         Node(
-            schemas=[raw, normal],
-            triggers=[Trigger(id="invalid", event="A name arrives.", process="process.normalise")],
-            processes=[_normalise_process()],
+            schemas=[
+                raw,
+                normal,
+            ],
+            triggers=[
+                Trigger(
+                    id="invalid",
+                    event="A name arrives.",
+                    process=(
+                        "process.normalise"
+                    ),
+                )
+            ],
+            processes=[
+                _normalise_process()
+            ],
         )
 
     def trigger_event_overlap() -> None:
         Node(
-            schemas=[raw, normal],
+            schemas=[
+                raw,
+                normal,
+            ],
             triggers=[
-                Trigger(id="first", event="A name arrives.", process="process.handle"),
-                Trigger(id="second", event="A name arrives.", process="process.handle"),
+                Trigger(
+                    id="first",
+                    event="A name arrives.",
+                    process="process.handle",
+                ),
+                Trigger(
+                    id="second",
+                    event="A name arrives.",
+                    process="process.handle",
+                ),
             ],
             processes=[
                 _normalise_process(),
-                Process(id="handle", name="Handle request", steps=[Call(process="process.normalise", inputs=[ValueBinding(placeholder="RAW_NAME", value=LiteralValue(value="Ada"))], outputs=["NORMAL_NAME"])]),
+                Process(
+                    id="handle",
+                    name="Handle request",
+                    steps=[
+                        Call(
+                            process=(
+                                "process.normalise"
+                            ),
+                            inputs=[
+                                ValueBinding(
+                                    placeholder=(
+                                        "RAW_NAME"
+                                    ),
+                                    value=LiteralValue(
+                                        value="Ada"
+                                    ),
+                                )
+                            ],
+                            outputs=[
+                                "NORMAL_NAME"
+                            ],
+                        )
+                    ],
+                ),
             ],
         )
 
     def output_missing() -> None:
         Node(
-            schemas=[raw, normal],
+            schemas=[
+                raw,
+                normal,
+            ],
             processes=[
                 Process(
                     id="normalise",
                     name="Normalise name",
                     input="schema.raw-name",
-                    output="schema.normal-name",
+                    output=(
+                        "schema.normal-name"
+                    ),
                     steps=[
                         Act(
-                            instruction="Read <RAW_NAME>.",
-                            inputs=[ValueBinding(placeholder="RAW_NAME", value=BindingValue(binding="RAW_NAME"))],
+                            instruction=(
+                                "Read <RAW_NAME>."
+                            ),
+                            inputs=[
+                                ValueBinding(
+                                    placeholder=(
+                                        "RAW_NAME"
+                                    ),
+                                    value=BindingValue(
+                                        binding=(
+                                            "RAW_NAME"
+                                        )
+                                    ),
+                                )
+                            ],
                         )
                     ],
                 )
@@ -963,29 +2095,54 @@ def _validate_contract_rules() -> None:
 
     def call_mismatch() -> None:
         Node(
-            schemas=[raw, normal],
+            schemas=[
+                raw,
+                normal,
+            ],
             processes=[
                 _normalise_process(),
                 Process(
                     id="handle",
                     name="Handle request",
-                    steps=[Call(process="process.normalise")],
+                    steps=[
+                        Call(
+                            process=(
+                                "process.normalise"
+                            )
+                        )
+                    ],
                 ),
             ],
         )
 
     def act_mismatch() -> None:
         Node(
-            schemas=[raw, normal],
+            schemas=[
+                raw,
+                normal,
+            ],
             processes=[
                 Process(
                     id="read-name",
                     name="Read name",
                     steps=[
                         Act(
-                            input="schema.raw-name",
-                            instruction="Read <NOTE>.",
-                            inputs=[ValueBinding(placeholder="NOTE", value=LiteralValue(value="x"))],
+                            input=(
+                                "schema.raw-name"
+                            ),
+                            instruction=(
+                                "Read <NOTE>."
+                            ),
+                            inputs=[
+                                ValueBinding(
+                                    placeholder=(
+                                        "NOTE"
+                                    ),
+                                    value=LiteralValue(
+                                        value="x"
+                                    ),
+                                )
+                            ],
                         )
                     ],
                 )
@@ -995,62 +2152,211 @@ def _validate_contract_rules() -> None:
     def typed_constant_invalid() -> None:
         Node(
             schemas=[raw],
-            constants=[Constant(id="fixed-name", schema="schema.raw-name", placeholder="RAW_NAME", value=5)],
+            constants=[
+                Constant(
+                    id="fixed-name",
+                    schema=(
+                        "schema.raw-name"
+                    ),
+                    placeholder=(
+                        "RAW_NAME"
+                    ),
+                    value=5,
+                )
+            ],
         )
 
     def typed_constant_unknown() -> None:
         Node(
             schemas=[raw],
-            constants=[Constant(id="fixed-name", schema="schema.raw-name", placeholder="MISSING", value="Ada")],
+            constants=[
+                Constant(
+                    id="fixed-name",
+                    schema=(
+                        "schema.raw-name"
+                    ),
+                    placeholder=(
+                        "MISSING"
+                    ),
+                    value="Ada",
+                )
+            ],
         )
 
     def incomplete_binding() -> None:
-        Constant(id="fixed-name", schema="schema.raw-name", value="Ada")
+        Constant(
+            id="fixed-name",
+            schema="schema.raw-name",
+            value="Ada",
+        )
 
     def reserved_instruction() -> None:
-        Act(instruction='input="schema.fake": Say <X>.', inputs=[ValueBinding(placeholder="X", value=LiteralValue(value="hi"))])
+        Act(
+            instruction=(
+                'input="schema.fake": '
+                "Say <X>."
+            ),
+            inputs=[
+                ValueBinding(
+                    placeholder="X",
+                    value=LiteralValue(
+                        value="hi"
+                    ),
+                )
+            ],
+        )
 
     def trigger_binding_read() -> None:
         Trigger(
             id="invalid",
             event="A name arrives.",
             process="process.normalise",
-            seed=[ValueBinding(placeholder="RAW_NAME", value=BindingValue(binding="RAW_NAME"))],
+            seed=[
+                ValueBinding(
+                    placeholder="RAW_NAME",
+                    value=BindingValue(
+                        binding="RAW_NAME"
+                    ),
+                )
+            ],
         )
 
     def trigger_source_out() -> None:
         Node(
-            schemas=[raw, normal],
-            interfaces=[Interface(id="name-output", direction="out", schema="schema.raw-name")],
+            schemas=[
+                raw,
+                normal,
+            ],
+            interfaces=[
+                Interface(
+                    id="name-output",
+                    direction="out",
+                    schema="schema.raw-name",
+                )
+            ],
             triggers=[
                 Trigger(
                     id="invalid",
                     event="A name arrives.",
-                    source="interface.name-output",
+                    source=(
+                        "interface.name-output"
+                    ),
                     process="process.handle",
                 )
             ],
             processes=[
                 _normalise_process(),
-                Process(id="handle", name="Handle request", steps=[Call(process="process.normalise", inputs=[ValueBinding(placeholder="RAW_NAME", value=LiteralValue(value="Ada"))], outputs=["NORMAL_NAME"])]),
+                Process(
+                    id="handle",
+                    name="Handle request",
+                    steps=[
+                        Call(
+                            process=(
+                                "process.normalise"
+                            ),
+                            inputs=[
+                                ValueBinding(
+                                    placeholder=(
+                                        "RAW_NAME"
+                                    ),
+                                    value=LiteralValue(
+                                        value="Ada"
+                                    ),
+                                )
+                            ],
+                            outputs=[
+                                "NORMAL_NAME"
+                            ],
+                        )
+                    ],
+                ),
             ],
         )
 
     def trigger_source_overlap() -> None:
         Node(
-            schemas=[raw, normal],
-            interfaces=[Interface(id="name-input", direction="in", schema="schema.raw-name")],
-            triggers=[
-                Trigger(id="first", event="A name arrives.", source="interface.name-input", process="process.normalise", seed=[ValueBinding(placeholder="RAW_NAME", value=InterfaceValue(interface="interface.name-input", placeholder="RAW_NAME"))]),
-                Trigger(id="second", event="Another name arrives.", source="interface.name-input", process="process.normalise", seed=[ValueBinding(placeholder="RAW_NAME", value=InterfaceValue(interface="interface.name-input", placeholder="RAW_NAME"))]),
+            schemas=[
+                raw,
+                normal,
             ],
-            processes=[_normalise_process()],
+            interfaces=[
+                Interface(
+                    id="name-input",
+                    direction="in",
+                    schema="schema.raw-name",
+                )
+            ],
+            triggers=[
+                Trigger(
+                    id="first",
+                    event="A name arrives.",
+                    source=(
+                        "interface.name-input"
+                    ),
+                    process=(
+                        "process.normalise"
+                    ),
+                    seed=[
+                        ValueBinding(
+                            placeholder=(
+                                "RAW_NAME"
+                            ),
+                            value=InterfaceValue(
+                                interface=(
+                                    "interface."
+                                    "name-input"
+                                ),
+                                placeholder=(
+                                    "RAW_NAME"
+                                ),
+                            ),
+                        )
+                    ],
+                ),
+                Trigger(
+                    id="second",
+                    event=(
+                        "Another name arrives."
+                    ),
+                    source=(
+                        "interface.name-input"
+                    ),
+                    process=(
+                        "process.normalise"
+                    ),
+                    seed=[
+                        ValueBinding(
+                            placeholder=(
+                                "RAW_NAME"
+                            ),
+                            value=InterfaceValue(
+                                interface=(
+                                    "interface."
+                                    "name-input"
+                                ),
+                                placeholder=(
+                                    "RAW_NAME"
+                                ),
+                            ),
+                        )
+                    ],
+                ),
+            ],
+            processes=[
+                _normalise_process()
+            ],
         )
 
     def typed_interface_read() -> None:
         Node(
             schemas=[raw],
-            interfaces=[Interface(id="name-input", direction="in", schema="schema.raw-name")],
+            interfaces=[
+                Interface(
+                    id="name-input",
+                    direction="in",
+                    schema="schema.raw-name",
+                )
+            ],
             processes=[
                 Process(
                     id="read-name",
@@ -1058,11 +2364,23 @@ def _validate_contract_rules() -> None:
                     input="schema.raw-name",
                     steps=[
                         Act(
-                            instruction="Read <RAW_NAME>.",
+                            instruction=(
+                                "Read <RAW_NAME>."
+                            ),
                             inputs=[
                                 ValueBinding(
-                                    placeholder="RAW_NAME",
-                                    value=InterfaceValue(interface="interface.name-input", placeholder="RAW_NAME"),
+                                    placeholder=(
+                                        "RAW_NAME"
+                                    ),
+                                    value=InterfaceValue(
+                                        interface=(
+                                            "interface."
+                                            "name-input"
+                                        ),
+                                        placeholder=(
+                                            "RAW_NAME"
+                                        ),
+                                    ),
                                 )
                             ],
                         )
@@ -1073,98 +2391,362 @@ def _validate_contract_rules() -> None:
 
     scaling = Schema(
         id="scaling",
-        template="<BALANCE> times <FACTOR>",
+        template=(
+            "<BALANCE> times <FACTOR>"
+        ),
         where=[
-            where("BALANCE", Type(of="number")),
-            where("FACTOR", Type(of="number"), AtLeast(value="BALANCE")),
+            where(
+                "BALANCE",
+                Type(of="number"),
+            ),
+            where(
+                "FACTOR",
+                Type(of="number"),
+                AtLeast(
+                    value="BALANCE"
+                ),
+            ),
         ],
     )
-    try:
-        scaling.bind_value("FACTOR", 0)
-    except SchemaBindingError as error:
-        if error.failures[0].code != "unresolved_binding":
-            raise RuntimeError(f"expected unresolved_binding, got {error}") from None
-    else:
-        raise RuntimeError("bind_value accepted a placeholder-valued bound")
 
-    floor = Schema(id="floor", template="<VALUE>", where=[where("VALUE", AtLeast(value=0))])
     try:
-        floor.bind_value("VALUE", float("nan"))
-    except SchemaBindingError as error:
-        if error.failures[0].code != "invalid_json_value":
-            raise RuntimeError(f"expected invalid_json_value, got {error}") from None
-    else:
-        raise RuntimeError("bind_value accepted a non-JSON value")
+        scaling.bind_value(
+            "FACTOR",
+            0,
+        )
 
-    mass = Schema(id="mass", template="<MASS>", where=[where("MASS", Type(of="quantity"))])
-    mass.bind({"MASS": {"value": "10", "unit": "kg"}})
+    except SchemaBindingError as error:
+        if (
+            error.failures[0].code
+            != "unresolved_binding"
+        ):
+            raise RuntimeError(
+                "expected unresolved_binding, "
+                f"got {error}"
+            ) from None
+
+    else:
+        raise RuntimeError(
+            "bind_value accepted a "
+            "placeholder-valued bound"
+        )
+
+    floor = Schema(
+        id="floor",
+        template="<VALUE>",
+        where=[
+            where(
+                "VALUE",
+                AtLeast(value=0),
+            )
+        ],
+    )
+
     try:
-        mass.bind({"MASS": Quantity(value=Decimal("10"), unit=Unit.KILOGRAM)})
-    except SchemaBindingError as error:
-        if error.failures[0].code != "invalid_json_value":
-            raise RuntimeError(f"expected invalid_json_value, got {error}") from None
-    else:
-        raise RuntimeError("bind accepted a non-JSON quantity value")
+        floor.bind_value(
+            "VALUE",
+            float("nan"),
+        )
 
-    _expect_rule("trigger_contract_mismatch", trigger_seed_mismatch)
-    _expect_rule("overlapping_trigger_guards", trigger_event_overlap)
-    _expect_rule("process_output_binding_mismatch", output_missing)
-    _expect_rule("call_contract_mismatch", call_mismatch)
-    _expect_rule("act_schema_mismatch", act_mismatch)
-    _expect_rule("invalid_schema_binding", typed_constant_invalid)
-    _expect_rule("unknown_schema_placeholder", typed_constant_unknown)
-    _expect_rule("incomplete_schema_binding", incomplete_binding)
-    _expect_rule("invalid_act_instruction", reserved_instruction)
-    _expect_rule("invalid_trigger_seed_value", trigger_binding_read)
-    _expect_rule("trigger_source_not_ingress", trigger_source_out)
-    _expect_rule("overlapping_trigger_guards", trigger_source_overlap)
-    _expect_rule("typed_process_interface_read", typed_interface_read)
+    except SchemaBindingError as error:
+        if (
+            error.failures[0].code
+            != "invalid_json_value"
+        ):
+            raise RuntimeError(
+                "expected invalid_json_value, "
+                f"got {error}"
+            ) from None
+
+    else:
+        raise RuntimeError(
+            "bind_value accepted a "
+            "non-JSON value"
+        )
+
+    mass = Schema(
+        id="mass",
+        template="<MASS>",
+        where=[
+            where(
+                "MASS",
+                Type(of="quantity"),
+            )
+        ],
+    )
+    mass.bind(
+        {
+            "MASS": {
+                "value": "10",
+                "unit": "kg",
+            }
+        }
+    )
+
+    try:
+        mass.bind(
+            {
+                "MASS": Quantity(
+                    value=Decimal("10"),
+                    unit=Unit.KILOGRAM,
+                )
+            }
+        )
+
+    except SchemaBindingError as error:
+        if (
+            error.failures[0].code
+            != "invalid_json_value"
+        ):
+            raise RuntimeError(
+                "expected invalid_json_value, "
+                f"got {error}"
+            ) from None
+
+    else:
+        raise RuntimeError(
+            "bind accepted a "
+            "non-JSON quantity value"
+        )
+
+    _expect_rule(
+        "trigger_contract_mismatch",
+        trigger_seed_mismatch,
+    )
+    _expect_rule(
+        "overlapping_trigger_guards",
+        trigger_event_overlap,
+    )
+    _expect_rule(
+        "process_output_binding_mismatch",
+        output_missing,
+    )
+    _expect_rule(
+        "call_contract_mismatch",
+        call_mismatch,
+    )
+    _expect_rule(
+        "act_schema_mismatch",
+        act_mismatch,
+    )
+    _expect_rule(
+        "invalid_schema_binding",
+        typed_constant_invalid,
+    )
+    _expect_rule(
+        "unknown_schema_placeholder",
+        typed_constant_unknown,
+    )
+    _expect_rule(
+        "incomplete_schema_binding",
+        incomplete_binding,
+    )
+    _expect_rule(
+        "invalid_act_instruction",
+        reserved_instruction,
+    )
+    _expect_rule(
+        "invalid_trigger_seed_value",
+        trigger_binding_read,
+    )
+    _expect_rule(
+        "trigger_source_not_ingress",
+        trigger_source_out,
+    )
+    _expect_rule(
+        "overlapping_trigger_guards",
+        trigger_source_overlap,
+    )
+    _expect_rule(
+        "typed_process_interface_read",
+        typed_interface_read,
+    )
 
 
 def _validate_source_routing() -> None:
     raw, _normal = _contract_schemas()
     routed = Node(
         schemas=[raw],
-        state=[State(id="route", value="")],
+        state=[
+            State(
+                id="route",
+                value="",
+            )
+        ],
         triggers=[
-            Trigger(id="event-routed", event="A name arrives.", process="process.mark-event"),
-            Trigger(id="source-routed", event="A name arrives by wire.", source="interface.request", process="process.mark-source"),
+            Trigger(
+                id="event-routed",
+                event="A name arrives.",
+                process=(
+                    "process.mark-event"
+                ),
+            ),
+            Trigger(
+                id="source-routed",
+                event=(
+                    "A name arrives by wire."
+                ),
+                source="interface.request",
+                process=(
+                    "process.mark-source"
+                ),
+            ),
         ],
         processes=[
-            Process(id="mark-event", name="Mark event", steps=[Set(state="state.route", value=LiteralValue(value="event"))]),
-            Process(id="mark-source", name="Mark source", steps=[Set(state="state.route", value=LiteralValue(value="source"))]),
+            Process(
+                id="mark-event",
+                name="Mark event",
+                steps=[
+                    Set(
+                        state="state.route",
+                        value=LiteralValue(
+                            value="event"
+                        ),
+                    )
+                ],
+            ),
+            Process(
+                id="mark-source",
+                name="Mark source",
+                steps=[
+                    Set(
+                        state="state.route",
+                        value=LiteralValue(
+                            value="source"
+                        ),
+                    )
+                ],
+            ),
         ],
-        interfaces=[Interface(id="request", direction="in", schema="schema.raw-name")],
+        interfaces=[
+            Interface(
+                id="request",
+                direction="in",
+                schema="schema.raw-name",
+            )
+        ],
     )
-    payload = {"interface.request": {"RAW_NAME": "Ada"}}
-    by_event = execute(routed, Arrival(event="A name arrives.", interfaces=payload), {"state.route": ""})
-    by_source = execute(routed, Arrival(source="interface.request", interfaces=payload), {"state.route": ""})
-    if by_event.state["state.route"] != "event" or by_source.state["state.route"] != "source":
-        raise RuntimeError("arrival routing selected the wrong trigger")
-    idle = execute(routed, Arrival(event="A name arrives by wire.", interfaces=payload), {"state.route": ""})
+    payload = {
+        "interface.request": {
+            "RAW_NAME": "Ada",
+        }
+    }
+    by_event = execute(
+        routed,
+        Arrival(
+            event="A name arrives.",
+            interfaces=payload,
+        ),
+        {
+            "state.route": "",
+        },
+    )
+    by_source = execute(
+        routed,
+        Arrival(
+            source="interface.request",
+            interfaces=payload,
+        ),
+        {
+            "state.route": "",
+        },
+    )
+
+    if (
+        by_event.state["state.route"]
+        != "event"
+        or by_source.state["state.route"]
+        != "source"
+    ):
+        raise RuntimeError(
+            "arrival routing selected "
+            "the wrong trigger"
+        )
+
+    idle = execute(
+        routed,
+        Arrival(
+            event=(
+                "A name arrives by wire."
+            ),
+            interfaces=payload,
+        ),
+        {
+            "state.route": "",
+        },
+    )
+
     if idle.state["state.route"] != "":
-        raise RuntimeError("an event arrival fired a source-backed trigger")
+        raise RuntimeError(
+            "an event arrival fired "
+            "a source-backed trigger"
+        )
+
     try:
-        execute(routed, Arrival(source="interface.request"), {"state.route": ""})
+        execute(
+            routed,
+            Arrival(
+                source="interface.request"
+            ),
+            {
+                "state.route": "",
+            },
+        )
+
     except ExecutionError as error:
-        if error.code != "invalid_arrival_source":
-            raise RuntimeError(f"expected invalid_arrival_source, got {error.code}") from None
+        if (
+            error.code
+            != "invalid_arrival_source"
+        ):
+            raise RuntimeError(
+                "expected invalid_arrival_source, "
+                f"got {error.code}"
+            ) from None
+
     else:
-        raise RuntimeError("a source arrival without its payload executed")
-    for values in ({}, {"event": "A name arrives.", "source": "interface.request"}):
+        raise RuntimeError(
+            "a source arrival without "
+            "its payload executed"
+        )
+
+    for values in (
+        {},
+        {
+            "event": "A name arrives.",
+            "source": "interface.request",
+        },
+    ):
         try:
             Arrival(**values)
+
         except ValidationError as error:
-            if "invalid_arrival_selector" not in {str(item["type"]) for item in error.errors()}:
-                raise RuntimeError(f"expected invalid_arrival_selector, got {error}") from None
+            if (
+                "invalid_arrival_selector"
+                not in {
+                    str(item["type"])
+                    for item in error.errors()
+                }
+            ):
+                raise RuntimeError(
+                    "expected "
+                    "invalid_arrival_selector, "
+                    f"got {error}"
+                ) from None
+
         else:
-            raise RuntimeError("an arrival accepted an invalid selector pair")
+            raise RuntimeError(
+                "an arrival accepted an "
+                "invalid selector pair"
+            )
 
 
 def _validate_json_ld_style_display() -> None:
     raw, normal = _contract_schemas()
     contract = Node(
-        schemas=[raw, normal],
+        schemas=[
+            raw,
+            normal,
+        ],
         processes=[
             _normalise_process(),
             Process(
@@ -1172,9 +2754,22 @@ def _validate_json_ld_style_display() -> None:
                 name="Handle request",
                 steps=[
                     Call(
-                        process="process.normalise",
-                        inputs=[ValueBinding(placeholder="RAW_NAME", value=LiteralValue(value="Ada"))],
-                        outputs=["NORMAL_NAME"],
+                        process=(
+                            "process.normalise"
+                        ),
+                        inputs=[
+                            ValueBinding(
+                                placeholder=(
+                                    "RAW_NAME"
+                                ),
+                                value=LiteralValue(
+                                    value="Ada"
+                                ),
+                            )
+                        ],
+                        outputs=[
+                            "NORMAL_NAME"
+                        ],
                     )
                 ],
             ),
@@ -1184,77 +2779,226 @@ def _validate_json_ld_style_display() -> None:
         render(
             contract,
             render="json-ld",
-            document="https://example.org/oak/contract.oak.md",
-            vocabulary="https://example.org/oak#",
+            document=(
+                "https://example.org/"
+                "oak/contract.oak.md"
+            ),
+            vocabulary=(
+                "https://example.org/oak#"
+            ),
         )
     )
-    normalise, handle = linked["processes"]
+    normalise, handle = (
+        linked["processes"]
+    )
     call = handle["steps"][0]
+
     if not (
-        linked.get("@id") == "https://example.org/oak/contract.oak.md"
-        and normalise["input"]["@id"].endswith("#schema.raw-name")
-        and normalise["output"]["@id"].endswith("#schema.normal-name")
-        and call["process"]["@id"].endswith("#process.normalise")
-        and call["outputs"] == ["NORMAL_NAME"]
+        linked.get("@id")
+        == (
+            "https://example.org/"
+            "oak/contract.oak.md"
+        )
+        and normalise["input"]["@id"].endswith(
+            "#schema.raw-name"
+        )
+        and normalise["output"]["@id"].endswith(
+            "#schema.normal-name"
+        )
+        and call["process"]["@id"].endswith(
+            "#process.normalise"
+        )
+        and call["outputs"]
+        == ["NORMAL_NAME"]
     ):
-        raise RuntimeError("JSON-LD process contract is wrong")
+        raise RuntimeError(
+            "JSON-LD process contract is wrong"
+        )
 
     styled = render(
-        Node(instructions=[Instruction(id="wording", body="Utilize the exact command.")]),
+        Node(
+            instructions=[
+                Instruction(
+                    id="wording",
+                    body=(
+                        "Utilize the exact command."
+                    ),
+                )
+            ]
+        ),
         style="asd-ste100-9",
     )
-    if "Use the exact command." not in styled:
-        raise RuntimeError("controlled style failed")
-    if number_text(12345.5) != "12\u2009345.5":
-        raise RuntimeError("number display failed")
-    if quantity_text(Quantity(value=Decimal("10"), unit=Unit.KILOGRAM)) != "10 kg":
-        raise RuntimeError("quantity display failed")
-    value = DateTime(value=datetime.fromisoformat("2026-08-24T17:35:38+10:00"), zone="Australia/Brisbane")
-    if datetime_text(value) != "2026-08-24T17:35:38+10:00 [Australia/Brisbane]":
-        raise RuntimeError("datetime display failed")
+
+    if (
+        "Use the exact command."
+        not in styled
+    ):
+        raise RuntimeError(
+            "controlled style failed"
+        )
+
+    if number_text(
+        12345.5
+    ) != "12\u2009345.5":
+        raise RuntimeError(
+            "number display failed"
+        )
+
+    if quantity_text(
+        Quantity(
+            value=Decimal("10"),
+            unit=Unit.KILOGRAM,
+        )
+    ) != "10 kg":
+        raise RuntimeError(
+            "quantity display failed"
+        )
+
+    value = DateTime(
+        value=datetime.fromisoformat(
+            "2026-08-24T17:35:38+10:00"
+        ),
+        zone="Australia/Brisbane",
+    )
+
+    if datetime_text(value) != (
+        "2026-08-24T17:35:38+10:00 "
+        "[Australia/Brisbane]"
+    ):
+        raise RuntimeError(
+            "datetime display failed"
+        )
 
 
 def _validate_outputs() -> None:
-    from build.authoring import authoring, tree
+    from build.authoring import (
+        authoring,
+        tree,
+    )
     from build.docs import documents
     from build.ebnf import grammar
 
     authoring_text = authoring()
-    if render(parse(authoring_text), grouping="xml") + "\n" != authoring_text:
-        raise RuntimeError("authoring output is not canonical XML OAK")
-    bodies = [instruction.body for instruction in tree().instructions]
-    for guidance in (*ENTRY_ID_GUIDANCE, *NAMING_GUIDANCE, *DECOMPOSITION_GUIDANCE, *ACT_GUIDANCE, *DELEGATION_GUIDANCE):
-        if bodies.count(guidance.instruction) != 1:
+
+    if (
+        render(
+            parse(authoring_text),
+            grouping="xml",
+        )
+        + "\n"
+        != authoring_text
+    ):
+        raise RuntimeError(
+            "authoring output is not "
+            "canonical XML OAK"
+        )
+
+    bodies = [
+        instruction.body
+        for instruction in tree().instructions
+    ]
+
+    for guidance in (
+        *ENTRY_ID_GUIDANCE,
+        *NAMING_GUIDANCE,
+        *DECOMPOSITION_GUIDANCE,
+        *ACT_GUIDANCE,
+        *DELEGATION_GUIDANCE,
+    ):
+        if bodies.count(
+            guidance.instruction
+        ) != 1:
             raise RuntimeError(
-                f"authoring output does not contain guidance exactly once: {guidance.id}"
+                "authoring output does not "
+                "contain guidance exactly once: "
+                f"{guidance.id}"
             )
 
     expected = {
-        ROOT / "outputs" / "oak.ebnf": grammar(),
-        ROOT / "outputs" / "authoring.md": authoring_text,
+        (
+            ROOT
+            / "outputs"
+            / "oak.ebnf"
+        ): grammar(),
+        (
+            ROOT
+            / "outputs"
+            / "authoring.md"
+        ): authoring_text,
         **{
-            ROOT / "outputs" / "docs" / name: text
+            (
+                ROOT
+                / "outputs"
+                / "docs"
+                / name
+            ): text
             for name, text in documents().items()
         },
     }
+
     for path, text in expected.items():
-        if not path.is_file() or path.read_text(encoding="utf-8") != text:
-            raise RuntimeError(f"generated output is missing or stale: {path}")
-    actual = set((ROOT / "outputs" / "docs").glob("*.md"))
-    documented = {path for path in expected if path.parent == ROOT / "outputs" / "docs"}
+        if (
+            not path.is_file()
+            or path.read_text(
+                encoding="utf-8"
+            )
+            != text
+        ):
+            raise RuntimeError(
+                "generated output is "
+                f"missing or stale: {path}"
+            )
+
+    actual = set(
+        (
+            ROOT
+            / "outputs"
+            / "docs"
+        ).glob("*.md")
+    )
+    documented = {
+        path
+        for path in expected
+        if path.parent
+        == (
+            ROOT
+            / "outputs"
+            / "docs"
+        )
+    }
+
     if actual != documented:
-        raise RuntimeError("documentation output path set is stale")
+        raise RuntimeError(
+            "documentation output "
+            "path set is stale"
+        )
+
     actual_root = {
         path
-        for path in (ROOT / "outputs").iterdir()
+        for path in (
+            ROOT
+            / "outputs"
+        ).iterdir()
         if path.is_file()
     }
     expected_root = {
-        ROOT / "outputs" / "oak.ebnf",
-        ROOT / "outputs" / "authoring.md",
+        (
+            ROOT
+            / "outputs"
+            / "oak.ebnf"
+        ),
+        (
+            ROOT
+            / "outputs"
+            / "authoring.md"
+        ),
     }
+
     if actual_root != expected_root:
-        raise RuntimeError("generated root output path set is stale")
+        raise RuntimeError(
+            "generated root output "
+            "path set is stale"
+        )
 
 
 def validate_examples() -> None:
