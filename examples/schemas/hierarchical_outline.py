@@ -33,9 +33,25 @@ hierarchical_outline_schema = Schema(
     ),
     where=[
         where(PLACEHOLDER_OUTLINE_TITLE, Type(of="string"), NonEmpty(), description="the title for the outline"),
-        where(PLACEHOLDER_LEVEL_1_NUMBER, Type(of="string"), Regex(pattern="^[0-9]+$"), description="the level one number"),
-        where(PLACEHOLDER_LEVEL_2_NUMBER, Type(of="string"), Regex(pattern="^[0-9]+\\.[0-9]+$"), description="the level two number"),
-        where(PLACEHOLDER_LEVEL_3_NUMBER, Type(of="string"), Regex(pattern="^[0-9]+\\.[0-9]+\\.[0-9]+$"), examples=["1.1.1", "1.1.2"], description="the level three number at the maximum depth"),
+        where(
+            PLACEHOLDER_LEVEL_1_NUMBER,
+            Type(of="string"),
+            Regex(pattern="^[0-9]+$"),
+            description="the level one number",
+        ),
+        where(
+            PLACEHOLDER_LEVEL_2_NUMBER,
+            Type(of="string"),
+            Regex(pattern="^[0-9]+\\.[0-9]+$"),
+            description="the level two number",
+        ),
+        where(
+            PLACEHOLDER_LEVEL_3_NUMBER,
+            Type(of="string"),
+            Regex(pattern="^[0-9]+\\.[0-9]+\\.[0-9]+$"),
+            examples=["1.1.1", "1.1.2"],
+            description="the level three number at the maximum depth",
+        ),
         where(PLACEHOLDER_STATEMENT, Type(of="string"), NonEmpty(), description="one atomic statement without obvious content"),
     ],
 )
