@@ -226,27 +226,7 @@ def parse_constants(
             )
             continue
 
-        inline_match = _INLINE_NAMED_VALUE.fullmatch(line)
-
-        if inline_match is None:
-            fail(
-                "named_value",
-                "constants",
-                number,
-                "expected id: JSON",
-            )
-
-        (
-            identifier,
-            schema_target,
-            placeholder,
-            source,
-        ) = inline_match.groups()
-        value = parse_json_value(
-            source,
-            f"constants.{identifier}",
-            number,
-        )
+        identifier, schema_target, placeholder, value = _inline_named_value(line, "constants", number)
         result.append(
             Constant(
                 id=identifier,
@@ -258,6 +238,35 @@ def parse_constants(
         cursor.advance()
 
     return result
+
+
+def _inline_named_value(
+    line: str,
+    part: str,
+    number: int,
+) -> tuple[str, str | None, str | None, object]:
+    inline_match = _INLINE_NAMED_VALUE.fullmatch(line)
+
+    if inline_match is None:
+        fail(
+            "named_value",
+            part,
+            number,
+            "expected id: JSON",
+        )
+
+    (
+        identifier,
+        schema_target,
+        placeholder,
+        source,
+    ) = inline_match.groups()
+    value = parse_json_value(
+        source,
+        f"{part}.{identifier}",
+        number,
+    )
+    return identifier, schema_target, placeholder, value
 
 
 def parse_state(
@@ -298,27 +307,7 @@ def parse_state(
                 "state does not accept block values",
             )
 
-        inline_match = _INLINE_NAMED_VALUE.fullmatch(line)
-
-        if inline_match is None:
-            fail(
-                "named_value",
-                "state",
-                number,
-                "expected id: JSON",
-            )
-
-        (
-            identifier,
-            schema_target,
-            placeholder,
-            source,
-        ) = inline_match.groups()
-        value = parse_json_value(
-            source,
-            f"state.{identifier}",
-            number,
-        )
+        identifier, schema_target, placeholder, value = _inline_named_value(line, "state", number)
         result.append(
             State(
                 id=identifier,

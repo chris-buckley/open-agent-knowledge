@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import NoReturn
+from typing import Iterable, NoReturn
 
 
 @dataclass(frozen=True, slots=True)

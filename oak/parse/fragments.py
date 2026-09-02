@@ -4,46 +4,48 @@ from __future__ import annotations
 
 from oak.base import OakModel
 from oak.node import Node
-from oak.node.parts import (
+from oak.node.parts.constants import Constant
+from oak.node.parts.instructions import Instruction
+from oak.node.parts.interfaces import Interface
+from oak.node.parts.processes import (
     Act,
     All,
     Any,
     Assert,
-    AtLeast,
-    AtMost,
     BindingValue,
     Call,
     Compare,
-    Constant,
     ConstantValue,
     Emit,
     Fail,
     Foreach,
     If,
-    Instruction,
-    Interface,
     InterfaceValue,
     Join,
-    Lines,
-    ListOf,
     LiteralValue,
-    MaxChars,
-    NonEmpty,
     Not,
-    OneOf,
     Par,
     Process,
-    Regex,
-    Schema,
     Set,
-    State,
     StateValue,
-    Trigger,
-    Type,
     ValueBinding,
-    Where,
     While,
 )
+from oak.node.parts.schemas import (
+    AtLeast,
+    AtMost,
+    Lines,
+    ListOf,
+    MaxChars,
+    NonEmpty,
+    OneOf,
+    Regex,
+    Schema,
+    Type,
+    Where,
+)
+from oak.node.parts.state import State
+from oak.node.parts.triggers import Trigger
 from oak.parse.conditions import parse_condition
 from oak.parse.cursor import Cursor
 from oak.parse.data import parse_constants, parse_state
