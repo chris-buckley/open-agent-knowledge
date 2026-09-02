@@ -86,6 +86,16 @@ def trigger_lines(
     return lines
 
 
+def trigger_body(
+    trigger: Trigger,
+) -> str:
+    """Return one trigger fact group as one text block."""
+    return "\n".join(
+        trigger_lines(trigger)
+    )
+
+
 __all__ = [
+    "trigger_body",
     "trigger_lines",
 ]

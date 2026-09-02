@@ -10,33 +10,15 @@ from oak.node.model import Node
 from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes.model import Process
 from oak.node.parts.schemas.model import Schema
-from oak.node.parts.triggers import Trigger
-from oak.node.structure import PART_ORDER
-from oak.render.oak.arrangement import schema_text
-from oak.render.oak.data import (
-    constant_text,
-    named_value_line,
-)
-from oak.render.oak.instructions import instruction_lines
+from oak.render.oak.arrangement import arrange_parts, schema_text
 from oak.render.oak.processes import process_lines
 from oak.render.oak.styles import StyleName, styled_node
-from oak.render.oak.triggers import trigger_lines
 from oak.surface.registry import surface_for
 
 GroupingName = Literal[
     "xml",
     "markdown",
 ]
-
-_PART_SEPARATORS = {
-    "instructions": "\n",
-    "constants": "\n\n",
-    "schemas": "\n\n",
-    "state": "\n",
-    "triggers": "\n\n",
-    "processes": "\n\n",
-    "interfaces": "\n\n",
-}
 
 
 def _interface_body(
@@ -47,43 +29,6 @@ def _interface_body(
         interface.description
         or ""
     )
-
-
-def _part_bodies(
-    node: Node,
-    schema,
-    process,
-    interface,
-) -> dict[str, list[str]]:
-    return {
-        "instructions": instruction_lines(
-            node
-        ),
-        "constants": [
-            constant_text(item)
-            for item in node.constants
-        ],
-        "schemas": [
-            schema(item)
-            for item in node.schemas
-        ],
-        "state": [
-            named_value_line(item)
-            for item in node.state
-        ],
-        "triggers": [
-            trigger_body(item)
-            for item in node.triggers
-        ],
-        "processes": [
-            process(item)
-            for item in node.processes
-        ],
-        "interfaces": [
-            interface(item)
-            for item in node.interfaces
-        ],
-    }
 
 
 def _xml_attributes(
@@ -126,6 +71,7 @@ def _xml_element(
 def schema_xml(
     schema: Schema,
 ) -> str:
+    """Render one schema entry as an XML-like element."""
     descriptor = surface_for(schema)
     return _xml_element(
         descriptor.tag
@@ -139,17 +85,10 @@ def schema_xml(
     )
 
 
-def trigger_body(
-    trigger: Trigger,
-) -> str:
-    return "\n".join(
-        trigger_lines(trigger)
-    )
-
-
 def process_xml(
     process: Process,
 ) -> str:
+    """Render one process entry as an XML-like element."""
     descriptor = surface_for(process)
     return _xml_element(
         descriptor.tag
@@ -169,6 +108,7 @@ def process_xml(
 def interface_xml(
     interface: Interface,
 ) -> str:
+    """Render one interface entry as an XML-like element."""
     descriptor = surface_for(
         interface
     )
@@ -203,20 +143,12 @@ def _xml_part(
 def _node_xml(
     node: Node,
 ) -> str:
-    bodies = _part_bodies(
+    return arrange_parts(
         node,
         schema_xml,
         process_xml,
         interface_xml,
-    )
-    return "\n\n".join(
-        _xml_part(
-            tag,
-            bodies[tag],
-            _PART_SEPARATORS[tag],
-        )
-        for tag in PART_ORDER
-        if bodies[tag]
+        _xml_part,
     )
 
 
@@ -278,6 +210,7 @@ def _markdown_entry(
 def schema_markdown(
     schema: Schema,
 ) -> str:
+    """Render one schema entry as a markdown-fenced entry."""
     descriptor = surface_for(schema)
     return _markdown_entry(
         descriptor.tag
@@ -294,6 +227,7 @@ def schema_markdown(
 def process_markdown(
     process: Process,
 ) -> str:
+    """Render one process entry as a markdown-fenced entry."""
     descriptor = surface_for(process)
     return _markdown_entry(
         descriptor.tag
@@ -313,6 +247,7 @@ def process_markdown(
 def interface_markdown(
     interface: Interface,
 ) -> str:
+    """Render one interface entry as a markdown-fenced entry."""
     descriptor = surface_for(
         interface
     )
@@ -353,20 +288,12 @@ def _markdown_part(
 def _node_markdown(
     node: Node,
 ) -> str:
-    bodies = _part_bodies(
+    return arrange_parts(
         node,
         schema_markdown,
         process_markdown,
         interface_markdown,
-    )
-    return "\n\n".join(
-        _markdown_part(
-            tag,
-            bodies[tag],
-            _PART_SEPARATORS[tag],
-        )
-        for tag in PART_ORDER
-        if bodies[tag]
+        _markdown_part,
     )
 
 

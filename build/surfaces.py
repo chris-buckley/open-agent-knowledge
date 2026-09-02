@@ -58,7 +58,6 @@ from oak.render.oak.groupings import (
     interface_xml,
     process_xml,
     schema_xml,
-    trigger_body,
 )
 from oak.render.oak.processes import (
     binding_line,
@@ -66,6 +65,7 @@ from oak.render.oak.processes import (
     process_value_text,
     step_lines,
 )
+from oak.render.oak.triggers import trigger_body
 from oak.surface import SURFACES, Surface
 
 AUTHORABLE_MODELS = (
