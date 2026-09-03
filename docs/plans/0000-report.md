@@ -10,7 +10,7 @@ Approved
 - Starting branch: main
 - Starting commit: 408acd101e2123ea88d861c77340551841143cf6
 - Final branch: refactor/organize-oak
-- Final commit: 3961d8070e0a9219442e5301dc3ad88ee1bda29b (this report is committed after it)
+- Final commit: ae9cdc4a9778c1b2bfbde5993691798722f31888 is the last code commit; the docs commits after it add the AGENTS.md rules, the PRD tree lines, and this report
 
 ## Completed phases
 
@@ -157,4 +157,4 @@ clean clone           build and 17 examples pass, git status empty
 ## Remaining concerns
 
 * 15 plan boxes stay open: line 252 (a shared typed lookup protocol between local and resolved validation, which the audit showed is not needed: the two lookups return different contracts), the two ruled deviations at lines 753 (OPERATOR_PHRASES) and 1072 (no part-name type), and the 12 stop conditions at lines 2272 to 2283, none of which occurred. Every behaviour-contract, section 10 style, phase exit, Phase 18, definition-of-done, and recovery box is ticked with evidence.
-* The branch holds 90 commits including this report. The user chose a merge commit over a squash, so the plan's single commit title is the pull request title.
+* The branch holds 91 commits including this report and the tree line that lists it. The user chose a merge commit over a squash, so the plan's single commit title is the pull request title.

@@ -733,7 +733,8 @@ oak
 ├── docs
 │   ├── PRD.md
 │   └── plans
-│       └── 0000-plan.md
+│       ├── 0000-plan.md
+│       └── 0000-report.md
 ├── examples
 │   ├── __init__.py
 │   ├── agents
