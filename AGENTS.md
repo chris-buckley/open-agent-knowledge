@@ -225,6 +225,10 @@ WHEN you finish an implementation or refactor, you MUST:
 - Search for every replaced identifier, path, format, and contract.
 - Keep only the current implementation and remove dead or duplicate code the diff exposes.
 
+WHEN a branch is merged, you MUST:
+
+- Delete it on the remote and locally in the same task.
+
 WHEN you finish any task, you MUST:
 
 - Confirm your work and your reply followed every rule in every applicable `AGENTS.md` before you report done.
