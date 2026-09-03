@@ -115,15 +115,15 @@ class Repeat:
         return body + f"{{{self.minimum},{self.maximum}}}"
 
     def ebnf(self) -> str:
-        item = self.item.ebnf()
-        required = ", ".join(item for _ in range(self.minimum))
+        element = self.item.ebnf()
+        required = ", ".join(element for _ in range(self.minimum))
         if self.maximum == self.minimum:
             return required or '""'
         if self.maximum is None:
-            repeated = f"{{ {item} }}"
+            repeated = f"{{ {element} }}"
             return f"{required}, {repeated}" if required else repeated
         optional_count = self.maximum - self.minimum
-        suffix = ", ".join(f"[ {item} ]" for _ in range(optional_count))
+        suffix = ", ".join(f"[ {element} ]" for _ in range(optional_count))
         if required and suffix:
             return f"{required}, {suffix}"
         return required or suffix or '""'

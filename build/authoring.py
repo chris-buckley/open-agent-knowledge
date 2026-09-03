@@ -10,7 +10,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from build.ebnf import grammar
-from build.surfaces import all_surface_schemas, surface_example
+from build.surfaces import surface_example, surface_schema
 from oak import (
     ACT,
     BindingValue,
@@ -33,6 +33,7 @@ from oak import (
 from oak.render.oak.groupings import process_xml
 from oak.rules import AUTHORING_GUIDANCE, RULES
 from oak.surface import SURFACES
+from oak.surface.registry import SURFACES_BY_ID
 
 from oak.rules import RULES as RULE_SOURCE
 from oak.surface import SURFACES as SURFACE_SOURCE
@@ -110,11 +111,23 @@ def tree() -> Node:
     return Node(
         instructions=instructions,
         constants=[
-            Constant(id="oak-ebnf", form="text", value=grammar(groupings=("xml",)).rstrip("\n")),
-            Constant(id="canonical-oak", form="text", value=surface_example(next(surface for surface in SURFACES if surface.id == "node"))),
-            Constant(id="orchestrator-example", form="text", value=_orchestrator_example()),
+            Constant(
+                id="oak-ebnf",
+                form="text",
+                value=grammar(groupings=("xml",)).rstrip("\n"),
+            ),
+            Constant(
+                id="canonical-oak",
+                form="text",
+                value=surface_example(SURFACES_BY_ID["node"]),
+            ),
+            Constant(
+                id="orchestrator-example",
+                form="text",
+                value=_orchestrator_example(),
+            ),
         ],
-        schemas=[*all_surface_schemas(), oak_document_schema],
+        schemas=[*(surface_schema(surface) for surface in SURFACES), oak_document_schema],
         triggers=[
             Trigger(
                 id="source-supplied",

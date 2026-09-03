@@ -1,50 +1,56 @@
 """The closed set of OAK entry parts."""
 
-from typing import Annotated
-
-from pydantic import Field
-
 from oak.node.parts.constants import Constant, ConstantForm
 from oak.node.parts.instructions import Instruction
 from oak.node.parts.interfaces import Direction, Interface, SchemaTarget
-from oak.node.parts.processes import (
-    Act,
+from oak.node.parts.part import Part
+from oak.node.parts.processes.conditions import (
     All,
     Any,
-    Assert,
-    BindingValue,
-    Call,
     Compare,
     Condition,
-    ConditionOperator,
-    ConstantTarget,
-    ConstantValue,
+    Not,
+    condition_values,
+)
+from oak.node.parts.processes.model import Process
+from oak.node.parts.processes.operators import ConditionOperator
+from oak.node.parts.processes.steps import (
+    Act,
+    Assert,
+    Call,
     Emit,
     Fail,
     Foreach,
     If,
-    InterfaceTarget,
-    InterfaceValue,
     Join,
-    LiteralValue,
-    Not,
     Par,
-    Process,
-    ProcessTarget,
     Set,
-    StateTarget,
-    StateValue,
     Step,
-    Value,
-    ValueBinding,
     While,
-    condition_values,
     step_values,
 )
-from oak.node.parts.schemas import (
+from oak.node.parts.processes.targets import (
+    ConstantTarget,
+    InterfaceTarget,
+    ProcessTarget,
+    StateTarget,
+)
+from oak.node.parts.processes.values import (
+    BindingValue,
+    ConstantValue,
+    InterfaceValue,
+    LiteralValue,
+    StateValue,
+    Value,
+    ValueBinding,
+)
+from oak.node.parts.schemas.binding import (
+    BindingFailure,
+    SchemaBindingError,
+)
+from oak.node.parts.schemas.constraints import (
     AtLeast,
     AtMost,
-    BindingFailure,
     Constraint,
     Lines,
     ListOf,
@@ -52,25 +58,15 @@ from oak.node.parts.schemas import (
     NonEmpty,
     OneOf,
     Regex,
-    Schema,
-    SchemaBindingError,
     Type,
+)
+from oak.node.parts.schemas.model import (
+    Schema,
     Where,
     where,
 )
 from oak.node.parts.state import State
 from oak.node.parts.triggers import Trigger
-
-Part = Annotated[
-    Instruction
-    | Constant
-    | Schema
-    | State
-    | Trigger
-    | Process
-    | Interface,
-    Field(discriminator="part"),
-]
 
 __all__ = [
     "Act",

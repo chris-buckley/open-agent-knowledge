@@ -74,16 +74,69 @@ PLACEHOLDER_STATUS = "STATUS"
 PLACEHOLDER_COMMIT = "COMMIT"
 PLACEHOLDER_COMMIT_CONVENTION = "COMMIT_CONVENTION"
 
-PLAN_WHERE = where(PLACEHOLDER_PLAN, Type(of="string"), NonEmpty(), description="the ready implementation plan")
-CHANGESET_WHERE = where(PLACEHOLDER_CHANGESET, Type(of="string"), NonEmpty(), description="the implemented code changes")
-TESTS_WHERE = where(PLACEHOLDER_TESTS, Type(of="string"), NonEmpty(), description="the verification evidence")
-FINDINGS_WHERE = where(PLACEHOLDER_FINDINGS, Type(of="string"), NonEmpty(), description="the self-review findings")
-SUMMARY_WHERE = where(PLACEHOLDER_SUMMARY, Type(of="string"), NonEmpty(), description="the implemented changes")
-STATUS_WHERE = where(PLACEHOLDER_STATUS, Type(of="string"), OneOf(values=["complete", "blocked"]), description="the completion status")
-COMPLETE_STATUS_WHERE = where(PLACEHOLDER_STATUS, Type(of="string"), OneOf(values=["complete"]), description="the complete status")
-BLOCKED_STATUS_WHERE = where(PLACEHOLDER_STATUS, Type(of="string"), OneOf(values=["blocked"]), description="the blocked status")
-BLOCKED_SUMMARY_WHERE = where(PLACEHOLDER_SUMMARY, Type(of="string"), NonEmpty(), description="the work state when blocked")
-COMMIT_WHERE = where(PLACEHOLDER_COMMIT, Type(of="string"), Regex(pattern="^[0-9a-f]{7,40}$"), description="the resulting commit hash")
+STATUS_COMPLETE = "complete"
+STATUS_BLOCKED = "blocked"
+
+PLAN_WHERE = where(
+    PLACEHOLDER_PLAN,
+    Type(of="string"),
+    NonEmpty(),
+    description="the ready implementation plan",
+)
+CHANGESET_WHERE = where(
+    PLACEHOLDER_CHANGESET,
+    Type(of="string"),
+    NonEmpty(),
+    description="the implemented code changes",
+)
+TESTS_WHERE = where(
+    PLACEHOLDER_TESTS,
+    Type(of="string"),
+    NonEmpty(),
+    description="the verification evidence",
+)
+FINDINGS_WHERE = where(
+    PLACEHOLDER_FINDINGS,
+    Type(of="string"),
+    NonEmpty(),
+    description="the self-review findings",
+)
+SUMMARY_WHERE = where(
+    PLACEHOLDER_SUMMARY,
+    Type(of="string"),
+    NonEmpty(),
+    description="the implemented changes",
+)
+STATUS_WHERE = where(
+    PLACEHOLDER_STATUS,
+    Type(of="string"),
+    OneOf(values=[STATUS_COMPLETE, STATUS_BLOCKED]),
+    description="the completion status",
+)
+COMPLETE_STATUS_WHERE = where(
+    PLACEHOLDER_STATUS,
+    Type(of="string"),
+    OneOf(values=[STATUS_COMPLETE]),
+    description="the complete status",
+)
+BLOCKED_STATUS_WHERE = where(
+    PLACEHOLDER_STATUS,
+    Type(of="string"),
+    OneOf(values=[STATUS_BLOCKED]),
+    description="the blocked status",
+)
+BLOCKED_SUMMARY_WHERE = where(
+    PLACEHOLDER_SUMMARY,
+    Type(of="string"),
+    NonEmpty(),
+    description="the work state when blocked",
+)
+COMMIT_WHERE = where(
+    PLACEHOLDER_COMMIT,
+    Type(of="string"),
+    Regex(pattern="^[0-9a-f]{7,40}$"),
+    description="the resulting commit hash",
+)
 
 implementer_instructions = [
     Instruction(id=slug, body=body)
@@ -357,7 +410,7 @@ implement_task_process = Process(
             condition=Compare(
                 left=BindingValue(binding=PLACEHOLDER_STATUS),
                 operator="equals",
-                right=LiteralValue(value="blocked"),
+                right=LiteralValue(value=STATUS_BLOCKED),
             ),
             then=[
                 Emit(

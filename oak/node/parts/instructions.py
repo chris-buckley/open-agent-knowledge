@@ -4,8 +4,8 @@ from typing import Literal
 
 from pydantic import ConfigDict, Field
 
-from oak.base import Entry
-from oak.vocabulary import NonBlankLine
+from oak.node.parts.entry import Entry
+from oak.vocabulary.text.non_blank_line import NonBlankLine
 
 
 class Instruction(Entry):

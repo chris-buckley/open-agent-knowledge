@@ -9,9 +9,17 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from build.surfaces import AUTHORABLE_MODELS, model_schema, model_surfaces, slug, surface_example, surface_grammar, surface_schema
+from build.surfaces import (
+    AUTHORABLE_MODELS,
+    model_schema,
+    slug,
+    surface_example,
+    surface_grammar,
+    surface_schema,
+)
 from oak import Constant, Instruction, Node, render
 from oak.rules import RULES
+from oak.surface.registry import surfaces_for_model
 
 from oak.rules import RULES as RULE_SOURCE
 from oak.surface import SURFACES as SURFACE_SOURCE
@@ -32,7 +40,7 @@ def document(model: type) -> str:
         raise RuntimeError(f"{model.__name__} has no title")
     if not isinstance(description, str) or not description:
         raise RuntimeError(f"{model.__name__} has no description")
-    surfaces = model_surfaces(model)
+    surfaces = surfaces_for_model(model)
     if not surfaces:
         raise RuntimeError(f"{model.__name__} has no surface")
     matching_rules = [rule for rule in RULES if model.__name__ in rule.models]
@@ -49,7 +57,11 @@ def document(model: type) -> str:
                 Constant(id=f"example-{index}", value=surface_example(surface))
                 for index, surface in enumerate(surfaces, 1)
             ],
-            Constant(id="grammar", form="text", value="\n".join(surface_grammar(surface) for surface in surfaces)),
+            Constant(
+                id="grammar",
+                form="text",
+                value="\n".join(surface_grammar(surface) for surface in surfaces),
+            ),
         ],
         schemas=[surface_schema(surface) for surface in surfaces],
     )

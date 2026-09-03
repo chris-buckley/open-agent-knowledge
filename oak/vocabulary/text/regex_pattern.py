@@ -61,7 +61,7 @@ def rust_regex_adapter(pattern: str) -> TypeAdapter[str]:
     )
 
 
-def _compiled(pattern: str) -> str:
+def _validated_pattern(pattern: str) -> str:
     try:
         rust_regex_adapter(pattern)
     except SchemaError as error:
@@ -76,5 +76,5 @@ def _compiled(pattern: str) -> str:
 RegexPattern = Annotated[
     str,
     StringConstraints(pattern=REGEX_SOURCE_PATTERN),
-    AfterValidator(_compiled),
+    AfterValidator(_validated_pattern),
 ]

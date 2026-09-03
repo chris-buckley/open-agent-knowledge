@@ -519,12 +519,12 @@ NODE
 - Use the explicit resolver for rules across documents.
 - Do not add a field only for a render token.
 - Define each authored text syntax once under `oak/vocabulary/text`.
-- Define each concrete authored render variant once in `oak/surface.py`.
+- Define each concrete authored render variant once in `oak/surface`.
 - Classify every model field in each surface as (rendered|fixed|omitted|generated).
 - Build rendering, parsing, EBNF, authoring generation, and documentation generation from the same surfaces.
 - Show the complete shape in each surface descriptor; the render omits an empty optional segment.
 - Constrain a projected surface field as non-empty only when the model requires it.
-- Keep each validator-backed authoring rule in `oak/rules.py` with its stable error code.
+- Keep each validator-backed authoring rule in `oak/rules` with its stable error code.
 - Build each reusable string shape with `Annotated` and `StringConstraints` or one reusable after validator.
 - Keep defaults and aliases at the field declaration.
 - Set `regex_engine` to `rust-regex` on the shared OAK base model.
@@ -731,81 +731,158 @@ oak
 ├── AGENTS.md
 ├── CLAUDE.md
 ├── docs
-│   └── PRD.md
+│   ├── PRD.md
+│   └── plans
+│       ├── 0000-plan.md
+│       └── 0000-report.md
 ├── examples
 │   ├── __init__.py
 │   ├── agents
 │   │   ├── __init__.py
-│   │   ├── amendment_reviewer.py
 │   │   ├── amendment_reviewer.oak.md
-│   │   ├── compound_growth.py
+│   │   ├── amendment_reviewer.py
+│   │   ├── bindings.py
 │   │   ├── compound_growth.oak.md
-│   │   ├── delegation.py
+│   │   ├── compound_growth.py
 │   │   ├── delegation.oak.md
-│   │   ├── implementer.py
+│   │   ├── delegation.py
 │   │   ├── implementer.oak.md
-│   │   ├── successor.py
+│   │   ├── implementer.py
 │   │   ├── successor.oak.md
-│   │   ├── successor_verifier.py
+│   │   ├── successor.py
 │   │   ├── successor_verifier.oak.md
-│   │   ├── task_reviewer.py
-│   │   └── task_reviewer.oak.md
+│   │   ├── successor_verifier.py
+│   │   ├── task_reviewer.oak.md
+│   │   └── task_reviewer.py
 │   └── schemas
 │       ├── __init__.py
-│       ├── api_coverage_table.py
 │       ├── api_coverage_table.oak.md
-│       ├── code_changes.py
+│       ├── api_coverage_table.py
 │       ├── code_changes.oak.md
-│       ├── code_map.py
+│       ├── code_changes.py
 │       ├── code_map.oak.md
-│       ├── docs_index.py
+│       ├── code_map.py
 │       ├── docs_index.oak.md
-│       ├── error.py
+│       ├── docs_index.py
 │       ├── error.oak.md
-│       ├── hierarchical_outline.py
+│       ├── error.py
 │       ├── hierarchical_outline.oak.md
-│       ├── ideation_list.py
+│       ├── hierarchical_outline.py
 │       ├── ideation_list.oak.md
-│       ├── link_manifest.py
+│       ├── ideation_list.py
 │       ├── link_manifest.oak.md
-│       ├── process_execution_table.py
+│       ├── link_manifest.py
 │       ├── process_execution_table.oak.md
-│       ├── smeac_plan.py
-│       └── smeac_plan.oak.md
+│       ├── process_execution_table.py
+│       ├── repeat_marker.py
+│       ├── smeac_plan.oak.md
+│       └── smeac_plan.py
 ├── oak
 │   ├── __init__.py
 │   ├── authoring.py
 │   ├── base.py
 │   ├── defaults.py
-│   ├── execute.py
-│   ├── parse.py
-│   ├── resolve.py
-│   ├── rules.py
-│   ├── surface.py
+│   ├── execute
+│   │   ├── __init__.py
+│   │   ├── actions.py
+│   │   ├── context.py
+│   │   ├── executor.py
+│   │   ├── models.py
+│   │   ├── steps.py
+│   │   └── values.py
 │   ├── node
 │   │   ├── __init__.py
 │   │   ├── dump.py
-│   │   ├── graph.py
+│   │   ├── index.py
+│   │   ├── interpretation.py
 │   │   ├── model.py
-│   │   └── parts
+│   │   ├── structure.py
+│   │   ├── parts
+│   │   │   ├── __init__.py
+│   │   │   ├── constants.py
+│   │   │   ├── entry.py
+│   │   │   ├── instructions.py
+│   │   │   ├── interfaces.py
+│   │   │   ├── part.py
+│   │   │   ├── state.py
+│   │   │   ├── triggers.py
+│   │   │   ├── processes
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── conditions.py
+│   │   │   │   ├── model.py
+│   │   │   │   ├── operators.py
+│   │   │   │   ├── steps.py
+│   │   │   │   ├── targets.py
+│   │   │   │   └── values.py
+│   │   │   └── schemas
+│   │   │       ├── __init__.py
+│   │   │       ├── binding.py
+│   │   │       ├── constraints.py
+│   │   │       └── model.py
+│   │   └── validation
 │   │       ├── __init__.py
-│   │       ├── constants.py
-│   │       ├── instructions.py
-│   │       ├── interfaces.py
+│   │       ├── conditions.py
+│   │       ├── contracts.py
+│   │       ├── flow.py
+│   │       ├── node.py
 │   │       ├── processes.py
-│   │       ├── schemas.py
-│   │       ├── state.py
-│   │       └── triggers.py
+│   │       ├── tools.py
+│   │       ├── triggers.py
+│   │       └── values.py
+│   ├── parse
+│   │   ├── __init__.py
+│   │   ├── conditions.py
+│   │   ├── cursor.py
+│   │   ├── data.py
+│   │   ├── document.py
+│   │   ├── errors.py
+│   │   ├── fragments.py
+│   │   ├── grouping.py
+│   │   ├── interfaces.py
+│   │   ├── processes.py
+│   │   ├── schemas.py
+│   │   ├── steps.py
+│   │   ├── triggers.py
+│   │   └── values.py
 │   ├── render
 │   │   ├── __init__.py
-│   │   ├── json_ld.py
+│   │   ├── selection.py
+│   │   ├── json_ld
+│   │   │   ├── __init__.py
+│   │   │   ├── context.py
+│   │   │   ├── document.py
+│   │   │   ├── entries.py
+│   │   │   ├── identifiers.py
+│   │   │   └── values.py
 │   │   └── oak
 │   │       ├── __init__.py
 │   │       ├── arrangement.py
+│   │       ├── data.py
 │   │       ├── groupings.py
 │   │       ├── instructions.py
+│   │       ├── processes.py
 │   │       ├── styles.py
-│   │       └── syntax.py
+│   │       └── triggers.py
+│   ├── resolve
+│   │   ├── __init__.py
+│   │   ├── contracts.py
+│   │   ├── errors.py
+│   │   ├── graph.py
+│   │   ├── paths.py
+│   │   ├── references.py
+│   │   └── resolver.py
+│   ├── rules
+│   │   ├── __init__.py
+│   │   ├── guidance.py
+│   │   ├── model.py
+│   │   └── validation.py
+│   ├── surface
+│   │   ├── __init__.py
+│   │   ├── constraints.py
+│   │   ├── entries.py
+│   │   ├── model.py
+│   │   ├── processes.py
+│   │   └── registry.py
 │   └── vocabulary
 │       ├── __init__.py
 │       ├── syntax.py
@@ -829,10 +906,25 @@ oak
 │   ├── docs.py
 │   ├── ebnf.py
 │   ├── examples.py
-│   └── surfaces.py
+│   ├── surfaces.py
+│   └── checks
+│       ├── __init__.py
+│       ├── architecture.py
+│       ├── execution.py
+│       ├── fixtures.py
+│       ├── human_examples.py
+│       ├── metadata.py
+│       ├── outputs.py
+│       ├── parsing.py
+│       ├── rendering.py
+│       ├── resolution.py
+│       ├── surfaces.py
+│       ├── text.py
+│       └── validation.py
 ├── outputs
-│   ├── oak.ebnf
 │   ├── authoring.md
+│   ├── oak.ebnf
 │   └── docs
 │       └── ...
 └── pyproject.toml
+```

@@ -1,12 +1,10 @@
-"""Shared OAK models: strict, closed, Rust regex, and identified entries."""
+"""Shared OAK models: strict, closed, and Rust regex."""
 
 from typing import ClassVar
 
-from pydantic import BaseModel, ConfigDict, Field, GetJsonSchemaHandler
+from pydantic import BaseModel, ConfigDict, GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import CoreSchema
-
-from oak.vocabulary.text import SlugId
 
 
 def _field_title(name: str, _field: object) -> str:
@@ -44,14 +42,3 @@ class DiscriminatedModel(OakModel):
             if field not in required:
                 required.insert(0, field)
         return schema
-
-
-class Entry(DiscriminatedModel):
-    """The fields shared by every entry."""
-
-    discriminator_field = "part"
-
-    id: SlugId = Field(
-        description="The entry id, unique in its OAK document.",
-        examples=["example"],
-    )

@@ -9,7 +9,8 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from oak import AtLeast, Instruction, Lines, Node, NonEmpty, OneOf, Schema, Type, parse, render, resolve, where
+from oak import AtLeast, Lines, Node, NonEmpty, OneOf, Schema, Type, parse, render, resolve, where
+from examples.schemas.repeat_marker import repeat_marker_instruction
 
 smeac_plan_schema = Schema(
     id="smeac-plan",
@@ -166,7 +167,7 @@ smeac_plan_schema = Schema(
 )
 
 smeac_plan_node = Node(
-    instructions=[Instruction(id="repeat-marker", body="A ... line in a template marks repetition of the pattern above it.")],
+    instructions=[repeat_marker_instruction],
     schemas=[smeac_plan_schema],
 )
 

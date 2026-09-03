@@ -5,49 +5,19 @@ from typing import Literal, Self
 from pydantic import ConfigDict, Field, model_validator
 from pydantic_core import PydanticCustomError
 
-from oak.base import Entry
-from oak.node.parts.processes import (
-    BindingValue,
-    Condition,
+from oak.node.parts.entry import Entry
+from oak.node.parts.processes.conditions import Condition, condition_values
+from oak.node.parts.processes.targets import (
     InterfaceTarget,
-    InterfaceValue,
     ProcessTarget,
+)
+from oak.node.parts.processes.values import (
+    BindingValue,
+    InterfaceValue,
     StateValue,
     ValueBinding,
-    condition_values,
 )
-from oak.rules import rule_error
-from oak.vocabulary import NonBlankLine
-
-
-def validate_trigger_contract(
-    trigger: "Trigger",
-    inputs: set[str] | None,
-) -> None:
-    """Validate one trigger seed against the selected process input schema."""
-    authored = [binding.placeholder for binding in trigger.seed]
-    if inputs is None:
-        if authored:
-            raise rule_error(
-                "trigger_contract_mismatch",
-                "trigger {trigger} seeds a process that has no input schema",
-                {"trigger": trigger.id},
-            )
-        return
-    if len(authored) == len(inputs) and set(authored) == inputs:
-        return
-    raise rule_error(
-        "trigger_contract_mismatch",
-        (
-            "trigger {trigger} seeds differ from the process input schema; "
-            "missing: {missing}; unused: {unused}"
-        ),
-        {
-            "trigger": trigger.id,
-            "missing": ", ".join(sorted(inputs - set(authored))) or "none",
-            "unused": ", ".join(sorted(set(authored) - inputs)) or "none",
-        },
-    )
+from oak.vocabulary.text.non_blank_line import NonBlankLine
 
 
 class Trigger(Entry):
@@ -161,13 +131,17 @@ class Trigger(Entry):
     @model_validator(mode="after")
     def valid_seed(self) -> Self:
         if any(
-            isinstance(binding.value, BindingValue)
+            isinstance(
+                binding.value,
+                BindingValue,
+            )
             for binding in self.seed
         ):
             raise PydanticCustomError(
                 "invalid_trigger_seed_value",
                 "trigger seed cannot read a local binding",
             )
+
         return self
 
     @model_validator(mode="after")
@@ -178,7 +152,13 @@ class Trigger(Entry):
         values = condition_values(self.guard)
 
         if any(
-            isinstance(value, (InterfaceValue, BindingValue))
+            isinstance(
+                value,
+                (
+                    InterfaceValue,
+                    BindingValue,
+                ),
+            )
             for value in values
         ):
             raise PydanticCustomError(
@@ -187,7 +167,10 @@ class Trigger(Entry):
             )
 
         if not any(
-            isinstance(value, StateValue)
+            isinstance(
+                value,
+                StateValue,
+            )
             for value in values
         ):
             raise PydanticCustomError(

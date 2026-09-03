@@ -1,78 +1,17 @@
 """Built-in interpretation instructions for the OAK render."""
 
-from collections.abc import Iterator
-
+from oak.node.interpretation import (
+    ACT_SCHEMA_INSTRUCTION,
+    CONTRACT_INSTRUCTION,
+    CONTROL_INSTRUCTION,
+    PART_INSTRUCTIONS,
+    REFERENCE_INSTRUCTION,
+    TRIGGER_SEED_INSTRUCTION,
+    TRIGGER_SOURCE_INSTRUCTION,
+    TYPED_ENTRY_INSTRUCTION,
+)
 from oak.node.model import Node
-from oak.node.parts.processes import Act, Call, Foreach, If, Par, Step, While
-
-REFERENCE_INSTRUCTION = (
-    "$ reads a value; local targets start with their part; relative targets "
-    "start with a document path; a bare $NAME is local to the running process; "
-    "SET, CALL, EMIT, and trigger facts omit $."
-)
-
-_PART_INSTRUCTIONS = (
-    ("constants", "Constants hold values that do not change while the knowledge runs."),
-    ("schemas", "Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot."),
-    ("state", "State holds values that persist and can change while processes run."),
-    ("triggers", "Each trigger is one fact group: event carries the meaning, an optional source names the exact ingress interface, an optional guard checks state after the match, and process selects the work."),
-    ("processes", "Each process is the exact ordered way to do one task; follow its typed steps from top to bottom."),
-    ("interfaces", "Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both."),
-)
-
-CONTROL_INSTRUCTION = (
-    "Conditions are typed trees; ALL, ANY, and NOT compose comparisons; "
-    "ASSERT fails a false condition; FOREACH is sequential; WHILE tests before each bounded iteration; PAR outputs become visible only at JOIN."
-)
-
-CONTRACT_INSTRUCTION = (
-    "Process input schemas seed local bindings, process output schemas validate successful outputs, "
-    "and CALL binds inputs and promotes declared outputs."
-)
-
-ACT_SCHEMA_INSTRUCTION = (
-    "ACT input and output schemas validate resolved inputs before invocation "
-    "and produced outputs before promotion."
-)
-
-TRIGGER_SEED_INSTRUCTION = (
-    "Trigger seeds fill the selected process input schema; "
-    "each seeded value validates before the process runs."
-)
-
-TRIGGER_SOURCE_INSTRUCTION = (
-    "A source-backed trigger fires on an arrival at its exact interface; "
-    "its event text stays the semantic signpost."
-)
-
-TYPED_ENTRY_INSTRUCTION = (
-    "AS binds one constant or state value to one schema placeholder; "
-    "the value must satisfy that placeholder at resolution and before each state write commits."
-)
-
-BUILT_IN_INSTRUCTIONS = frozenset(
-    (
-        REFERENCE_INSTRUCTION,
-        CONTROL_INSTRUCTION,
-        CONTRACT_INSTRUCTION,
-        ACT_SCHEMA_INSTRUCTION,
-        TRIGGER_SEED_INSTRUCTION,
-        TRIGGER_SOURCE_INSTRUCTION,
-        TYPED_ENTRY_INSTRUCTION,
-        *(text for _field, text in _PART_INSTRUCTIONS),
-    )
-)
-
-
-def _walk_steps(steps: list[Step]) -> Iterator[Step]:
-    for step in steps:
-        yield step
-        if isinstance(step, If):
-            yield from _walk_steps(step.then)
-            if step.otherwise is not None:
-                yield from _walk_steps(step.otherwise)
-        elif isinstance(step, (Foreach, While, Par)):
-            yield from _walk_steps(step.steps)
+from oak.node.parts.processes.steps import Act, Assert, Call, Foreach, Join, Par, While, iter_steps
 
 
 def instruction_lines(node: Node) -> list[str]:
@@ -81,18 +20,21 @@ def instruction_lines(node: Node) -> list[str]:
     steps = tuple(
         step
         for process in node.processes
-        for step in _walk_steps(process.steps)
+        for step in iter_steps(process.steps)
     )
     if node.processes or node.triggers:
         lines.append(REFERENCE_INSTRUCTION)
-    if any(step.kind in {"assert", "foreach", "while", "par", "join"} for step in steps):
+    if any(isinstance(step, (Assert, Foreach, While, Par, Join)) for step in steps):
         lines.append(CONTROL_INSTRUCTION)
     if (
         any(process.input is not None or process.output is not None for process in node.processes)
         or any(isinstance(step, Call) and (step.inputs or step.outputs) for step in steps)
     ):
         lines.append(CONTRACT_INSTRUCTION)
-    if any(isinstance(step, Act) and (step.input is not None or step.output is not None) for step in steps):
+    if any(
+        isinstance(step, Act) and (step.input is not None or step.output is not None)
+        for step in steps
+    ):
         lines.append(ACT_SCHEMA_INSTRUCTION)
     if any(trigger.seed for trigger in node.triggers):
         lines.append(TRIGGER_SEED_INSTRUCTION)
@@ -100,7 +42,7 @@ def instruction_lines(node: Node) -> list[str]:
         lines.append(TRIGGER_SOURCE_INSTRUCTION)
     if any(entry.schema_id is not None for entry in (*node.constants, *node.state)):
         lines.append(TYPED_ENTRY_INSTRUCTION)
-    for field, instruction in _PART_INSTRUCTIONS:
+    for field, instruction in PART_INSTRUCTIONS:
         if getattr(node, field):
             lines.append(instruction)
     if lines and node.instructions:

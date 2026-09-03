@@ -8,7 +8,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from build.surfaces import surface_grammar
-from oak.render.oak.arrangement import PART_ORDER
+from oak.node.structure import PART_ORDER
 from oak.surface import SURFACES
 from oak.vocabulary.text.dotted_path import DOTTED_PATH_EBNF
 from oak.vocabulary.text.non_blank_line import NON_BLANK_LINE_SYNTAX
@@ -36,8 +36,14 @@ def _document(prefix: str) -> list[str]:
 
 def _parts(prefix: str) -> list[str]:
     if prefix == "xml":
-        return [f'xml_{part}_part = "<{part}>", lf, text_body, "</{part}>" ;' for part in PART_ORDER]
-    return [f'markdown_{part}_part = "~~~~{part}", lf, text_body, "~~~~" ;' for part in PART_ORDER]
+        return [
+            f'xml_{part}_part = "<{part}>", lf, text_body, "</{part}>" ;'
+            for part in PART_ORDER
+        ]
+    return [
+        f'markdown_{part}_part = "~~~~{part}", lf, text_body, "~~~~" ;'
+        for part in PART_ORDER
+    ]
 
 
 _BODY_ENTRIES = {

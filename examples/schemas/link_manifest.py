@@ -9,7 +9,8 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from oak import Instruction, Lines, Node, NonEmpty, Schema, Type, parse, render, resolve, where
+from oak import Lines, Node, NonEmpty, Schema, Type, parse, render, resolve, where
+from examples.schemas.repeat_marker import repeat_marker_instruction
 
 link_manifest_schema = Schema(
     id="link-manifest",
@@ -30,7 +31,7 @@ link_manifest_schema = Schema(
 )
 
 link_manifest_node = Node(
-    instructions=[Instruction(id="repeat-marker", body="A ... line in a template marks repetition of the pattern above it.")],
+    instructions=[repeat_marker_instruction],
     schemas=[link_manifest_schema],
 )
 

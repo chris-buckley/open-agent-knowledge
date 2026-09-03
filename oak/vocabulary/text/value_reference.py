@@ -10,9 +10,9 @@ from oak.vocabulary.text.placeholder import PLACEHOLDER_SYNTAX
 from oak.vocabulary.text.slug_id import SLUG_ID_SYNTAX
 from oak.vocabulary.text.target_path import (
     DOCUMENT_PATH_BODY,
-    TargetPath,
     is_relative_target,
     split_target,
+    validate_target_path,
 )
 
 VALUE_REFERENCE_PATTERN = (
@@ -62,8 +62,8 @@ def _value_reference(value: str) -> str:
     source = value[1:]
 
     try:
-        TargetPath.__metadata__[-1].func(source)
-    except Exception:
+        validate_target_path(source)
+    except PydanticCustomError:
         raise PydanticCustomError(
             "invalid_document_path",
             "value reference is invalid",

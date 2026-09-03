@@ -27,8 +27,10 @@ from oak import (
     LiteralValue,
     Node,
     NonEmpty,
+    OakParseError,
     OneOf,
     Process,
+    ResolutionError,
     Schema,
     Set,
     State,
@@ -44,6 +46,7 @@ from oak import (
     resolve,
     where,
 )
+from examples.agents.bindings import interface_bindings, local_bindings
 from examples.agents.amendment_reviewer import (
     INTERFACE_REVIEW_REQUEST_INPUT as WORKER_REVIEW_REQUEST_INPUT,
     REVIEW_PLACEHOLDERS,
@@ -54,6 +57,8 @@ from examples.agents.successor_verifier import (
     INTERFACE_VERIFICATION_REQUEST_INPUT as WORKER_VERIFICATION_REQUEST_INPUT,
     PROOF_PLACEHOLDERS,
     REQUEST_PLACEHOLDERS as VERIFICATION_REQUEST_PLACEHOLDERS,
+    SCHEMA_SUCCESSOR_PROOF,
+    SCHEMA_SUCCESSOR_VERIFICATION_REQUEST,
     TOOL_OAK_VERIFY_SUCCESSOR,
     successor_verifier_node,
 )
@@ -134,17 +139,25 @@ ACCEPTED_AMENDMENT_PLACEHOLDERS = (
     PLACEHOLDER_PROTECTED_INVARIANTS,
 )
 
+STATUS_IDLE = "idle"
+STATUS_REVIEWING = "reviewing"
+STATUS_NEEDS_EVIDENCE = "needs-evidence"
+STATUS_REJECTED = "rejected"
+STATUS_RATIFIED = "ratified"
+DECISION_ACCEPT = "accept"
+DECISION_REJECT = "reject"
+DECISION_NEEDS_EVIDENCE = "needs-evidence"
+
+preserve_one_node_instruction = Instruction(
+    id="preserve-one-node",
+    body="Preserve exactly one node in every OAK document.",
+)
+preserve_seven_parts_instruction = Instruction(
+    id="preserve-seven-parts",
+    body="Preserve the closed seven-part OAK structure.",
+)
 constitution_node = Node(
-    instructions=[
-        Instruction(
-            id="preserve-one-node",
-            body="Preserve exactly one node in every OAK document.",
-        ),
-        Instruction(
-            id="preserve-seven-parts",
-            body="Preserve the closed seven-part OAK structure.",
-        ),
-    ]
+    instructions=[preserve_one_node_instruction, preserve_seven_parts_instruction],
 )
 CURRENT_OAK_TEXT = render(constitution_node)
 PROTECTED_INVARIANTS_TEXT = (
@@ -153,12 +166,32 @@ PROTECTED_INVARIANTS_TEXT = (
     "Every published successor parses, resolves, and round-trips canonically."
 )
 
+protect_current_instruction = Instruction(
+    id="protect-current",
+    body="Treat the current OAK document as immutable.",
+)
+require_proof_instruction = Instruction(
+    id="require-proof",
+    body="Never publish a successor without a valid independent proof.",
+)
+preserve_invariants_instruction = Instruction(
+    id="preserve-invariants",
+    body="Preserve every protected invariant across succession.",
+)
+request_evidence_instruction = Instruction(
+    id="request-evidence",
+    body="Request evidence instead of guessing when review support is incomplete.",
+)
+separate_authority_instruction = Instruction(
+    id="separate-authority",
+    body="Keep review, compilation, verification, ratification, and publication separate.",
+)
 successor_instructions = [
-    Instruction(id="protect-current", body="Treat the current OAK document as immutable."),
-    Instruction(id="require-proof", body="Never publish a successor without a valid independent proof."),
-    Instruction(id="preserve-invariants", body="Preserve every protected invariant across succession."),
-    Instruction(id="request-evidence", body="Request evidence instead of guessing when review support is incomplete."),
-    Instruction(id="separate-authority", body="Keep review, compilation, verification, ratification, and publication separate."),
+    protect_current_instruction,
+    require_proof_instruction,
+    preserve_invariants_instruction,
+    request_evidence_instruction,
+    separate_authority_instruction,
 ]
 
 
@@ -168,23 +201,6 @@ def required_text(placeholder: str, description: str) -> Where:
 
 def text_value(placeholder: str, description: str) -> Where:
     return where(placeholder, Type(of="string"), description=description)
-
-
-def local_bindings(placeholders: tuple[str, ...]) -> list[ValueBinding]:
-    return [
-        ValueBinding(placeholder=name, value=BindingValue(binding=name))
-        for name in placeholders
-    ]
-
-
-def interface_bindings(interface: str, placeholders: tuple[str, ...]) -> list[ValueBinding]:
-    return [
-        ValueBinding(
-            placeholder=name,
-            value=InterfaceValue(interface=interface, placeholder=name),
-        )
-        for name in placeholders
-    ]
 
 
 governance_schema = Schema(
@@ -207,7 +223,7 @@ governance_schema = Schema(
         where(
             PLACEHOLDER_STATUS,
             Type(of="string"),
-            OneOf(values=["idle", "reviewing", "needs-evidence", "rejected", "ratified"]),
+            OneOf(values=[STATUS_IDLE, STATUS_REVIEWING, STATUS_NEEDS_EVIDENCE, STATUS_REJECTED, STATUS_RATIFIED]),
             description="the persistent succession status",
         ),
         text_value(PLACEHOLDER_AMENDMENT_ID, "the pending amendment identifier, empty before a proposal"),
@@ -318,7 +334,12 @@ successor_publication_schema = Schema(
         "Proof: <PROOF>"
     ),
     where=[
-        where(PLACEHOLDER_DECISION, Type(of="string"), OneOf(values=["accept"]), description="the ratified amendment decision"),
+        where(
+            PLACEHOLDER_DECISION,
+            Type(of="string"),
+            OneOf(values=[DECISION_ACCEPT]),
+            description="the ratified amendment decision",
+        ),
         where(PLACEHOLDER_PRIOR_REVISION, Type(of="integer"), AtLeast(value=1), description="the revision that the successor replaces"),
         where(PLACEHOLDER_NEXT_REVISION, Type(of="integer"), AtLeast(value=2), description="the published successor revision"),
         required_text(PLACEHOLDER_AMENDMENT_ID, "the ratified amendment identifier"),
@@ -354,11 +375,36 @@ protected_invariants_constant = Constant(
     placeholder=PLACEHOLDER_PROTECTED_INVARIANTS,
     value=PROTECTED_INVARIANTS_TEXT,
 )
-current_revision_state = State(id="current-revision", schema=SCHEMA_GOVERNANCE, placeholder=PLACEHOLDER_REVISION, value=13)
-review_status_state = State(id="review-status", schema=SCHEMA_GOVERNANCE, placeholder=PLACEHOLDER_STATUS, value="idle")
-pending_amendment_id_state = State(id="pending-amendment-id", schema=SCHEMA_GOVERNANCE, placeholder=PLACEHOLDER_AMENDMENT_ID, value="")
-pending_amendment_state = State(id="pending-amendment", schema=SCHEMA_GOVERNANCE, placeholder=PLACEHOLDER_AMENDMENT, value="")
-pending_rationale_state = State(id="pending-rationale", schema=SCHEMA_GOVERNANCE, placeholder=PLACEHOLDER_RATIONALE, value="")
+current_revision_state = State(
+    id="current-revision",
+    schema=SCHEMA_GOVERNANCE,
+    placeholder=PLACEHOLDER_REVISION,
+    value=13,
+)
+review_status_state = State(
+    id="review-status",
+    schema=SCHEMA_GOVERNANCE,
+    placeholder=PLACEHOLDER_STATUS,
+    value=STATUS_IDLE,
+)
+pending_amendment_id_state = State(
+    id="pending-amendment-id",
+    schema=SCHEMA_GOVERNANCE,
+    placeholder=PLACEHOLDER_AMENDMENT_ID,
+    value="",
+)
+pending_amendment_state = State(
+    id="pending-amendment",
+    schema=SCHEMA_GOVERNANCE,
+    placeholder=PLACEHOLDER_AMENDMENT,
+    value="",
+)
+pending_rationale_state = State(
+    id="pending-rationale",
+    schema=SCHEMA_GOVERNANCE,
+    placeholder=PLACEHOLDER_RATIONALE,
+    value="",
+)
 
 amendment_proposed_trigger = Trigger(
     id="amendment-proposed",
@@ -378,7 +424,7 @@ evidence_supplied_trigger = Trigger(
     guard=Compare(
         left=StateValue(state=STATE_REVIEW_STATUS),
         operator="equals",
-        right=LiteralValue(value="needs-evidence"),
+        right=LiteralValue(value=STATUS_NEEDS_EVIDENCE),
     ),
     process=PROCESS_GOVERN_SUCCESSION,
     seed=[
@@ -465,7 +511,7 @@ govern_succession_process = Process(
         Set(state=STATE_PENDING_AMENDMENT_ID, value=BindingValue(binding=PLACEHOLDER_AMENDMENT_ID)),
         Set(state=STATE_PENDING_AMENDMENT, value=BindingValue(binding=PLACEHOLDER_AMENDMENT)),
         Set(state=STATE_PENDING_RATIONALE, value=BindingValue(binding=PLACEHOLDER_RATIONALE)),
-        Set(state=STATE_REVIEW_STATUS, value=LiteralValue(value="reviewing")),
+        Set(state=STATE_REVIEW_STATUS, value=LiteralValue(value=STATUS_REVIEWING)),
         Call(
             process=PROCESS_DISPATCH_REVIEW,
             inputs=[
@@ -485,7 +531,7 @@ govern_succession_process = Process(
             condition=Compare(
                 left=BindingValue(binding=PLACEHOLDER_DECISION),
                 operator="equals",
-                right=LiteralValue(value="accept"),
+                right=LiteralValue(value=DECISION_ACCEPT),
             ),
             then=[
                 ACT.tool(
@@ -581,7 +627,7 @@ govern_succession_process = Process(
                     outputs=[PLACEHOLDER_PRIOR_REVISION, PLACEHOLDER_NEXT_REVISION],
                 ),
                 Set(state=STATE_CURRENT_REVISION, value=BindingValue(binding=PLACEHOLDER_NEXT_REVISION)),
-                Set(state=STATE_REVIEW_STATUS, value=LiteralValue(value="ratified")),
+                Set(state=STATE_REVIEW_STATUS, value=LiteralValue(value=STATUS_RATIFIED)),
                 Emit(
                     interface=INTERFACE_SUCCESSOR_OUTPUT,
                     bindings=[
@@ -605,18 +651,18 @@ govern_succession_process = Process(
                     condition=Compare(
                         left=BindingValue(binding=PLACEHOLDER_DECISION),
                         operator="equals",
-                        right=LiteralValue(value="needs-evidence"),
+                        right=LiteralValue(value=DECISION_NEEDS_EVIDENCE),
                     ),
                     then=[
                         Set(
                             state=STATE_REVIEW_STATUS,
-                            value=LiteralValue(value="needs-evidence"),
+                            value=LiteralValue(value=STATUS_NEEDS_EVIDENCE),
                         )
                     ],
                     otherwise=[
                         Set(
                             state=STATE_REVIEW_STATUS,
-                            value=LiteralValue(value="rejected"),
+                            value=LiteralValue(value=STATUS_REJECTED),
                         )
                     ],
                 ),
@@ -707,7 +753,7 @@ EVIDENCE_VALUES = {
 }
 INITIAL_STATE = {
     STATE_CURRENT_REVISION: 13,
-    STATE_REVIEW_STATUS: "idle",
+    STATE_REVIEW_STATUS: STATUS_IDLE,
     STATE_PENDING_AMENDMENT_ID: "",
     STATE_PENDING_AMENDMENT: "",
     STATE_PENDING_RATIONALE: "",
@@ -719,18 +765,18 @@ def _review_amendment_act(_step, values):
     amendment = values[PLACEHOLDER_AMENDMENT].lower()
     if not evidence:
         return {
-            PLACEHOLDER_DECISION: "needs-evidence",
+            PLACEHOLDER_DECISION: DECISION_NEEDS_EVIDENCE,
             PLACEHOLDER_REVIEW_FINDINGS: "The amendment is coherent, but no verification evidence supports ratification.",
             PLACEHOLDER_EVIDENCE_REQUEST: "Provide parse, resolve, canonical round-trip, invariant, and exact-scope evidence.",
         }
     if "remove" in amendment and "seven" in amendment:
         return {
-            PLACEHOLDER_DECISION: "reject",
+            PLACEHOLDER_DECISION: DECISION_REJECT,
             PLACEHOLDER_REVIEW_FINDINGS: "The amendment would break the protected seven-part structure.",
             PLACEHOLDER_EVIDENCE_REQUEST: "",
         }
     return {
-        PLACEHOLDER_DECISION: "accept",
+        PLACEHOLDER_DECISION: DECISION_ACCEPT,
         PLACEHOLDER_REVIEW_FINDINGS: "The evidence supports one exact invariant-preserving amendment.",
         PLACEHOLDER_EVIDENCE_REQUEST: "",
     }
@@ -776,13 +822,13 @@ def _verify_successor_tool(_step, values):
     try:
         current, candidate = parse(current_text), parse(candidate_text)
         parses = True
-    except Exception:
+    except OakParseError:
         pass
     if candidate is not None:
         try:
             resolve(candidate)
             resolves = True
-        except Exception:
+        except ResolutionError:
             pass
         canonical = render(candidate) == candidate_text
     invariants_preserved = scope_exact = False
@@ -842,8 +888,8 @@ def _successor_verifier_agent(_step, values):
                 _verify_successor_tool,
                 frozenset(VERIFICATION_REQUEST_PLACEHOLDERS),
                 frozenset(PROOF_PLACEHOLDERS),
-                input="schema.successor-verification-request",
-                output="schema.successor-proof",
+                input=SCHEMA_SUCCESSOR_VERIFICATION_REQUEST,
+                output=SCHEMA_SUCCESSOR_PROOF,
             )
         },
     )
@@ -895,8 +941,8 @@ def _tool_registry() -> dict[str, ToolContract]:
             _verify_successor_tool,
             frozenset(VERIFICATION_REQUEST_PLACEHOLDERS),
             frozenset(PROOF_PLACEHOLDERS),
-            input="schema.successor-verification-request",
-            output="schema.successor-proof",
+            input=SCHEMA_SUCCESSOR_VERIFICATION_REQUEST,
+            output=SCHEMA_SUCCESSOR_PROOF,
         ),
     }
 
@@ -922,7 +968,7 @@ def build() -> str:
         load=_load_document,
     )
     if not (
-        review.state[STATE_REVIEW_STATUS] == "needs-evidence"
+        review.state[STATE_REVIEW_STATUS] == STATUS_NEEDS_EVIDENCE
         and review.state[STATE_CURRENT_REVISION] == 13
         and len(review.emissions) == 1
         and review.emissions[0].interface == INTERFACE_REVIEW_OUTCOME_OUTPUT
@@ -942,7 +988,7 @@ def build() -> str:
         load=_load_document,
     )
     if not (
-        succession.state[STATE_REVIEW_STATUS] == "ratified"
+        succession.state[STATE_REVIEW_STATUS] == STATUS_RATIFIED
         and succession.state[STATE_CURRENT_REVISION] == 14
         and len(succession.emissions) == 1
         and succession.emissions[0].interface == INTERFACE_SUCCESSOR_OUTPUT
@@ -951,7 +997,7 @@ def build() -> str:
 
     published = dict(succession.emissions[0].values)
     if not (
-        published[PLACEHOLDER_DECISION] == "accept"
+        published[PLACEHOLDER_DECISION] == DECISION_ACCEPT
         and published[PLACEHOLDER_PRIOR_REVISION] == 13
         and published[PLACEHOLDER_NEXT_REVISION] == 14
         and all(

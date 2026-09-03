@@ -1,15 +1,23 @@
 """How information is conveyed without ambiguity inside every render."""
 
-from oak.vocabulary.text import (
-    DottedPath,
-    NonBlankLine,
-    Placeholder,
-    ProcessName,
-    RegexPattern,
-    SlugId,
-    TargetPath,
-    ValueReference,
+from oak.vocabulary.datatypes.datetime import DateTime
+from oak.vocabulary.datatypes.names import DATATYPE_ADAPTERS, Datatype
+from oak.vocabulary.datatypes.quantity import Quantity
+from oak.vocabulary.display.datetime import datetime_text
+from oak.vocabulary.display.number import (
+    DECIMAL_SEPARATOR,
+    THIN_SPACE,
+    number_text,
 )
+from oak.vocabulary.display.quantity import quantity_text
+from oak.vocabulary.text.dotted_path import DottedPath
+from oak.vocabulary.text.non_blank_line import NonBlankLine
+from oak.vocabulary.text.placeholder import Placeholder
+from oak.vocabulary.text.process_name import ProcessName
+from oak.vocabulary.text.regex_pattern import RegexPattern
+from oak.vocabulary.text.slug_id import SlugId
+from oak.vocabulary.text.target_path import TargetPath
+from oak.vocabulary.text.value_reference import ValueReference
 from oak.vocabulary.units import Unit
 
 __all__ = [
@@ -32,34 +40,3 @@ __all__ = [
     "number_text",
     "quantity_text",
 ]
-
-
-def __getattr__(name: str) -> object:
-    if name in {
-        "DATATYPE_ADAPTERS",
-        "Datatype",
-        "DateTime",
-        "Quantity",
-    }:
-        from oak.vocabulary import datatypes
-
-        return getattr(
-            datatypes,
-            name,
-        )
-
-    if name in {
-        "DECIMAL_SEPARATOR",
-        "THIN_SPACE",
-        "datetime_text",
-        "number_text",
-        "quantity_text",
-    }:
-        from oak.vocabulary import display
-
-        return getattr(
-            display,
-            name,
-        )
-
-    raise AttributeError(name)

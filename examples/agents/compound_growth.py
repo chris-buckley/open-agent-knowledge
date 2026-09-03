@@ -61,12 +61,11 @@ PLACEHOLDER_SCALED_BALANCE = "SCALED_BALANCE"
 PLACEHOLDER_TARGET = "TARGET"
 PLACEHOLDER_REFLECTION = "REFLECTION"
 
-growth_instructions = [
-    Instruction(
-        id="run-continuously",
-        body="Run this machine continuously: after each cycle commits, apply the same arrival again.",
-    )
-]
+run_continuously_instruction = Instruction(
+    id="run-continuously",
+    body="Run this machine continuously: after each cycle commits, apply the same arrival again.",
+)
+growth_instructions = [run_continuously_instruction]
 
 growth_rate_constant = Constant(
     id="growth-rate",
@@ -259,15 +258,15 @@ def build() -> str:
     state = {STATE_CURRENT_BALANCE: 100, STATE_REFLECTION_TARGET: 800}
     emissions = []
     for _cycle in range(2):
-        result = execute(
+        cycle_execution = execute(
             parsed,
             Arrival(event=EVENT_GROWTH_REQUESTED),
             state,
             act=_reflect_act,
             tools=tools,
         )
-        state = dict(result.state)
-        emissions.extend(result.emissions)
+        state = dict(cycle_execution.state)
+        emissions.extend(cycle_execution.emissions)
     if len(emissions) != 2:
         raise RuntimeError("compound growth did not emit one reflection per cycle")
     if not (
