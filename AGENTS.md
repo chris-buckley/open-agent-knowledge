@@ -148,6 +148,7 @@ WHEN you change `docs/PRD.md`, you MUST:
 - Show the user each change as one runnable Python example authored with the package, its generated output, and the exact PRD lines, before you write them.
 - Keep the chat reply to what the user must answer.
 - Write them only after the user agrees.
+- Do not ask for agreement on a Tree section line that mirrors a file already in the repository; write it.
 - Compress a list of alternatives into one line in the form `(a|b|c)` to reduce tokens.
 
 WHEN you write a document in this repository, you MUST:
@@ -216,6 +217,7 @@ WHEN you communicate with the user, you MUST:
 - Do not use em dash, bold, or italics.
 - Do not use jargon. Defined repository concepts are permitted as the concept list grows.
 - Do not use filler, praise, or repetition.
+- Presume the routine answer to a routine question, act, and report it.
 
 WHEN you finish an implementation or refactor, you MUST:
 
