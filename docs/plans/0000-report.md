@@ -99,7 +99,7 @@ Approved
 - [x] Build imports no private parser functions
 - [x] Public exports are explicit
 - [x] Internal modules import the owning leaf module, never a package barrel
-- [x] Package initializers hold a docstring, imports, and __all__ only
+- [x] Package initializers in oak hold a docstring, imports, and __all__ only (build/checks/__init__.py also composes the ordered CHECKS tuple the build runs)
 - [x] No compatibility shim remains
 - [x] No obsolete path remains
 
@@ -122,7 +122,7 @@ model-schemas.json    identical (43 models)
 imports.json          every public-module symbol present
 diagnostics.json      identical (46 failures)
 probes                annotation metadata, SchemaBindingError signature, ResolvedGraph.registries equality, and every package __all__ bound
-PRD Tree section      identical to the repository
+PRD Tree section      identical to the tracked files under the baseline tree conventions (202 lines; see Deviations)
 negative probes       identical to a 408acd1 worktree (21 dumps, 42 round trips, 32 cases)
 clean clone           build and 17 examples pass, git status empty
 ```
@@ -132,6 +132,7 @@ clean clone           build and 17 examples pass, git status empty
 * Files added: 90 (89 before this report)
 * Files modified: 42
 * Files deleted: 10
+* Files tracked at the tip: 427 (347 at the baseline; 381 and 301 without legacy-snapshot-aps)
 * Unrelated changes: none
 
 ## Deviations from the plan
@@ -153,8 +154,10 @@ clean clone           build and 17 examples pass, git status empty
 * The last fix-range reviewer measured behaviour against the mid-style commit 89eba8e rather than the baseline and flagged the restored discriminator tables, the restored error context, and the un-exported JSON_ADAPTER and TypedTarget; each of those matches 408acd1, which is the contract.
 * build/checks/architecture.py enumerates source files with rglob. That is verification coverage of the whole tree, the same enumeration the plan's own bash checks perform with find; the plan's exclusion of automatic discovery concerns product registries and module loading, and nothing is imported or registered by the scan.
 * AGENTS.md gained two rules in 4c57016 at the user's request: a Tree section line that mirrors a file already in the repository is written without asking, and a routine question is presumed, acted on, and reported.
+* The PRD Tree keeps the conventions the baseline tree used: .agents, oak/vocabulary/datatypes, oak/vocabulary/display, and outputs/docs collapse to one ... line each, and legacy-snapshot-aps is not listed. Every other tracked file has one line, and the tree generated from git ls-files under those conventions matches the section line for line. The plan's exact-tree boxes are ticked under that reading.
+* A read-only GPT-5 Pro completion audit of f677bcd on 2026-09-03 returned INCOMPLETE on four points: the tree lacked this report's line (added in 9fd3a9c), the report lacked a total file count (added), the initializer claim was unqualified (qualified), and the tree conventions above (ruled, not changed). It confirmed the 15 open boxes, every named path and deletion, the change counts, the dependency edges, and that no obsolete import remains.
 
 ## Remaining concerns
 
 * 15 plan boxes stay open: line 252 (a shared typed lookup protocol between local and resolved validation, which the audit showed is not needed: the two lookups return different contracts), the two ruled deviations at lines 753 (OPERATOR_PHRASES) and 1072 (no part-name type), and the 12 stop conditions at lines 2272 to 2283, none of which occurred. Every behaviour-contract, section 10 style, phase exit, Phase 18, definition-of-done, and recovery box is ticked with evidence.
-* The branch holds 91 commits including this report and the tree line that lists it. The user chose a merge commit over a squash, so the plan's single commit title is the pull request title.
+* The branch holds 92 commits including this report, the tree line that lists it, and the audit fixes. The user chose a merge commit over a squash, so the plan's single commit title is the pull request title.
