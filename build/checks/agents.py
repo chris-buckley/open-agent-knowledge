@@ -101,14 +101,42 @@ def _ancestor_agent_paths(path: str) -> tuple[str, ...]:
     return tuple(ancestors)
 
 
-def _claims(node: Node) -> dict[str, str]:
+def _claims(node: Node) -> tuple[tuple[str, str], ...]:
     """Return normalized authored claims without generated interpretation text."""
-    claims: dict[str, str] = {}
+    claims: list[tuple[str, str]] = []
 
     def add(kind: str, text: str) -> None:
         normalized = _normal_text(text)
         if normalized:
-            claims[f"{kind}:{normalized}"] = text
+            claims.append((f"{kind}:{normalized}", text))
+
+    def add_constant_items(value: object) -> None:
+        if isinstance(value, list):
+            for item in value:
+                if isinstance(item, str):
+                    if len(_normal_text(item).split()) >= 3:
+                        add("constant-item", item)
+                else:
+                    add(
+                        "constant-item",
+                        json.dumps(
+                            item,
+                            ensure_ascii=False,
+                            sort_keys=True,
+                            separators=(",", ":"),
+                        ),
+                    )
+        elif isinstance(value, dict):
+            for key, item in value.items():
+                add(
+                    "constant-item",
+                    json.dumps(
+                        {key: item},
+                        ensure_ascii=False,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                )
 
     for instruction in node.instructions:
         add("instruction", instruction.body)
@@ -121,6 +149,7 @@ def _claims(node: Node) -> dict[str, str]:
             separators=(",", ":"),
         )
         add("constant", value)
+        add_constant_items(constant.value)
 
     for schema in node.schemas:
         if schema.name is not None:
@@ -146,7 +175,7 @@ def _claims(node: Node) -> dict[str, str]:
         if interface.description is not None:
             add("interface-description", interface.description)
 
-    return claims
+    return tuple(claims)
 
 
 def _validate_instruction_last_policy(name: str, node: Node) -> None:
@@ -213,7 +242,7 @@ def validate_agents() -> None:
 
         canonical = render(node, grouping="xml")
         if canonical != text:
-            raise RuntimeError(f"{name} is not canonical XML-grouped OAK")
+            raise RuntimeError("f{ name } is not canonical XML-grouped OAK")
 
         _validate_instruction_last_policy(name, node)
 
@@ -225,7 +254,7 @@ def validate_agents() -> None:
         if owner.form != "inline" or not isinstance(owner.value, str) or not owner.value:
             raise RuntimeError(f"{name} owned-concern must be one inline string")
         if owner.value in concerns.values():
-            raise RuntimeError(f"{name} repeats another owned concern: {owner.value}")
+            raise RuntimeError((f"{name} repeats another owned concern: {owner.value}"))
         concerns[name] = owner.value
 
         if not node.processes:
@@ -262,7 +291,7 @@ def validate_agents() -> None:
     if tuple(routed) != _SCOPED_PATHS:
         raise RuntimeError(
             "root AGENTS router path order is stale: "
-            f"expected {_SCOPED_PATHS}, got {tuple(routed)}"
+            f "expected {_SCOPED_PATHS}, got {tuple(routed)}"
         )
     if len({row["concern"] for row in rows if isinstance(row, dict)}) != len(rows):
         raise RuntimeError("root AGENTS router repeats a concern")
@@ -291,7 +320,7 @@ def validate_agents() -> None:
     claims_by_path = {name: _claims(node) for name, node in nodes.items()}
     seen: dict[str, tuple[str, str]] = {}
     for name in AGENT_PATHS:
-        for key, claim in claims_by_path[name].items():
+        for key, claim in claims_by_path[name]:
             previous = seen.get(key)
             if previous is not None:
                 previous_path, previous_claim = previous
@@ -301,10 +330,14 @@ def validate_agents() -> None:
                 )
             seen[key] = (name, claim)
 
+    claims_as_maps = {
+        name: dict(claims)
+        for name, claims in claims_by_path.items()
+    }
     for name in _SCOPED_PATHS:
-        child = claims_by_path[name]
+        child = claims_as_maps[name]
         for ancestor in _ancestor_agent_paths(name):
-            overlap = set(child) & set(claims_by_path[ancestor])
+            overlap = set(child) & set(claims_as_maps[ancestor])
             if overlap:
                 key = next(iter(overlap))
                 raise RuntimeError(
