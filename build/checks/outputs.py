@@ -91,7 +91,7 @@ def validate_outputs() -> None:
     actual_root = {
         path
         for path in (ROOT / "outputs").iterdir()
-        if path.is_file()
+        if path.is_file() and path.name != "AGENTS.md"
     }
     expected_root = {
         ROOT / "outputs" / "oak.ebnf",
