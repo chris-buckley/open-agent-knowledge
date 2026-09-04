@@ -1,4 +1,4 @@
-name: Interface flow patch applier
+name: Interface flow import cleanup
 
 on:
   push:
@@ -9,20 +9,13 @@ permissions:
   contents: write
 
 jobs:
-  apply:
-    if: "${{ startsWith(github.event.head_commit.message, 'chore(automation): stage interface flow') }}"
+  cleanup:
+    if: "${{ startsWith(github.event.head_commit.message, 'chore(automation): delete interface flow import branch') }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: docs/interface-flow-plan
           fetch-depth: 0
-      - name: Apply staged commits
-        run: |
-          cat .github/interface-flow/series.patch.* > /tmp/interface-flow.patch
-          git config user.name OpenAI
-          git config user.email openai@example.invalid
-          git am /tmp/interface-flow.patch
-          git rm .github/interface-flow/series.patch.*
-          git commit --amend --no-edit
-          git push origin HEAD:docs/interface-flow-plan
+      - name: Delete temporary import branch
+        run: git push origin --delete automation/interface-flow-import
