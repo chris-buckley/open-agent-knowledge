@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from build.checks.architecture import validate_architecture
+from build.checks.documentation import validate_documentation
 from build.checks.execution import (
     validate_execution,
     validate_source_routing,
@@ -39,6 +40,7 @@ CHECKS: tuple[Check, ...] = (
     validate_source_routing,
     validate_json_ld_style_display,
     validate_human_examples,
+    validate_documentation,
     validate_surfaces,
     validate_outputs,
     validate_architecture,

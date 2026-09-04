@@ -16,8 +16,8 @@ class Instruction(Entry):
             "examples": [
                 {
                     "part": "instructions",
-                    "id": "read-prd",
-                    "body": "Read the product requirements before work.",
+                    "id": "read-architecture",
+                    "body": "Read the architecture overview before work.",
                 }
             ]
         }
@@ -30,5 +30,5 @@ class Instruction(Entry):
     )
     body: NonBlankLine = Field(
         description="One directive or declarative rule.",
-        examples=["Read the product requirements before work."],
+        examples=["Read the architecture overview before work."],
     )

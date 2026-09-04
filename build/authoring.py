@@ -1,4 +1,4 @@
-"""Generate the single-shot OAK authoring document."""
+"""Generate the compact single-shot OAK authoring document."""
 
 from __future__ import annotations
 
@@ -10,80 +10,185 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from build.ebnf import grammar
-from build.surfaces import surface_example, surface_schema
 from oak import (
     ACT,
     BindingValue,
-    Call,
+    Compare,
     Constant,
+    ConstantValue,
     Emit,
     Instruction,
     Interface,
+    LiteralValue,
     Node,
     NonEmpty,
+    OneOf,
     Process,
     Schema,
+    Set,
+    State,
+    StateValue,
     Trigger,
     Type,
     ValueBinding,
     render,
     where,
 )
-from oak.render.oak.groupings import process_xml
-from oak.rules import AUTHORING_GUIDANCE, RULES
-from oak.surface import SURFACES
-from oak.surface.registry import SURFACES_BY_ID
+from oak.rules import AUTHORING_GUIDANCE
 
-from oak.rules import RULES as RULE_SOURCE
+from oak.rules import AUTHORING_GUIDANCE as GUIDANCE_SOURCE
 from oak.surface import SURFACES as SURFACE_SOURCE
 
 TARGET = ROOT / "outputs" / "authoring.md"
 
+ARCHITECTURE_CAPSULE = """One UTF-8 OAK document contains one idless node.
+The node has only instructions, constants, schemas, state, triggers, processes, and interfaces.
+Schemas define reusable information shapes independently of boundaries and processes.
+Constants are fixed, state persists across arrivals, process bindings are local, and interfaces carry complete boundary instances.
+Target paths connect documents into a graph; local state and interface operations stay in the active document.
+Triggers route outside occurrences; CALL composes internal process work.
+OAK text is the default authored render; JSON-LD is the interchange render.
+The host owns tools, credentials, transport, model selection, external side effects, persistence, and deployment."""
 
-def _orchestrator_example() -> str:
-    """Render one decomposed trigger-selected orchestrator of calls and emits."""
-    orchestrator = Process(
-        id="implement-task",
-        name="Implement task",
-        input="schema.task-request",
-        steps=[
-            Call(
-                process="process.plan-task",
-                inputs=[
-                    ValueBinding(placeholder="TASK_BRIEF", value=BindingValue(binding="TASK_BRIEF")),
-                    ValueBinding(placeholder="CONTEXT", value=BindingValue(binding="CONTEXT")),
-                ],
-                outputs=["PLAN"],
+
+def canonical_example() -> str:
+    """Return one compact example that exercises all seven parts."""
+    request_schema = Schema(
+        id="support-request",
+        name="Support Request",
+        purpose="Carry one support request into classification.",
+        template="Message: <MESSAGE>",
+        where=[
+            where(
+                "MESSAGE",
+                Type(of="string"),
+                NonEmpty(),
+                description="the support request text",
+            )
+        ],
+    )
+    result_schema = Schema(
+        id="support-result",
+        name="Support Result",
+        purpose="Carry one classified support request.",
+        template="Priority: <PRIORITY>\nSummary: <SUMMARY>",
+        where=[
+            where(
+                "PRIORITY",
+                Type(of="string"),
+                OneOf(values=["urgent", "normal"]),
+                description="the assigned urgency",
             ),
-            Call(
-                process="process.implement-plan",
-                inputs=[ValueBinding(placeholder="PLAN", value=BindingValue(binding="PLAN"))],
-                outputs=["CHANGESET"],
-            ),
-            Call(
-                process="process.test-changeset",
-                inputs=[ValueBinding(placeholder="CHANGESET", value=BindingValue(binding="CHANGESET"))],
-                outputs=["TESTS"],
-            ),
-            Call(
-                process="process.review-changeset",
-                inputs=[
-                    ValueBinding(placeholder="PLAN", value=BindingValue(binding="PLAN")),
-                    ValueBinding(placeholder="CHANGESET", value=BindingValue(binding="CHANGESET")),
-                ],
-                outputs=["FINDINGS"],
-            ),
-            Emit(
-                interface="interface.implementation-report-output",
-                bindings=[
-                    ValueBinding(placeholder="CHANGESET", value=BindingValue(binding="CHANGESET")),
-                    ValueBinding(placeholder="TESTS", value=BindingValue(binding="TESTS")),
-                    ValueBinding(placeholder="FINDINGS", value=BindingValue(binding="FINDINGS")),
-                ],
+            where(
+                "SUMMARY",
+                Type(of="string"),
+                NonEmpty(),
+                description="the concise request summary",
             ),
         ],
     )
-    return process_xml(orchestrator)
+    workflow_schema = Schema(
+        id="workflow-state",
+        name="Workflow State",
+        purpose="Constrain the persistent classification state.",
+        template="Status: <STATUS>",
+        where=[
+            where(
+                "STATUS",
+                Type(of="string"),
+                OneOf(values=["idle", "running"]),
+                description="the current workflow status",
+            )
+        ],
+    )
+    node = Node(
+        instructions=[
+            Instruction(
+                id="classify-support-request",
+                body="Classify each support request by urgency.",
+            )
+        ],
+        constants=[
+            Constant(
+                id="urgent-terms",
+                value=["outage", "security"],
+            )
+        ],
+        schemas=[request_schema, result_schema, workflow_schema],
+        state=[
+            State(
+                id="review-status",
+                schema="schema.workflow-state",
+                placeholder="STATUS",
+                value="idle",
+            )
+        ],
+        triggers=[
+            Trigger(
+                id="support-requested",
+                event="A support request is supplied.",
+                source="interface.request",
+                guard=Compare(
+                    left=StateValue(state="state.review-status"),
+                    operator="equals",
+                    right=LiteralValue(value="idle"),
+                ),
+                process="process.classify-request",
+            )
+        ],
+        processes=[
+            Process(
+                id="classify-request",
+                name="Classify request",
+                input="schema.support-request",
+                output="schema.support-result",
+                steps=[
+                    Set(
+                        state="state.review-status",
+                        value=LiteralValue(value="running"),
+                    ),
+                    ACT(
+                        (
+                            "Classify <MESSAGE> using <URGENT_TERMS>, "
+                            "then produce <PRIORITY> and <SUMMARY>."
+                        ),
+                        output="schema.support-result",
+                        inputs=[
+                            ValueBinding(
+                                placeholder="MESSAGE",
+                                value=BindingValue(binding="MESSAGE"),
+                            ),
+                            ValueBinding(
+                                placeholder="URGENT_TERMS",
+                                value=ConstantValue(
+                                    constant="constant.urgent-terms"
+                                ),
+                            ),
+                        ],
+                        outputs=["PRIORITY", "SUMMARY"],
+                    ),
+                    Emit(interface="interface.result"),
+                    Set(
+                        state="state.review-status",
+                        value=LiteralValue(value="idle"),
+                    ),
+                ],
+            )
+        ],
+        interfaces=[
+            Interface(
+                id="request",
+                flow="receives",
+                schema="schema.support-request",
+            ),
+            Interface(
+                id="result",
+                flow="emits",
+                schema="schema.support-result",
+            ),
+        ],
+    )
+    return render(node, grouping="xml")
 
 
 def tree() -> Node:
@@ -93,24 +198,29 @@ def tree() -> Node:
         name="OAK Document",
         purpose="Carry the one valid OAK document written from the supplied source.",
         template="<OAK>",
-        where=[where("OAK", Type(of="string"), NonEmpty(), description="the complete valid OAK document")],
+        where=[
+            where(
+                "OAK",
+                Type(of="string"),
+                NonEmpty(),
+                description="the complete valid OAK document",
+            )
+        ],
     )
-    instructions = [
-        *[
-            Instruction(id=guidance.id, body=guidance.instruction)
+    return Node(
+        instructions=[
+            Instruction(
+                id=guidance.id,
+                body=guidance.instruction,
+            )
             for guidance in AUTHORING_GUIDANCE
         ],
-        *[
-            Instruction(
-                id="enforce-" + rule.code.replace("_", ""),
-                body=rule.instruction,
-            )
-            for rule in RULES
-        ],
-    ]
-    return Node(
-        instructions=instructions,
         constants=[
+            Constant(
+                id="architecture-capsule",
+                form="text",
+                value=ARCHITECTURE_CAPSULE,
+            ),
             Constant(
                 id="oak-ebnf",
                 form="text",
@@ -119,15 +229,10 @@ def tree() -> Node:
             Constant(
                 id="canonical-oak",
                 form="text",
-                value=surface_example(SURFACES_BY_ID["node"]),
-            ),
-            Constant(
-                id="orchestrator-example",
-                form="text",
-                value=_orchestrator_example(),
+                value=canonical_example(),
             ),
         ],
-        schemas=[*(surface_schema(surface) for surface in SURFACES), oak_document_schema],
+        schemas=[oak_document_schema],
         triggers=[
             Trigger(
                 id="source-supplied",
@@ -139,14 +244,23 @@ def tree() -> Node:
             Process(
                 id="write-oak",
                 name="Write OAK",
+                output="schema.oak-document",
                 steps=[
                     ACT(
                         "Derive <DRAFT> from the complete supplied source.",
                         outputs=["DRAFT"],
                     ),
                     ACT(
-                        "Validate <DRAFT> against every supplied OAK contract and produce <OAK>.",
-                        inputs=[ValueBinding(placeholder="DRAFT", value=BindingValue(binding="DRAFT"))],
+                        (
+                            "Validate <DRAFT> against the supplied architecture, "
+                            "grammar, example, and OAK contracts, then produce <OAK>."
+                        ),
+                        inputs=[
+                            ValueBinding(
+                                placeholder="DRAFT",
+                                value=BindingValue(binding="DRAFT"),
+                            )
+                        ],
                         outputs=["OAK"],
                     ),
                     Emit(interface="interface.oak-document-output"),
