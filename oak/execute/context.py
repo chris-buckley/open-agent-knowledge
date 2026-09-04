@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from pydantic import JsonValue
 
-from oak.execute.models import ActHandler, Emission, ToolContract
+from oak.execute.models import ActHandler, Emission, InterpreterHandler, ToolContract
 from oak.resolve.graph import ResolvedGraph
 
 
@@ -20,6 +20,7 @@ class ExecutionContext:
     emissions: list[Emission]
     act: ActHandler | None
     tools: Mapping[str, ToolContract]
+    interpreter: InterpreterHandler | None = None
 
 
 @dataclass(slots=True)
@@ -28,10 +29,11 @@ class ProcessFrame:
 
     document: str
     bindings: dict[str, JsonValue]
+    process: str | None = None
 
     def child(self) -> ProcessFrame:
         """Return one fresh child scope with the current bindings."""
-        return ProcessFrame(self.document, dict(self.bindings))
+        return ProcessFrame(self.document, dict(self.bindings), self.process)
 
 
 __all__ = ["ExecutionContext", "ProcessFrame"]

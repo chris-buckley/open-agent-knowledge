@@ -10,6 +10,7 @@ from oak.execute.models import (
     ExecutionError,
     ExecutionResult,
     InterfaceArrivalTarget,
+    InterpreterHandler,
     ToolContract,
     ToolHandler,
 )
@@ -21,6 +22,7 @@ __all__ = [
     "ExecutionError",
     "ExecutionResult",
     "InterfaceArrivalTarget",
+    "InterpreterHandler",
     "ToolContract",
     "ToolHandler",
     "execute",

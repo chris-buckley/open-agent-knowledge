@@ -14,6 +14,7 @@ from oak.execute.models import (
     Arrival,
     ExecutionError,
     ExecutionResult,
+    InterpreterHandler,
     ToolContract,
     _STATE_ADAPTER,
 )
@@ -80,12 +81,19 @@ def execute(
     state: Mapping[str, JsonValue],
     *,
     act: ActHandler | None = None,
+    interpreter: InterpreterHandler | None = None,
     tools: Mapping[str, ToolContract] | None = None,
     source: str | None = None,
     load: DocumentLoader | None = None,
     root: str | None = None,
 ) -> ExecutionResult:
     """Run one arrival cycle and commit state and emissions on success."""
+    if act is not None and interpreter is not None:
+        raise ExecutionError(
+            "ambiguous_act_handler",
+            "supply either act or interpreter, not both",
+        )
+
     graph = resolve(node, source=source, load=load, root=root)
     tool_registry = tools or {}
 
@@ -119,6 +127,7 @@ def execute(
         emissions=[],
         act=act,
         tools=tool_registry,
+        interpreter=interpreter,
     )
 
     for document, graph_node in graph.documents.items():

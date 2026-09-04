@@ -10,12 +10,14 @@ from . import (
     vocabulary,
 )
 from oak.authoring import ACT
+from oak.context import InterpreterContext, build_interpreter_context, task_context
 from oak.execute import (
     ActHandler,
     Arrival,
     Emission,
     ExecutionError,
     ExecutionResult,
+    InterpreterHandler,
     ToolContract,
     ToolHandler,
     execute,
@@ -134,12 +136,17 @@ __all__ = (
     "vocabulary",
     # Direct authoring.
     "ACT",
+    # Derived OAK interpreter context.
+    "InterpreterContext",
+    "build_interpreter_context",
+    "task_context",
     # Execution.
     "ActHandler",
     "Arrival",
     "Emission",
     "ExecutionError",
     "ExecutionResult",
+    "InterpreterHandler",
     "ToolContract",
     "ToolHandler",
     "execute",

@@ -10,6 +10,7 @@ def validate_human_examples() -> None:
         compound_growth,
         delegation,
         implementer,
+        interpreter_context,
         successor,
         successor_verifier,
         task_reviewer,
@@ -25,6 +26,7 @@ def validate_human_examples() -> None:
         link_manifest,
         process_execution_table,
         smeac_plan,
+        verification,
     )
 
     examples = (
@@ -32,6 +34,7 @@ def validate_human_examples() -> None:
         compound_growth,
         delegation,
         implementer,
+        interpreter_context,
         successor_verifier,
         successor,
         task_reviewer,
@@ -45,7 +48,10 @@ def validate_human_examples() -> None:
         link_manifest,
         process_execution_table,
         smeac_plan,
+        verification,
     )
+
+    interpreter_context.run()
 
     for module in examples:
         rendered = module.build()

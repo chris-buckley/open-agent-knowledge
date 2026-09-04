@@ -8,6 +8,7 @@ from copy import deepcopy
 
 from pydantic import JsonValue
 
+from oak.context import build_interpreter_context
 from oak.execute.context import ExecutionContext, ProcessFrame
 from oak.execute.models import (
     ActHandler,
@@ -24,6 +25,7 @@ from oak.node.parts.processes.steps import Act, Par
 
 def invoke_action(
     context: ExecutionContext,
+    frame: ProcessFrame,
     step: Act,
     values: Mapping[str, JsonValue],
 ) -> dict[str, JsonValue]:
@@ -33,10 +35,10 @@ def invoke_action(
     if step.tool is None:
         handler = context.act
 
-        if handler is None:
+        if handler is None and context.interpreter is None:
             raise ExecutionError(
                 "act_handler_missing",
-                "an interpreter-native act needs an act handler",
+                "an interpreter-native act needs an act or interpreter handler",
             )
 
     else:
@@ -51,10 +53,17 @@ def invoke_action(
         handler = contract.handler
 
     try:
-        authored = handler(
-            step,
-            values,
-        )
+        if step.tool is None and context.interpreter is not None:
+            if frame.process is None:
+                raise ExecutionError("missing_process_context", "native action has no process")
+            request = build_interpreter_context(
+                context.graph, frame.process, step, values, state=context.state,
+            )
+            authored = context.interpreter(request)
+        else:
+            if handler is None:
+                raise ExecutionError("act_handler_missing", "native action has no handler")
+            authored = handler(step, values)
         outputs = _BINDING_ADAPTER.validate_python(
             dict(authored)
         )
@@ -151,6 +160,7 @@ def run_parallel(
                 executor.submit(
                     invoke_action,
                     context,
+                    frame,
                     child,
                     values,
                 )

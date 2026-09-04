@@ -6,6 +6,8 @@ from collections.abc import Callable
 
 from build.checks.agents import validate_agents
 from build.checks.architecture import validate_architecture
+from build.checks.context import validate_interpreter_context
+from build.checks.evidence import validate_evidence
 from build.checks.execution import (
     validate_execution,
     validate_source_routing,
@@ -33,6 +35,8 @@ CHECKS: tuple[Check, ...] = (
     validate_resolution,
     validate_interfaces,
     validate_execution,
+    validate_interpreter_context,
+    validate_evidence,
     validate_while,
     validate_part_omission,
     validate_act_authoring,

@@ -10,6 +10,10 @@ ROOT = Path(__file__).resolve().parents[2]
 _ARCHITECTURE_PATH = Path(__file__).resolve()
 
 _EXPECTED_ROOT_EXPORTS = (
+    "InterpreterContext",
+    "InterpreterHandler",
+    "build_interpreter_context",
+    "task_context",
     "ACT",
     "Act",
     "ActHandler",
