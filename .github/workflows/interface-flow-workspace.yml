@@ -32,7 +32,7 @@ jobs:
             'pydantic-settings>=2.15' \
             'PyYAML>=6,<7'
       - name: Verify untouched branch
-        run: python build/examples.py
+        run: python -m build.examples
       - name: Record baseline paths
         run: |
           find examples -type f -name '*.oak.md' -print | sort > /tmp/example-paths.txt
