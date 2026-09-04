@@ -1,0 +1,27 @@
+name: Documentation workspace
+
+on:
+  push:
+    branches:
+      - docs/architecture-manual
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/architecture-manual
+          fetch-depth: 0
+      - name: Export exact checkout
+        run: git archive --format=zip --output=/tmp/open-agent-knowledge.zip HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: documentation-workspace
+          path: /tmp/open-agent-knowledge.zip
+          if-no-files-found: error
+          retention-days: 1
