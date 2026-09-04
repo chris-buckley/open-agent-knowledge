@@ -1,4 +1,4 @@
-name: Documentation workspace
+name: Documentation migration validation
 
 on:
   push:
@@ -6,22 +6,49 @@ on:
       - docs/architecture-manual
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  export:
-    if: github.actor != 'github-actions[bot]'
+  verify:
+    if: "${{ startsWith(github.event.head_commit.message, 'chore(automation): generate documentation products') }}"
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: .
     steps:
       - uses: actions/checkout@v4
         with:
           ref: docs/architecture-manual
           fetch-depth: 0
-      - name: Export exact checkout
-        run: git archive --format=zip --output=/tmp/open-agent-knowledge.zip HEAD
-      - uses: actions/upload-artifact@v4
+      - uses: actions/setup-python@v5
         with:
-          name: documentation-workspace
-          path: /tmp/open-agent-knowledge.zip
-          if-no-files-found: error
-          retention-days: 1
+          python-version: '3.13'
+      - name: Install declared dependencies
+        run: |
+          python -m pip install \
+            'pydantic[email,timezone]>=2.13,<3' \
+            'pydantic-extra-types[all]>=2.11' \
+            'pydantic-settings>=2.15' \
+            'PyYAML>=6,<7'
+      - name: Regenerate products
+        run: |
+          python build/docs.py
+          python build/ebnf.py
+          python build/authoring.py
+      - name: Compile sources
+        run: python -m compileall -q oak build examples
+      - name: Verify product as module
+        run: python -m build.examples
+      - name: Verify direct command
+        run: python build/examples.py
+      - name: Commit generated products
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add outputs/authoring.md outputs/oak.ebnf outputs/docs
+          if git diff --cached --quiet; then
+            echo 'Expected generated output changes were absent.'
+            exit 1
+          fi
+          git commit -m 'build(outputs): regenerate architecture documentation products'
+          git diff --exit-code
+          git push origin HEAD:docs/architecture-manual
