@@ -160,6 +160,6 @@ jobs:
         run: |
           git config user.name OpenAI
           git config user.email openai@example.invalid
-          git add AGENTS.md build/checks/documentation.py docs/architecture/repository.md docs/plans/0002-plan.md docs/plans/0002-report.md docs/README.md
+          git add -A
           git commit -m 'docs(architecture): use AGENTS as sole router'
           git push origin HEAD:docs/architecture-manual
