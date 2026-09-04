@@ -17,6 +17,7 @@ from oak.base import OakModel
 from oak.parse.document import parse
 from oak.parse.fragments import parse_fragment
 from oak.render import render
+from oak.rules.guidance import AUTHORING_GUIDANCE
 from oak.rules.validation import RULES
 from oak.surface.model import Surface
 from oak.surface.registry import SURFACES, surface_for
@@ -88,9 +89,9 @@ def validate_surfaces() -> None:
         docs_build.SURFACE_SOURCE
         is authoring_build.SURFACE_SOURCE
         is SURFACES
-        and docs_build.RULE_SOURCE
-        is authoring_build.RULE_SOURCE
-        is RULES
+        and docs_build.RULE_SOURCE is RULES
+        and authoring_build.GUIDANCE_SOURCE
+        is AUTHORING_GUIDANCE
     ):
         raise RuntimeError("freshness gate 9 failed")
 
