@@ -1,11 +1,25 @@
 <instructions>
-This document owns accepted change plans and completion reports as repository history.
-Keep `docs` limited to this scoped `AGENTS.md` and the `plans` directory.
-Use a numbered plan to record one accepted repository change and its completion checks.
-Use the matching report to record outcome, evidence, changed paths, and final verdict.
-Treat a plan as active only while the named change is in progress.
-Treat every completed plan and report as historical evidence, not as current architecture.
-Preserve historical references that were correct when a completed plan was written.
-Read a plan only when the user or task names it.
-Mark a plan complete only after every applicable checkbox is satisfied.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+Constants hold values that do not change while the knowledge runs.
+Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 </instructions>
+
+<constants>
+owned-concern: "Accepted change plans and completion reports as repository history."
+
+record-types: CSV<<
+record,purpose
+plan,"record one accepted change, implementation checks, and completion standard"
+report,"record outcome, evidence, changed paths, and final verdict"
+>>
+
+history-rules: ["plans are active only while their named change is in progress", "completed plans and reports are historical evidence, not current architecture", "historical references remain unchanged when they were correct at completion", "a plan becomes complete only after every applicable checkbox passes"]
+</constants>
+
+<processes>
+<process id="maintain-history" name="Maintain history">
+ACT Use <RECORDS> to choose the correct numbered plan or matching completion report. (RECORDS=$constant.record-types)
+ACT Apply <RULES> before changing status, checkboxes, evidence, or verdict. (RULES=$constant.history-rules)
+ACT Read a historical plan only when the user or active task names it. ()
+</process>
+</processes>

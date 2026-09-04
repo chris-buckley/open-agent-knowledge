@@ -1,36 +1,59 @@
 <instructions>
-This document owns one OAK document, its node, seven parts, value lifetimes, schemas, cross-part dataflow, and same-document validation.
-One OAK file is one document and contains exactly one node.
-Use the document path as node identity because a node has no id and contains no node.
-Keep the closed parts in this order: instructions, constants, schemas, state, triggers, processes, interfaces.
-Omit an empty part from OAK rendering without changing part order.
-Permit one document to contain static knowledge or an executable state machine without requiring interfaces or triggers.
-Give every entry one id that is unique across all parts in its document.
-Use instructions for rules the interpreter follows during the whole use of a document.
-Use constants for JSON values fixed during use.
-Use schemas for reusable information shapes independent of boundary flow and process routing.
-Use state for mutable JSON values that persist across arrivals.
-Use triggers only for routing outside occurrences to one process.
-Use processes for ordered invocation-local work.
-Use interfaces for one-way boundary crossings of complete schema instances.
-Permit one schema to type constants, state, process contracts, action contracts, interfaces, and tool contracts without changing its identity.
-Require every schema template placeholder to have one matching ordered constraint entry.
-Apply datatype checks before dependent schema constraints.
-Permit constants and state to bind one value to one schema placeholder.
-Keep fixed constants, persistent state, immutable process bindings, and boundary interface instances as separate value lifetimes.
-Seed a process frame from its input schema placeholders.
-Keep each process binding immutable and local to its frame or child scope.
-Do not expose an interface instance as ambient process storage.
-Require a source-backed trigger to have no seeds and to share one resolved schema with its selected process input.
-Permit an event-backed trigger to seed process input from literals, constants, and state.
-Restrict non-true trigger guards to state values.
-Require every declared process output placeholder to be visible after successful completion.
-Use `CALL` contracts to compose internal processes without sharing local frames.
-Check document-wide ids, local target type, local contracts, binding visibility, branch reachability, local call cycles, and interface flow during node validation.
-Validate each rule at the earliest same-document boundary that has all required information.
-Reject type coercion and unknown fields in authored models.
-Keep state reads, state writes, receive sources, and emissions local to the active document.
-Defer only information that requires another document to `oak/resolve`.
-Defer supplied or produced runtime values to `oak/execute`.
-Keep exact field, constraint, and error details in the implementation and generated reference.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+Constants hold values that do not change while the knowledge runs.
+Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 </instructions>
+
+<constants>
+owned-concern: "One OAK document, its node, seven parts, value lifetimes, schemas, cross-part dataflow, and same-document validation."
+
+part-order: ["instructions", "constants", "schemas", "state", "triggers", "processes", "interfaces"]
+
+part-responsibilities: CSV<<
+part,owns,lifetime,excludes
+instructions,irreducible interpreter policy,whole document use,"facts, reusable shapes, mutable values, routing, ordered work, and boundary payloads"
+constants,fixed JSON knowledge,whole document use,mutable values
+schemas,reusable information shapes,definition,boundary flow and process routing
+state,persistent mutable JSON values,across arrivals,invocation-local results
+triggers,outside occurrence routing,one arrival decision,internal sequencing
+processes,ordered local work,one invocation,outside transport
+interfaces,complete boundary schema instances,one receive or emission,information shape definitions
+>>
+
+value-lifetimes: CSV<<
+value,scope
+constant,fixed during document use
+state,persistent across arrivals
+process binding,immutable in one frame or child scope
+interface instance,one complete boundary occurrence
+>>
+
+node-invariants: YAML<<
+- One OAK file contains exactly one idless node.
+- Every entry id is unique across all parts in one document.
+- Empty parts are omitted without changing canonical part order.
+- A source-backed trigger has no seeds and shares one resolved schema with its selected
+  process input.
+- An event-backed trigger can seed process input from literals, constants, and state.
+- Trigger guards read state only.
+- Interface instances never become ambient process storage.
+- State and interface operations remain local to the active document.
+>>
+
+validation-ownership: CSV<<
+boundary,owns
+model,one field or object shape
+node,"same-document ids, targets, contracts, binding flow, local cycles, and interface use"
+resolver,facts that require another document
+executor,supplied and produced runtime values
+>>
+</constants>
+
+<processes>
+<process id="change-node" name="Change node">
+ACT Use <PARTS> and <LIFETIMES> to place each new fact in one semantic owner before considering instructions. (PARTS=$constant.part-responsibilities, LIFETIMES=$constant.value-lifetimes)
+ACT Preserve <ORDER> and <INVARIANTS> across models, validation, authoring, parsing, rendering, and examples. (ORDER=$constant.part-order, INVARIANTS=$constant.node-invariants)
+ACT Use <VALIDATION> to place each check at the earliest boundary with all required information. (VALIDATION=$constant.validation-ownership)
+ACT Keep exact field, constraint, and error details in implementation and generated reference instead of restating them here. ()
+</process>
+</processes>

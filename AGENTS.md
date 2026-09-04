@@ -1,64 +1,139 @@
 <instructions>
-This document owns OAK product intent, repository-wide work rules, and the scoped AGENTS router.
-Open Agent Knowledge (OAK) is a portable standard for expressing knowledge as one compact validated unit.
-Read this file in full before any repository work.
-Use this scoped AGENTS router to select every file that matches the task.
-├── Read `oak/AGENTS.md` for package, representation, syntax, parsing, rendering, vocabulary, surfaces, and rules.
-│   ├── Read `oak/node/AGENTS.md` for document, node, part, value, schema, and local-validation architecture.
-│   ├── Read `oak/resolve/AGENTS.md` for target paths, loading, graph resolution, and cross-document contracts.
-│   └── Read `oak/execute/AGENTS.md` for arrivals, processes, tools, state, emissions, and transactions.
-├── Read `build/AGENTS.md` for generators, checks, freshness, and the authoring prompt.
-├── Read `examples/AGENTS.md` for practical authoring, naming, and executable examples.
-├── Read `outputs/AGENTS.md` for generated artifacts.
-└── Read `docs/AGENTS.md` for plans and reports.
-Read every applicable `AGENTS.md` from the repository root to each work path before you inspect or change implementation files.
-Read additional routed `AGENTS.md` files when work crosses directory concerns.
-Treat each scoped `AGENTS.md` as the sole current architecture owner for its stated concern.
-Treat the `AGENTS.md` hierarchy as host scoping, not as implicit OAK document imports.
-Follow every applicable instruction as a hard requirement.
-Stop and ask the user when a task conflicts with an applicable instruction.
-Keep every repository-owned `AGENTS.md` as one canonical XML-grouped OAK document.
-Use only the instructions part in repository-owned `AGENTS.md` files.
-Limit every repository-owned `AGENTS.md` to 500 lines.
-Start each nested `AGENTS.md` with one instruction that states its sole owned concern.
-Do not repeat or paraphrase architecture owned by another `AGENTS.md`.
-Keep parent files as routers, not summaries of child architecture.
-Update this router when a scoped `AGENTS.md` path or owner changes.
-Use `.agents` as the only repository directory for agent support files.
-Do not create or reference `.agent`.
-Do not add README files as repository or directory indexes.
-Apply the reduce principle: less is more.
-Challenge every implementation line and documentation line.
-Remove information that does not earn its place.
-Update owned architecture, implementation, examples, and generated outputs together when one change affects them.
-Do not stage product work into versions or deferred phases.
-Show proposed architecture to the user before writing it unless the user approved it in the current task.
-Read the matching `.agents/skills` material before work with Pydantic, JSON Schema, or JSON-LD.
-Apply relevant skill references, guides, and examples to that work.
-Treat Agnostic Prompt Standard material as legacy reference, not as content to copy into OAK.
-Use `interpreter` for the consumer of OAK knowledge.
-Use `render` for one representation of a document and `output` for one generated artifact.
-Choose the simplest implementation that fully preserves the applicable architecture.
-Keep components modular and concerns separate.
-Use existing project dependencies before adding code or packages.
-Check a library documentation and types before assuming that it lacks a capability.
-Prefer an established maintained library when it reduces complexity or improves reliability.
-Make architectural decisions for the long term, not as planned replacements.
-Find every definition and repository-owned use of an obsolete name, path, format, or contract.
-Delete replaced implementations and support material in the same task.
-Do not add compatibility layers, shims, aliases, fallbacks, or migrations unless an owner or the user names the exact consumer.
-Update the owning `AGENTS.md` before continuing after a durable correction to repository meaning or work rules.
-Store product meaning in its scoped `AGENTS.md` and work rules in the nearest governing `AGENTS.md`.
-Do not use platform memory as repository authority.
-Write only confirmed information relevant to the owning concern.
-Link to an exact owner instead of copying its types, syntax, or error catalog.
-Use no em dash or asterisk emphasis in repository documentation.
-Lead user communication with the answer or outcome.
-Use short plain sentences and state uncertainty directly.
-Use no jargon, filler, praise, or repetition in user communication.
-Run `python -m build.examples` after an implementation or refactor.
-Inspect the final diff instead of relying only on check results.
-Search the final tree for every replaced identifier, path, format, and contract.
-Delete a merged branch on the remote and locally in the same task.
-Confirm every applicable instruction before you report completion.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
+ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
+RECEIVES accepts one complete instance of its schema.
+A source-backed trigger supplies the received instance as the selected process input.
+EMITS publishes one complete instance of its schema.
+EMIT without bindings fills the target schema from same-named visible process bindings.
+Constants hold values that do not change while the knowledge runs.
+Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+Each trigger is one fact group: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
+Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 </instructions>
+
+<constants>
+owned-concern: "OAK product intent, repository-wide operating knowledge, and scoped AGENTS routing."
+
+product-purpose: "Open Agent Knowledge is a portable standard for expressing knowledge as one compact validated unit."
+
+agent-router: CSV<<
+path,concern
+oak/AGENTS.md,"package representation, syntax, parsing, rendering, vocabulary, surfaces, rules, and public API"
+oak/node/AGENTS.md,"document, node, parts, values, schemas, and same-document validation"
+oak/resolve/AGENTS.md,"target paths, loading, graph resolution, and cross-document contracts"
+oak/execute/AGENTS.md,"arrivals, processes, tools, state, emissions, failures, and transactions"
+build/AGENTS.md,"generators, checks, freshness, generated reference, and authoring prompt"
+examples/AGENTS.md,"practical authoring, naming, decomposition, examples, and sibling renders"
+outputs/AGENTS.md,generated artifacts and regeneration ownership
+docs/AGENTS.md,accepted plans and completion reports as history
+>>
+
+agent-line-limit: 500
+
+part-authoring-priority: ["schemas", "constants", "state", "interfaces", "triggers", "processes", "instructions"]
+
+repository-rules: YAML<<
+- Read the root and every routed AGENTS document that applies before inspecting or
+  changing implementation files.
+- Treat AGENTS hierarchy as host scoping and never as implicit OAK imports.
+- Treat each scoped AGENTS document as the sole current owner of its named concern.
+- Use .agents as the only repository directory for agent support files.
+- Do not create repository or directory README indexes.
+- Update architecture, implementation, examples, and generated outputs in one pass
+  when the concern requires them.
+- Choose the smallest implementation that preserves every applicable contract.
+- Delete obsolete names, paths, formats, contracts, and support material in the same
+  task.
+- Add compatibility only for an explicitly named contract and consumer.
+- Store durable repository meaning in the owning AGENTS document rather than platform
+  memory.
+- Stop and ask the user when the active task conflicts with applicable repository
+  knowledge.
+- Do not split one requested product change into deferred phases.
+- Show proposed architecture to the user before writing it unless the user approved
+  it in the active task.
+- Treat Agnostic Prompt Standard material as legacy reference rather than OAK source
+  content.
+- Use interpreter for the consumer of OAK knowledge, render for one document representation,
+  and output for one generated artifact.
+- Use existing dependencies before adding code or packages.
+- Check library documentation and types before assuming that a capability is absent.
+- Prefer maintained libraries when they reduce complexity or improve reliability.
+- Make architectural decisions for the long term rather than as planned replacements.
+- Apply a durable user correction to its owning AGENTS document before continuing.
+- Write only confirmed information relevant to the owned concern and point to the
+  exact owner instead of copying detail.
+- Use no em dash or asterisk emphasis in repository documentation.
+- Confirm every applicable repository contract before reporting completion.
+>>
+
+skill-router: CSV<<
+topic,path
+Pydantic,.agents/skills/pydantic-v2.12/SKILL.md
+JSON Schema,.agents/skills/json-schema-2020-12/SKILL.md
+JSON-LD,.agents/skills/json-ld/SKILL.md
+>>
+
+communication-contract: YAML<<
+- Lead with the answer or outcome.
+- Use short plain sentences.
+- State uncertainty directly.
+- Avoid jargon, filler, praise, and repetition.
+>>
+</constants>
+
+<schemas>
+<schema id="repository-task" name="Repository Task" purpose="Carry one requested repository change and its constraints.">
+Task: <TASK>
+Paths: <PATHS>
+Constraints: <CONSTRAINTS>
+
+WHERE:
+- <TASK> is string; is non-empty; the requested repository outcome.
+- <PATHS> is string; is non-empty; the affected or inspected repository paths.
+- <CONSTRAINTS> is string; task-specific constraints, empty when none are supplied.
+</schema>
+
+<schema id="repository-result" name="Repository Result" purpose="Carry the completed repository outcome and verification evidence.">
+Outcome: <OUTCOME>
+Evidence: <EVIDENCE>
+Changed paths: <CHANGED_PATHS>
+
+WHERE:
+- <OUTCOME> is string; is non-empty; the completed task outcome.
+- <EVIDENCE> is string; is non-empty; the checks and review evidence.
+- <CHANGED_PATHS> is string; the changed paths, empty for read-only work.
+</schema>
+</schemas>
+
+<triggers>
+trigger.repository-task-requested.event := "A repository task is requested."
+trigger.repository-task-requested.source := interface.task-request
+trigger.repository-task-requested.process := process.perform-repository-task
+
+trigger.branch-merged.event := "A repository branch is merged."
+trigger.branch-merged.process := process.clean-merged-branch
+</triggers>
+
+<processes>
+<process id="perform-repository-task" name="Perform task" input="schema.repository-task" output="schema.repository-result">
+ACT Use <ROUTER> to select and read every scoped AGENTS document that applies to <PATHS> before changing implementation. (ROUTER=$constant.agent-router, PATHS=$PATHS)
+ACT Apply <PART_PRIORITY> to represent <TASK>; add authored instructions only after no structured OAK part can carry the meaning. (PART_PRIORITY=$constant.part-authoring-priority, TASK=$TASK)
+ACT Apply <RULES> and <CONSTRAINTS> to choose one owner for each concern and implement the smallest complete change for <TASK>. (RULES=$constant.repository-rules, CONSTRAINTS=$CONSTRAINTS, TASK=$TASK)
+ACT Use <SKILLS> to read matching specialist material before work on formats used by <PATHS>. (SKILLS=$constant.skill-router, PATHS=$PATHS)
+ACT Update every affected source, example, output, and scoped AGENTS document for <TASK>, then remove obsolete paths and contracts. (TASK=$TASK)
+ACT Run the complete verification process owned by build/AGENTS.md, inspect the final diff, and search for every replaced identifier, path, format, and contract. ()
+ACT output="schema.repository-result": Produce <OUTCOME>, <EVIDENCE>, and <CHANGED_PATHS> for <TASK> under <COMMUNICATION>. (TASK=$TASK, COMMUNICATION=$constant.communication-contract) -> OUTCOME, EVIDENCE, CHANGED_PATHS
+EMIT interface.task-result
+</process>
+
+<process id="clean-merged-branch" name="Clean branch">
+ACT Delete the merged branch on the remote and locally after a successful merge. ()
+</process>
+</processes>
+
+<interfaces>
+task-request RECEIVES schema.repository-task
+task-result EMITS schema.repository-result
+</interfaces>
