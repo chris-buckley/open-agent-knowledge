@@ -1,0 +1,100 @@
++- An `EMITS` interface publishes one complete instance of its schema.
++- Model a duplex relationship as two interfaces.
+ - Give each interface one local or relative schema target.
+ - Give each interface an optional `NonBlankLine` description.
+-- Use an interface description only for boundary meaning absent from its schema.
++- Use an interface description only for boundary meaning absent from its id and schema.
+ - Interfaces do not define information shapes.
+ - Interfaces are optional.
+ 
+@@ -357,8 +370,9 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
+ - Define `EntryPath` as `part.SlugId` for one singular part name.
+ - Define `RelativeDocumentPath` as a relative POSIX path of (letter|digit|`.`|`_`|`-`|`/`) ending in `.oak.md`.
+ - Define `TargetPath` as (`EntryPath`|`RelativeDocumentPath#EntryPath`).
+-- Define `DottedPath` as one local (constant|schema|state|process|interface) target or one local interface placeholder path.
+-- Define `ValueReference` as `$` followed by one (constant target|local state target|local interface placeholder path|Placeholder).
++- Define `InterfaceFlow` as (receives|emits) and render it as (`RECEIVES`|`EMITS`).
++- Define `DottedPath` as one local (constant|schema|state|process|interface) target.
++- Define `ValueReference` as `$` followed by one (constant target|local state target|Placeholder).
+ - `$` reads a process value.
+ - Use `TargetPath` without `$` for each (SET|CALL|EMIT|schema|trigger fact) target.
+ - Address each trigger fact as `trigger.`, the trigger id, `.`, and one fact name.
+@@ -442,8 +456,8 @@ NODE
+ - Name each identifier value with the semantic structure `<object>_id` (e.g. `document-id` as a `SlugId` or `DOCUMENT_ID`).
+ - The mapping naming rule applies to constants, state, and process bindings.
+ - Name each mapping with the semantic structure `<key>_to_<value>` (e.g. `filename-to-document-id` as a `SlugId` or `FILENAME_TO_DOCUMENT_ID`).
+-- The lifetime rule applies to constants, state, process bindings, and interfaces.
+-- Represent each variable-like value by its source and lifetime: `CONSTANT` for fixed values, `STATE` for mutable values, a process binding for local immutable values, and an `INTERFACE` binding for boundary values (e.g. `$constant.max-retries`, `$state.current-candidate`, or `$CANDIDATE`).
++- The lifetime rule applies to constants, state, process bindings, and interface instances.
++- Represent each readable value by its lifetime: `CONSTANT` for fixed values, `STATE` for persistent mutable values, and a process binding for local immutable values.
+ - The shared naming rules apply to every entry part.
+ - Use the shortest unambiguous name that states purpose or result and reuses one exact domain noun across every part, including verification processes (e.g. schema `candidate`, state `current-candidate`, process `validate-candidate`, and interface `verified-candidate-output`; do not rename `candidate` as `option` or `proposal`).
+ - Replace generic nouns and vague process verbs with exact domain terms that state purpose or action (e.g. replace (data|item|result|value|config|response|path) with (candidate|verification-step|verified-candidate|retry-limit|validation-rules|review-feedback|source-document-file), and replace (handle|process|manage|do) with (validate|publish|archive|verify)).
+@@ -491,8 +505,8 @@ NODE
+ 
+ ### Delegation
+ 
+-- Model each subagent as one worker OAK document with one in interface and one out interface.
+-- Treat the worker in interface schema as the request contract and the worker out interface schema as the result contract.
++- Model each subagent as one worker OAK document with one `RECEIVES` interface and one `EMITS` interface.
++- Treat the worker receive schema as the request contract and its emit schema as the result contract.
+ - Type each dispatch process with relative targets to the worker request and result schemas as its input and output schemas.
+ - Dispatch each worker inside its dispatch process with one exact tool name from the supplied registry.
+ - Prefer one registered portable `agent.<worker>` contract when the host permits registration.
+@@ -583,7 +597,7 @@ NODE
+ - End each act and call with one binding suffix, even when empty.
+ - Render the binding suffix as `(PLACEHOLDER=value, ...)` with `, ` between bindings.
+ - Append ` -> ` and the ordered outputs to an act or call with outputs.
+-- Render an emit as `EMIT target (bindings)` with no outputs.
++- Render an inferred emit as `EMIT target` and an explicit emit as `EMIT target (bindings)` with no outputs.
+ - Render if with `IF`, its condition, `THEN`, and optional `ELSE`.
+ - Render assert with `ASSERT`, its condition, and optional `MESSAGE`.
+ - Render foreach with `FOREACH binding IN value` and its steps.
+@@ -591,8 +605,10 @@ NODE
+ - Render a recursive while with `WHILE LIMIT positive-integer:`, its condition, `THEN:`, and its steps.
+ - Render par with `PAR`, named-tool acts, and one following `JOIN`.
+ - Render fail with `FAIL` and one JSON string.
+-- Render each interface with id, direction, schema target, and optional description.
+-- Separate parts and sibling body entries with one blank line.
++- Render each interface as `id (RECEIVES|EMITS) schema-target` with an optional `: JSON-string` description.
++- Render one interface entry per line without an entry wrapper.
++- Keep the interface part body byte-identical between groupings.
++- Separate parts and grouped body entries with one blank line, and consecutive interface entries with one LF.
+ - Append exactly two LF characters between a schema template and `WHERE` so trailing template whitespace round-trips.
+ - Preserve schema template whitespace.
+ - Render `Where` entries in authored order.
+@@ -635,8 +651,10 @@ NODE
+ - Require the caller to supply the JSON-LD vocabulary IRI.
+ - Define one root context with `@base` and the `oak` prefix.
+ - Render each entry, `Where`, constraint, condition, process value, and step kind as `@type`.
++- Render each interface with `flow`, one id-valued `schema`, and optional `description`.
++- Omit an empty emit `bindings` list and interpret omission as same-name inference.
+ - Render `where`, `constraints`, `examples`, `steps`, `inputs`, `outputs`, `bindings`, `conditions`, `thenSteps`, and `otherwise` as ordered lists.
+-- Render trigger `process` and `source` as id-valued targets and trigger seeds as one ordered binding list when present.
++- Render trigger `process` and `source` as id-valued targets and event trigger seeds as one ordered binding list when present.
+ - Render process, act, constant, and state schema targets as id-valued schema targets.
+ - Render each constant and state schema binding with its `placeholder`.
+ - Render call process as an id-valued process target.
+@@ -674,7 +692,7 @@ NODE
+ - Generate every Entry ID, Naming, Decomposition, ACT, Schema binding, and Delegation rule as one instruction entry.
+ - Include every authoring rule, every surface schema, the xml grammar, one canonical OAK example, and one decomposed orchestrator example.
+ - Declare no universal input interface.
+-- Declare one OAK document schema, one out interface, one trigger, and one process.
++- Declare one OAK document schema, one `EMITS` interface, one trigger, and one process.
+ - Derive a draft, validate it, and emit the valid OAK document as the sole response.
+ 
+ ### Documentation
+@@ -699,8 +717,8 @@ NODE
+ - Exercise schema-bound constants, state, trigger seeds, act schemas, and a typed tool contract in `examples/agents/compound_growth.py`.
+ - Encode the extracted implementer instructions in `examples/agents/implementer.py`.
+ - Encode the extracted task reviewer instructions in `examples/agents/task_reviewer.py`.
+-- Seed each trigger-selected reviewer and coordinator process from interface-sourced trigger seeds.
+-- Fire each worker and coordinator trigger from its source interface arrival.
++- Supply each source-selected reviewer and coordinator process from its complete receive instance.
++- Fire each worker and coordinator trigger from one receive interface arrival.
+ - Encode each ported legacy format as one constrained schema document under `examples/schemas`.
+ - Bind one accepted and one rejected value set per ported constraint kind across `examples/schemas`.
+ - Dispatch the task reviewer as one worker agent with a schema-typed agent contract from `examples/agents/delegation.py`.
+@@ -720,7 +738,8 @@ NODE
+ 7. Require every documentation page to parse as one OAK document.
+ 8. Require every parsed documentation page to reproduce its committed render.
