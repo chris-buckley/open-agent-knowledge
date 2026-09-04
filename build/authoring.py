@@ -19,7 +19,6 @@ from oak import (
     Emit,
     Instruction,
     Interface,
-    InterfaceValue,
     Node,
     NonEmpty,
     Process,
@@ -46,12 +45,13 @@ def _orchestrator_example() -> str:
     orchestrator = Process(
         id="implement-task",
         name="Implement task",
+        input="schema.task-request",
         steps=[
             Call(
                 process="process.plan-task",
                 inputs=[
-                    ValueBinding(placeholder="TASK_BRIEF", value=InterfaceValue(interface="interface.task-request-input", placeholder="TASK_BRIEF")),
-                    ValueBinding(placeholder="CONTEXT", value=InterfaceValue(interface="interface.task-request-input", placeholder="CONTEXT")),
+                    ValueBinding(placeholder="TASK_BRIEF", value=BindingValue(binding="TASK_BRIEF")),
+                    ValueBinding(placeholder="CONTEXT", value=BindingValue(binding="CONTEXT")),
                 ],
                 outputs=["PLAN"],
             ),
@@ -149,17 +149,14 @@ def tree() -> Node:
                         inputs=[ValueBinding(placeholder="DRAFT", value=BindingValue(binding="DRAFT"))],
                         outputs=["OAK"],
                     ),
-                    Emit(
-                        interface="interface.oak-document-output",
-                        bindings=[ValueBinding(placeholder="OAK", value=BindingValue(binding="OAK"))],
-                    ),
+                    Emit(interface="interface.oak-document-output"),
                 ],
             )
         ],
         interfaces=[
             Interface(
                 id="oak-document-output",
-                direction="out",
+                flow="emits",
                 schema="schema.oak-document",
                 description="The sole OAK document returned to the caller.",
             )

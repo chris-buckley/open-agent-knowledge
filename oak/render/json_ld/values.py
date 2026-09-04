@@ -12,7 +12,6 @@ from oak.node.parts.processes.conditions import (
 from oak.node.parts.processes.values import (
     BindingValue,
     ConstantValue,
-    InterfaceValue,
     LiteralValue,
     StateValue,
     Value,
@@ -39,7 +38,6 @@ _VALUE_TYPES = {
     "literal": "LiteralValue",
     "constant": "ConstantValue",
     "state": "StateValue",
-    "interface": "InterfaceValue",
     "binding": "BindingValue",
 }
 _CONDITION_TYPES = {
@@ -75,12 +73,6 @@ def _value_fields(document: str, value: Value) -> Fields:
 
         case StateValue():
             return {"stateTarget": {"@id": target_id(document, value.state)}}
-
-        case InterfaceValue():
-            return {
-                "interface": {"@id": target_id(document, value.interface)},
-                "placeholder": value.placeholder,
-            }
 
         case BindingValue():
             return {"binding": value.binding}

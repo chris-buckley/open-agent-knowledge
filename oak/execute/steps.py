@@ -134,21 +134,39 @@ def _run_set(context: ExecutionContext, frame: ProcessFrame, step: Set) -> None:
 
 def _run_emit(context: ExecutionContext, frame: ProcessFrame, step: Emit) -> None:
     identifier = target_id(step.interface)
-    _interface_document, interface = context.graph.entry(
+    interface_document, interface = context.graph.entry(
         frame.document,
         step.interface,
         Interface,
     )
+    if interface.flow != "emits":
+        raise ExecutionError(
+            "emit_target_not_emit",
+            f"interface {identifier} cannot emit output",
+        )
+
     _schema_document, schema = context.graph.entry(
-        frame.document,
+        interface_document,
         interface.schema_id,
         Schema,
     )
-    values = _bound_values(context, frame, step.bindings)
+    if step.bindings:
+        values = _bound_values(context, frame, step.bindings)
+    else:
+        placeholders = [item.placeholder for item in schema.where]
+        missing = [name for name in placeholders if name not in frame.bindings]
+        if missing:
+            raise ExecutionError(
+                "inferred_emit_binding_mismatch",
+                "missing visible bindings: " + ", ".join(missing),
+            )
+        values = {
+            name: deepcopy(frame.bindings[name])
+            for name in placeholders
+        }
 
     try:
         schema.bind(values)
-
     except SchemaBindingError as error:
         raise ExecutionError(
             "invalid_emission",

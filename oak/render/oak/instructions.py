@@ -4,6 +4,8 @@ from oak.node.interpretation import (
     ACT_SCHEMA_INSTRUCTION,
     CONTRACT_INSTRUCTION,
     CONTROL_INSTRUCTION,
+    INFERRED_EMIT_INSTRUCTION,
+    INTERFACE_DESCRIPTION_INSTRUCTION,
     PART_INSTRUCTIONS,
     REFERENCE_INSTRUCTION,
     TRIGGER_SEED_INSTRUCTION,
@@ -11,7 +13,18 @@ from oak.node.interpretation import (
     TYPED_ENTRY_INSTRUCTION,
 )
 from oak.node.model import Node
-from oak.node.parts.processes.steps import Act, Assert, Call, Foreach, Join, Par, While, iter_steps
+from oak.node.parts.interfaces import INTERFACE_FLOWS
+from oak.node.parts.processes.steps import (
+    Act,
+    Assert,
+    Call,
+    Emit,
+    Foreach,
+    Join,
+    Par,
+    While,
+    iter_steps,
+)
 
 
 def instruction_lines(node: Node) -> list[str]:
@@ -38,8 +51,25 @@ def instruction_lines(node: Node) -> list[str]:
         lines.append(ACT_SCHEMA_INSTRUCTION)
     if any(trigger.seed for trigger in node.triggers):
         lines.append(TRIGGER_SEED_INSTRUCTION)
-    if any(trigger.source is not None for trigger in node.triggers):
-        lines.append(TRIGGER_SOURCE_INSTRUCTION)
+    used_flows = {interface.flow for interface in node.interfaces}
+    source_used = any(trigger.source is not None for trigger in node.triggers)
+    inferred_emit_used = any(
+        isinstance(step, Emit) and not step.bindings
+        for step in steps
+    )
+
+    for definition in INTERFACE_FLOWS:
+        if definition.flow not in used_flows:
+            continue
+
+        lines.append(definition.instruction)
+        if definition.flow == "receives" and source_used:
+            lines.append(TRIGGER_SOURCE_INSTRUCTION)
+        if definition.flow == "emits" and inferred_emit_used:
+            lines.append(INFERRED_EMIT_INSTRUCTION)
+
+    if any(interface.description is not None for interface in node.interfaces):
+        lines.append(INTERFACE_DESCRIPTION_INSTRUCTION)
     if any(entry.schema_id is not None for entry in (*node.constants, *node.state)):
         lines.append(TYPED_ENTRY_INSTRUCTION)
     for field, instruction in PART_INSTRUCTIONS:

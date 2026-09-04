@@ -1,11 +1,14 @@
 <instructions>
 $ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
+RECEIVES accepts one complete instance of its schema.
+A source-backed trigger supplies the received instance as the selected process input.
+EMITS publishes one complete instance of its schema.
+Text after `: ` states boundary meaning absent from the interface schema.
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-Each trigger is one fact group: event carries the meaning, an optional source names the exact ingress interface, an optional guard checks state after the match, and process selects the work.
+Each trigger is one fact group: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
-Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both.
 
 Read the task brief and supplied context before implementation.
 Ask focused questions before implementation when a requirement is unclear.
@@ -132,6 +135,7 @@ WHERE:
 
 <triggers>
 trigger.implementation-requested.event := "An implementation task arrives."
+trigger.implementation-requested.source := interface.task-request-input
 trigger.implementation-requested.process := process.implement-task
 </triggers>
 
@@ -161,8 +165,8 @@ ACT Apply <FINDINGS> to <CHANGESET> and produce <SUMMARY> and <STATUS>. (FINDING
 ACT Commit <CHANGESET> after <TESTS> with one <COMMIT_CONVENTION> message and produce <COMMIT>. (CHANGESET=$CHANGESET, TESTS=$TESTS, COMMIT_CONVENTION=$constant.commit-convention) -> COMMIT
 </process>
 
-<process id="implement-task" name="Implement task">
-CALL process.plan-task (TASK_BRIEF=$interface.task-request-input.TASK_BRIEF, CONTEXT=$interface.task-request-input.CONTEXT) -> PLAN
+<process id="implement-task" name="Implement task" input="schema.task-request">
+CALL process.plan-task (TASK_BRIEF=$TASK_BRIEF, CONTEXT=$CONTEXT) -> PLAN
 CALL process.implement-plan (PLAN=$PLAN) -> CHANGESET
 CALL process.test-changeset (CHANGESET=$CHANGESET) -> TESTS
 CALL process.review-changeset (PLAN=$PLAN, CHANGESET=$CHANGESET) -> FINDINGS
@@ -177,15 +181,7 @@ IF $STATUS equals "blocked":
 </processes>
 
 <interfaces>
-<interface id="task-request-input" direction="in" schema="schema.task-request">
-The task and context supplied to the implementer.
-</interface>
-
-<interface id="implementation-report-output" direction="out" schema="schema.implementation-report">
-The implementer's final status and evidence.
-</interface>
-
-<interface id="escalation-output" direction="out" schema="schema.escalation">
-The blocked outcome returned instead of a commit.
-</interface>
+task-request-input RECEIVES schema.task-request: "The task and context supplied to the implementer."
+implementation-report-output EMITS schema.implementation-report: "The implementer's final status and evidence."
+escalation-output EMITS schema.escalation: "The blocked outcome returned instead of a commit."
 </interfaces>

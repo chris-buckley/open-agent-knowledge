@@ -14,7 +14,7 @@ Name a tool exposed by the supplied exact tool registry.
 </instructions>
 
 <constants>
-example-1: "ACT Turn <REQUEST> into <RESULT>. (REQUEST=$interface.request.REQUEST) -> RESULT"
+example-1: "ACT Turn <REQUEST> into <RESULT>. (REQUEST=\"Example request.\") -> RESULT"
 
 example-2: "ACT TOOL \"mcp__docs__search\" input=\"schema.query\" output=\"schema.result\": Find <QUERY> and return <RESULT>. (QUERY=\"OAK\") -> RESULT"
 

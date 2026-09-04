@@ -26,13 +26,13 @@ from oak import (
     resolve,
     where,
 )
-from examples.agents.bindings import interface_bindings, local_bindings
+from examples.agents.bindings import local_bindings
 
 SCHEMA_AMENDMENT_REVIEW_REQUEST = "schema.amendment-review-request"
 SCHEMA_AMENDMENT_REVIEW = "schema.amendment-review"
 PROCESS_REVIEW_AMENDMENT = "process.review-amendment"
-INTERFACE_REVIEW_REQUEST_INPUT = "interface.review-request-input"
-INTERFACE_REVIEW_OUTPUT = "interface.review-output"
+INTERFACE_REVIEW_REQUEST_INPUT = "interface.review-request"
+INTERFACE_REVIEW_OUTPUT = "interface.review-result"
 
 EVENT_AMENDMENT_REVIEW_REQUESTED = "An amendment review is requested."
 
@@ -174,7 +174,6 @@ amendment_review_requested_trigger = Trigger(
     event=EVENT_AMENDMENT_REVIEW_REQUESTED,
     source=INTERFACE_REVIEW_REQUEST_INPUT,
     process=PROCESS_REVIEW_AMENDMENT,
-    seed=interface_bindings(INTERFACE_REVIEW_REQUEST_INPUT, REQUEST_PLACEHOLDERS),
 )
 
 review_amendment_process = Process(
@@ -195,23 +194,20 @@ review_amendment_process = Process(
             inputs=local_bindings(REQUEST_PLACEHOLDERS),
             outputs=list(REVIEW_PLACEHOLDERS),
         ),
-        Emit(
-            interface=INTERFACE_REVIEW_OUTPUT,
-            bindings=local_bindings(REVIEW_PLACEHOLDERS),
-        ),
+        Emit(interface=INTERFACE_REVIEW_OUTPUT),
     ],
 )
 
 review_request_input_interface = Interface(
-    id="review-request-input",
-    direction="in",
+    id="review-request",
+    flow="receives",
     schema=SCHEMA_AMENDMENT_REVIEW_REQUEST,
     description="The amendment package supplied by the successor coordinator.",
 )
 
 review_output_interface = Interface(
-    id="review-output",
-    direction="out",
+    id="review-result",
+    flow="emits",
     schema=SCHEMA_AMENDMENT_REVIEW,
     description="The independent amendment decision returned to the coordinator.",
 )

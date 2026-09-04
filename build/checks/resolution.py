@@ -7,12 +7,7 @@ from oak.node.model import Node
 from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes.model import Process
 from oak.node.parts.processes.steps import Act, Call, Emit
-from oak.node.parts.processes.values import (
-    BindingValue,
-    InterfaceValue,
-    LiteralValue,
-    ValueBinding,
-)
+from oak.node.parts.processes.values import BindingValue, LiteralValue, ValueBinding
 from oak.node.parts.schemas.constraints import Type
 from oak.node.parts.schemas.model import Schema, where
 from oak.node.parts.triggers import Trigger
@@ -27,32 +22,60 @@ def validate_resolution() -> None:
             Schema(
                 id="shared",
                 template="<VALUE>",
-                where=[
-                    where(
-                        "VALUE",
-                        Type(of="string"),
-                    )
-                ],
+                where=[where("VALUE", Type(of="string"))],
             )
         ]
     )
     root = Node(
+        triggers=[
+            Trigger(
+                id="shared-arrived",
+                event="A shared value arrives.",
+                source="interface.shared",
+                process="process.read-shared",
+            )
+        ],
+        processes=[
+            Process(
+                id="read-shared",
+                name="Read shared",
+                input="shared.oak.md#schema.shared",
+                steps=[
+                    Act(
+                        instruction="Read <VALUE>.",
+                        inputs=[
+                            ValueBinding(
+                                placeholder="VALUE",
+                                value=BindingValue(binding="VALUE"),
+                            )
+                        ],
+                    )
+                ],
+            ),
+            Process(
+                id="emit-shared",
+                name="Emit shared",
+                input="shared.oak.md#schema.shared",
+                steps=[Emit(interface="interface.shared-output")],
+            ),
+        ],
         interfaces=[
             Interface(
                 id="shared",
-                direction="in",
+                flow="receives",
                 schema="shared.oak.md#schema.shared",
-            )
-        ]
+            ),
+            Interface(
+                id="shared-output",
+                flow="emits",
+                schema="shared.oak.md#schema.shared",
+            ),
+        ],
     )
     graph = resolve(
         root,
         source="root.oak.md",
-        load=lambda path: (
-            shared
-            if path == "shared.oak.md"
-            else None
-        ),
+        load=lambda path: shared if path == "shared.oak.md" else None,
     )
     _document, schema = graph.entry(
         "root.oak.md",
@@ -60,9 +83,7 @@ def validate_resolution() -> None:
         Schema,
     )
     if schema.id != "shared":
-        raise RuntimeError(
-            "resolution selected the wrong schema"
-        )
+        raise RuntimeError("resolution selected the wrong schema")
 
     raw, normal = contract_schemas()
     target = Node(
@@ -76,16 +97,11 @@ def validate_resolution() -> None:
                 name="Handle request",
                 steps=[
                     Call(
-                        process=(
-                            "target.oak.md"
-                            "#process.normalise"
-                        ),
+                        process="target.oak.md#process.normalise",
                         inputs=[
                             ValueBinding(
                                 placeholder="RAW_NAME",
-                                value=LiteralValue(
-                                    value="Ada"
-                                ),
+                                value=LiteralValue(value="Ada"),
                             )
                         ],
                         outputs=["NORMAL_NAME"],
@@ -96,17 +112,9 @@ def validate_resolution() -> None:
     )
 
     def loader(path: str) -> Node | None:
-        return (
-            target
-            if path == "target.oak.md"
-            else None
-        )
+        return target if path == "target.oak.md" else None
 
-    resolve(
-        caller,
-        source="root.oak.md",
-        load=loader,
-    )
+    resolve(caller, source="root.oak.md", load=loader)
 
     failures = (
         (
@@ -117,12 +125,7 @@ def validate_resolution() -> None:
                         id="handle",
                         name="Handle request",
                         steps=[
-                            Call(
-                                process=(
-                                    "target.oak.md"
-                                    "#process.normalise"
-                                )
-                            )
+                            Call(process="target.oak.md#process.normalise")
                         ],
                     )
                 ]
@@ -135,50 +138,45 @@ def validate_resolution() -> None:
                     Trigger(
                         id="invalid",
                         event="A name arrives.",
-                        process=(
-                            "target.oak.md"
-                            "#process.normalise"
-                        ),
+                        process="target.oak.md#process.normalise",
                     )
                 ]
             ),
         ),
         (
-            "unknown_interface_placeholder",
+            "source_trigger_schema_mismatch",
             Node(
                 interfaces=[
                     Interface(
-                        id="request-input",
-                        direction="in",
-                        schema=(
-                            "target.oak.md"
-                            "#schema.raw-name"
-                        ),
+                        id="request",
+                        flow="receives",
+                        schema="target.oak.md#schema.raw-name",
+                    )
+                ],
+                triggers=[
+                    Trigger(
+                        id="request-arrived",
+                        event="A request arrives.",
+                        source="interface.request",
+                        process="process.read-normal",
                     )
                 ],
                 processes=[
                     Process(
-                        id="read-request",
-                        name="Read request",
+                        id="read-normal",
+                        name="Read normal",
+                        input="target.oak.md#schema.normal-name",
                         steps=[
                             Act(
-                                instruction=(
-                                    "Read <MISSING> "
-                                    "and produce <NOTE>."
-                                ),
+                                instruction="Read <NORMAL_NAME>.",
                                 inputs=[
                                     ValueBinding(
-                                        placeholder="MISSING",
-                                        value=InterfaceValue(
-                                            interface=(
-                                                "interface."
-                                                "request-input"
-                                            ),
-                                            placeholder="MISSING",
+                                        placeholder="NORMAL_NAME",
+                                        value=BindingValue(
+                                            binding="NORMAL_NAME"
                                         ),
                                     )
                                 ],
-                                outputs=["NOTE"],
                             )
                         ],
                     )
@@ -190,12 +188,9 @@ def validate_resolution() -> None:
             Node(
                 interfaces=[
                     Interface(
-                        id="result-output",
-                        direction="out",
-                        schema=(
-                            "target.oak.md"
-                            "#schema.normal-name"
-                        ),
+                        id="result",
+                        flow="emits",
+                        schema="target.oak.md#schema.normal-name",
                     )
                 ],
                 processes=[
@@ -208,16 +203,11 @@ def validate_resolution() -> None:
                                 outputs=["WRONG"],
                             ),
                             Emit(
-                                interface=(
-                                    "interface."
-                                    "result-output"
-                                ),
+                                interface="interface.result",
                                 bindings=[
                                     ValueBinding(
                                         placeholder="WRONG",
-                                        value=BindingValue(
-                                            binding="WRONG"
-                                        ),
+                                        value=BindingValue(binding="WRONG"),
                                     )
                                 ],
                             ),
@@ -231,12 +221,9 @@ def validate_resolution() -> None:
             Node(
                 interfaces=[
                     Interface(
-                        id="result-output",
-                        direction="out",
-                        schema=(
-                            "target.oak.md"
-                            "#schema.normal-name"
-                        ),
+                        id="result",
+                        flow="emits",
+                        schema="target.oak.md#schema.normal-name",
                     )
                 ],
                 processes=[
@@ -245,10 +232,7 @@ def validate_resolution() -> None:
                         name="Emit blank",
                         steps=[
                             Emit(
-                                interface=(
-                                    "interface."
-                                    "result-output"
-                                ),
+                                interface="interface.result",
                                 bindings=[
                                     ValueBinding(
                                         placeholder="NORMAL_NAME",
@@ -265,11 +249,7 @@ def validate_resolution() -> None:
 
     for code, invalid in failures:
         try:
-            resolve(
-                invalid,
-                source="root.oak.md",
-                load=loader,
-            )
+            resolve(invalid, source="root.oak.md", load=loader)
         except ResolutionError as error:
             if error.code != code:
                 raise RuntimeError(
@@ -283,23 +263,15 @@ def validate_resolution() -> None:
             Process(
                 id="invalid",
                 name="Build result",
-                input=(
-                    "target.oak.md"
-                    "#schema.raw-name"
-                ),
-                output=(
-                    "target.oak.md"
-                    "#schema.normal-name"
-                ),
+                input="target.oak.md#schema.raw-name",
+                output="target.oak.md#schema.normal-name",
                 steps=[
                     Act(
                         instruction="Read <RAW_NAME>.",
                         inputs=[
                             ValueBinding(
                                 placeholder="RAW_NAME",
-                                value=BindingValue(
-                                    binding="RAW_NAME"
-                                ),
+                                value=BindingValue(binding="RAW_NAME"),
                             )
                         ],
                     )
@@ -308,26 +280,15 @@ def validate_resolution() -> None:
         ]
     )
     try:
-        resolve(
-            relative_contract,
-            source="root.oak.md",
-            load=loader,
-        )
+        resolve(relative_contract, source="root.oak.md", load=loader)
     except ResolutionError as error:
-        if (
-            error.code
-            != "process_output_binding_mismatch"
-        ):
+        if error.code != "process_output_binding_mismatch":
             raise RuntimeError(
                 "expected process_output_binding_mismatch, "
                 f"got {error.code}"
             ) from None
     else:
-        raise RuntimeError(
-            "expected process_output_binding_mismatch"
-        )
+        raise RuntimeError("expected process_output_binding_mismatch")
 
 
-__all__ = [
-    "validate_resolution",
-]
+__all__ = ["validate_resolution"]

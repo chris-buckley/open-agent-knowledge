@@ -11,6 +11,7 @@ from build.checks.execution import (
     validate_while,
 )
 from build.checks.human_examples import validate_human_examples
+from build.checks.interfaces import validate_interfaces
 from build.checks.metadata import validate_metadata
 from build.checks.outputs import validate_outputs
 from build.checks.parsing import validate_part_omission
@@ -29,6 +30,7 @@ CHECKS: tuple[Check, ...] = (
     validate_text_examples,
     validate_metadata,
     validate_resolution,
+    validate_interfaces,
     validate_execution,
     validate_while,
     validate_part_omission,

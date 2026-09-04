@@ -109,16 +109,25 @@ def _parse_set(cursor: Cursor, text: str, number: int) -> Set:
 
 
 def _parse_emit(cursor: Cursor, text: str, number: int) -> Emit:
-    target, _, remainder = text[5:].partition(" ")
-    parsed = parse_suffix(remainder)
+    body = text[5:]
+    target, separator, remainder = body.partition(" ")
 
+    if not target:
+        cursor.fail("emit_target", "EMIT needs one interface target")
+
+    if not separator:
+        cursor.advance()
+        return Emit(interface=target)
+
+    parsed = parse_suffix(remainder)
     if parsed is None:
-        cursor.fail("emit_suffix", "EMIT needs target (bindings)")
+        cursor.fail("emit_suffix", "EMIT needs target or target (bindings)")
 
     bindings, outputs = parsed
-
     if outputs:
         cursor.fail("emit_suffix", "EMIT takes no outputs")
+    if not bindings:
+        cursor.fail("emit_empty_bindings", "EMIT () is invalid; omit the suffix")
 
     cursor.advance()
     return Emit(

@@ -150,7 +150,7 @@ def json_ld_context(
         },
         "placeholder": "oak:placeholder",
         "description": "oak:description",
-        "direction": "oak:direction",
+        "flow": "oak:flow",
         "event": "oak:event",
         "guard": "oak:guard",
         "kind": "oak:kind",

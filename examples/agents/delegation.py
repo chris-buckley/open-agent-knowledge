@@ -25,7 +25,7 @@ from oak import (
     render,
     resolve,
 )
-from examples.agents.bindings import interface_bindings, local_bindings
+from examples.agents.bindings import local_bindings
 from examples.agents.task_reviewer import (
     INTERFACE_REVIEW_REQUEST_INPUT as WORKER_REVIEW_REQUEST_INPUT,
     PLACEHOLDER_ASSESSMENT,
@@ -43,8 +43,8 @@ SCHEMA_WORKER_REQUEST = "task_reviewer.oak.md#schema.review-request"
 SCHEMA_WORKER_RESULT = "task_reviewer.oak.md#schema.task-review"
 PROCESS_DISPATCH_REVIEW = "process.dispatch-review"
 PROCESS_DELEGATE_REVIEW = "process.delegate-review"
-INTERFACE_REVIEW_REQUEST_INPUT = "interface.review-request-input"
-INTERFACE_TASK_REVIEW_OUTPUT = "interface.task-review-output"
+INTERFACE_REVIEW_REQUEST_INPUT = "interface.review-request"
+INTERFACE_TASK_REVIEW_OUTPUT = "interface.task-review"
 
 TOOL_AGENT_REVIEWER = "agent.reviewer"
 WORKER_DOCUMENT = "examples/agents/task_reviewer.oak.md"
@@ -71,7 +71,6 @@ delegation_requested_trigger = Trigger(
     event=EVENT_DELEGATION_REQUESTED,
     source=INTERFACE_REVIEW_REQUEST_INPUT,
     process=PROCESS_DELEGATE_REVIEW,
-    seed=interface_bindings(INTERFACE_REVIEW_REQUEST_INPUT, REQUEST_PLACEHOLDERS),
 )
 
 dispatch_review_process = Process(
@@ -101,23 +100,20 @@ delegate_review_process = Process(
             inputs=local_bindings(REQUEST_PLACEHOLDERS),
             outputs=list(RESULT_PLACEHOLDERS),
         ),
-        Emit(
-            interface=INTERFACE_TASK_REVIEW_OUTPUT,
-            bindings=local_bindings(RESULT_PLACEHOLDERS),
-        ),
+        Emit(interface=INTERFACE_TASK_REVIEW_OUTPUT),
     ],
 )
 
 review_request_input_interface = Interface(
-    id="review-request-input",
-    direction="in",
+    id="review-request",
+    flow="receives",
     schema=SCHEMA_WORKER_REQUEST,
     description="The review request the coordinator forwards to the worker.",
 )
 
 task_review_output_interface = Interface(
-    id="task-review-output",
-    direction="out",
+    id="task-review",
+    flow="emits",
     schema=SCHEMA_WORKER_RESULT,
     description="The worker task review returned to the caller.",
 )
@@ -154,8 +150,8 @@ def _reviewer_agent(_step, values):
     completed = execute(
         task_reviewer_node,
         Arrival(
-            source=WORKER_REVIEW_REQUEST_INPUT,
-            interfaces={WORKER_REVIEW_REQUEST_INPUT: dict(values)},
+            interface=WORKER_REVIEW_REQUEST_INPUT,
+            values=dict(values),
         ),
         {},
         act=_worker_act,
@@ -177,8 +173,8 @@ def build() -> str:
     completed = execute(
         parsed,
         Arrival(
-            source=INTERFACE_REVIEW_REQUEST_INPUT,
-            interfaces={INTERFACE_REVIEW_REQUEST_INPUT: dict(REQUEST_VALUES)},
+            interface=INTERFACE_REVIEW_REQUEST_INPUT,
+            values=dict(REQUEST_VALUES),
         ),
         {},
         tools={

@@ -7,16 +7,8 @@ from pydantic_core import PydanticCustomError
 
 from oak.node.parts.entry import Entry
 from oak.node.parts.processes.conditions import Condition, condition_values
-from oak.node.parts.processes.targets import (
-    InterfaceTarget,
-    ProcessTarget,
-)
-from oak.node.parts.processes.values import (
-    BindingValue,
-    InterfaceValue,
-    StateValue,
-    ValueBinding,
-)
+from oak.node.parts.processes.targets import InterfaceTarget, ProcessTarget
+from oak.node.parts.processes.values import BindingValue, StateValue, ValueBinding
 from oak.vocabulary.text.non_blank_line import NonBlankLine
 
 
@@ -50,16 +42,6 @@ class Trigger(Entry):
                         },
                     },
                     "process": "process.run",
-                    "seed": [
-                        {
-                            "placeholder": "REQUEST",
-                            "value": {
-                                "source": "interface",
-                                "interface": "interface.request",
-                                "placeholder": "REQUEST",
-                            },
-                        }
-                    ],
                 },
             ]
         }
@@ -80,7 +62,7 @@ class Trigger(Entry):
     source: InterfaceTarget | None = Field(
         default=None,
         description=(
-            "The optional local in or inout interface whose arrival "
+            "The optional local RECEIVES interface whose arrival "
             "fires the trigger."
         ),
         examples=["interface.request"],
@@ -113,15 +95,17 @@ class Trigger(Entry):
     )
     seed: list[ValueBinding] = Field(
         default_factory=list,
-        description="The seed bindings that fill the selected process input schema.",
+        description=(
+            "The event-backed seed bindings that fill the selected "
+            "process input schema."
+        ),
         examples=[
             [
                 {
                     "placeholder": "REQUEST",
                     "value": {
-                        "source": "interface",
-                        "interface": "interface.request",
-                        "placeholder": "REQUEST",
+                        "source": "literal",
+                        "value": "status",
                     },
                 }
             ]
@@ -130,16 +114,19 @@ class Trigger(Entry):
 
     @model_validator(mode="after")
     def valid_seed(self) -> Self:
-        if any(
-            isinstance(
-                binding.value,
-                BindingValue,
+        if self.source is not None and self.seed:
+            raise PydanticCustomError(
+                "source_trigger_seed",
+                "a source-backed trigger cannot declare seeds",
             )
+
+        if any(
+            isinstance(binding.value, BindingValue)
             for binding in self.seed
         ):
             raise PydanticCustomError(
                 "invalid_trigger_seed_value",
-                "trigger seed cannot read a local binding",
+                "an event-backed trigger seed cannot read a local binding",
             )
 
         return self
@@ -151,28 +138,13 @@ class Trigger(Entry):
 
         values = condition_values(self.guard)
 
-        if any(
-            isinstance(
-                value,
-                (
-                    InterfaceValue,
-                    BindingValue,
-                ),
-            )
-            for value in values
-        ):
+        if any(isinstance(value, BindingValue) for value in values):
             raise PydanticCustomError(
                 "invalid_trigger_guard_value",
-                "trigger guard cannot read an interface or local binding",
+                "trigger guard cannot read a local binding",
             )
 
-        if not any(
-            isinstance(
-                value,
-                StateValue,
-            )
-            for value in values
-        ):
+        if not any(isinstance(value, StateValue) for value in values):
             raise PydanticCustomError(
                 "trigger_guard_missing_state",
                 "trigger guard must read at least one state value",

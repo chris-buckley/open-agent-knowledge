@@ -21,7 +21,6 @@ from oak.node.parts.processes.operators import (
 from oak.node.parts.processes.values import (
     BindingValue,
     ConstantValue,
-    InterfaceValue,
     StateValue,
     Value,
 )
@@ -43,8 +42,7 @@ def _same_dynamic_value(
             (
                 ConstantValue,
                 StateValue,
-                InterfaceValue,
-                BindingValue,
+                            BindingValue,
             ),
         )
         and left == right

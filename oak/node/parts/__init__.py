@@ -2,7 +2,7 @@
 
 from oak.node.parts.constants import Constant, ConstantForm
 from oak.node.parts.instructions import Instruction
-from oak.node.parts.interfaces import Direction, Interface, SchemaTarget
+from oak.node.parts.interfaces import Interface, InterfaceFlow, SchemaTarget
 from oak.node.parts.part import Part
 from oak.node.parts.processes.conditions import (
     All,
@@ -38,7 +38,6 @@ from oak.node.parts.processes.targets import (
 from oak.node.parts.processes.values import (
     BindingValue,
     ConstantValue,
-    InterfaceValue,
     LiteralValue,
     StateValue,
     Value,
@@ -86,7 +85,7 @@ __all__ = [
     "ConstantTarget",
     "ConstantValue",
     "Constraint",
-    "Direction",
+    "InterfaceFlow",
     "Emit",
     "Fail",
     "Foreach",
@@ -94,7 +93,6 @@ __all__ = [
     "Instruction",
     "Interface",
     "InterfaceTarget",
-    "InterfaceValue",
     "Join",
     "Lines",
     "ListOf",

@@ -1,4 +1,4 @@
-"""ValueReference: one readable target or process-local binding prefixed by $."""
+"""ValueReference: one readable value prefixed by $."""
 
 import re
 from typing import Annotated
@@ -22,41 +22,21 @@ VALUE_REFERENCE_PATTERN = (
     + SLUG_ID_SYNTAX.body
     + r"|state\."
     + SLUG_ID_SYNTAX.body
-    + r"|interface\."
-    + SLUG_ID_SYNTAX.body
-    + r"\."
-    + PLACEHOLDER_SYNTAX.body
     + r")$"
 )
 VALUE_REFERENCE_EBNF = (
     'value_reference = "$", '
-    "( placeholder | constant_target | state_target | "
-    "interface_value_path ) ;\n"
+    "( placeholder | constant_target | state_target ) ;\n"
     'constant_target = [ relative_document_path, "#" ], "constant", ".", slug_id ;\n'
-    'state_target = "state", ".", slug_id ;\n'
-    'interface_value_path = "interface", ".", slug_id, ".", placeholder ;'
+    'state_target = "state", ".", slug_id ;'
 )
 
-_BARE_RE = re.compile(
-    rf"^\${PLACEHOLDER_SYNTAX.body}$"
-)
-_STATE_RE = re.compile(
-    rf"^\$state\.{SLUG_ID_SYNTAX.body}$"
-)
-_INTERFACE_RE = re.compile(
-    rf"^\$interface\.{SLUG_ID_SYNTAX.body}\."
-    rf"{PLACEHOLDER_SYNTAX.body}$"
-)
+_BARE_RE = re.compile(rf"^\${PLACEHOLDER_SYNTAX.body}$")
+_STATE_RE = re.compile(rf"^\$state\.{SLUG_ID_SYNTAX.body}$")
 
 
 def _value_reference(value: str) -> str:
-    if _BARE_RE.fullmatch(value):
-        return value
-
-    if _STATE_RE.fullmatch(value):
-        return value
-
-    if _INTERFACE_RE.fullmatch(value):
+    if _BARE_RE.fullmatch(value) or _STATE_RE.fullmatch(value):
         return value
 
     source = value[1:]
@@ -76,10 +56,7 @@ def _value_reference(value: str) -> str:
             "relative value reference must target a constant",
         )
 
-    if (
-        is_relative_target(source)
-        or source.startswith("constant.")
-    ):
+    if is_relative_target(source) or source.startswith("constant."):
         return value
 
     raise PydanticCustomError(
@@ -90,8 +67,6 @@ def _value_reference(value: str) -> str:
 
 ValueReference = Annotated[
     str,
-    StringConstraints(
-        pattern=VALUE_REFERENCE_PATTERN,
-    ),
+    StringConstraints(pattern=VALUE_REFERENCE_PATTERN),
     AfterValidator(_value_reference),
 ]

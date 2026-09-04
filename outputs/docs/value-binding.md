@@ -6,7 +6,7 @@ ValueBinding: One placeholder bound to one process value.
 </instructions>
 
 <constants>
-example-1: "REQUEST=$interface.request.REQUEST"
+example-1: "REQUEST=$REQUEST"
 
 grammar: TEXT<<
 surface_value_binding_line = ? <PLACEHOLDER>=<VALUE> ? ;

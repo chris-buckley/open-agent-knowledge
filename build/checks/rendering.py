@@ -10,9 +10,9 @@ from oak.authoring import ACT
 from oak.node.model import Node
 from oak.node.parts.instructions import Instruction
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import Act, Call
+from oak.node.parts.processes.steps import Act, Call, Emit
 from oak.node.parts.processes.values import (
-    InterfaceValue,
+    BindingValue,
     LiteralValue,
     StateValue,
     ValueBinding,
@@ -29,10 +29,7 @@ def validate_act_authoring() -> None:
         inputs=[
             ValueBinding(
                 placeholder="REPORT",
-                value=InterfaceValue(
-                    interface="interface.report",
-                    placeholder="REPORT",
-                ),
+                value=BindingValue(binding="REPORT"),
             )
         ],
         outputs=["SEVERITY"],
@@ -79,7 +76,7 @@ def validate_act_authoring() -> None:
         step_lines(native)
     ) != (
         "ACT Classify <REPORT> and produce <SEVERITY>. "
-        "(REPORT=$interface.report.REPORT) -> SEVERITY"
+        "(REPORT=$REPORT) -> SEVERITY"
     ):
         raise RuntimeError(
             "ACT changed interpreter-native OAK syntax"
@@ -125,6 +122,22 @@ def validate_act_authoring() -> None:
                 process="process.run"
             ),
             "CALL process.run ()",
+        ),
+        (
+            Emit(interface="interface.result"),
+            "EMIT interface.result",
+        ),
+        (
+            Emit(
+                interface="interface.result",
+                bindings=[
+                    ValueBinding(
+                        placeholder="RESULT",
+                        value=BindingValue(binding="FINAL_RESULT"),
+                    )
+                ],
+            ),
+            "EMIT interface.result (RESULT=$FINAL_RESULT)",
         ),
         (
             ACT(

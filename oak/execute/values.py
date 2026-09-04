@@ -18,7 +18,6 @@ from oak.node.parts.processes.operators import (
 from oak.node.parts.processes.values import (
     BindingValue,
     ConstantValue,
-    InterfaceValue,
     LiteralValue,
     StateValue,
     Value,
@@ -44,19 +43,6 @@ def _state_value(context: ExecutionContext, frame: ProcessFrame, value: StateVal
     return deepcopy(context.state[key])
 
 
-def _interface_value(context: ExecutionContext, frame: ProcessFrame, value: InterfaceValue) -> JsonValue:
-    identifier = target_id(value.interface)
-    values = context.interfaces.get((frame.document, identifier))
-
-    if values is None or value.placeholder not in values:
-        raise ExecutionError(
-            "missing_interface_value",
-            f"interface {identifier} has no {value.placeholder} value",
-        )
-
-    return deepcopy(values[value.placeholder])
-
-
 def _binding_value(frame: ProcessFrame, value: BindingValue) -> JsonValue:
     if value.binding not in frame.bindings:
         raise ExecutionError("missing_process_binding", f"binding {value.binding} is absent")
@@ -75,9 +61,6 @@ def resolve_value(context: ExecutionContext, frame: ProcessFrame, value: Value) 
 
         case StateValue():
             return _state_value(context, frame, value)
-
-        case InterfaceValue():
-            return _interface_value(context, frame, value)
 
         case BindingValue():
             return _binding_value(frame, value)

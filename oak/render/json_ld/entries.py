@@ -144,10 +144,15 @@ def _step_fields(document: str, step: Step) -> Fields:
             }
 
         case Emit():
-            return {
+            fields: Fields = {
                 "interface": _target_reference(document, step.interface),
-                "bindings": [binding_node(document, binding) for binding in step.bindings],
             }
+            if step.bindings:
+                fields["bindings"] = [
+                    binding_node(document, binding)
+                    for binding in step.bindings
+                ]
+            return fields
 
         case If():
             return _if_fields(document, step)
@@ -275,7 +280,7 @@ def _interface_node(document: str, entry: Interface) -> Fields:
     node: Fields = {
         "@id": entry_id(document, "interface", entry.id),
         "@type": "oak:Interface",
-        "direction": entry.direction,
+        "flow": entry.flow,
         "schema": _target_reference(document, entry.schema_id),
     }
 

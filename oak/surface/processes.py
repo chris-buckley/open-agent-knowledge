@@ -25,12 +25,11 @@ from oak.node.parts.processes.steps import (
 from oak.node.parts.processes.values import (
     BindingValue,
     ConstantValue,
-    InterfaceValue,
     LiteralValue,
     StateValue,
     ValueBinding,
 )
-from oak.surface.model import _PRESENT, _surface
+from oak.surface.model import _NON_EMPTY, _PRESENT, _surface
 
 PROCESS_SURFACES = (
     _surface(
@@ -52,16 +51,6 @@ PROCESS_SURFACES = (
         StateValue,
         "$<STATE>",
         rendered=("state",),
-        fixed=("source",),
-    ),
-    _surface(
-        "value-interface",
-        InterfaceValue,
-        "$<INTERFACE>.<PLACEHOLDER>",
-        rendered=(
-            "interface",
-            "placeholder",
-        ),
         fixed=("source",),
     ),
     _surface(
@@ -153,7 +142,15 @@ PROCESS_SURFACES = (
         fixed=("kind",),
     ),
     _surface(
-        "step-emit",
+        "step-emit-inferred",
+        Emit,
+        "EMIT <INTERFACE>",
+        rendered=("interface",),
+        fixed=("kind", "bindings"),
+        when=(("bindings", []),),
+    ),
+    _surface(
+        "step-emit-explicit",
         Emit,
         "EMIT <INTERFACE> (<BINDINGS>)",
         rendered=(
@@ -161,6 +158,7 @@ PROCESS_SURFACES = (
             "bindings",
         ),
         fixed=("kind",),
+        when=(("bindings", _NON_EMPTY),),
     ),
     _surface(
         "step-if",

@@ -3,15 +3,16 @@ $ reads a value; local targets start with their part; relative targets start wit
 Conditions are typed trees; ALL, ANY, and NOT compose comparisons; ASSERT fails a false condition; FOREACH is sequential; WHILE tests before each bounded iteration; PAR outputs become visible only at JOIN.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
-Trigger seeds fill the selected process input schema; each seeded value validates before the process runs.
-A source-backed trigger fires on an arrival at its exact interface; its event text stays the semantic signpost.
+RECEIVES accepts one complete instance of its schema.
+A source-backed trigger supplies the received instance as the selected process input.
+EMITS publishes one complete instance of its schema.
+Text after `: ` states boundary meaning absent from the interface schema.
 AS binds one constant or state value to one schema placeholder; the value must satisfy that placeholder at resolution and before each state write commits.
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 State holds values that persist and can change while processes run.
-Each trigger is one fact group: event carries the meaning, an optional source names the exact ingress interface, an optional guard checks state after the match, and process selects the work.
+Each trigger is one fact group: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
-Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both.
 
 Treat the current OAK document as immutable.
 Never publish a successor without a valid independent proof.
@@ -162,23 +163,13 @@ pending-rationale AS schema.governance.RATIONALE: ""
 
 <triggers>
 trigger.amendment-proposed.event := "An amendment is proposed."
-trigger.amendment-proposed.source := interface.amendment-input
-trigger.amendment-proposed.process := process.govern-succession
-trigger.amendment-proposed.seed.AMENDMENT_ID := $interface.amendment-input.AMENDMENT_ID
-trigger.amendment-proposed.seed.AMENDMENT := $interface.amendment-input.AMENDMENT
-trigger.amendment-proposed.seed.RATIONALE := $interface.amendment-input.RATIONALE
-trigger.amendment-proposed.seed.EVIDENCE := $interface.amendment-input.EVIDENCE
-trigger.amendment-proposed.seed.RESUME := false
+trigger.amendment-proposed.source := interface.amendment
+trigger.amendment-proposed.process := process.start-succession
 
 trigger.evidence-supplied.event := "Evidence for the pending amendment is supplied."
-trigger.evidence-supplied.source := interface.evidence-input
+trigger.evidence-supplied.source := interface.evidence
 trigger.evidence-supplied.guard := $state.review-status equals "needs-evidence"
-trigger.evidence-supplied.process := process.govern-succession
-trigger.evidence-supplied.seed.AMENDMENT_ID := $interface.evidence-input.AMENDMENT_ID
-trigger.evidence-supplied.seed.AMENDMENT := $state.pending-amendment
-trigger.evidence-supplied.seed.RATIONALE := $state.pending-rationale
-trigger.evidence-supplied.seed.EVIDENCE := $interface.evidence-input.EVIDENCE
-trigger.evidence-supplied.seed.RESUME := true
+trigger.evidence-supplied.process := process.resume-succession
 </triggers>
 
 <processes>
@@ -188,6 +179,14 @@ ACT TOOL "agent.amendment-reviewer" input="amendment_reviewer.oak.md#schema.amen
 
 <process id="dispatch-verification" name="Dispatch verification" input="successor_verifier.oak.md#schema.successor-verification-request" output="successor_verifier.oak.md#schema.successor-proof">
 ACT TOOL "agent.successor-verifier" input="successor_verifier.oak.md#schema.successor-verification-request" output="successor_verifier.oak.md#schema.successor-proof": Verify <CANDIDATE_OAK> against <CURRENT_OAK>, <AMENDMENT>, and <PROTECTED_INVARIANTS>, then produce <VALID>, <PARSES>, <RESOLVES>, <CANONICAL>, <INVARIANTS_PRESERVED>, <SCOPE_EXACT>, and <PROOF>. (CURRENT_OAK=$CURRENT_OAK, CANDIDATE_OAK=$CANDIDATE_OAK, AMENDMENT=$AMENDMENT, PROTECTED_INVARIANTS=$PROTECTED_INVARIANTS) -> VALID, PARSES, RESOLVES, CANONICAL, INVARIANTS_PRESERVED, SCOPE_EXACT, PROOF
+</process>
+
+<process id="start-succession" name="Start succession" input="schema.amendment-proposal">
+CALL process.govern-succession (AMENDMENT_ID=$AMENDMENT_ID, AMENDMENT=$AMENDMENT, RATIONALE=$RATIONALE, EVIDENCE=$EVIDENCE, RESUME=false)
+</process>
+
+<process id="resume-succession" name="Resume succession" input="schema.evidence-supplement">
+CALL process.govern-succession (AMENDMENT_ID=$AMENDMENT_ID, AMENDMENT=$state.pending-amendment, RATIONALE=$state.pending-rationale, EVIDENCE=$EVIDENCE, RESUME=true)
 </process>
 
 <process id="govern-succession" name="Govern succession" input="schema.amendment-cycle">
@@ -219,31 +218,20 @@ IF $DECISION equals "accept":
     ACT Advance <CURRENT_REVISION> and produce <PRIOR_REVISION> and <NEXT_REVISION>. (CURRENT_REVISION=$state.current-revision) -> PRIOR_REVISION, NEXT_REVISION
     SET state.current-revision = $NEXT_REVISION
     SET state.review-status = "ratified"
-    EMIT interface.successor-output (DECISION=$DECISION, AMENDMENT_ID=$AMENDMENT_ID, AMENDMENT=$AMENDMENT, RATIONALE=$RATIONALE, PRIOR_REVISION=$PRIOR_REVISION, NEXT_REVISION=$NEXT_REVISION, CANDIDATE_OAK=$CANDIDATE_OAK, VALID=$VALID, PARSES=$PARSES, RESOLVES=$RESOLVES, CANONICAL=$CANONICAL, INVARIANTS_PRESERVED=$INVARIANTS_PRESERVED, SCOPE_EXACT=$SCOPE_EXACT, PROOF=$PROOF)
+    EMIT interface.successor (DECISION=$DECISION, AMENDMENT_ID=$AMENDMENT_ID, AMENDMENT=$AMENDMENT, RATIONALE=$RATIONALE, PRIOR_REVISION=$PRIOR_REVISION, NEXT_REVISION=$NEXT_REVISION, CANDIDATE_OAK=$CANDIDATE_OAK, VALID=$VALID, PARSES=$PARSES, RESOLVES=$RESOLVES, CANONICAL=$CANONICAL, INVARIANTS_PRESERVED=$INVARIANTS_PRESERVED, SCOPE_EXACT=$SCOPE_EXACT, PROOF=$PROOF)
   ELSE:
     IF $DECISION equals "needs-evidence":
       THEN:
         SET state.review-status = "needs-evidence"
       ELSE:
         SET state.review-status = "rejected"
-    EMIT interface.review-outcome-output (DECISION=$DECISION, REVIEW_FINDINGS=$REVIEW_FINDINGS, EVIDENCE_REQUEST=$EVIDENCE_REQUEST)
+    EMIT interface.review-outcome (DECISION=$DECISION, REVIEW_FINDINGS=$REVIEW_FINDINGS, EVIDENCE_REQUEST=$EVIDENCE_REQUEST)
 </process>
 </processes>
 
 <interfaces>
-<interface id="amendment-input" direction="in" schema="schema.amendment-proposal">
-The proposed amendment, rationale, and available evidence.
-</interface>
-
-<interface id="evidence-input" direction="in" schema="schema.evidence-supplement">
-The evidence supplied for the amendment retained in state.
-</interface>
-
-<interface id="review-outcome-output" direction="out" schema="amendment_reviewer.oak.md#schema.amendment-review">
-The independent decision returned when succession does not proceed.
-</interface>
-
-<interface id="successor-output" direction="out" schema="schema.successor-publication">
-The canonical successor published only together with its proof.
-</interface>
+amendment RECEIVES schema.amendment-proposal: "The proposed amendment, rationale, and available evidence."
+evidence RECEIVES schema.evidence-supplement: "The evidence supplied for the amendment retained in state."
+review-outcome EMITS amendment_reviewer.oak.md#schema.amendment-review: "The independent decision returned when succession does not proceed."
+successor EMITS schema.successor-publication: "The canonical successor published only together with its proof."
 </interfaces>

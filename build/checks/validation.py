@@ -12,10 +12,9 @@ from oak.node.model import Node
 from oak.node.parts.constants import Constant
 from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import Act, Call
+from oak.node.parts.processes.steps import Act, Call, Emit
 from oak.node.parts.processes.values import (
     BindingValue,
-    InterfaceValue,
     LiteralValue,
     ValueBinding,
 )
@@ -255,16 +254,13 @@ def validate_contract_rules() -> None:
             ],
         )
 
-    def trigger_source_out() -> None:
+    def trigger_source_emit() -> None:
         Node(
-            schemas=[
-                raw,
-                normal,
-            ],
+            schemas=[raw, normal],
             interfaces=[
                 Interface(
-                    id="name-output",
-                    direction="out",
+                    id="name-result",
+                    flow="emits",
                     schema="schema.raw-name",
                 )
             ],
@@ -272,43 +268,20 @@ def validate_contract_rules() -> None:
                 Trigger(
                     id="invalid",
                     event="A name arrives.",
-                    source="interface.name-output",
-                    process="process.handle",
+                    source="interface.name-result",
+                    process="process.normalise",
                 )
             ],
-            processes=[
-                normalise_process(),
-                Process(
-                    id="handle",
-                    name="Handle request",
-                    steps=[
-                        Call(
-                            process="process.normalise",
-                            inputs=[
-                                ValueBinding(
-                                    placeholder="RAW_NAME",
-                                    value=LiteralValue(
-                                        value="Ada"
-                                    ),
-                                )
-                            ],
-                            outputs=["NORMAL_NAME"],
-                        )
-                    ],
-                ),
-            ],
+            processes=[normalise_process()],
         )
 
     def trigger_source_overlap() -> None:
         Node(
-            schemas=[
-                raw,
-                normal,
-            ],
+            schemas=[raw, normal],
             interfaces=[
                 Interface(
-                    id="name-input",
-                    direction="in",
+                    id="name",
+                    flow="receives",
                     schema="schema.raw-name",
                 )
             ],
@@ -316,68 +289,133 @@ def validate_contract_rules() -> None:
                 Trigger(
                     id="first",
                     event="A name arrives.",
-                    source="interface.name-input",
+                    source="interface.name",
                     process="process.normalise",
-                    seed=[
-                        ValueBinding(
-                            placeholder="RAW_NAME",
-                            value=InterfaceValue(
-                                interface="interface.name-input",
-                                placeholder="RAW_NAME",
-                            ),
-                        )
-                    ],
                 ),
                 Trigger(
                     id="second",
                     event="Another name arrives.",
-                    source="interface.name-input",
+                    source="interface.name",
                     process="process.normalise",
-                    seed=[
-                        ValueBinding(
-                            placeholder="RAW_NAME",
-                            value=InterfaceValue(
-                                interface="interface.name-input",
-                                placeholder="RAW_NAME",
-                            ),
-                        )
-                    ],
                 ),
             ],
-            processes=[
-                normalise_process()
+            processes=[normalise_process()],
+        )
+
+    def source_trigger_seed() -> None:
+        Trigger(
+            id="invalid",
+            event="A name arrives.",
+            source="interface.name",
+            process="process.normalise",
+            seed=[
+                ValueBinding(
+                    placeholder="RAW_NAME",
+                    value=LiteralValue(value="Ada"),
+                )
             ],
         )
 
-    def typed_interface_read() -> None:
+    def source_process_without_input() -> None:
         Node(
             schemas=[raw],
             interfaces=[
                 Interface(
-                    id="name-input",
-                    direction="in",
+                    id="name",
+                    flow="receives",
+                    schema="schema.raw-name",
+                )
+            ],
+            triggers=[
+                Trigger(
+                    id="invalid",
+                    event="A name arrives.",
+                    source="interface.name",
+                    process="process.handle",
+                )
+            ],
+            processes=[
+                Process(
+                    id="handle",
+                    name="Handle request",
+                    steps=[Act(instruction="Handle the request.")],
+                )
+            ],
+        )
+
+    def source_schema_mismatch() -> None:
+        Node(
+            schemas=[raw, normal],
+            interfaces=[
+                Interface(
+                    id="name",
+                    flow="receives",
+                    schema="schema.raw-name",
+                )
+            ],
+            triggers=[
+                Trigger(
+                    id="invalid",
+                    event="A name arrives.",
+                    source="interface.name",
+                    process="process.read-normal",
+                )
+            ],
+            processes=[
+                Process(
+                    id="read-normal",
+                    name="Read normal",
+                    input="schema.normal-name",
+                    steps=[
+                        Act(
+                            instruction="Read <NORMAL_NAME>.",
+                            inputs=[
+                                ValueBinding(
+                                    placeholder="NORMAL_NAME",
+                                    value=BindingValue(binding="NORMAL_NAME"),
+                                )
+                            ],
+                        )
+                    ],
+                )
+            ],
+        )
+
+    def emit_through_receive() -> None:
+        Node(
+            schemas=[raw],
+            interfaces=[
+                Interface(
+                    id="name",
+                    flow="receives",
                     schema="schema.raw-name",
                 )
             ],
             processes=[
                 Process(
-                    id="read-name",
-                    name="Read name",
+                    id="echo-name",
+                    name="Echo name",
                     input="schema.raw-name",
-                    steps=[
-                        Act(
-                            instruction="Read <RAW_NAME>.",
-                            inputs=[
-                                ValueBinding(
-                                    placeholder="RAW_NAME",
-                                    value=InterfaceValue(
-                                        interface="interface.name-input",
-                                        placeholder="RAW_NAME",
-                                    ),
-                                )
-                            ],
-                        )
-                    ],
+                    steps=[Emit(interface="interface.name")],
+                )
+            ],
+        )
+
+    def inferred_emit_missing() -> None:
+        Node(
+            schemas=[normal],
+            interfaces=[
+                Interface(
+                    id="normal-result",
+                    flow="emits",
+                    schema="schema.normal-name",
+                )
+            ],
+            processes=[
+                Process(
+                    id="emit-name",
+                    name="Emit name",
+                    steps=[Emit(interface="interface.normal-result")],
                 )
             ],
         )
@@ -539,16 +577,32 @@ def validate_contract_rules() -> None:
         trigger_binding_read,
     )
     _expect_rule(
-        "trigger_source_not_ingress",
-        trigger_source_out,
+        "trigger_source_not_receive",
+        trigger_source_emit,
     )
     _expect_rule(
         "overlapping_trigger_guards",
         trigger_source_overlap,
     )
     _expect_rule(
-        "typed_process_interface_read",
-        typed_interface_read,
+        "source_trigger_seed",
+        source_trigger_seed,
+    )
+    _expect_rule(
+        "source_trigger_process_input",
+        source_process_without_input,
+    )
+    _expect_rule(
+        "source_trigger_schema_mismatch",
+        source_schema_mismatch,
+    )
+    _expect_rule(
+        "emit_target_not_emit",
+        emit_through_receive,
+    )
+    _expect_rule(
+        "inferred_emit_binding_mismatch",
+        inferred_emit_missing,
     )
 
 

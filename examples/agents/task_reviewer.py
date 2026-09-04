@@ -16,7 +16,6 @@ from oak import (
     Emit,
     Instruction,
     Interface,
-    InterfaceValue,
     Node,
     NonEmpty,
     Process,
@@ -136,11 +135,6 @@ review_requested_trigger = Trigger(
     event="A task review is requested.",
     source=INTERFACE_REVIEW_REQUEST_INPUT,
     process=PROCESS_REVIEW_TASK,
-    seed=[
-        ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=InterfaceValue(interface=INTERFACE_REVIEW_REQUEST_INPUT, placeholder=PLACEHOLDER_TASK_BRIEF)),
-        ValueBinding(placeholder=PLACEHOLDER_IMPLEMENTATION_REPORT, value=InterfaceValue(interface=INTERFACE_REVIEW_REQUEST_INPUT, placeholder=PLACEHOLDER_IMPLEMENTATION_REPORT)),
-        ValueBinding(placeholder=PLACEHOLDER_DIFF, value=InterfaceValue(interface=INTERFACE_REVIEW_REQUEST_INPUT, placeholder=PLACEHOLDER_DIFF)),
-    ],
 )
 
 read_evidence_process = Process(
@@ -219,28 +213,20 @@ review_task_process = Process(
             inputs=[ValueBinding(placeholder=PLACEHOLDER_EVIDENCE, value=BindingValue(binding=PLACEHOLDER_EVIDENCE))],
             outputs=[PLACEHOLDER_STRENGTHS, PLACEHOLDER_ISSUES, PLACEHOLDER_ASSESSMENT],
         ),
-        Emit(
-            interface=INTERFACE_TASK_REVIEW_OUTPUT,
-            bindings=[
-                ValueBinding(placeholder=PLACEHOLDER_SPEC_COMPLIANCE, value=BindingValue(binding=PLACEHOLDER_SPEC_COMPLIANCE)),
-                ValueBinding(placeholder=PLACEHOLDER_STRENGTHS, value=BindingValue(binding=PLACEHOLDER_STRENGTHS)),
-                ValueBinding(placeholder=PLACEHOLDER_ISSUES, value=BindingValue(binding=PLACEHOLDER_ISSUES)),
-                ValueBinding(placeholder=PLACEHOLDER_ASSESSMENT, value=BindingValue(binding=PLACEHOLDER_ASSESSMENT)),
-            ],
-        ),
+        Emit(interface=INTERFACE_TASK_REVIEW_OUTPUT),
     ],
 )
 
 review_request_input_interface = Interface(
     id="review-request-input",
-    direction="in",
+    flow="receives",
     schema=SCHEMA_REVIEW_REQUEST,
     description="The brief, report, and diff supplied to the reviewer.",
 )
 
 task_review_output_interface = Interface(
     id="task-review-output",
-    direction="out",
+    flow="emits",
     schema=SCHEMA_TASK_REVIEW,
     description="The task-scoped review returned to the caller.",
 )

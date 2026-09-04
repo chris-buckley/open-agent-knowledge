@@ -37,7 +37,7 @@ TEXT_EXAMPLES = (
         (
             "constant.policy",
             "state.mode",
-            "interface.stdin.COMMAND",
+            "interface.stdin",
         ),
     ),
     (
@@ -45,7 +45,6 @@ TEXT_EXAMPLES = (
         (
             "$constant.policy",
             "$state.mode",
-            "$interface.stdin.COMMAND",
             "$RESULT",
         ),
     ),
