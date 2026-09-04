@@ -66,7 +66,10 @@ def run_process(
                 f"process {process.id}: {error}",
             ) from None
 
-    frame = ProcessFrame(document, deepcopy(dict(inputs)))
+    frame = ProcessFrame(
+        document, deepcopy(dict(inputs)),
+        context.graph.display_target(document, "process", process.id),
+    )
     run_steps(context, frame, process.steps)
     output_schema = resolved_schema(context, document, process.output)
 
@@ -112,7 +115,7 @@ def _run_act(context: ExecutionContext, frame: ProcessFrame, step: Act) -> None:
         values,
         "invalid_act_input",
     )
-    outputs = invoke_action(context, step, values)
+    outputs = invoke_action(context, frame, step, values)
     validate_schema_values(
         context,
         frame.document,

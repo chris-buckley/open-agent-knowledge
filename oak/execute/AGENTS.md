@@ -7,7 +7,7 @@ Each process is the exact ordered way to do one task; follow its typed steps fro
 <constants>
 owned-concern: "One execution cycle, arrivals, trigger selection, process frames, steps, tools, state, emissions, failures, and transaction behavior."
 
-execution-inputs: ["root node or resolved graph", "one arrival", "complete state mapping", "optional native action handler", "exact tool registry"]
+execution-inputs: ["root node or resolved graph", "one arrival", "complete state mapping", "optional direct native action handler or OAK-context interpreter", "exact tool registry"]
 
 arrival-forms: ["exact event text without values", "one local receive interface with one complete schema instance"]
 
@@ -31,6 +31,8 @@ FOREACH WHILE,bounded ordered iteration with fresh child scopes
 PAR JOIN,"validate before launch, isolate child outputs, then promote in authored order"
 >>
 
+native-action-contract: ["accept either the existing direct act callback or the context interpreter, never both", "give the context interpreter a detached native OAK invocation with literal inputs and original schema identities", "preserve all source documents and their separate policy scopes for runtime interpretation", "keep source instructions in their source document rather than transplanting local references", "snapshot the current staged state without exposing mutable execution objects", "validate interpreter outputs before binding promotion just like direct action outputs", "leave exact named-tool dispatch unchanged"]
+
 transaction-contract: YAML<<
 - Do not mutate the caller state mapping.
 - Keep local bindings immutable inside each process frame.
@@ -48,6 +50,7 @@ transaction-contract: YAML<<
 ACT Validate <INPUTS> and one of <ARRIVALS> before trigger selection. (INPUTS=$constant.execution-inputs, ARRIVALS=$constant.arrival-forms)
 ACT Apply <SELECTION> after exact event or source matching and authored-order guard evaluation. (SELECTION=$constant.trigger-selection)
 ACT Preserve <STEPS> across process frames, tools, calls, branches, loops, parallel work, and emissions. (STEPS=$constant.step-contracts)
+ACT Apply <NATIVE> to interpreter-native action dispatch. (NATIVE=$constant.native-action-contract)
 ACT Apply <TRANSACTION> to every success and failure path. (TRANSACTION=$constant.transaction-contract)
 ACT Use stable execution error codes and retain suppressed parallel child failures when available. ()
 </process>

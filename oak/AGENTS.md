@@ -5,7 +5,7 @@ Each process is the exact ordered way to do one task; follow its typed steps fro
 </instructions>
 
 <constants>
-owned-concern: "Package boundaries, representation, authored syntax, parsing, rendering, vocabulary, surfaces, rules, and the public API."
+owned-concern: "Package boundaries, representation, derived interpreter context, authored syntax, parsing, rendering, vocabulary, surfaces, rules, and the public API."
 
 host-boundary: CSV<<
 owner,responsibility
@@ -40,7 +40,11 @@ representation-contracts: YAML<<
   generated reference.
 - Require canonical Node to OAK to Node to OAK equality.
 - Keep exact model fields in Pydantic and exact authored tokens in surfaces and vocabulary.
+- Derive interpreter context from canonical OAK meaning and render its knowledge as
+  OAK documents rather than introducing task-specific YAML or another authored format.
 >>
+
+context-selection-contract: ["default to the complete resolved graph when prose dependencies are uncertain", "an explicit task process selects its whole owning document and transitive document dependencies", "retain additional host-known prose dependencies by exact document path", "never merge document identities or prune individual entries for a task view", "keep the complete execution graph authoritative"]
 </constants>
 
 <processes>
@@ -49,6 +53,7 @@ ACT Use <BOUNDARY> to keep OAK meaning separate from host implementation. (BOUND
 ACT Use <REPRESENTATIONS> to preserve one canonical meaning across every supported form. (REPRESENTATIONS=$constant.representation-map)
 ACT Apply <DEPENDENCIES> before changing package imports or ownership. (DEPENDENCIES=$constant.package-dependencies)
 ACT Apply <CONTRACTS> to each model, parser, renderer, vocabulary, surface, rule, and public export change. (CONTRACTS=$constant.representation-contracts)
+ACT Apply <CONTEXT> when deriving interpreter task views. (CONTEXT=$constant.context-selection-contract)
 ACT Read the matching specialist skill before changing Pydantic, JSON Schema, or JSON-LD behavior. ()
 </process>
 </processes>
