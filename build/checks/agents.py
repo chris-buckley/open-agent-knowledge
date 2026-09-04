@@ -242,7 +242,7 @@ def validate_agents() -> None:
 
         canonical = render(node, grouping="xml")
         if canonical != text:
-            raise RuntimeError("f{ name } is not canonical XML-grouped OAK")
+            raise RuntimeError(f"{name} is not canonical XML-grouped OAK")
 
         _validate_instruction_last_policy(name, node)
 
@@ -254,7 +254,7 @@ def validate_agents() -> None:
         if owner.form != "inline" or not isinstance(owner.value, str) or not owner.value:
             raise RuntimeError(f"{name} owned-concern must be one inline string")
         if owner.value in concerns.values():
-            raise RuntimeError((f"{name} repeats another owned concern: {owner.value}"))
+            raise RuntimeError(f"{name} repeats another owned concern: {owner.value}")
         concerns[name] = owner.value
 
         if not node.processes:
@@ -291,7 +291,7 @@ def validate_agents() -> None:
     if tuple(routed) != _SCOPED_PATHS:
         raise RuntimeError(
             "root AGENTS router path order is stale: "
-            f "expected {_SCOPED_PATHS}, got {tuple(routed)}"
+            f"expected {_SCOPED_PATHS}, got {tuple(routed)}"
         )
     if len({row["concern"] for row in rows if isinstance(row, dict)}) != len(rows):
         raise RuntimeError("root AGENTS router repeats a concern")
