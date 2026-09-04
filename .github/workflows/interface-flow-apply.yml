@@ -19,10 +19,10 @@ jobs:
           fetch-depth: 0
       - name: Apply staged commits
         run: |
-          cp .github/interface-flow/series.patch /tmp/interface-flow.patch
+          cat .github/interface-flow/series.patch.* > /tmp/interface-flow.patch
           git config user.name OpenAI
           git config user.email openai@example.invalid
           git am /tmp/interface-flow.patch
-          git rm .github/interface-flow/series.patch
+          git rm .github/interface-flow/series.patch.*
           git commit --amend --no-edit
           git push origin HEAD:docs/interface-flow-plan
