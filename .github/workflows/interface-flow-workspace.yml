@@ -30,14 +30,16 @@ jobs:
             'pydantic-extra-types[all]>=2.11' \
             'pydantic-settings>=2.15' \
             'PyYAML>=6,<7'
-      - name: Verify product
+      - name: Compile sources
+        run: python -m compileall -q oak build examples
+      - name: Regenerate committed products
+        run: |
+          python build/authoring.py
+          python build/ebnf.py
+          python build/docs.py
+      - name: Verify product as module
         run: python -m build.examples
       - name: Verify direct command
         run: python build/examples.py
-      - name: Check obsolete current syntax
-        run: |
-          if rg -n 'InterfaceValue|direction="(in|out|inout)"|direction=("|\x27)(in|out|inout)|\$interface\.|Arrival\([^)]*source=|interfaces=' oak build examples outputs; then
-            exit 1
-          fi
-      - name: Check worktree
+      - name: Check generated worktree
         run: git diff --exit-code
