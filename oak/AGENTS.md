@@ -40,6 +40,8 @@ representation-contracts: YAML<<
   generated reference.
 - Require canonical Node to OAK to Node to OAK equality.
 - Keep exact model fields in Pydantic and exact authored tokens in surfaces and vocabulary.
+- Derive interpreter context from canonical OAK meaning and render its knowledge as
+  OAK documents rather than introducing task-specific YAML or another authored format.
 >>
 </constants>
 
