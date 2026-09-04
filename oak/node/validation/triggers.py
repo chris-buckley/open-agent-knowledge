@@ -31,6 +31,7 @@ from oak.node.parts.triggers import Trigger
 from oak.node.validation.conditions import compare_static, validate_condition
 from oak.node.validation.values import (
     STATIC_MISSING,
+    interface_schema,
     process_schema,
     static_value,
     validate_value,
@@ -373,100 +374,94 @@ def _guards_disjoint(
     )
 
 
+def _validate_source_contract(
+    index: NodeIndex,
+    trigger: Trigger,
+    interface: Interface,
+    process: Process,
+) -> None:
+    if process.input is None:
+        raise rule_error(
+            "source_trigger_process_input",
+            "source-backed trigger {trigger} selects a process without input",
+            {"trigger": trigger.id},
+        )
+
+    interface_contract = interface_schema(index, interface)
+    process_contract = process_schema(index, process, process.input)
+
+    if (
+        interface_contract is not None
+        and process_contract is not None
+        and interface_contract.id != process_contract.id
+    ):
+        raise rule_error(
+            "source_trigger_schema_mismatch",
+            (
+                "trigger {trigger} receive schema {receive} differs from "
+                "process input schema {process_input}"
+            ),
+            {
+                "trigger": trigger.id,
+                "receive": interface.schema_id,
+                "process_input": process.input,
+            },
+        )
+
+
 def validate_triggers(
     index: NodeIndex,
     triggers: Sequence[Trigger],
 ) -> None:
     """Validate trigger targets, contracts, guards, and overlap."""
-    by_key: dict[
-        tuple[str, str],
-        list[Trigger],
-    ] = defaultdict(list)
+    by_key: dict[tuple[str, str], list[Trigger]] = defaultdict(list)
 
     for trigger in triggers:
-        process = index.require(
-            trigger,
-            trigger.process,
-            Process,
-        )
+        process = index.require(trigger, trigger.process, Process)
 
         for binding in trigger.seed:
-            validate_value(
-                index,
-                trigger,
-                binding.value,
-            )
-
-        if trigger.source is not None:
-            interface = index.require(
-                trigger,
-                trigger.source,
-                Interface,
-            )
-
-            if (
-                interface is not None
-                and interface.direction not in ("in", "inout")
-            ):
-                raise rule_error(
-                    "trigger_source_not_ingress",
-                    (
-                        "trigger {trigger} source {interface} "
-                        "is not an in or inout interface"
-                    ),
-                    {
-                        "trigger": trigger.id,
-                        "interface": trigger.source,
-                    },
-                )
-
-        if process is not None:
-            input_schema = process_schema(
-                index,
-                process,
-                process.input,
-            )
-
-            if process.input is None or input_schema is not None:
-                validate_trigger_contract(
-                    trigger,
-                    (
-                        None
-                        if input_schema is None
-                        else input_schema.placeholders
-                    ),
-                )
-
-        if trigger.guard is not True:
-            validate_condition(
-                index,
-                trigger,
-                trigger.guard,
-            )
+            validate_value(index, trigger, binding.value)
 
         if trigger.source is None:
-            by_key[
-                (
-                    "event",
-                    trigger.event,
-                )
-            ].append(trigger)
+            if process is not None:
+                input_schema = process_schema(index, process, process.input)
+
+                if process.input is None or input_schema is not None:
+                    validate_trigger_contract(
+                        trigger,
+                        None if input_schema is None else input_schema.placeholders,
+                    )
+
+            by_key[("event", trigger.event)].append(trigger)
 
         else:
-            by_key[
-                (
-                    "source",
-                    trigger.source,
-                )
-            ].append(trigger)
+            interface = index.require(trigger, trigger.source, Interface)
+
+            if interface is not None:
+                if interface.flow != "receives":
+                    raise rule_error(
+                        "trigger_source_not_receive",
+                        (
+                            "trigger {trigger} source {interface} "
+                            "is not a RECEIVES interface"
+                        ),
+                        {
+                            "trigger": trigger.id,
+                            "interface": trigger.source,
+                        },
+                    )
+
+                if process is not None:
+                    _validate_source_contract(index, trigger, interface, process)
+
+            by_key[("source", trigger.source)].append(trigger)
+
+        if trigger.guard is not True:
+            validate_condition(index, trigger, trigger.guard)
 
     for (kind, key), group in by_key.items():
         for left, right in combinations(group, 2):
-            if not _guards_disjoint(
-                index,
-                left,
-                right,
-            ):
+            if not _guards_disjoint(index, left, right):
                 raise PydanticCustomError(
                     "overlapping_trigger_guards",
                     (

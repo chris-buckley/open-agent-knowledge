@@ -10,7 +10,6 @@ from oak.node.parts.processes.targets import (
 from oak.node.parts.processes.values import (
     BindingValue,
     ConstantValue,
-    InterfaceValue,
     LiteralValue,
     StateValue,
     Value,
@@ -62,7 +61,6 @@ __all__ = [
     "Foreach",
     "If",
     "InterfaceTarget",
-    "InterfaceValue",
     "Join",
     "LiteralValue",
     "Not",

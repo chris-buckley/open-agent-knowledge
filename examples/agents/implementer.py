@@ -20,7 +20,6 @@ from oak import (
     If,
     Instruction,
     Interface,
-    InterfaceValue,
     LiteralValue,
     Node,
     NonEmpty,
@@ -260,6 +259,7 @@ commit_convention_constant = Constant(
 implementation_requested_trigger = Trigger(
     id="implementation-requested",
     event="An implementation task arrives.",
+    source=INTERFACE_TASK_REQUEST_INPUT,
     process=PROCESS_IMPLEMENT_TASK,
 )
 
@@ -371,12 +371,13 @@ commit_changeset_process = Process(
 implement_task_process = Process(
     id="implement-task",
     name="Implement task",
+    input=SCHEMA_TASK_REQUEST,
     steps=[
         Call(
             process=PROCESS_PLAN_TASK,
             inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=InterfaceValue(interface=INTERFACE_TASK_REQUEST_INPUT, placeholder=PLACEHOLDER_TASK_BRIEF)),
-                ValueBinding(placeholder=PLACEHOLDER_CONTEXT, value=InterfaceValue(interface=INTERFACE_TASK_REQUEST_INPUT, placeholder=PLACEHOLDER_CONTEXT)),
+                ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=BindingValue(binding=PLACEHOLDER_TASK_BRIEF)),
+                ValueBinding(placeholder=PLACEHOLDER_CONTEXT, value=BindingValue(binding=PLACEHOLDER_CONTEXT)),
             ],
             outputs=[PLACEHOLDER_PLAN],
         ),
@@ -448,21 +449,21 @@ implement_task_process = Process(
 
 task_request_input_interface = Interface(
     id="task-request-input",
-    direction="in",
+    flow="receives",
     schema=SCHEMA_TASK_REQUEST,
     description="The task and context supplied to the implementer.",
 )
 
 implementation_report_output_interface = Interface(
     id="implementation-report-output",
-    direction="out",
+    flow="emits",
     schema=SCHEMA_IMPLEMENTATION_REPORT,
     description="The implementer's final status and evidence.",
 )
 
 escalation_output_interface = Interface(
     id="escalation-output",
-    direction="out",
+    flow="emits",
     schema=SCHEMA_ESCALATION,
     description="The blocked outcome returned instead of a commit.",
 )

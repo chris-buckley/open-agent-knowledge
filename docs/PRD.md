@@ -1,7 +1,7 @@
 ---
 title: OAK Product Requirements
 status: draft
-updated: 2026-09-01
+updated: 2026-09-04
 owner: Christopher Buckley
 defaults:
   render: OAK
@@ -46,18 +46,18 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 7. Reject a duplicate SlugId across entries in one document.
 8. Reject a (missing|wrong-type) local reference target.
 9. Omit unset optional fields from the Pydantic dump.
-10. Reject a process value or emit step that conflicts with the interface direction.
+10. Reject a trigger source or emit target whose interface flow is not (receives|emits) respectively.
 11. Reject an act whose instruction placeholders differ from its inputs and outputs.
 12. Reject a process that reads an unbound local binding.
 13. Reject a process that redefines a visible local binding.
-14. Reject an interface value whose placeholder is absent from the interface schema.
-15. Reject an emit step whose bindings differ from the interface schema placeholders.
+14. Reject an interface process value.
+15. Reject an explicit emit whose bindings differ from its interface schema or an inferred emit whose schema placeholder is not visible.
 16. Reject a local or resolved process call cycle.
 17. Reject a statically dead process branch or unreachable step.
 18. Fail one execution when multiple triggers match one cycle.
 19. Reject a process name outside `ProcessName`.
 20. Reject a non-true trigger guard that reads no state value.
-21. Reject a trigger guard that reads an (interface|local binding).
+21. Reject a trigger guard that reads a local binding.
 22. Reject equal trigger events or equal trigger sources unless every guard pair is provably disjoint.
 23. Reject an (ALL|ANY) condition with fewer than two children.
 24. Reject an ordered comparison outside two numbers or two strings.
@@ -69,15 +69,15 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 30. Reject an unresolved relative target when explicit resolution is requested.
 31. Reject an unknown tool or a named-tool act that conflicts with its supplied registry contract.
 32. Reject a par tool whose supplied registry does not confirm parallel use.
-33. Reject a trigger whose seed set differs from the selected process input schema, including seeds on a process without one.
+33. Reject an event-backed trigger whose seed set differs from the selected process input schema, including seeds on a process without one.
 34. Reject a process that cannot supply every output schema placeholder after successful completion.
 35. Reject a call whose input set differs from the called process input schema or whose output set differs from its output schema.
 36. Reject a while with no steps or a limit less than one.
-37. Reject a trigger seed that reads a local binding.
+37. Reject an event-backed trigger seed that reads a local binding or a source-backed trigger with any seed.
 38. Reject an act whose inputs differ from its input schema placeholders or whose outputs differ from its output schema placeholders.
 39. Reject a schema binding without both a schema target and a placeholder, with a placeholder absent from the schema, with a placeholder-valued bound, or with a value that fails the placeholder constraints.
-40. Reject an interface read in a process with an input schema.
-41. Reject a trigger source that is not one local in or inout interface.
+40. Reject a source-backed trigger whose selected process has no input schema or resolves a different schema from its receive interface.
+41. Reject an arrival without exactly one event or receive interface, with values on an event, or without a complete valid receive instance.
 
 ## Structure
 
@@ -105,7 +105,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Resolve each relative path from the referencing document directory.
 - Keep the authored relative path for diagnostics.
 - Allow relative targets for (schema|constant|process) references.
-- Keep state reads, state writes, interface reads, and interface emissions in the active document.
+- Keep state reads, state writes, interface receives, and interface emissions in the active document.
 - Require each entry id to use `SlugId` independent of file placement.
 - Do not prefix an entry id with its part.
 - A `SlugId` collision across parts is a duplicate id.
@@ -167,7 +167,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 ## Schemas
 
 - Schemas define reusable information shapes.
-- A schema is independent of boundary, direction, and process.
+- A schema is independent of boundary, flow, and process.
 - Give each schema an optional `name`, an optional `purpose`, one `template`, and one ordered `where` list.
 - Store each template as one verbatim string.
 - Give each `Where` one placeholder, one non-empty constraint list, optional examples, and an optional description.
@@ -212,13 +212,17 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - A trigger contains one `event`, one optional `source`, one `guard`, one `process`, and one `seed` binding list.
 - Require each `event` value to use `NonBlankLine`.
 - The event stays the semantic signpost for the interpreter.
-- Give `source` one local in or inout interface target.
+- Give `source` one local `RECEIVES` interface target.
 - Give `guard` either true or one recursive condition.
 - Default direct Pydantic trigger authoring to `guard=true`.
 - Give `process` one local or relative process target.
-- Give each seed one value binding whose value is not a local binding.
-- Require the seed set to equal the selected process input schema placeholder set, empty when it declares none.
-- Resolve seed values from the root document, validate them through the process input schema, and seed them as the initial process-local bindings.
+- Give each event-backed seed one value binding whose value is not a local binding.
+- Require each event-backed seed set to equal the selected process input schema placeholder set, empty when it declares none.
+- Resolve event-backed seed values from the root document and validate them through the process input schema.
+- Require a source-backed trigger to declare no seeds.
+- Require a source-backed selected process to declare an input schema.
+- Require the receive interface schema and selected process input schema to resolve to the same schema entry.
+- Use the validated receive instance as the complete initial process input.
 - Match a source-less trigger by exact `event` string equality.
 - Match a source-backed trigger by its exact arrival interface, without an event comparison.
 - Do not infer a source from seeds.
@@ -230,20 +234,24 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Prove equal-key guards disjoint only from compatible state equality, exclusion, and range constraints.
 - Treat every unproved equal-key guard pair as overlapping.
 - Reject a non-true trigger guard without a state read with `trigger_guard_missing_state`.
-- Reject a trigger guard that reads an interface or local binding with `invalid_trigger_guard_value`.
+- Reject a trigger guard that reads a local binding with `invalid_trigger_guard_value`.
+- Reject seeds on a source-backed trigger with `source_trigger_seed`.
+- Reject a source-backed selected process without an input schema with `source_trigger_process_input`.
+- Reject a source and process input that resolve to different schemas with `source_trigger_schema_mismatch`.
 - Triggers are optional.
 
 ## Processes
 
 - Processes are exact ordered ways to do a task.
 - Represent each process step as one discriminated union of (act|set|emit|if|call|fail|assert|foreach|while|par|join) on `kind`.
-- Represent each process value as one discriminated union of (literal|constant|state|interface|binding) on `source`.
+- Represent each process value as one discriminated union of (literal|constant|state|binding) on `source`.
 - Give each value binding one placeholder and one process value.
 - Give each process one `ProcessName`, optional input and output schema targets, and one or more steps.
 - Use each input schema placeholder as one initial process-local binding.
 - Require every output schema placeholder to be visible after successful process completion.
-- Seed a trigger-selected process input from its trigger seeds.
-- Reject an interface read in a process that declares an input schema.
+- Seed an event-selected process input from its trigger seeds.
+- Seed a source-selected process input from its complete receive instance.
+- Do not expose interface instances as process values.
 - Author the first process-name word as the action and the second as its object.
 - Execute process steps in authored order.
 - Give each act one instruction, one input binding list, one output placeholder list, one optional exact tool name, and optional input and output schema targets.
@@ -268,10 +276,13 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Give each all or any at least two conditions.
 - Give each not exactly one condition.
 - Give each set one local state target and one value.
-- Give each emit one local interface target and one non-empty binding list.
-- Require each emit interface to target an (out|inout) interface.
-- Require each emit binding set to equal the interface schema placeholder set.
-- Validate each emitted binding before staging its emission.
+- Give each emit one local `EMITS` interface target and one optional binding list.
+- Treat a non-empty emit binding list as explicit projection.
+- Require each explicit emit binding set to equal the interface schema placeholder set.
+- Treat an omitted binding list as same-name inference from visible process bindings.
+- Require every inferred interface schema placeholder to be visible at the emit step.
+- Validate each complete emitted instance before staging its emission.
+- Reject an unsafe inferred emit with `inferred_emit_binding_mismatch`.
 - Give each if one condition, one non-empty then list, and one optional non-empty else list.
 - Execute only the selected if branch.
 - Keep a binding created in an if branch inside that branch.
@@ -316,9 +327,10 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Commit state writes and interface emissions after successful top-level completion.
 - Discard state writes and interface emissions after failure.
 - Do not claim rollback for external tool effects.
-- Represent one arrival as exactly one `event` text or one `source` interface, and zero or more input interface bindings.
-- Require a source arrival to carry its source interface payload.
-- Validate each active input binding before trigger selection.
+- Represent one arrival as exactly one `event` text or one local receive `interface` target.
+- Give an event arrival no values.
+- Give a receive arrival one complete `values` mapping.
+- Validate the complete receive instance before trigger selection.
 - Require the supplied state target set to equal the resolved authored state target set.
 - Execute one cycle with `execute(document, arrival, state, act=..., tools=...)`.
 - Require an interpreter-native act handler only when an unnamed act runs.
@@ -335,14 +347,15 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 
 ## Interfaces
 
-- An interface declares one information crossing at the active document boundary.
-- An in interface carries information into the document.
-- An out interface carries information out of the document.
-- An inout interface carries information in both directions.
-- Require each interface direction to be (in|out|inout).
+- An interface declares one identified one-way information crossing at the active document boundary.
+- Give each interface one flow selected from (receives|emits).
+- Render the flows as the closed keywords (`RECEIVES`|`EMITS`).
+- A `RECEIVES` interface accepts one complete instance of its schema.
+- An `EMITS` interface publishes one complete instance of its schema.
+- Model a duplex relationship as two interfaces.
 - Give each interface one local or relative schema target.
 - Give each interface an optional `NonBlankLine` description.
-- Use an interface description only for boundary meaning absent from its schema.
+- Use an interface description only for boundary meaning absent from its id and schema.
 - Interfaces do not define information shapes.
 - Interfaces are optional.
 
@@ -357,8 +370,9 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
 - Define `EntryPath` as `part.SlugId` for one singular part name.
 - Define `RelativeDocumentPath` as a relative POSIX path of (letter|digit|`.`|`_`|`-`|`/`) ending in `.oak.md`.
 - Define `TargetPath` as (`EntryPath`|`RelativeDocumentPath#EntryPath`).
-- Define `DottedPath` as one local (constant|schema|state|process|interface) target or one local interface placeholder path.
-- Define `ValueReference` as `$` followed by one (constant target|local state target|local interface placeholder path|Placeholder).
+- Define `InterfaceFlow` as (receives|emits) and render it as (`RECEIVES`|`EMITS`).
+- Define `DottedPath` as one local (constant|schema|state|process|interface) target.
+- Define `ValueReference` as `$` followed by one (constant target|local state target|Placeholder).
 - `$` reads a process value.
 - Use `TargetPath` without `$` for each (SET|CALL|EMIT|schema|trigger fact) target.
 - Address each trigger fact as `trigger.`, the trigger id, `.`, and one fact name.
@@ -442,8 +456,8 @@ NODE
 - Name each identifier value with the semantic structure `<object>_id` (e.g. `document-id` as a `SlugId` or `DOCUMENT_ID`).
 - The mapping naming rule applies to constants, state, and process bindings.
 - Name each mapping with the semantic structure `<key>_to_<value>` (e.g. `filename-to-document-id` as a `SlugId` or `FILENAME_TO_DOCUMENT_ID`).
-- The lifetime rule applies to constants, state, process bindings, and interfaces.
-- Represent each variable-like value by its source and lifetime: `CONSTANT` for fixed values, `STATE` for mutable values, a process binding for local immutable values, and an `INTERFACE` binding for boundary values (e.g. `$constant.max-retries`, `$state.current-candidate`, or `$CANDIDATE`).
+- The lifetime rule applies to constants, state, process bindings, and interface instances.
+- Represent each readable value by its lifetime: `CONSTANT` for fixed values, `STATE` for persistent mutable values, and a process binding for local immutable values.
 - The shared naming rules apply to every entry part.
 - Use the shortest unambiguous name that states purpose or result and reuses one exact domain noun across every part, including verification processes (e.g. schema `candidate`, state `current-candidate`, process `validate-candidate`, and interface `verified-candidate-output`; do not rename `candidate` as `option` or `proposal`).
 - Replace generic nouns and vague process verbs with exact domain terms that state purpose or action (e.g. replace (data|item|result|value|config|response|path) with (candidate|verification-step|verified-candidate|retry-limit|validation-rules|review-feedback|source-document-file), and replace (handle|process|manage|do) with (validate|publish|archive|verify)).
@@ -491,8 +505,8 @@ NODE
 
 ### Delegation
 
-- Model each subagent as one worker OAK document with one in interface and one out interface.
-- Treat the worker in interface schema as the request contract and the worker out interface schema as the result contract.
+- Model each subagent as one worker OAK document with one `RECEIVES` interface and one `EMITS` interface.
+- Treat the worker receive schema as the request contract and its emit schema as the result contract.
 - Type each dispatch process with relative targets to the worker request and result schemas as its input and output schemas.
 - Dispatch each worker inside its dispatch process with one exact tool name from the supplied registry.
 - Prefer one registered portable `agent.<worker>` contract when the host permits registration.
@@ -583,7 +597,7 @@ NODE
 - End each act and call with one binding suffix, even when empty.
 - Render the binding suffix as `(PLACEHOLDER=value, ...)` with `, ` between bindings.
 - Append ` -> ` and the ordered outputs to an act or call with outputs.
-- Render an emit as `EMIT target (bindings)` with no outputs.
+- Render an inferred emit as `EMIT target` and an explicit emit as `EMIT target (bindings)` with no outputs.
 - Render if with `IF`, its condition, `THEN`, and optional `ELSE`.
 - Render assert with `ASSERT`, its condition, and optional `MESSAGE`.
 - Render foreach with `FOREACH binding IN value` and its steps.
@@ -591,8 +605,10 @@ NODE
 - Render a recursive while with `WHILE LIMIT positive-integer:`, its condition, `THEN:`, and its steps.
 - Render par with `PAR`, named-tool acts, and one following `JOIN`.
 - Render fail with `FAIL` and one JSON string.
-- Render each interface with id, direction, schema target, and optional description.
-- Separate parts and sibling body entries with one blank line.
+- Render each interface as `id (RECEIVES|EMITS) schema-target` with an optional `: JSON-string` description.
+- Render one interface entry per line without an entry wrapper.
+- Keep the interface part body byte-identical between groupings.
+- Separate parts and grouped body entries with one blank line, and consecutive interface entries with one LF.
 - Append exactly two LF characters between a schema template and `WHERE` so trailing template whitespace round-trips.
 - Preserve schema template whitespace.
 - Render `Where` entries in authored order.
@@ -635,8 +651,10 @@ NODE
 - Require the caller to supply the JSON-LD vocabulary IRI.
 - Define one root context with `@base` and the `oak` prefix.
 - Render each entry, `Where`, constraint, condition, process value, and step kind as `@type`.
+- Render each interface with `flow`, one id-valued `schema`, and optional `description`.
+- Omit an empty emit `bindings` list and interpret omission as same-name inference.
 - Render `where`, `constraints`, `examples`, `steps`, `inputs`, `outputs`, `bindings`, `conditions`, `thenSteps`, and `otherwise` as ordered lists.
-- Render trigger `process` and `source` as id-valued targets and trigger seeds as one ordered binding list when present.
+- Render trigger `process` and `source` as id-valued targets and event trigger seeds as one ordered binding list when present.
 - Render process, act, constant, and state schema targets as id-valued schema targets.
 - Render each constant and state schema binding with its `placeholder`.
 - Render call process as an id-valued process target.
@@ -674,7 +692,7 @@ NODE
 - Generate every Entry ID, Naming, Decomposition, ACT, Schema binding, and Delegation rule as one instruction entry.
 - Include every authoring rule, every surface schema, the xml grammar, one canonical OAK example, and one decomposed orchestrator example.
 - Declare no universal input interface.
-- Declare one OAK document schema, one out interface, one trigger, and one process.
+- Declare one OAK document schema, one `EMITS` interface, one trigger, and one process.
 - Derive a draft, validate it, and emit the valid OAK document as the sole response.
 
 ### Documentation
@@ -699,8 +717,8 @@ NODE
 - Exercise schema-bound constants, state, trigger seeds, act schemas, and a typed tool contract in `examples/agents/compound_growth.py`.
 - Encode the extracted implementer instructions in `examples/agents/implementer.py`.
 - Encode the extracted task reviewer instructions in `examples/agents/task_reviewer.py`.
-- Seed each trigger-selected reviewer and coordinator process from interface-sourced trigger seeds.
-- Fire each worker and coordinator trigger from its source interface arrival.
+- Supply each source-selected reviewer and coordinator process from its complete receive instance.
+- Fire each worker and coordinator trigger from one receive interface arrival.
 - Encode each ported legacy format as one constrained schema document under `examples/schemas`.
 - Bind one accepted and one rejected value set per ported constraint kind across `examples/schemas`.
 - Dispatch the task reviewer as one worker agent with a schema-typed agent contract from `examples/agents/delegation.py`.
@@ -720,7 +738,8 @@ NODE
 7. Require every documentation page to parse as one OAK document.
 8. Require every parsed documentation page to reproduce its committed render.
 9. Require authoring and documentation generation to share the same surface and rule objects.
-10. Require the generated output path set and contents to equal the committed snapshot.
+10. Require the interface flow model, surfaces, parser, renderer, and instructions to share one closed registry.
+11. Require the generated output path set and contents to equal the committed snapshot.
 
 ### Tree
 
@@ -734,7 +753,9 @@ oak
 │   ├── PRD.md
 │   └── plans
 │       ├── 0000-plan.md
-│       └── 0000-report.md
+│       ├── 0000-report.md
+│       ├── 0001-plan.md
+│       └── 0001-report.md
 ├── examples
 │   ├── __init__.py
 │   ├── agents
@@ -860,6 +881,7 @@ oak
 │   │       ├── data.py
 │   │       ├── groupings.py
 │   │       ├── instructions.py
+│   │       ├── interfaces.py
 │   │       ├── processes.py
 │   │       ├── styles.py
 │   │       └── triggers.py
@@ -913,6 +935,7 @@ oak
 │       ├── execution.py
 │       ├── fixtures.py
 │       ├── human_examples.py
+│       ├── interfaces.py
 │       ├── metadata.py
 │       ├── outputs.py
 │       ├── parsing.py

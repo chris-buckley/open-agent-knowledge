@@ -23,7 +23,6 @@ from oak import (
     If,
     Instruction,
     Interface,
-    InterfaceValue,
     LiteralValue,
     Node,
     NonEmpty,
@@ -46,7 +45,7 @@ from oak import (
     resolve,
     where,
 )
-from examples.agents.bindings import interface_bindings, local_bindings
+from examples.agents.bindings import local_bindings
 from examples.agents.amendment_reviewer import (
     INTERFACE_REVIEW_REQUEST_INPUT as WORKER_REVIEW_REQUEST_INPUT,
     REVIEW_PLACEHOLDERS,
@@ -85,12 +84,14 @@ STATE_PENDING_RATIONALE = "state.pending-rationale"
 
 PROCESS_DISPATCH_REVIEW = "process.dispatch-review"
 PROCESS_DISPATCH_VERIFICATION = "process.dispatch-verification"
+PROCESS_START_SUCCESSION = "process.start-succession"
+PROCESS_RESUME_SUCCESSION = "process.resume-succession"
 PROCESS_GOVERN_SUCCESSION = "process.govern-succession"
 
-INTERFACE_AMENDMENT_INPUT = "interface.amendment-input"
-INTERFACE_EVIDENCE_INPUT = "interface.evidence-input"
-INTERFACE_REVIEW_OUTCOME_OUTPUT = "interface.review-outcome-output"
-INTERFACE_SUCCESSOR_OUTPUT = "interface.successor-output"
+INTERFACE_AMENDMENT_INPUT = "interface.amendment"
+INTERFACE_EVIDENCE_INPUT = "interface.evidence"
+INTERFACE_REVIEW_OUTCOME_OUTPUT = "interface.review-outcome"
+INTERFACE_SUCCESSOR_OUTPUT = "interface.successor"
 
 TOOL_AGENT_AMENDMENT_REVIEWER = "agent.amendment-reviewer"
 TOOL_AGENT_SUCCESSOR_VERIFIER = "agent.successor-verifier"
@@ -410,11 +411,7 @@ amendment_proposed_trigger = Trigger(
     id="amendment-proposed",
     event=EVENT_AMENDMENT_PROPOSED,
     source=INTERFACE_AMENDMENT_INPUT,
-    process=PROCESS_GOVERN_SUCCESSION,
-    seed=[
-        *interface_bindings(INTERFACE_AMENDMENT_INPUT, AMENDMENT_PROPOSAL_PLACEHOLDERS),
-        ValueBinding(placeholder=PLACEHOLDER_RESUME, value=LiteralValue(value=False)),
-    ],
+    process=PROCESS_START_SUCCESSION,
 )
 
 evidence_supplied_trigger = Trigger(
@@ -426,20 +423,7 @@ evidence_supplied_trigger = Trigger(
         operator="equals",
         right=LiteralValue(value=STATUS_NEEDS_EVIDENCE),
     ),
-    process=PROCESS_GOVERN_SUCCESSION,
-    seed=[
-        ValueBinding(
-            placeholder=PLACEHOLDER_AMENDMENT_ID,
-            value=InterfaceValue(interface=INTERFACE_EVIDENCE_INPUT, placeholder=PLACEHOLDER_AMENDMENT_ID),
-        ),
-        ValueBinding(placeholder=PLACEHOLDER_AMENDMENT, value=StateValue(state=STATE_PENDING_AMENDMENT)),
-        ValueBinding(placeholder=PLACEHOLDER_RATIONALE, value=StateValue(state=STATE_PENDING_RATIONALE)),
-        ValueBinding(
-            placeholder=PLACEHOLDER_EVIDENCE,
-            value=InterfaceValue(interface=INTERFACE_EVIDENCE_INPUT, placeholder=PLACEHOLDER_EVIDENCE),
-        ),
-        ValueBinding(placeholder=PLACEHOLDER_RESUME, value=LiteralValue(value=True)),
-    ],
+    process=PROCESS_RESUME_SUCCESSION,
 )
 
 dispatch_review_process = Process(
@@ -482,6 +466,57 @@ dispatch_verification_process = Process(
             output=SCHEMA_VERIFIER_RESULT,
             inputs=local_bindings(VERIFICATION_REQUEST_PLACEHOLDERS),
             outputs=list(PROOF_PLACEHOLDERS),
+        )
+    ],
+)
+
+start_succession_process = Process(
+    id="start-succession",
+    name="Start succession",
+    input=SCHEMA_AMENDMENT_PROPOSAL,
+    steps=[
+        Call(
+            process=PROCESS_GOVERN_SUCCESSION,
+            inputs=[
+                *local_bindings(AMENDMENT_PROPOSAL_PLACEHOLDERS),
+                ValueBinding(
+                    placeholder=PLACEHOLDER_RESUME,
+                    value=LiteralValue(value=False),
+                ),
+            ],
+        )
+    ],
+)
+
+resume_succession_process = Process(
+    id="resume-succession",
+    name="Resume succession",
+    input=SCHEMA_EVIDENCE_SUPPLEMENT,
+    steps=[
+        Call(
+            process=PROCESS_GOVERN_SUCCESSION,
+            inputs=[
+                ValueBinding(
+                    placeholder=PLACEHOLDER_AMENDMENT_ID,
+                    value=BindingValue(binding=PLACEHOLDER_AMENDMENT_ID),
+                ),
+                ValueBinding(
+                    placeholder=PLACEHOLDER_AMENDMENT,
+                    value=StateValue(state=STATE_PENDING_AMENDMENT),
+                ),
+                ValueBinding(
+                    placeholder=PLACEHOLDER_RATIONALE,
+                    value=StateValue(state=STATE_PENDING_RATIONALE),
+                ),
+                ValueBinding(
+                    placeholder=PLACEHOLDER_EVIDENCE,
+                    value=BindingValue(binding=PLACEHOLDER_EVIDENCE),
+                ),
+                ValueBinding(
+                    placeholder=PLACEHOLDER_RESUME,
+                    value=LiteralValue(value=True),
+                ),
+            ],
         )
     ],
 )
@@ -676,26 +711,26 @@ govern_succession_process = Process(
 )
 
 amendment_input_interface = Interface(
-    id="amendment-input",
-    direction="in",
+    id="amendment",
+    flow="receives",
     schema=SCHEMA_AMENDMENT_PROPOSAL,
     description="The proposed amendment, rationale, and available evidence.",
 )
 evidence_input_interface = Interface(
-    id="evidence-input",
-    direction="in",
+    id="evidence",
+    flow="receives",
     schema=SCHEMA_EVIDENCE_SUPPLEMENT,
     description="The evidence supplied for the amendment retained in state.",
 )
 review_outcome_output_interface = Interface(
-    id="review-outcome-output",
-    direction="out",
+    id="review-outcome",
+    flow="emits",
     schema=SCHEMA_REVIEWER_RESULT,
     description="The independent decision returned when succession does not proceed.",
 )
 successor_output_interface = Interface(
-    id="successor-output",
-    direction="out",
+    id="successor",
+    flow="emits",
     schema=SCHEMA_SUCCESSOR_PUBLICATION,
     description="The canonical successor published only together with its proof.",
 )
@@ -723,6 +758,8 @@ successor_node = Node(
     processes=[
         dispatch_review_process,
         dispatch_verification_process,
+        start_succession_process,
+        resume_succession_process,
         govern_succession_process,
     ],
     interfaces=[
@@ -786,8 +823,8 @@ def _amendment_reviewer_agent(_step, values):
     completed = execute(
         amendment_reviewer_node,
         Arrival(
-            source=WORKER_REVIEW_REQUEST_INPUT,
-            interfaces={WORKER_REVIEW_REQUEST_INPUT: dict(values)},
+            interface=WORKER_REVIEW_REQUEST_INPUT,
+            values=dict(values),
         ),
         {},
         act=_review_amendment_act,
@@ -879,8 +916,8 @@ def _successor_verifier_agent(_step, values):
     completed = execute(
         successor_verifier_node,
         Arrival(
-            source=WORKER_VERIFICATION_REQUEST_INPUT,
-            interfaces={WORKER_VERIFICATION_REQUEST_INPUT: dict(values)},
+            interface=WORKER_VERIFICATION_REQUEST_INPUT,
+            values=dict(values),
         ),
         {},
         tools={
@@ -958,8 +995,8 @@ def build() -> str:
     review = execute(
         parsed,
         Arrival(
-            source=INTERFACE_AMENDMENT_INPUT,
-            interfaces={INTERFACE_AMENDMENT_INPUT: dict(AMENDMENT_VALUES)},
+            interface=INTERFACE_AMENDMENT_INPUT,
+            values=dict(AMENDMENT_VALUES),
         ),
         INITIAL_STATE,
         act=_advance_revision_act,
@@ -978,8 +1015,8 @@ def build() -> str:
     succession = execute(
         parsed,
         Arrival(
-            source=INTERFACE_EVIDENCE_INPUT,
-            interfaces={INTERFACE_EVIDENCE_INPUT: dict(EVIDENCE_VALUES)},
+            interface=INTERFACE_EVIDENCE_INPUT,
+            values=dict(EVIDENCE_VALUES),
         ),
         review.state,
         act=_advance_revision_act,

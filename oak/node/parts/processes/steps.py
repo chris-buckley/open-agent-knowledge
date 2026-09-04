@@ -41,9 +41,8 @@ class Act(StepModel):
                         {
                             "placeholder": "REQUEST",
                             "value": {
-                                "source": "interface",
-                                "interface": "interface.request",
-                                "placeholder": "REQUEST",
+                                "source": "literal",
+                                "value": "Example request.",
                             },
                         }
                     ],
@@ -101,9 +100,8 @@ class Act(StepModel):
                 {
                     "placeholder": "REQUEST",
                     "value": {
-                        "source": "interface",
-                        "interface": "interface.request",
-                        "placeholder": "REQUEST",
+                        "source": "binding",
+                        "binding": "REQUEST",
                     },
                 }
             ]
@@ -262,16 +260,20 @@ class Emit(StepModel):
                 {
                     "kind": "emit",
                     "interface": "interface.result",
+                },
+                {
+                    "kind": "emit",
+                    "interface": "interface.result",
                     "bindings": [
                         {
                             "placeholder": "RESULT",
                             "value": {
                                 "source": "binding",
-                                "binding": "RESULT",
+                                "binding": "FINAL_RESULT",
                             },
                         }
                     ],
-                }
+                },
             ]
         }
     )
@@ -285,27 +287,25 @@ class Emit(StepModel):
         examples=["interface.result"],
     )
     bindings: list[ValueBinding] = Field(
-        min_length=1,
-        description="One value binding for each interface schema placeholder.",
+        default_factory=list,
+        description="The optional explicit projection bindings in authored order.",
         examples=[
+            [],
             [
                 {
                     "placeholder": "RESULT",
                     "value": {
                         "source": "binding",
-                        "binding": "RESULT",
+                        "binding": "FINAL_RESULT",
                     },
                 }
-            ]
+            ],
         ],
     )
 
     @model_validator(mode="after")
     def placeholders(self) -> Self:
-        names = [
-            item.placeholder
-            for item in self.bindings
-        ]
+        names = [item.placeholder for item in self.bindings]
         duplicates = sorted(
             name
             for name, count in Counter(names).items()
@@ -316,11 +316,7 @@ class Emit(StepModel):
             raise PydanticCustomError(
                 "duplicate_emit_placeholder",
                 "emit repeats placeholders: {placeholders}",
-                {
-                    "placeholders": ", ".join(
-                        duplicates
-                    )
-                },
+                {"placeholders": ", ".join(duplicates)},
             )
 
         return self

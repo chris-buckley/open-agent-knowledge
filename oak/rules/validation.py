@@ -49,8 +49,8 @@ _RULES = (
     ),
     AuthoringRule(
         "external_interface_reference",
-        "Read and emit interfaces only in the active OAK document.",
-        ("InterfaceValue", "Emit"),
+        "Use interfaces only in the active OAK document.",
+        ("Interface", "Emit", "Trigger"),
     ),
     AuthoringRule(
         "cross_document_process_call_cycle",
@@ -58,29 +58,24 @@ _RULES = (
         ("Call",),
     ),
     AuthoringRule(
-        "interface_direction_mismatch",
-        "Read only in or inout interfaces and emit only out or inout interfaces.",
-        ("InterfaceValue", "Emit"),
-    ),
-    AuthoringRule(
-        "unknown_interface_placeholder",
-        "Read a placeholder present in the interface schema.",
-        ("InterfaceValue",),
-    ),
-    AuthoringRule(
         "emit_schema_binding_mismatch",
-        "Bind every interface schema placeholder exactly once when emitting.",
+        "Bind every interface schema placeholder exactly once in an explicit EMIT.",
         ("Emit",),
+    ),
+    AuthoringRule(
+        "inferred_emit_binding_mismatch",
+        "Make every inferred EMIT placeholder visible at its step.",
+        ("Emit",),
+    ),
+    AuthoringRule(
+        "emit_target_not_emit",
+        "Target only an EMITS interface from EMIT.",
+        ("Emit", "Interface"),
     ),
     AuthoringRule(
         "invalid_static_schema_binding",
         "Make every statically known emission satisfy its interface schema.",
         ("Emit",),
-    ),
-    AuthoringRule(
-        "typed_process_interface_read",
-        "Do not read an interface in a process with an input schema.",
-        ("Process", "InterfaceValue"),
     ),
     AuthoringRule(
         "process_call_cycle",
@@ -99,7 +94,7 @@ _RULES = (
     ),
     AuthoringRule(
         "trigger_contract_mismatch",
-        "Bind each selected process input schema placeholder exactly once in trigger seeds.",
+        "Bind each event-selected process input placeholder exactly once in trigger seeds.",
         ("Trigger",),
     ),
     AuthoringRule(
@@ -108,9 +103,24 @@ _RULES = (
         ("Trigger",),
     ),
     AuthoringRule(
-        "trigger_source_not_ingress",
-        "Select only an in or inout local interface as a trigger source.",
+        "trigger_source_not_receive",
+        "Select only a local RECEIVES interface as a trigger source.",
         ("Trigger", "Interface"),
+    ),
+    AuthoringRule(
+        "source_trigger_seed",
+        "Give a source-backed trigger no seeds.",
+        ("Trigger",),
+    ),
+    AuthoringRule(
+        "source_trigger_process_input",
+        "Select a process with an input schema from a source-backed trigger.",
+        ("Trigger", "Process"),
+    ),
+    AuthoringRule(
+        "source_trigger_schema_mismatch",
+        "Use the same resolved schema for a receive source and selected process input.",
+        ("Trigger", "Interface", "Process"),
     ),
     AuthoringRule(
         "dead_process_branch",
@@ -139,7 +149,7 @@ _RULES = (
     ),
     AuthoringRule(
         "invalid_trigger_guard_value",
-        "Do not read an interface or local binding in a trigger guard.",
+        "Do not read a local binding in a trigger guard.",
         ("Trigger",),
     ),
     AuthoringRule(

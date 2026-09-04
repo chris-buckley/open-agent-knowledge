@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from collections.abc import Set as AbstractSet
 from typing import TYPE_CHECKING
 
@@ -24,6 +24,8 @@ from oak.node.parts.processes.values import BindingValue, LiteralValue, Value
 
 if TYPE_CHECKING:
     from oak.node.parts.processes.model import Process
+
+StepVisitor = Callable[[Step, AbstractSet[str]], None]
 
 
 def _check_binding_visible(value: Value, visible: AbstractSet[str]) -> None:
@@ -81,8 +83,13 @@ def _parallel_outputs(step: Par, visible: AbstractSet[str]) -> set[str]:
     return outputs
 
 
-def visible_bindings(steps: Sequence[Step], initial: AbstractSet[str]) -> set[str]:
-    """Return the bindings visible after one successful step sequence."""
+def visible_bindings(
+    steps: Sequence[Step],
+    initial: AbstractSet[str],
+    *,
+    visit: StepVisitor | None = None,
+) -> set[str]:
+    """Return bindings visible after one successful step sequence."""
     visible = set(initial)
     pending: set[str] | None = None
 
@@ -96,22 +103,29 @@ def visible_bindings(steps: Sequence[Step], initial: AbstractSet[str]) -> set[st
         for value in step_values(step):
             _check_binding_visible(value, visible)
 
+        if visit is not None:
+            visit(step, frozenset(visible))
+
         match step:
             case Act() | Call():
                 _promote_outputs(set(step.outputs), visible)
 
             case If():
-                visible_bindings(step.then, visible)
+                visible_bindings(step.then, visible, visit=visit)
 
                 if step.otherwise is not None:
-                    visible_bindings(step.otherwise, visible)
+                    visible_bindings(step.otherwise, visible, visit=visit)
 
             case Foreach():
                 _check_foreach(step, visible)
-                visible_bindings(step.steps, visible | {step.binding})
+                visible_bindings(
+                    step.steps,
+                    visible | {step.binding},
+                    visit=visit,
+                )
 
             case While():
-                visible_bindings(step.steps, visible)
+                visible_bindings(step.steps, visible, visit=visit)
 
             case Par():
                 pending = _parallel_outputs(step, visible)
@@ -170,12 +184,18 @@ def validate_process_flow(process: Process) -> None:
     sequence_always_fails(process.steps)
 
 
-def process_visible_bindings(process: Process, inputs: AbstractSet[str]) -> set[str]:
-    """Return every binding visible after successful process completion."""
-    return visible_bindings(process.steps, inputs)
+def process_visible_bindings(
+    process: Process,
+    inputs: AbstractSet[str],
+    *,
+    visit: StepVisitor | None = None,
+) -> set[str]:
+    """Return bindings visible after successful process completion."""
+    return visible_bindings(process.steps, inputs, visit=visit)
 
 
 __all__ = [
+    "StepVisitor",
     "process_visible_bindings",
     "sequence_always_fails",
     "validate_process_flow",

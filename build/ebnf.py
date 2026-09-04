@@ -64,7 +64,7 @@ def grammar(groupings: tuple[str, ...] = ("xml", "markdown")) -> str:
         "(* an empty part is omitted from the render *)",
         *[line for grouping in groupings for line in (*_document(grouping), *_parts(grouping))],
         *[_BODY_ENTRIES[grouping] for grouping in groupings],
-        'entry_tag = "schema" | "process" | "interface" ;',
+        'entry_tag = "schema" | "process" ;',
         'trigger_fact = "trigger.", slug_id, ".", trigger_field, " := ", trigger_value ;',
         'trigger_field = "event" | "source" | "guard" | "process" | ( "seed.", placeholder ) ;',
         "trigger_value = ? one field-typed value; a composite guard continues on indented condition lines ? ;",

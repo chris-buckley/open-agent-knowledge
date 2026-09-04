@@ -14,6 +14,7 @@ FieldRole = Literal[
     "generated",
 ]
 _PRESENT = object()
+_NON_EMPTY = object()
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,6 +50,8 @@ class Surface:
             (
                 getattr(value, name) is not None
                 if expected is _PRESENT
+                else bool(getattr(value, name))
+                if expected is _NON_EMPTY
                 else getattr(value, name) == expected
             )
             for name, expected in self.when

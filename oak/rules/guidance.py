@@ -25,7 +25,7 @@ SOURCE_GUIDANCE = (
     ),
     GuidanceRule(
         "map-triggers",
-        "Map arrival events, ingress sources, state guards, and selected processes to triggers.",
+        "Map arrival events, receive sources, state guards, and selected processes to triggers.",
     ),
     GuidanceRule(
         "map-processes",
@@ -288,18 +288,18 @@ TYPED_BINDING_GUIDANCE = (
     ),
     GuidanceRule(
         "seed-trigger",
-        "Seed a typed trigger-selected process through trigger seeds, one binding per input schema placeholder.",
+        "Seed an event-selected typed process through trigger seeds, one binding per input schema placeholder.",
     ),
 )
 
 DELEGATION_GUIDANCE = (
     GuidanceRule(
         "model-worker",
-        "Model each subagent as one worker OAK document with one in interface and one out interface.",
+        "Model each subagent as one worker OAK document with one RECEIVES interface and one EMITS interface.",
     ),
     GuidanceRule(
         "treat-contracts",
-        "Treat the worker in interface schema as the request contract and the worker out interface schema as the result contract.",
+        "Treat the worker receive schema as the request contract and its emit schema as the result contract.",
     ),
     GuidanceRule(
         "type-dispatch",

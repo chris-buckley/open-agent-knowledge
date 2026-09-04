@@ -20,7 +20,7 @@ from oak.base import OakModel
 from oak.node.parts.processes.steps import Act
 from oak.vocabulary.text.non_blank_line import NonBlankLine
 from oak.vocabulary.text.placeholder import Placeholder
-from oak.vocabulary.text.target_path import TargetPath, typed_target
+from oak.vocabulary.text.target_path import TargetPath, local_target
 
 _STRICT = ConfigDict(
     strict=True,
@@ -41,7 +41,7 @@ JSON_ADAPTER = TypeAdapter(
 InterfaceArrivalTarget = Annotated[
     TargetPath,
     AfterValidator(
-        lambda value: typed_target(
+        lambda value: local_target(
             value,
             "interface",
         )
@@ -77,26 +77,15 @@ class ToolContract:
 
 
 class Arrival(OakModel):
-    """One outside occurrence: an event text or one ingress interface arrival."""
+    """One outside occurrence: an event or one receive interface."""
 
     model_config = ConfigDict(
         json_schema_extra={
             "examples": [
+                {"event": "A command line arrives."},
                 {
-                    "event": "A command line arrives.",
-                    "interfaces": {
-                        "interface.stdin": {
-                            "COMMAND": "pwd",
-                        }
-                    },
-                },
-                {
-                    "source": "interface.stdin",
-                    "interfaces": {
-                        "interface.stdin": {
-                            "COMMAND": "pwd",
-                        }
-                    },
+                    "interface": "interface.stdin",
+                    "values": {"COMMAND": "pwd"},
                 },
             ]
         }
@@ -104,36 +93,34 @@ class Arrival(OakModel):
 
     event: NonBlankLine | None = Field(
         default=None,
-        description="The event text matched exactly against source-less triggers.",
+        description="The event text matched against event-backed triggers.",
         examples=["A command line arrives."],
     )
-    source: InterfaceArrivalTarget | None = Field(
+    interface: InterfaceArrivalTarget | None = Field(
         default=None,
-        description="The ingress interface matched exactly against source-backed triggers.",
+        description="The local receive interface matched against source-backed triggers.",
         examples=["interface.stdin"],
     )
-    interfaces: dict[
-        InterfaceArrivalTarget,
-        dict[Placeholder, JsonValue],
-    ] = Field(
+    values: dict[Placeholder, JsonValue] = Field(
         default_factory=dict,
-        description="The active input bindings by root-relative interface target.",
-        examples=[
-            {
-                "interface.stdin": {
-                    "COMMAND": "pwd",
-                }
-            }
-        ],
+        description="The complete receive interface instance, or empty for an event.",
+        examples=[{"COMMAND": "pwd"}],
     )
 
     @model_validator(mode="after")
     def one_selector(self) -> Self:
-        if (self.event is None) == (self.source is None):
+        if (self.event is None) == (self.interface is None):
             raise PydanticCustomError(
                 "invalid_arrival_selector",
-                "an arrival needs exactly one of event or source",
+                "an arrival needs exactly one of event or interface",
             )
+
+        if self.event is not None and self.values:
+            raise PydanticCustomError(
+                "event_arrival_values",
+                "an event arrival cannot carry values",
+            )
+
         return self
 
 

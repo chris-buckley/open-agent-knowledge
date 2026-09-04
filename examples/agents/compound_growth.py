@@ -213,7 +213,7 @@ grow_balance_process = Process(
 
 reflection_output_interface = Interface(
     id="reflection-output",
-    direction="out",
+    flow="emits",
     schema=SCHEMA_REFLECTION,
     description="The reflection written to the chat before the next cycle starts.",
 )

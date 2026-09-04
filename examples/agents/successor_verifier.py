@@ -25,13 +25,13 @@ from oak import (
     resolve,
     where,
 )
-from examples.agents.bindings import interface_bindings, local_bindings
+from examples.agents.bindings import local_bindings
 
 SCHEMA_SUCCESSOR_VERIFICATION_REQUEST = "schema.successor-verification-request"
 SCHEMA_SUCCESSOR_PROOF = "schema.successor-proof"
 PROCESS_VERIFY_SUCCESSOR = "process.verify-successor"
-INTERFACE_VERIFICATION_REQUEST_INPUT = "interface.verification-request-input"
-INTERFACE_PROOF_OUTPUT = "interface.proof-output"
+INTERFACE_VERIFICATION_REQUEST_INPUT = "interface.verification-request"
+INTERFACE_PROOF_OUTPUT = "interface.proof"
 
 TOOL_OAK_VERIFY_SUCCESSOR = "oak.verify-successor"
 EVENT_SUCCESSOR_VERIFICATION_REQUESTED = "A successor verification is requested."
@@ -188,7 +188,6 @@ successor_verification_requested_trigger = Trigger(
     event=EVENT_SUCCESSOR_VERIFICATION_REQUESTED,
     source=INTERFACE_VERIFICATION_REQUEST_INPUT,
     process=PROCESS_VERIFY_SUCCESSOR,
-    seed=interface_bindings(INTERFACE_VERIFICATION_REQUEST_INPUT, REQUEST_PLACEHOLDERS),
 )
 
 verify_successor_process = Process(
@@ -210,23 +209,20 @@ verify_successor_process = Process(
             inputs=local_bindings(REQUEST_PLACEHOLDERS),
             outputs=list(PROOF_PLACEHOLDERS),
         ),
-        Emit(
-            interface=INTERFACE_PROOF_OUTPUT,
-            bindings=local_bindings(PROOF_PLACEHOLDERS),
-        ),
+        Emit(interface=INTERFACE_PROOF_OUTPUT),
     ],
 )
 
 verification_request_input_interface = Interface(
-    id="verification-request-input",
-    direction="in",
+    id="verification-request",
+    flow="receives",
     schema=SCHEMA_SUCCESSOR_VERIFICATION_REQUEST,
     description="The candidate and governance context supplied by the coordinator.",
 )
 
 proof_output_interface = Interface(
-    id="proof-output",
-    direction="out",
+    id="proof",
+    flow="emits",
     schema=SCHEMA_SUCCESSOR_PROOF,
     description="The independent proof returned to the successor coordinator.",
 )

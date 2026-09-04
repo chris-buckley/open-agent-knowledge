@@ -9,7 +9,6 @@ from collections.abc import Sequence
 from oak.node.parts.processes.values import (
     BindingValue,
     ConstantValue,
-    InterfaceValue,
     LiteralValue,
     StateValue,
     Value,
@@ -50,24 +49,6 @@ def parse_value(
     if target.startswith("state."):
         return StateValue(
             state=target
-        )
-
-    if target.startswith("interface."):
-        parts = target.split(".")
-
-        if len(parts) != 3:
-            fail(
-                "interface_value",
-                path,
-                line,
-                "interface value needs one placeholder",
-            )
-
-        return InterfaceValue(
-            interface=".".join(
-                parts[:2]
-            ),
-            placeholder=parts[2],
         )
 
     if (

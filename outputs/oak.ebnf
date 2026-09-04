@@ -32,7 +32,7 @@ markdown_processes_part = "~~~~processes", lf, text_body, "~~~~" ;
 markdown_interfaces_part = "~~~~interfaces", lf, text_body, "~~~~" ;
 xml_body_entry = "<", entry_tag, attributes, ">", lf, text_body, "</", entry_tag, ">" ;
 markdown_body_entry = "~~~", entry_tag, markdown_attributes, lf, text_body, "~~~" ;
-entry_tag = "schema" | "process" | "interface" ;
+entry_tag = "schema" | "process" ;
 trigger_fact = "trigger.", slug_id, ".", trigger_field, " := ", trigger_value ;
 trigger_field = "event" | "source" | "guard" | "process" | ( "seed.", placeholder ) ;
 trigger_value = ? one field-typed value; a composite guard continues on indented condition lines ? ;
@@ -59,11 +59,10 @@ slug_id = ? [a-z] ?, { ? [a-z0-9] ? }, { "-", ? [a-z0-9] ?, { ? [a-z0-9] ? } } ;
 non_blank_line = { ? [^\r\n] ? }, ? [^\s] ?, { ? [^\r\n] ? } ;
 process_name = ? [A-Z] ?, { ? [A-Za-z0-9] ? }, { "-", ? [A-Za-z0-9] ?, { ? [A-Za-z0-9] ? } }, " ", ? [A-Za-z0-9] ?, { ? [A-Za-z0-9] ? }, { "-", ? [A-Za-z0-9] ?, { ? [A-Za-z0-9] ? } } ;
 placeholder = ? [A-Z] ?, { ? [A-Z0-9] ? }, { "_", ? [A-Z0-9] ?, { ? [A-Z0-9] ? } } ;
-dotted_path = ( "constant" | "schema" | "state" | "process" | "interface" ), ".", slug_id, [ ".", placeholder ] ;
-value_reference = "$", ( placeholder | constant_target | state_target | interface_value_path ) ;
+dotted_path = ( "constant" | "schema" | "state" | "process" | "interface" ), ".", slug_id ;
+value_reference = "$", ( placeholder | constant_target | state_target ) ;
 constant_target = [ relative_document_path, "#" ], "constant", ".", slug_id ;
 state_target = "state", ".", slug_id ;
-interface_value_path = "interface", ".", slug_id, ".", placeholder ;
 entry_part = "instruction" | "constant" | "schema" | "state" | "trigger" | "process" | "interface" ;
 entry_path = entry_part, ".", slug_id ;
 relative_document_path = ? one relative POSIX path of letters, digits, ".", "_", "-", and "/" ending in .oak.md ? ;
@@ -104,7 +103,6 @@ surface_state = ? <ID> AS <SCHEMA_ID>.<PLACEHOLDER>: <VALUE> ? ;
 surface_value_literal = ? <VALUE> ? ;
 surface_value_constant = ? $<CONSTANT> ? ;
 surface_value_state = ? $<STATE> ? ;
-surface_value_interface = ? $<INTERFACE>.<PLACEHOLDER> ? ;
 surface_value_binding = ? $<BINDING> ? ;
 surface_value_binding_line = ? <PLACEHOLDER>=<VALUE> ? ;
 surface_condition_compare = ? <LEFT> <OPERATOR> <RIGHT> ? ;
@@ -117,7 +115,8 @@ surface_condition_not = ? NOT:
 surface_act_native = ? ACT input="<INPUT>" output="<OUTPUT>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
 surface_act_tool = ? ACT TOOL "<TOOL>" input="<INPUT>" output="<OUTPUT>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
 surface_step_set = ? SET <STATE> = <VALUE> ? ;
-surface_step_emit = ? EMIT <INTERFACE> (<BINDINGS>) ? ;
+surface_step_emit_inferred = ? EMIT <INTERFACE> ? ;
+surface_step_emit_explicit = ? EMIT <INTERFACE> (<BINDINGS>) ? ;
 surface_step_if = ? IF <CONDITION>:
 THEN:
   <THEN>
@@ -142,9 +141,8 @@ trigger.<ID>.source := <SOURCE>
 trigger.<ID>.guard := <GUARD>
 trigger.<ID>.process := <PROCESS>
 trigger.<ID>.seed.<SEED> ? ;
-surface_interface = ? <interface id="<ID>" direction="<DIRECTION>" schema="<SCHEMA_ID>">
-<DESCRIPTION>
-</interface> ? ;
+surface_interface_receives = ? <ID> RECEIVES <SCHEMA_ID>: <DESCRIPTION> ? ;
+surface_interface_emits = ? <ID> EMITS <SCHEMA_ID>: <DESCRIPTION> ? ;
 surface_node = ? <instructions>
 <INSTRUCTIONS>
 </instructions>

@@ -30,7 +30,6 @@ from oak.node.parts.processes.steps import (
 from oak.node.parts.processes.values import (
     BindingValue,
     ConstantValue,
-    InterfaceValue,
     LiteralValue,
     StateValue,
     ValueBinding,
@@ -80,7 +79,6 @@ _VALUE_MODELS = (
     LiteralValue,
     ConstantValue,
     StateValue,
-    InterfaceValue,
     BindingValue,
 )
 _CONDITION_MODELS = (

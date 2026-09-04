@@ -24,7 +24,6 @@ from oak.node.parts import (
     If,
     Instruction,
     Interface,
-    InterfaceValue,
     Join,
     Lines,
     ListOf,
@@ -53,11 +52,8 @@ from oak.render.oak.data import (
     named_value_line,
     where_line,
 )
-from oak.render.oak.groupings import (
-    interface_xml,
-    process_xml,
-    schema_xml,
-)
+from oak.render.oak.groupings import process_xml, schema_xml
+from oak.render.oak.interfaces import interface_text
 from oak.render.oak.processes import (
     binding_line,
     condition_text,
@@ -85,7 +81,6 @@ AUTHORABLE_MODELS = (
     LiteralValue,
     ConstantValue,
     StateValue,
-    InterfaceValue,
     BindingValue,
     ValueBinding,
     Compare,
@@ -330,7 +325,7 @@ def surface_example(
             return process_xml(instance)
 
         case Interface():
-            return interface_xml(instance)
+            return interface_text(instance)
 
         case Type() | OneOf() | Regex() | NonEmpty() | MaxChars() | Lines() | ListOf() | AtLeast() | AtMost():
             return constraint_text(instance)
@@ -338,7 +333,7 @@ def surface_example(
         case Where():
             return where_line(instance)
 
-        case LiteralValue() | ConstantValue() | StateValue() | InterfaceValue() | BindingValue():
+        case LiteralValue() | ConstantValue() | StateValue() | BindingValue():
             return process_value_text(instance)
 
         case ValueBinding():

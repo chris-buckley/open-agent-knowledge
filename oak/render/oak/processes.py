@@ -30,7 +30,6 @@ from oak.node.parts.processes.steps import (
 from oak.node.parts.processes.values import (
     BindingValue,
     ConstantValue,
-    InterfaceValue,
     LiteralValue,
     StateValue,
     Value,
@@ -53,9 +52,6 @@ def process_value_text(value: Value) -> str:
 
         case StateValue():
             return "$" + value.state
-
-        case InterfaceValue():
-            return "$" + value.interface + "." + value.placeholder
 
         case BindingValue():
             return "$" + value.binding
@@ -150,7 +146,12 @@ def _set_lines(step: Set, indent: int) -> list[str]:
 
 def _emit_lines(step: Emit, indent: int) -> list[str]:
     prefix = " " * indent
-    return [prefix + "EMIT " + step.interface + " " + _suffix_text(step.bindings, [])]
+    suffix = (
+        ""
+        if not step.bindings
+        else " " + _suffix_text(step.bindings, [])
+    )
+    return [prefix + "EMIT " + step.interface + suffix]
 
 
 def _child_lines(steps: Sequence[Step], indent: int) -> list[str]:

@@ -7,11 +7,7 @@ from typing import Annotated, Literal
 from pydantic import ConfigDict, Field, JsonValue
 
 from oak.base import DiscriminatedModel, OakModel
-from oak.node.parts.processes.targets import (
-    ConstantTarget,
-    InterfaceTarget,
-    StateTarget,
-)
+from oak.node.parts.processes.targets import ConstantTarget, StateTarget
 from oak.vocabulary.text.placeholder import Placeholder
 
 
@@ -25,14 +21,7 @@ class LiteralValue(ValueModel):
     """One authored JSON value."""
 
     model_config = ConfigDict(
-        json_schema_extra={
-            "examples": [
-                {
-                    "source": "literal",
-                    "value": "critical",
-                }
-            ]
-        }
+        json_schema_extra={"examples": [{"source": "literal", "value": "critical"}]}
     )
     source: Literal["literal"] = Field(
         default="literal",
@@ -50,12 +39,7 @@ class ConstantValue(ValueModel):
 
     model_config = ConfigDict(
         json_schema_extra={
-            "examples": [
-                {
-                    "source": "constant",
-                    "constant": "constant.policy",
-                }
-            ]
+            "examples": [{"source": "constant", "constant": "constant.policy"}]
         }
     )
     source: Literal["constant"] = Field(
@@ -74,12 +58,7 @@ class StateValue(ValueModel):
 
     model_config = ConfigDict(
         json_schema_extra={
-            "examples": [
-                {
-                    "source": "state",
-                    "state": "state.status",
-                }
-            ]
+            "examples": [{"source": "state", "state": "state.status"}]
         }
     )
     source: Literal["state"] = Field(
@@ -93,46 +72,12 @@ class StateValue(ValueModel):
     )
 
 
-class InterfaceValue(ValueModel):
-    """One placeholder value read from one active local input interface."""
-
-    model_config = ConfigDict(
-        json_schema_extra={
-            "examples": [
-                {
-                    "source": "interface",
-                    "interface": "interface.request",
-                    "placeholder": "REQUEST",
-                }
-            ]
-        }
-    )
-    source: Literal["interface"] = Field(
-        default="interface",
-        description="The process value source discriminator.",
-        examples=["interface"],
-    )
-    interface: InterfaceTarget = Field(
-        description="The active local input interface target to read.",
-        examples=["interface.request"],
-    )
-    placeholder: Placeholder = Field(
-        description="The interface schema placeholder to read.",
-        examples=["REQUEST"],
-    )
-
-
 class BindingValue(ValueModel):
     """One value read from a visible process-local binding."""
 
     model_config = ConfigDict(
         json_schema_extra={
-            "examples": [
-                {
-                    "source": "binding",
-                    "binding": "RESULT",
-                }
-            ]
+            "examples": [{"source": "binding", "binding": "RESULT"}]
         }
     )
     source: Literal["binding"] = Field(
@@ -147,11 +92,7 @@ class BindingValue(ValueModel):
 
 
 Value = Annotated[
-    LiteralValue
-    | ConstantValue
-    | StateValue
-    | InterfaceValue
-    | BindingValue,
+    LiteralValue | ConstantValue | StateValue | BindingValue,
     Field(discriminator="source"),
 ]
 
@@ -164,11 +105,7 @@ class ValueBinding(OakModel):
             "examples": [
                 {
                     "placeholder": "REQUEST",
-                    "value": {
-                        "source": "interface",
-                        "interface": "interface.request",
-                        "placeholder": "REQUEST",
-                    },
+                    "value": {"source": "binding", "binding": "REQUEST"},
                 }
             ]
         }
@@ -179,19 +116,13 @@ class ValueBinding(OakModel):
     )
     value: Value = Field(
         description="The process value bound to the placeholder.",
-        examples=[
-            {
-                "source": "literal",
-                "value": "ready",
-            }
-        ],
+        examples=[{"source": "literal", "value": "ready"}],
     )
 
 
 __all__ = [
     "BindingValue",
     "ConstantValue",
-    "InterfaceValue",
     "LiteralValue",
     "StateValue",
     "Value",

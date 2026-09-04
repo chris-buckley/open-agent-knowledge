@@ -1,17 +1,19 @@
 <instructions>
 $ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+EMITS publishes one complete instance of its schema.
+EMIT without bindings fills the target schema from same-named visible process bindings.
+Text after `: ` states boundary meaning absent from the interface schema.
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-Each trigger is one fact group: event carries the meaning, an optional source names the exact ingress interface, an optional guard checks state after the match, and process selects the work.
+Each trigger is one fact group: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
-Each interface is one document-boundary crossing: in arrives, out is emitted, and inout does both.
 
 Treat the complete supplied host context as the source, regardless of modality.
 Map directives, policies, interpretation rules, and required behaviour to instructions.
 Map stable values needed during use to constants.
 Map reusable information shapes and output contracts to schemas.
 Map values that can change while the knowledge runs to state.
-Map arrival events, ingress sources, state guards, and selected processes to triggers.
+Map arrival events, receive sources, state guards, and selected processes to triggers.
 Map ordered ways to perform tasks to processes.
 Map verifiable document-boundary crossings to interfaces.
 Omit a part when the source provides no justified entry.
@@ -73,9 +75,9 @@ Do not expose `ACT.use`.
 Add no second helper for interpreter-native work.
 Bind a constant or state value to one schema placeholder with `AS` when a schema constrains it.
 Give an act input and output schema targets when its values must validate at the action boundary.
-Seed a typed trigger-selected process through trigger seeds, one binding per input schema placeholder.
-Model each subagent as one worker OAK document with one in interface and one out interface.
-Treat the worker in interface schema as the request contract and the worker out interface schema as the result contract.
+Seed an event-selected typed process through trigger seeds, one binding per input schema placeholder.
+Model each subagent as one worker OAK document with one RECEIVES interface and one EMITS interface.
+Treat the worker receive schema as the request contract and its emit schema as the result contract.
 Type each dispatch process with relative targets to the worker request and result schemas as its input and output schemas.
 Dispatch each worker inside its dispatch process with one exact tool name from the supplied registry.
 Prefer one registered portable `agent.<worker>` contract when the host permits registration.
@@ -104,16 +106,17 @@ Declare each act output placeholder once.
 Bind each emitted placeholder once.
 Use each entry id once in one OAK document.
 Define each schema placeholder once in WHERE.
-Bind every interface schema placeholder exactly once when emitting.
+Bind every interface schema placeholder exactly once in an explicit EMIT.
+Target only an EMITS interface from EMIT.
 Make every reachable relative document available through the explicit loader.
 Make every resolved fragment target exist in its document.
-Read and emit interfaces only in the active OAK document.
+Use interfaces only in the active OAK document.
 Supply the referencing document path before resolving a relative target.
 Read and write state only in the active OAK document.
 Use a new loop binding that does not shadow a visible binding.
 Give FOREACH a value that resolves to a JSON list.
 Give a schema binding both a schema target and a placeholder.
-Read only in or inout interfaces and emit only out or inout interfaces.
+Make every inferred EMIT placeholder visible at its step.
 Do not start an act instruction with an act schema attribute.
 Use only JSON scalar values in CSV cells.
 Give each CSV constant one non-empty list of object rows.
@@ -122,7 +125,7 @@ Keep a lines minimum at or below its maximum.
 Make every schema-bound value satisfy its placeholder constraints.
 Make every statically known emission satisfy its interface schema.
 Give each TEXT constant one string value.
-Do not read an interface or local binding in a trigger guard.
+Do not read a local binding in a trigger guard.
 Do not read a local binding in a trigger seed.
 Make every WHERE example satisfy its local constraints.
 Put JOIN immediately after one PAR.
@@ -139,15 +142,16 @@ Do not redefine a visible immutable process binding.
 Keep the local process call graph acyclic.
 Make every process output schema placeholder visible after successful completion.
 Remove an assertion that is statically true.
+Select a process with an input schema from a source-backed trigger.
+Use the same resolved schema for a receive source and selected process input.
+Give a source-backed trigger no seeds.
 Match a named tool's declared placeholder sets and schema targets.
 Use a tool in PAR only when its supplied registry confirms parallel use.
-Bind each selected process input schema placeholder exactly once in trigger seeds.
+Bind each event-selected process input placeholder exactly once in trigger seeds.
 Give every non-true trigger guard at least one state read.
-Select only an in or inout local interface as a trigger source.
-Do not read an interface in a process with an input schema.
+Select only a local RECEIVES interface as a trigger source.
 Read only a visible prior process-local binding.
 Reference only another placeholder in the same schema.
-Read a placeholder present in the interface schema.
 Bind a placeholder present in the selected schema.
 Name a tool exposed by the supplied exact tool registry.
 Remove a process step after a path that always fails.
@@ -176,7 +180,7 @@ xml_triggers_part = "<triggers>", lf, text_body, "</triggers>" ;
 xml_processes_part = "<processes>", lf, text_body, "</processes>" ;
 xml_interfaces_part = "<interfaces>", lf, text_body, "</interfaces>" ;
 xml_body_entry = "<", entry_tag, attributes, ">", lf, text_body, "</", entry_tag, ">" ;
-entry_tag = "schema" | "process" | "interface" ;
+entry_tag = "schema" | "process" ;
 trigger_fact = "trigger.", slug_id, ".", trigger_field, " := ", trigger_value ;
 trigger_field = "event" | "source" | "guard" | "process" | ( "seed.", placeholder ) ;
 trigger_value = ? one field-typed value; a composite guard continues on indented condition lines ? ;
@@ -202,11 +206,10 @@ slug_id = ? [a-z] ?, { ? [a-z0-9] ? }, { "-", ? [a-z0-9] ?, { ? [a-z0-9] ? } } ;
 non_blank_line = { ? [^\r\n] ? }, ? [^\s] ?, { ? [^\r\n] ? } ;
 process_name = ? [A-Z] ?, { ? [A-Za-z0-9] ? }, { "-", ? [A-Za-z0-9] ?, { ? [A-Za-z0-9] ? } }, " ", ? [A-Za-z0-9] ?, { ? [A-Za-z0-9] ? }, { "-", ? [A-Za-z0-9] ?, { ? [A-Za-z0-9] ? } } ;
 placeholder = ? [A-Z] ?, { ? [A-Z0-9] ? }, { "_", ? [A-Z0-9] ?, { ? [A-Z0-9] ? } } ;
-dotted_path = ( "constant" | "schema" | "state" | "process" | "interface" ), ".", slug_id, [ ".", placeholder ] ;
-value_reference = "$", ( placeholder | constant_target | state_target | interface_value_path ) ;
+dotted_path = ( "constant" | "schema" | "state" | "process" | "interface" ), ".", slug_id ;
+value_reference = "$", ( placeholder | constant_target | state_target ) ;
 constant_target = [ relative_document_path, "#" ], "constant", ".", slug_id ;
 state_target = "state", ".", slug_id ;
-interface_value_path = "interface", ".", slug_id, ".", placeholder ;
 entry_part = "instruction" | "constant" | "schema" | "state" | "trigger" | "process" | "interface" ;
 entry_path = entry_part, ".", slug_id ;
 relative_document_path = ? one relative POSIX path of letters, digits, ".", "_", "-", and "/" ending in .oak.md ? ;
@@ -247,7 +250,6 @@ surface_state = ? <ID> AS <SCHEMA_ID>.<PLACEHOLDER>: <VALUE> ? ;
 surface_value_literal = ? <VALUE> ? ;
 surface_value_constant = ? $<CONSTANT> ? ;
 surface_value_state = ? $<STATE> ? ;
-surface_value_interface = ? $<INTERFACE>.<PLACEHOLDER> ? ;
 surface_value_binding = ? $<BINDING> ? ;
 surface_value_binding_line = ? <PLACEHOLDER>=<VALUE> ? ;
 surface_condition_compare = ? <LEFT> <OPERATOR> <RIGHT> ? ;
@@ -260,7 +262,8 @@ surface_condition_not = ? NOT:
 surface_act_native = ? ACT input="<INPUT>" output="<OUTPUT>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
 surface_act_tool = ? ACT TOOL "<TOOL>" input="<INPUT>" output="<OUTPUT>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
 surface_step_set = ? SET <STATE> = <VALUE> ? ;
-surface_step_emit = ? EMIT <INTERFACE> (<BINDINGS>) ? ;
+surface_step_emit_inferred = ? EMIT <INTERFACE> ? ;
+surface_step_emit_explicit = ? EMIT <INTERFACE> (<BINDINGS>) ? ;
 surface_step_if = ? IF <CONDITION>:
 THEN:
   <THEN>
@@ -285,9 +288,8 @@ trigger.<ID>.source := <SOURCE>
 trigger.<ID>.guard := <GUARD>
 trigger.<ID>.process := <PROCESS>
 trigger.<ID>.seed.<SEED> ? ;
-surface_interface = ? <interface id="<ID>" direction="<DIRECTION>" schema="<SCHEMA_ID>">
-<DESCRIPTION>
-</interface> ? ;
+surface_interface_receives = ? <ID> RECEIVES <SCHEMA_ID>: <DESCRIPTION> ? ;
+surface_interface_emits = ? <ID> EMITS <SCHEMA_ID>: <DESCRIPTION> ? ;
 surface_node = ? <instructions>
 <INSTRUCTIONS>
 </instructions>
@@ -324,8 +326,8 @@ Use the supplied schema.
 >>
 
 orchestrator-example: TEXT<<
-<process id="implement-task" name="Implement task">
-CALL process.plan-task (TASK_BRIEF=$interface.task-request-input.TASK_BRIEF, CONTEXT=$interface.task-request-input.CONTEXT) -> PLAN
+<process id="implement-task" name="Implement task" input="schema.task-request">
+CALL process.plan-task (TASK_BRIEF=$TASK_BRIEF, CONTEXT=$CONTEXT) -> PLAN
 CALL process.implement-plan (PLAN=$PLAN) -> CHANGESET
 CALL process.test-changeset (CHANGESET=$CHANGESET) -> TESTS
 CALL process.review-changeset (PLAN=$PLAN, CHANGESET=$CHANGESET) -> FINDINGS
@@ -521,14 +523,6 @@ WHERE:
 - <STATE> is string; is non-empty; The local state target to read..
 </schema>
 
-<schema id="value-interface" name="InterfaceValue" purpose="One placeholder value read from one active local input interface.">
-$<INTERFACE>.<PLACEHOLDER>
-
-WHERE:
-- <INTERFACE> is string; is non-empty; The active local input interface target to read..
-- <PLACEHOLDER> is string; is non-empty; The interface schema placeholder to read..
-</schema>
-
 <schema id="value-binding" name="BindingValue" purpose="One value read from a visible process-local binding.">
 $<BINDING>
 
@@ -608,12 +602,19 @@ WHERE:
 - <VALUE> is string; is non-empty; The process value written to state..
 </schema>
 
-<schema id="step-emit" name="Emit" purpose="One schema instance emitted through one local output interface.">
+<schema id="step-emit-inferred" name="Emit step-emit-inferred" purpose="One schema instance emitted through one local output interface.">
+EMIT <INTERFACE>
+
+WHERE:
+- <INTERFACE> is string; is non-empty; The local output interface target..
+</schema>
+
+<schema id="step-emit-explicit" name="Emit step-emit-explicit" purpose="One schema instance emitted through one local output interface.">
 EMIT <INTERFACE> (<BINDINGS>)
 
 WHERE:
 - <INTERFACE> is string; is non-empty; The local output interface target..
-- <BINDINGS> is string; is non-empty; One value binding for each interface schema placeholder..
+- <BINDINGS> is string; is non-empty; The optional explicit projection bindings in authored order..
 </schema>
 
 <schema id="step-if" name="If" purpose="One recursive condition with a then branch and optional else branch.">
@@ -711,22 +712,28 @@ trigger.<ID>.seed.<SEED>
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
 - <EVENT> is string; is non-empty; The semantic signpost matched exactly when the trigger has no source..
-- <SOURCE> is string; The optional local in or inout interface whose arrival fires the trigger..
+- <SOURCE> is string; The optional local RECEIVES interface whose arrival fires the trigger..
 - <GUARD> is string; True or the recursive state guard checked after the match..
 - <PROCESS> is string; is non-empty; The local or relative process target selected by the trigger..
-- <SEED> is string; The seed bindings that fill the selected process input schema..
+- <SEED> is string; The event-backed seed bindings that fill the selected process input schema..
 </schema>
 
-<schema id="interface" name="Interface" purpose="One crossing of information at the active document boundary.">
-<interface id="<ID>" direction="<DIRECTION>" schema="<SCHEMA_ID>">
-<DESCRIPTION>
-</interface>
+<schema id="interface-receives" name="Interface interface-receives" purpose="One identified one-way crossing at the active document boundary.">
+<ID> RECEIVES <SCHEMA_ID>: <DESCRIPTION>
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..
-- <DIRECTION> is string; is non-empty; The direction across the document boundary..
-- <SCHEMA_ID> is string; is non-empty; The local or relative schema target that defines the shape..
-- <DESCRIPTION> is string; What the document boundary crossing means..
+- <SCHEMA_ID> is string; is non-empty; The local or relative schema target that defines the instance..
+- <DESCRIPTION> is string; Boundary meaning absent from the interface id and schema..
+</schema>
+
+<schema id="interface-emits" name="Interface interface-emits" purpose="One identified one-way crossing at the active document boundary.">
+<ID> EMITS <SCHEMA_ID>: <DESCRIPTION>
+
+WHERE:
+- <ID> is string; is non-empty; The entry id, unique in its OAK document..
+- <SCHEMA_ID> is string; is non-empty; The local or relative schema target that defines the instance..
+- <DESCRIPTION> is string; Boundary meaning absent from the interface id and schema..
 </schema>
 
 <schema id="node" name="Node" purpose="One complete idless set of the seven OAK parts.">
@@ -785,12 +792,10 @@ trigger.source-supplied.process := process.write-oak
 <process id="write-oak" name="Write OAK">
 ACT Derive <DRAFT> from the complete supplied source. () -> DRAFT
 ACT Validate <DRAFT> against every supplied OAK contract and produce <OAK>. (DRAFT=$DRAFT) -> OAK
-EMIT interface.oak-document-output (OAK=$OAK)
+EMIT interface.oak-document-output
 </process>
 </processes>
 
 <interfaces>
-<interface id="oak-document-output" direction="out" schema="schema.oak-document">
-The sole OAK document returned to the caller.
-</interface>
+oak-document-output EMITS schema.oak-document: "The sole OAK document returned to the caller."
 </interfaces>

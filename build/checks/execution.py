@@ -32,7 +32,6 @@ from oak.node.parts.processes.steps import (
 )
 from oak.node.parts.processes.values import (
     BindingValue,
-    InterfaceValue,
     LiteralValue,
     StateValue,
     ValueBinding,
@@ -155,6 +154,7 @@ def validate_execution() -> None:
             Trigger(
                 id="name",
                 event="A name arrives.",
+                source="interface.request",
                 process="process.handle",
             )
         ],
@@ -163,43 +163,31 @@ def validate_execution() -> None:
             Process(
                 id="handle",
                 name="Handle request",
+                input="schema.raw-name",
                 steps=[
                     Call(
                         process="process.normalise",
                         inputs=[
                             ValueBinding(
                                 placeholder="RAW_NAME",
-                                value=InterfaceValue(
-                                    interface="interface.request",
-                                    placeholder="RAW_NAME",
-                                ),
+                                value=BindingValue(binding="RAW_NAME"),
                             )
                         ],
                         outputs=["NORMAL_NAME"],
                     ),
-                    Emit(
-                        interface="interface.result",
-                        bindings=[
-                            ValueBinding(
-                                placeholder="NORMAL_NAME",
-                                value=BindingValue(
-                                    binding="NORMAL_NAME"
-                                ),
-                            )
-                        ],
-                    ),
+                    Emit(interface="interface.result"),
                 ],
             ),
         ],
         interfaces=[
             Interface(
                 id="request",
-                direction="in",
+                flow="receives",
                 schema="schema.raw-name",
             ),
             Interface(
                 id="result",
-                direction="out",
+                flow="emits",
                 schema="schema.normal-name",
             ),
         ],
@@ -221,12 +209,8 @@ def validate_execution() -> None:
     contract_execution = execute(
         contract,
         Arrival(
-            event="A name arrives.",
-            interfaces={
-                "interface.request": {
-                    "RAW_NAME": " ada ",
-                }
-            },
+            interface="interface.request",
+            values={"RAW_NAME": " ada "},
         ),
         {},
         act=lambda _step, values: {
@@ -247,12 +231,8 @@ def validate_execution() -> None:
         execute(
             contract,
             Arrival(
-                event="A name arrives.",
-                interfaces={
-                    "interface.request": {
-                        "RAW_NAME": "Ada",
-                    }
-                },
+                interface="interface.request",
+                values={"RAW_NAME": "Ada"},
             ),
             {},
             act=lambda _step, _values: {
@@ -441,7 +421,7 @@ def validate_while() -> None:
         interfaces=[
             Interface(
                 id="progress-count-output",
-                direction="out",
+                flow="emits",
                 schema="schema.progress-count",
             )
         ],
@@ -604,6 +584,7 @@ def validate_source_routing() -> None:
             Process(
                 id="mark-source",
                 name="Mark source",
+                input="schema.raw-name",
                 steps=[
                     Set(
                         state="state.route",
@@ -617,29 +598,21 @@ def validate_source_routing() -> None:
         interfaces=[
             Interface(
                 id="request",
-                direction="in",
+                flow="receives",
                 schema="schema.raw-name",
             )
         ],
     )
-    interface_values = {
-        "interface.request": {
-            "RAW_NAME": "Ada",
-        }
-    }
     by_event = execute(
         routed,
-        Arrival(
-            event="A name arrives.",
-            interfaces=interface_values,
-        ),
+        Arrival(event="A name arrives."),
         {"state.route": ""},
     )
     by_source = execute(
         routed,
         Arrival(
-            source="interface.request",
-            interfaces=interface_values,
+            interface="interface.request",
+            values={"RAW_NAME": "Ada"},
         ),
         {"state.route": ""},
     )
@@ -653,10 +626,7 @@ def validate_source_routing() -> None:
 
     idle = execute(
         routed,
-        Arrival(
-            event="A name arrives by wire.",
-            interfaces=interface_values,
-        ),
+        Arrival(event="A name arrives by wire."),
         {"state.route": ""},
     )
     if idle.state["state.route"] != "":
@@ -667,13 +637,13 @@ def validate_source_routing() -> None:
     try:
         execute(
             routed,
-            Arrival(source="interface.request"),
+            Arrival(interface="interface.request"),
             {"state.route": ""},
         )
     except ExecutionError as error:
-        if error.code != "invalid_arrival_source":
+        if error.code != "invalid_interface_binding":
             raise RuntimeError(
-                "expected invalid_arrival_source, "
+                "expected invalid_interface_binding, "
                 f"got {error.code}"
             ) from None
     else:
@@ -685,7 +655,7 @@ def validate_source_routing() -> None:
         {},
         {
             "event": "A name arrives.",
-            "source": "interface.request",
+            "interface": "interface.request",
         },
     ):
         try:
@@ -703,6 +673,21 @@ def validate_source_routing() -> None:
             raise RuntimeError(
                 "an arrival accepted an invalid selector pair"
             )
+
+    try:
+        Arrival(
+            event="A name arrives.",
+            values={"RAW_NAME": "Ada"},
+        )
+    except ValidationError as error:
+        if "event_arrival_values" not in {
+            str(item["type"]) for item in error.errors()
+        }:
+            raise RuntimeError(
+                "expected event_arrival_values"
+            ) from None
+    else:
+        raise RuntimeError("an event arrival accepted values")
 
 
 __all__ = [

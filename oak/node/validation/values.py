@@ -1,4 +1,4 @@
-"""Local process values, typed entries, and interface direction checks."""
+"""Local process values and typed entries."""
 
 from __future__ import annotations
 
@@ -13,7 +13,6 @@ from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes.model import Process
 from oak.node.parts.processes.values import (
     ConstantValue,
-    InterfaceValue,
     LiteralValue,
     StateValue,
     Value,
@@ -57,102 +56,17 @@ def process_schema(
     )
 
 
-def direction_error(
-    process: Process,
-    action: str,
-    interface: Interface,
-) -> None:
-    """Raise the stable process interface-direction error."""
-    raise PydanticCustomError(
-        "interface_direction_mismatch",
-        "process {process} cannot {action} interface {interface} with direction {direction}",
-        {
-            "process": process.id,
-            "action": action,
-            "interface": interface.id,
-            "direction": interface.direction,
-        },
-    )
-
-
 def validate_value(
     index: NodeIndex,
     source: Entry,
     value: Value,
 ) -> None:
-    """Validate one process value's local target and interface contract."""
+    """Validate one process value local target."""
     if isinstance(value, ConstantValue):
-        index.require(
-            source,
-            value.constant,
-            Constant,
-        )
-        return
+        index.require(source, value.constant, Constant)
 
-    if isinstance(value, StateValue):
-        index.require(
-            source,
-            value.state,
-            State,
-        )
-        return
-
-    if not isinstance(value, InterfaceValue):
-        return
-
-    if isinstance(source, Process) and source.input is not None:
-        raise rule_error(
-            "typed_process_interface_read",
-            "process {process} has an input schema and reads {interface}",
-            {
-                "process": source.id,
-                "interface": value.interface,
-            },
-        )
-
-    interface = index.require(
-        source,
-        value.interface,
-        Interface,
-    )
-
-    if interface is None:
-        return
-
-    if interface.direction not in ("in", "inout"):
-        if isinstance(source, Process):
-            direction_error(
-                source,
-                "read",
-                interface,
-            )
-
-        raise PydanticCustomError(
-            "interface_direction_mismatch",
-            "{source} cannot read interface {interface} with direction {direction}",
-            {
-                "source": source.id,
-                "interface": interface.id,
-                "direction": interface.direction,
-            },
-        )
-
-    schema = interface_schema(
-        index,
-        interface,
-    )
-
-    if schema is not None and value.placeholder not in schema.placeholders:
-        raise PydanticCustomError(
-            "unknown_interface_placeholder",
-            "{source} reads placeholder {placeholder} absent from interface {interface} schema {schema}",
-            {
-                "source": source.id,
-                "placeholder": value.placeholder,
-                "interface": interface.id,
-                "schema": schema.id,
-            },
-        )
+    elif isinstance(value, StateValue):
+        index.require(source, value.state, State)
 
 
 def static_value(
@@ -257,7 +171,6 @@ def validate_typed_entries(
 
 __all__ = [
     "STATIC_MISSING",
-    "direction_error",
     "interface_schema",
     "process_schema",
     "static_value",

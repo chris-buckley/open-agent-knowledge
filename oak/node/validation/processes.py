@@ -30,12 +30,12 @@ from oak.node.parts.state import State
 from oak.node.validation.conditions import condition_result, validate_condition
 from oak.node.validation.contracts import find_cycle, inspect_emit_contract
 from oak.node.validation.flow import (
+    StepVisitor,
     process_visible_bindings,
     sequence_always_fails,
 )
 from oak.node.validation.values import (
     STATIC_MISSING,
-    direction_error,
     interface_schema,
     process_schema,
     static_value,
@@ -49,9 +49,11 @@ def validate_process_contract(
     process: Process,
     inputs: AbstractSet[str],
     outputs: AbstractSet[str],
+    *,
+    visit: StepVisitor | None = None,
 ) -> None:
     """Validate one process against resolved input and output schemas."""
-    visible = process_visible_bindings(process, inputs)
+    visible = process_visible_bindings(process, inputs, visit=visit)
     missing = sorted(outputs - visible)
 
     if not missing or sequence_always_fails(process.steps):
@@ -195,18 +197,54 @@ def _validate_call_schema_contract(
         )
 
 
-def _validate_emit_step(index: NodeIndex, process: Process, step: Emit) -> None:
+def validate_inferred_emit(
+    process: Process,
+    step: Emit,
+    schema: object,
+    visible: AbstractSet[str],
+) -> None:
+    """Require every inferred emit placeholder to be visible."""
+    expected = schema.placeholders
+    missing = sorted(expected - set(visible))
+
+    if missing:
+        raise rule_error(
+            "inferred_emit_binding_mismatch",
+            (
+                "process {process} cannot infer interface {interface} "
+                "placeholders: {placeholders}"
+            ),
+            {
+                "process": process.id,
+                "interface": step.interface,
+                "placeholders": ", ".join(missing),
+            },
+        )
+
+
+def _validate_emit_step(
+    index: NodeIndex,
+    process: Process,
+    step: Emit,
+) -> None:
     interface = index.require(process, step.interface, Interface)
 
     if interface is None:
         return
 
-    if interface.direction not in ("out", "inout"):
-        direction_error(process, "emit", interface)
+    if interface.flow != "emits":
+        raise rule_error(
+            "emit_target_not_emit",
+            "process {process} emits through non-EMITS interface {interface}",
+            {
+                "process": process.id,
+                "interface": interface.id,
+            },
+        )
 
     schema = interface_schema(index, interface)
 
-    if schema is None:
+    if schema is None or not step.bindings:
         return
 
     try:
@@ -367,7 +405,7 @@ def validate_process_schema_contract(
     index: NodeIndex,
     process: Process,
 ) -> None:
-    """Validate one process against its local input and output schemas."""
+    """Validate one process against its locally known schemas."""
     input_schema = process_schema(index, process, process.input)
     output_schema = process_schema(index, process, process.output)
     input_known = process.input is None or input_schema is not None
@@ -378,15 +416,27 @@ def validate_process_schema_contract(
 
     inputs = set() if input_schema is None else input_schema.placeholders
 
+    def visit(step: Step, visible: AbstractSet[str]) -> None:
+        if not isinstance(step, Emit) or step.bindings:
+            return
+
+        interface = index.require(process, step.interface, Interface)
+        if interface is None:
+            return
+
+        schema = interface_schema(index, interface)
+        if schema is not None:
+            validate_inferred_emit(process, step, schema, visible)
+
     if output_known:
         validate_process_contract(
             process,
             inputs,
             set() if output_schema is None else output_schema.placeholders,
+            visit=visit,
         )
-
     else:
-        process_visible_bindings(process, inputs)
+        process_visible_bindings(process, inputs, visit=visit)
 
 
 def _local_calls(steps: Sequence[Step]) -> Iterator[str]:
@@ -424,6 +474,7 @@ __all__ = [
     "validate_act_contract",
     "validate_call_contract",
     "validate_local_call_cycles",
+    "validate_inferred_emit",
     "validate_process_contract",
     "validate_process_schema_contract",
     "validate_process_steps",

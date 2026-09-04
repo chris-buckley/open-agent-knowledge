@@ -18,7 +18,7 @@ PART_SEPARATORS = {
     "state": "\n",
     "triggers": "\n\n",
     "processes": "\n\n",
-    "interfaces": "\n\n",
+    "interfaces": "\n",
 }
 
 
