@@ -15,13 +15,14 @@ The single product requirements document is replaced by a routed architecture ma
 
 `AGENTS.md` now requires the architecture overview before implementation files and routes each task to every matching document.
 
+It is the only documentation index. No repository or docs README index is used.
+
 Exact model fields, syntax, validation codes, parsing, rendering, resolution, and runtime behaviour remain owned by the package and generated reference.
 
 ## Documentation tree
 
 ```text
 docs/
-├── README.md
 ├── architecture/
 │   ├── overview.md
 │   ├── document.md
@@ -90,13 +91,16 @@ The final branch passed:
 - canonical parse and render of the authoring prompt;
 - canonical parse and render of the authoring guide example;
 - generated output content and path freshness;
-- documentation path, router, and local link freshness;
+- documentation path, AGENTS router, and local link freshness;
+- absence of repository and docs README indexes;
 - exact absence of current `docs/PRD.md`, `read-prd`, and the old product-requirements instruction outside historical plans;
 - documentation checks for em dashes and asterisk emphasis;
 - repeated generation without output changes;
 - `git diff --check`.
 
 The final diff was inspected for accidental changes, duplicate ownership, stale output, obsolete paths, and temporary support files.
+
+GitHub Actions run `33840439650` validated the AGENTS-only router correction and the full build.
 
 The temporary workspace workflow is removed.
 

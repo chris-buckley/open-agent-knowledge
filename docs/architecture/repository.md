@@ -8,7 +8,6 @@ This document owns implementation boundaries, source ownership, dependency direc
 open-agent-knowledge/
 ├── AGENTS.md
 ├── docs/
-│   ├── README.md
 │   ├── architecture/
 │   ├── guides/
 │   └── plans/
@@ -47,6 +46,8 @@ open-agent-knowledge/
 | Executable use cases | `examples` |
 | Generated reference | `outputs` |
 | Change history | `docs/plans` |
+
+The root `AGENTS.md` is the only documentation index and router.
 
 No generated output defines source behaviour. No completed plan defines current architecture.
 

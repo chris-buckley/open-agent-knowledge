@@ -10,7 +10,6 @@ from oak.parse.document import parse
 from oak.render import render
 
 ROUTED_DOCUMENTS = (
-    "docs/README.md",
     "docs/architecture/overview.md",
     "docs/architecture/document.md",
     "docs/architecture/graph.md",
@@ -22,8 +21,13 @@ ROUTED_DOCUMENTS = (
 )
 
 _REMOVED_PRD = Path("docs") / ("PRD" + ".md")
+_REMOVED_INDEXES = (
+    Path("README" + ".md"),
+    Path("docs") / ("README" + ".md"),
+)
 _OBSOLETE_TEXT = (
     _REMOVED_PRD.as_posix(),
+    _REMOVED_INDEXES[1].as_posix(),
     "read-" + "prd",
     "Read the product " + "requirements before work.",
 )
@@ -79,22 +83,23 @@ def validate_documentation() -> None:
         )
         for path in directory.glob("*.md")
     }
-    expected_routes = set(ROUTED_DOCUMENTS) - {"docs/README.md"}
+    expected_routes = set(ROUTED_DOCUMENTS)
     if actual_routes != expected_routes:
         raise RuntimeError("documentation router path set is stale")
 
     if (ROOT / _REMOVED_PRD).exists():
         raise RuntimeError(f"{_REMOVED_PRD} remains after architecture migration")
 
+    for index_path in _REMOVED_INDEXES:
+        if (ROOT / index_path).exists():
+            raise RuntimeError(f"README index is forbidden: {index_path}")
+
     agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
-    index = (ROOT / "docs" / "README.md").read_text(encoding="utf-8")
 
     for name in ROUTED_DOCUMENTS:
         relative = Path(name).relative_to("docs")
         if any(part not in agents for part in relative.parts):
             raise RuntimeError(f"AGENTS.md router omits {name}")
-        if relative.as_posix() not in index:
-            raise RuntimeError(f"docs/README.md router omits {relative}")
 
     for path in _current_text_files():
         text = path.read_text(encoding="utf-8")

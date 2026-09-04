@@ -80,7 +80,6 @@ WHEN you select repository documentation, you MUST:
 
 ```text
 docs/
-├── README.md                       documentation map and authority
 ├── architecture/
 │   ├── overview.md                 every task
 │   ├── document.md                 node, parts, values, schemas, triggers, processes, interfaces, examples
@@ -97,7 +96,7 @@ docs/
 - Read `docs/architecture/overview.md` for every task.
 - Read each matching route before implementation files.
 - Read more than one route when the task crosses concerns.
-- Read `docs/README.md` when documentation ownership, authority, or paths change.
+- Use this `AGENTS.md` as the only documentation index and router.
 - Read a plan only when the user or task names it.
 - Do not use generated model pages as a substitute for architecture documents.
 
@@ -105,6 +104,7 @@ WHEN working in this repository, you MUST:
 
 - Use `.agents` as the only repository directory for agent support files.
 - Do not create or reference `.agent`.
+- Do not add README files as repository or directory indexes.
 - Apply the reduce principle: less is more.
 - Attack every implementation and every documentation line.
 - Make every bit of information fight for its place.
@@ -123,7 +123,7 @@ WHEN you change current architecture, you MUST:
 - Update every dependent implementation and generated output in the same task.
 - Do not create a second authority for the same fact.
 - Show the proposed architecture to the user before writing it unless the user already approved it in the current task.
-- Update `docs/README.md` and the documentation router when a documentation path changes.
+- Update the documentation router when a documentation path changes.
 
 WHEN you work with JSON-LD, JSON Schema, or Pydantic, you MUST:
 
