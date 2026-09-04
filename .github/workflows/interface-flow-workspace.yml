@@ -13,7 +13,7 @@ env:
 
 jobs:
   verify:
-    if: startsWith(github.event.head_commit.message, 'chore(automation): validate interface flow')
+    if: "${{ startsWith(github.event.head_commit.message, 'chore(automation): validate interface flow') }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
