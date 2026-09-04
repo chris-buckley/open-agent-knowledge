@@ -1,0 +1,42 @@
+name: Interface flow workspace
+
+on:
+  push:
+    branches:
+      - docs/interface-flow-plan
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/interface-flow-plan
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+      - run: python -m pip install -e .
+      - name: Verify untouched branch
+        run: python build/examples.py
+      - name: Record baseline paths
+        run: |
+          find examples -type f -name '*.oak.md' -print | sort > /tmp/example-paths.txt
+          find outputs -type f -print | sort > /tmp/output-paths.txt
+          git rev-parse HEAD > /tmp/head.txt
+      - name: Export exact checkout
+        run: |
+          git archive --format=zip --output=/tmp/open-agent-knowledge.zip HEAD
+          zip -j /tmp/open-agent-knowledge.zip /tmp/example-paths.txt /tmp/output-paths.txt /tmp/head.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: interface-flow-workspace
+          path: /tmp/open-agent-knowledge.zip
+          if-no-files-found: error
+          retention-days: 1
