@@ -6,7 +6,7 @@ Instruction: One rule the interpreter must follow.
 </instructions>
 
 <constants>
-example-1: "Read the product requirements before work."
+example-1: "Read the architecture overview before work."
 
 grammar: TEXT<<
 surface_instruction = ? <BODY> ? ;
