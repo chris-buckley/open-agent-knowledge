@@ -1,0 +1,37 @@
+name: OAK context verification
+on:
+  push:
+    branches: [feat/oak-native-interpreter-context]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install repository dependencies
+        run: |
+          python - <<'PY'
+          import subprocess
+          import sys
+          import tomllib
+          from pathlib import Path
+          dependencies = tomllib.loads(Path('pyproject.toml').read_text())['project']['dependencies']
+          subprocess.run([sys.executable, '-m', 'pip', 'install', *dependencies], check=True)
+          PY
+      - name: Verify repository
+        run: |
+          python -m compileall -q oak build examples
+          python -m build.examples
+          python build/examples.py
+      - name: Preserve exact source for local inspection
+        if: always()
+        run: git archive --format=tar HEAD > /tmp/oak-source.tar
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oak-source-${{ github.sha }}
+          path: /tmp/oak-source.tar
