@@ -1,0 +1,100 @@
+ 9. Require authoring and documentation generation to share the same surface and rule objects.
+-10. Require the generated output path set and contents to equal the committed snapshot.
++10. Require the interface flow model, surfaces, parser, renderer, and instructions to share one closed registry.
++11. Require the generated output path set and contents to equal the committed snapshot.
+ 
+ ### Tree
+ 
+@@ -734,7 +753,9 @@ oak
+ │   ├── PRD.md
+ │   └── plans
+ │       ├── 0000-plan.md
+-│       └── 0000-report.md
++│       ├── 0000-report.md
++│       ├── 0001-plan.md
++│       └── 0001-report.md
+ ├── examples
+ │   ├── __init__.py
+ │   ├── agents
+@@ -860,6 +881,7 @@ oak
+ │   │       ├── data.py
+ │   │       ├── groupings.py
+ │   │       ├── instructions.py
++│   │       ├── interfaces.py
+ │   │       ├── processes.py
+ │   │       ├── styles.py
+ │   │       └── triggers.py
+diff --git a/docs/plans/0001-plan.md b/docs/plans/0001-plan.md
+index 5823bd0..8430595 100644
+--- a/docs/plans/0001-plan.md
++++ b/docs/plans/0001-plan.md
+@@ -1,7 +1,7 @@
+ # OAK Interface Flow Implementation Plan
+ 
+ ```yaml
+-status: ready-for-execution
++status: in-progress
+ change_type: language-and-runtime simplification
+ repository: chris-buckley/open-agent-knowledge
+ target_path: docs/plans/0001-plan.md
+@@ -11,7 +11,7 @@ baseline_commit_time_utc: 2026-09-03T03:53:04Z
+ baseline_commit_time_brisbane: 2026-09-03T13:53:04+10:00
+ delivery: one complete implementation
+ design_status: accepted
+-prd_wording_approval: required before editing docs/PRD.md
++prd_wording_approval: accepted
+ compatibility_layer: forbidden
+ new_test_suite: forbidden
+ ```
+@@ -173,29 +173,29 @@ The implementation inventory must add any dependent file omitted from this table
+ 
+ ### Phase 1. Authority and baseline
+ 
+-* [ ] Create an isolated branch or worktree from the pinned baseline.
+-* [ ] Read the root `AGENTS.md` in full.
+-* [ ] Discover and read every nested `AGENTS.md` for affected paths.
+-* [ ] Read `docs/PRD.md` in full.
+-* [ ] Read the applicable Pydantic, JSON Schema, and JSON-LD skills and references.
+-* [ ] Inventory every use of `Direction`, `direction`, `inout`, `InterfaceValue`, `$interface.`, `Arrival.source`, `Arrival.interfaces`, grouped interface entries, source-trigger seeds, and emit suffixes.
+-* [ ] Run `python build/examples.py` and record the untouched baseline result.
+-* [ ] Record the generated output and example snapshot path sets.
+-* [ ] Prepare one runnable Python example, its generated OAK, and exact PRD line replacements.
+-* [ ] Present the exact PRD and `AGENTS.md` changes and obtain wording approval before editing them.
++* [x] Create an isolated branch or worktree from the pinned baseline.
++* [x] Read the root `AGENTS.md` in full.
++* [x] Discover and read every nested `AGENTS.md` for affected paths.
++* [x] Read `docs/PRD.md` in full.
++* [x] Read the applicable Pydantic, JSON Schema, and JSON-LD skills and references.
++* [x] Inventory every use of `Direction`, `direction`, `inout`, `InterfaceValue`, `$interface.`, `Arrival.source`, `Arrival.interfaces`, grouped interface entries, source-trigger seeds, and emit suffixes.
++* [x] Run `python build/examples.py` and record the untouched baseline result.
++* [x] Record the generated output and example snapshot path sets.
++* [x] Prepare one runnable Python example, its generated OAK, and exact PRD line replacements.
++* [x] Present the exact PRD and `AGENTS.md` changes and obtain wording approval before editing them.
+ 
+ ### Phase 2. Product requirements and concepts
+ 
+-* [ ] Redefine `interface` in the `AGENTS.md` concepts CSV as one identified one-way boundary crossing that selects a flow and schema.
+-* [ ] Update the `trigger` concept when needed to state complete receive handoff.
+-* [ ] Update PRD Constraints for flow, source handoff, arrivals, process values, and inferred emission.
+-* [ ] Update PRD Structure, Triggers, Processes, Interfaces, Vocabulary, Authoring, Render, JSON-LD, Build, Examples, and Tree sections.
+-* [ ] Define the exact canonical interface grammar and separators.
+-* [ ] Define the generated instruction predicates and order.
+-* [ ] Define stable validation, parse, resolution, and execution error codes for the new rules.
+-* [ ] Delete obsolete direction, interface-read, and multi-interface-arrival requirements.
+-* [ ] Add `docs/plans/0001-plan.md` and the planned `0001-report.md` to the PRD tree.
+-* [ ] Keep every unrelated PRD line unchanged.
++* [x] Redefine `interface` in the `AGENTS.md` concepts CSV as one identified one-way boundary crossing that selects a flow and schema.
++* [x] Update the `trigger` concept when needed to state complete receive handoff.
++* [x] Update PRD Constraints for flow, source handoff, arrivals, process values, and inferred emission.
++* [x] Update PRD Structure, Triggers, Processes, Interfaces, Vocabulary, Authoring, Render, JSON-LD, Build, Examples, and Tree sections.
++* [x] Define the exact canonical interface grammar and separators.
++* [x] Define the generated instruction predicates and order.
++* [x] Define stable validation, parse, resolution, and execution error codes for the new rules.
++* [x] Delete obsolete direction, interface-read, and multi-interface-arrival requirements.
++* [x] Add `docs/plans/0001-plan.md` and the planned `0001-report.md` to the PRD tree.
++* [x] Keep every unrelated PRD line unchanged.
+ 
+ ### Phase 3. Models, vocabulary, and public API
+ 
+-- 
+2.47.3
