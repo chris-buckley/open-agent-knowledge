@@ -1,0 +1,100 @@
+From 994367f66dde52a044484560fd2bc72aa09ab060 Mon Sep 17 00:00:00 2001
+From: OpenAI <openai@example.invalid>
+Date: Fri, 4 Sep 2026 00:09:13 +0000
+Subject: [PATCH] docs(interface): define one-way boundary contract
+
+
+diff --git a/AGENTS.md b/AGENTS.md
+index bce12ea..379c6e0 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -62,8 +62,8 @@ WHEN you infer repository rules, you MUST know these concepts:
+ 
+ ```csv
+ name,meaning
+-schema,"one reusable information shape independent of boundary, direction, and process"
+-interface,"one identified information crossing at a document boundary; it selects a direction and a schema"
++schema,"one reusable information shape independent of boundary, flow, and process"
++interface,"one identified one-way information crossing at a document boundary; it selects a flow and a schema"
+ operating context,"the complete information and rules supplied to an agent: instructions, constants, schemas, state, triggers, processes, interfaces"
+ OAK,"Open Agent Knowledge, the universal knowledge standard this repository defines, formerly UAOC"
+ interpreter,"the human, agent, or program that interprets OAK knowledge before using it"
+@@ -78,7 +78,7 @@ authoring surface,"the OAK text an interpreter or human writes; Pydantic is the
+ surface descriptor,"one declarative authored text variant that drives rendering, parsing, EBNF, authoring generation, and documentation generation"
+ vocabulary,"how information is conveyed without ambiguity inside every render: text shapes, datatypes, units, time, and display forms; where the core schema and Rust regex checks run"
+ grouping,"the delimiters that group the parts and body entries of one OAK document (xml tags|markdown fences)"
+-trigger,"the entry that signposts knowledge to the outside; its facts are one event, one optional source, one optional guard, one process, and seeds"
++trigger,"the entry that signposts knowledge to the outside; its facts are one event, one optional receive source, one optional guard, one process, and event seeds"
+ APS,"Agnostic Prompt Standard, the legacy standard that OAK succeeds; its skill snapshot is in `legacy-snapshot-aps`"
+ package,"the Pydantic models, defaults, parser, resolver, executor, surface descriptors, and renderers the PRD builds; it is the `oak` directory"
+ render,"a representation of one OAK document (OAK|JSON-LD); OAK is the opinionated default, the successor of APS"
+diff --git a/docs/PRD.md b/docs/PRD.md
+index bc306ba..cfd958a 100644
+--- a/docs/PRD.md
++++ b/docs/PRD.md
+@@ -1,7 +1,7 @@
+ ---
+ title: OAK Product Requirements
+ status: draft
+-updated: 2026-09-01
++updated: 2026-09-04
+ owner: Christopher Buckley
+ defaults:
+   render: OAK
+@@ -46,18 +46,18 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
+ 7. Reject a duplicate SlugId across entries in one document.
+ 8. Reject a (missing|wrong-type) local reference target.
+ 9. Omit unset optional fields from the Pydantic dump.
+-10. Reject a process value or emit step that conflicts with the interface direction.
++10. Reject a trigger source or emit target whose interface flow is not (receives|emits) respectively.
+ 11. Reject an act whose instruction placeholders differ from its inputs and outputs.
+ 12. Reject a process that reads an unbound local binding.
+ 13. Reject a process that redefines a visible local binding.
+-14. Reject an interface value whose placeholder is absent from the interface schema.
+-15. Reject an emit step whose bindings differ from the interface schema placeholders.
++14. Reject an interface process value.
++15. Reject an explicit emit whose bindings differ from its interface schema or an inferred emit whose schema placeholder is not visible.
+ 16. Reject a local or resolved process call cycle.
+ 17. Reject a statically dead process branch or unreachable step.
+ 18. Fail one execution when multiple triggers match one cycle.
+ 19. Reject a process name outside `ProcessName`.
+ 20. Reject a non-true trigger guard that reads no state value.
+-21. Reject a trigger guard that reads an (interface|local binding).
++21. Reject a trigger guard that reads a local binding.
+ 22. Reject equal trigger events or equal trigger sources unless every guard pair is provably disjoint.
+ 23. Reject an (ALL|ANY) condition with fewer than two children.
+ 24. Reject an ordered comparison outside two numbers or two strings.
+@@ -69,15 +69,15 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
+ 30. Reject an unresolved relative target when explicit resolution is requested.
+ 31. Reject an unknown tool or a named-tool act that conflicts with its supplied registry contract.
+ 32. Reject a par tool whose supplied registry does not confirm parallel use.
+-33. Reject a trigger whose seed set differs from the selected process input schema, including seeds on a process without one.
++33. Reject an event-backed trigger whose seed set differs from the selected process input schema, including seeds on a process without one.
+ 34. Reject a process that cannot supply every output schema placeholder after successful completion.
+ 35. Reject a call whose input set differs from the called process input schema or whose output set differs from its output schema.
+ 36. Reject a while with no steps or a limit less than one.
+-37. Reject a trigger seed that reads a local binding.
++37. Reject an event-backed trigger seed that reads a local binding or a source-backed trigger with any seed.
+ 38. Reject an act whose inputs differ from its input schema placeholders or whose outputs differ from its output schema placeholders.
+ 39. Reject a schema binding without both a schema target and a placeholder, with a placeholder absent from the schema, with a placeholder-valued bound, or with a value that fails the placeholder constraints.
+-40. Reject an interface read in a process with an input schema.
+-41. Reject a trigger source that is not one local in or inout interface.
++40. Reject a source-backed trigger whose selected process has no input schema or resolves a different schema from its receive interface.
++41. Reject an arrival without exactly one event or receive interface, with values on an event, or without a complete valid receive instance.
+ 
+ ## Structure
+ 
+@@ -105,7 +105,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
+ - Resolve each relative path from the referencing document directory.
+ - Keep the authored relative path for diagnostics.
+ - Allow relative targets for (schema|constant|process) references.
+-- Keep state reads, state writes, interface reads, and interface emissions in the active document.
++- Keep state reads, state writes, interface receives, and interface emissions in the active document.
+ - Require each entry id to use `SlugId` independent of file placement.
+ - Do not prefix an entry id with its part.
+ - A `SlugId` collision across parts is a duplicate id.
+@@ -167,7 +167,7 @@ Knowledge can run: one document whose state, triggers, and processes form a stat
+ ## Schemas
+ 
+ - Schemas define reusable information shapes.
+-- A schema is independent of boundary, direction, and process.
