@@ -1,0 +1,39 @@
+name: Statement implementation workspace
+on:
+  push:
+    branches: [plan/typed-statement-conventions]
+    paths: [.github/workflows/statement-workspace.yml]
+permissions:
+  contents: read
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Export committed repository
+        run: |
+          mkdir -p /tmp/oak-statements
+          git archive --format=zip --output=/tmp/oak-statements/repository.zip HEAD
+          git rev-parse HEAD > /tmp/oak-statements/revision.txt
+          git rev-parse HEAD^{tree} > /tmp/oak-statements/tree.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oak-statement-source
+          path: /tmp/oak-statements/
+          retention-days: 3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install declared dependencies
+        run: |
+          python - <<'PY'
+          import pathlib, subprocess, sys, tomllib
+          dependencies = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['dependencies']
+          subprocess.run([sys.executable, '-m', 'pip', 'install', *dependencies], check=True)
+          PY
+      - name: Baseline verification
+        run: |
+          python -m build.examples
+          python build/examples.py
