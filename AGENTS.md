@@ -37,6 +37,8 @@ part-authoring-priority: ["schemas", "constants", "state", "interfaces", "trigge
 repository-rules: YAML<<
 - Read the root and every routed AGENTS document that applies before inspecting or
   changing implementation files.
+- Before Python design, implementation, refactoring, or review, read and apply .agents/rules/coding-standards.md
+  within the applicable repository contracts.
 - Treat AGENTS hierarchy as host scoping and never as implicit OAK imports.
 - Treat each scoped AGENTS document as the sole current owner of its named concern.
 - Keep repository-development assistance in .agents and distributable skill products
