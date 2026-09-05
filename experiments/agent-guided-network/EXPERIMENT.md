@@ -1,7 +1,7 @@
 # Agent-guided numerical networks
 
 Prepared: 2026-09-05
-Status: The first feasibility run and the harder attention follow-on are implemented and measured. Agent-free numerical execution is demonstrated; scientific agent superiority is not established. See results/first-run/REPORT.md and results/attention-run/REPORT.md.
+Status: Feasibility, attention, and compression studies are implemented and measured. Agent-free numerical execution and task-specific compression are demonstrated; an advantage attributable to agent judgement is not established. See LEARNINGS.md for the evidence index.
 Baseline: OAK `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a`.
 Branch: `experiment/agent-guided-network`.
 
@@ -218,12 +218,20 @@ experiments/
   AGENTS.md
   agent-guided-network/
     EXPERIMENT.md
+    LEARNINGS.md
+    compression/
+      COMPRESSION.md
+      study.py and study.oak.md
+      numeric.py, oak_io.py, fit.py, task.py
+      session.py, export.py, replay.py, tests.py, run.py
     nodes/
       CONTRACT.md
       initial/
       learned/
       attention-initial/
       attention-learned/
+      compression-folded/
+      compression-learned/
     attention/
       ATTENTION.md
       study.py and study.oak.md
@@ -241,6 +249,7 @@ experiments/
       STATUS.md
       first-run/
       attention-run/
+      compression-run/
 
 docs/plans/0010-agent-guided-network/
   plan.md
@@ -273,3 +282,14 @@ For a fresh manual session, use `prepare /tmp/oak-session`, then `observe /tmp/o
 The user authorised adding attention and a harder experiment on this same branch on 5 September 2026. [The attention extension](attention/ATTENTION.md) preserves the first-run evidence and introduces two linked single-head cross-attention OAK nodes, inline query/key/value/output matrices, variable-length two-hop retrieval, and held-out longer and near-distractor tests. [Its frozen OAK study](attention/study.oak.md) owns the exact numerical protocol. This is an attention mechanism, not a complete Transformer or an independent-agent population. One running assistant continues to represent the logical learning roles; exported computation remains agent-free.
 
 The [measured attention report](results/attention-run/REPORT.md) records four actual proposals on seed 7: one direct output-calibration edit accepted and three rejected. Two other seeds replayed the methods. Across these seeds, ordinary, longer-table, and near-distractor accuracies were 93.49%, 77.67%, and 38.02%. The actual seed-7 improvement was calibration, not accuracy, and a fixed numerical scaling grid found the same edit. Exports matched on all tested cases. This identifies generalisation and calibration limits, not scientific agent superiority.
+
+
+## Compression hypothesis and learning index
+
+On 6 September 2026, Brisbane time, the user clarified the intended payoff: a much more compressed AI because agents can deliberately place or change its weights. H06 asks whether this produces retained capability at smaller parameter and deployed storage budgets. Direct editing alone does not imply compression. Preserve the distinction between exact functional folding, a smaller task-specific replacement, and an advantage attributable to agent judgement.
+
+[LEARNINGS.md](LEARNINGS.md) consolidates findings with stable IDs, evidence links, uncertainty, and contradictions as studies progress. [The compression protocol](compression/COMPRESSION.md) and [its frozen OAK study](compression/study.oak.md) define the current extension. The shared-context executing assistant continues to act for the logical node roles; prediction remains purely numerical.
+
+[The measured compression report](results/compression-run/REPORT.md) records 416-to-144 exact projection folding and a three-shared-gain task replacement. Seven live proposals across three fresh data seeds produced six acceptances and one rejection. Final accuracy was 100% on short, sixteen-entry, and near-key regimes, but 61.78% on harder unseen stress cases. A four-candidate non-agent search selected exactly the same model. A separate zero-learned-parameter task algorithm solved every regime. The three-gain result encodes aligned-key task structure, not general intelligence or demonstrated agent superiority.
+
+Coefficient payload fell from 3,328 to 24 bytes, but the actual complete exported package fell from 18,623 to 10,142 bytes. Runtime, metadata, expanded nonzeros, and different JSON presentation policies are disclosed. The extreme-case loss worsened relative to the teacher despite higher accuracy. Keep those limitations alongside the positive compression result.

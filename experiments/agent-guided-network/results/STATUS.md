@@ -24,3 +24,10 @@ Repository CI is separate from scientific evidence. The [delivery report](../../
 [Attention report](attention-run/REPORT.md): two linked single-head cross-attention nodes, 416 trainable scalars, and a harder variable-length two-hop retrieval task. One live assistant session made four proposals; only output calibration was accepted on seed 7. Replay seeds accepted different subsets. Ordinary accuracy does not transfer to long or nearly ambiguous inputs: three-seed means are 93.49%, 77.67%, and 38.02%.
 
 Twenty new attention tests and complete numerical replay passed locally. All nine seed/regime exports passed isolated execution with maximum observed difference 0.0, as did sampled OAK-executor parity checks. Raw observations, proposals, rejections, source/data identities, and final results are retained under attention-run. The first-run records remain unchanged. Neither the actual calibration edit nor the three-seed means establish agent superiority.
+
+
+## Compression follow-on
+
+[Compression report](compression-run/REPORT.md): exact 416-to-144 algebraic folding plus a three-shared-gain task replacement. Seven actual proposals across three fresh data seeds were evaluated; six passed. A four-candidate non-agent search selected identical weights on all seeds. Short, long, and near-key accuracy was 100%; unseen harder stress accuracy was 61.78%, with worse stress loss than the teacher. A separate exact zero-learned-parameter algorithm solved all regimes.
+
+The coefficient reduction is not the deployment reduction: actual exports are 18,623 versus 10,142 bytes, with runtime and serialization differences disclosed. All twelve compact export checks and a full numerical replay passed. The evidence supports task-specific compression, not general-AI compression or agent superiority. [The learning index](../LEARNINGS.md) retains the consolidated findings and limits.

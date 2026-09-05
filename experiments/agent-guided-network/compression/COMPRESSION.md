@@ -3,7 +3,7 @@
 Authorised: 6 September 2026, Brisbane time.
 Branch: `experiment/agent-guided-network`.
 Baseline: `01093746154ef972842df1c1c0f298101921b579`.
-Status: Protocol recorded before implementation and scored proposals.
+Status: Protocol was recorded before scored proposals; implementation, seven live decisions, final testing, and numerical replay are complete. [Measured report](../results/compression-run/REPORT.md).
 Learning ledger: [LEARNINGS.md](../LEARNINGS.md).
 
 ## Hypothesis and verdicts
@@ -38,7 +38,7 @@ A running assistant may propose a diagonal projection or explicitly place the th
 
 ## Study design
 
-Use the previous selected seed-7 network as one fixed teacher. All new trials start from that same published network. Fresh data seeds are 107, 223, and 331, not new teacher-training seeds. One shared-context assistant makes fresh decisions separately for each data seed. These are not independent language-model runs; subsequent replay records zero new decisions.
+Use the previous selected seed-7 network as one fixed teacher. All new trials start from that same published network. Fresh data seeds are 107, 223, and 331, not new teacher-training seeds. One shared-context assistant makes fresh decisions separately for each data seed. These are not independent language-model runs; subsequent replay records zero decisions.
 
 Use fresh training and development mixtures containing both short and sixteen-entry tables and near distractors. The earlier stressed tests motivated this new protocol but are not reused as fresh test evidence. Freeze all data recipes and source hashes before scored proposals. An implementation-only seed-zero pilot is separate.
 
@@ -61,3 +61,22 @@ Keep old studies immutable. Maintain the learning index as evidence arrives. No 
 ## Related primary work
 
 [Deep Compression](https://arxiv.org/abs/1510.00149) combines pruning, quantisation, and coding. It motivates counting storage and metadata rather than only zeros. [The Lottery Ticket Hypothesis](https://arxiv.org/abs/1803.03635) studies sparse trainable subnetworks, not agents hand-placing weights. [Knowledge distillation](https://arxiv.org/abs/1503.02531) transfers behaviour to another model; a smaller model is not automatically an exact representation of its teacher. Abstracts checked on 6 September 2026. None establishes this experiment's agent-compression hypothesis.
+
+
+## Implemented boundary
+
+The closed compact profile uses four canonical OAK documents with typed calls and exact host tool names. Each kernel payload in OAK is a one-element list containing its named numerical descriptor, constrained by existing schema facilities and checked by the host. This packaging adds no grammar or invented OAK tensor type. New Python source, the study, the earlier attention source, and teacher documents were hashed before live observations. Old source and raw results are unchanged.
+
+The final selections all use gains [2048, 2048, 8]. The fixed four-candidate control selects identical kernels. Full storage and stress failures are in the report and the learning index. The broader hypothesis remains unconfirmed.
+
+## Reproduce
+
+Install the repository dependencies and `experiments/agent-guided-network/requirements.txt`, then run from the repository root:
+
+```sh
+OPENBLAS_NUM_THREADS=1 python experiments/agent-guided-network/compression/run.py test
+python -m tarfile -e experiments/agent-guided-network/results/compression-run/records.tar.xz /tmp/oak-compression-recorded
+OPENBLAS_NUM_THREADS=1 python experiments/agent-guided-network/compression/run.py replay /tmp/oak-compression-replay --recorded /tmp/oak-compression-recorded
+```
+
+Replay regenerates every control, candidate, selected network, and standalone export. It reports zero new assistant decisions. A live run uses the same command prefix with `start RUN`, then `prepare RUN --seed SEED`, `propose RUN --seed SEED --kind identity --gains FIRST SECOND OUTPUT --rationale TEXT`, and a separate `apply RUN --seed SEED --number N`. Call `observe` before later proposals. Run `close` after all three seed selections, then `finish`. Use only the frozen study's seeds and budget; a changed protocol requires a separately identified study.
