@@ -34,6 +34,7 @@ from build.checks.metadata import validate_metadata
 from build.checks.outputs import validate_outputs
 from build.checks.optional_validator import validate_optional_validator
 from build.checks.parsing import validate_part_omission
+from build.checks.plans import validate_plans
 from build.checks.rendering import (
     validate_act_authoring,
     validate_json_ld_style_display,
@@ -74,6 +75,7 @@ CHECKS: tuple[Check, ...] = (
     validate_shapes,
     validate_authoring_skill,
     validate_optional_validator,
+    validate_plans,
     validate_agents,
     validate_surfaces,
     validate_outputs,

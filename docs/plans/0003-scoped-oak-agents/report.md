@@ -8,7 +8,7 @@ branch: docs/scoped-oak-agents
 baseline_commit: 9791ba43f881957325f18cd1685b2f485e4c9867
 implementation_commit: 7369a368abb009c9c22547a7d84054d9347defeb
 implementation_tree: 0c84790367ba3de08df0cda3043c379cf5d923fd
-plan: docs/plans/0003-plan.md
+plan: docs/plans/0003-scoped-oak-agents/plan.md
 ```
 
 ## Outcome

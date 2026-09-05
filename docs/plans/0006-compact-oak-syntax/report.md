@@ -2,7 +2,7 @@
 
 Prepared: 2026-09-05
 Classification: PUBLIC
-Plan: [0006-plan.md](0006-plan.md)
+Plan: [plan.md](plan.md)
 Branch: `feat/compact-oak-syntax`
 Implementation verdict: Approved, following a separate self-review pass.
 Delivery status: complete; all 101 plan tasks are evidenced and PR #12 is open for review.

@@ -415,7 +415,7 @@ This map is a starting inventory, not permission to skip newly discovered consum
 
 ## 4. Admin and Logistics
 
-The resource statuses below record preparation-time availability. Execution recovered a runnable checkout, completed verification and review, and opened PR #12; current evidence is in `0006-report.md`.
+The resource statuses below record preparation-time availability. Execution recovered a runnable checkout, completed verification and review, and opened PR #12; current evidence is in [report.md](report.md).
 
 | Resource | Quantity | Source | Status |
 | --- | --- | --- | --- |

@@ -6,7 +6,7 @@ verdict: Approved
 repository: chris-buckley/open-agent-knowledge
 branch: docs/architecture-manual
 baseline_commit: 9a2c9598fbb64ef4de5b630910f015b2344728b6
-plan: docs/plans/0002-plan.md
+plan: docs/plans/0002-architecture-documentation/plan.md
 ```
 
 ## Outcome

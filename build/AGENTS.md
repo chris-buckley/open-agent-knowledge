@@ -23,6 +23,8 @@ authoring-product-byte-limits: {"skill-entry": 10000, "standalone-agent": 64000}
 
 agent-graph-checks: ["exact path discovery", "canonical parse and render equality", "500-line maximum", "root router coverage", "one owned concern per file", "structured content before authored instructions", "duplicate authored-claim rejection", "obsolete owner rejection"]
 
+plan-checks: ["apply the storage and format policy owned by docs/AGENTS.md", "check unique named plan directories and required plan files", "derive SMEAC section order and phase labels from the referenced schema", "check populated sections and compact phase checkboxes with unique task identifiers", "preserve the named historical format exceptions", "exercise rejected plan structures as well as accepted examples"]
+
 freshness-rules: YAML<<
 - Generate each product once from package sources.
 - Require every generated path and byte to equal a fresh build.
@@ -40,6 +42,9 @@ ACT Use <GENERATORS> to regenerate every affected product from its source. (
 ACT Enforce <PRODUCT_LIMITS> and <AGENT_CHECKS> while validating generated and scoped knowledge products. (
   PRODUCT_LIMITS=$constant.authoring-product-byte-limits,
   AGENT_CHECKS=$constant.agent-graph-checks,
+)
+ACT Apply <PLAN_CHECKS> to persistent plan records and their verification examples. (
+  PLAN_CHECKS=$constant.plan-checks,
 )
 ACT Run <MODULE_CHECK> and <DIRECT_CHECK> after compilation and generation. (
   MODULE_CHECK=$constant.full-verification-command,

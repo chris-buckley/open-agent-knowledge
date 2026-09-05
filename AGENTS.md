@@ -26,7 +26,7 @@ oak/execute/AGENTS.md,"arrivals, processes, tools, state, emissions, failures, a
 build/AGENTS.md,"generators, checks, freshness, generated reference, and authoring prompt"
 examples/AGENTS.md,"practical authoring, naming, decomposition, examples, and sibling renders"
 outputs/AGENTS.md,generated artifacts and regeneration ownership
-docs/AGENTS.md,accepted plans and completion reports as history
+docs/AGENTS.md,"persistent plan creation, plan storage, and completion reports"
 skills/AGENTS.md,"portable authoring capability, skill packaging, scope-safe fusion, and optional validator identity"
 >>
 
@@ -41,6 +41,7 @@ repository-rules: YAML<<
 - Treat each scoped AGENTS document as the sole current owner of its named concern.
 - Keep repository-development assistance in .agents and distributable skill products
   in skills.
+- Route every persistent repository plan through docs/AGENTS.md before creating it.
 - Do not create repository or directory README indexes.
 - Update architecture, implementation, examples, and generated outputs in one pass
   when the concern requires them.

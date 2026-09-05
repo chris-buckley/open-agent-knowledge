@@ -4,7 +4,7 @@
 status: complete
 change_type: language-and-runtime simplification
 repository: chris-buckley/open-agent-knowledge
-target_path: docs/plans/0001-plan.md
+target_path: docs/plans/0001-interface-flow/plan.md
 baseline_branch: main
 baseline_commit: 7aefe22375b2343a64f64f28799c1b0cd3153c94
 baseline_commit_time_utc: 2026-09-03T03:53:04Z

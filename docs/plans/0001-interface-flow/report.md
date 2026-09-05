@@ -6,7 +6,7 @@ verdict: Approved
 repository: chris-buckley/open-agent-knowledge
 branch: docs/interface-flow-plan
 baseline_commit: 7aefe22375b2343a64f64f28799c1b0cd3153c94
-plan: docs/plans/0001-plan.md
+plan: docs/plans/0001-interface-flow/plan.md
 ```
 
 ## Outcome

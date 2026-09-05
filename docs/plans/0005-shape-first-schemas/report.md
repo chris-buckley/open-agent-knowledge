@@ -51,6 +51,6 @@ The host is a deterministic fixture, not a measured comparison of model behaviou
 The example text substitution helper is not a production escaping or layout engine.
 Presentation checks cover the committed fixtures, not arbitrary Markdown.
 Schema binding still validates one value per placeholder. The generic repetition
-sketch in 0005-plan.md is design material only, not current language semantics.
+sketch in [plan.md](plan.md) is design material only, not current language semantics.
 
 Markdown reference: https://github.github.com/gfm/#tables-extension-
