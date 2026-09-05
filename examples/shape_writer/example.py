@@ -63,7 +63,7 @@ compare_options_process = Process(
 decide_change_process = Process(
     id="decide-change", name="Decide change", input=SCHEMA_COMPARISON, output=SCHEMA_DECISION,
     steps=[ACT(
-        "For <CRITERION>, weigh <CURRENT> against <PROPOSED> and produce <DECISION> and <RATIONALE>.",
+        "Assess <CURRENT> and <PROPOSED> against <CRITERION>; produce <DECISION> and <RATIONALE>.",
         input=SCHEMA_COMPARISON, output=SCHEMA_DECISION,
         inputs=local_bindings(PLACEHOLDERS_COMPARISON), outputs=PLACEHOLDERS_DECISION,
     )],

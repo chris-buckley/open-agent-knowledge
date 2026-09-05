@@ -83,10 +83,28 @@ def validate_authoring_skill() -> None:
     for path, example in teaching.items():
         require((PACKAGE / path).read_text() == example + "\n", "teaching example is stale")
         resolve(parse(example), source=path, root=str(PurePosixPath(path).parent), load=teaching.get)
+    _guidance_delivery(actual, fused)
     _teaching_scope(actual, fused, teaching)
     _execution_parity(actual, fused)
     _fusion_rejections()
 
+
+
+def _guidance_delivery(documents: dict[str, str], fused: Node) -> None:
+    """Every rule reaches its sole guide and the assembled capability unchanged."""
+    rules = {rule.id: rule.instruction for rule in AUTHORING_GUIDANCE}
+    require(len(rules) == len(AUTHORING_GUIDANCE), "duplicate authoring rule id")
+    for rule in ("describe-action-roles", "distinguish-action-promises"):
+        require(rule in RULE_OWNERS[GUIDES.index("06-processes")], "statement guidance lost its process guide owner")
+    delivered = []
+    for guide, keys in zip(GUIDES, RULE_OWNERS, strict=True):
+        node = parse(documents[f"references/{guide}.oak.md"])
+        guidance = next(c.value for c in node.constants if c.id == "guidance")
+        require(guidance == [rules[key] for key in keys], f"{guide} guidance differs from its source")
+        delivered.extend(guidance)
+    assembled = [text for c in fused.constants if c.id.endswith("-guidance") for text in c.value]
+    require(assembled == delivered, "assembled guidance differs from the exact skill guides")
+    require(len(set(delivered)) == len(delivered), "duplicate authored guidance claims")
 
 
 def _teaching_scope(documents: dict[str, str], fused: Node, teaching: dict[str, str]) -> None:

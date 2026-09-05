@@ -8,9 +8,9 @@ Format: `examples/schemas/smeac_plan.oak.md`
 Repository: `chris-buckley/open-agent-knowledge`
 Baseline: `main` at `4fd86cee4b85bb946a9c8ce7eab2c405e5568144`
 Branch: `plan/typed-statement-conventions`
-Plan status: Ready for implementation approval.
-Execution status: Not started. All implementation tasks remain open.
-Authorization gate: This request authorizes this plan and its new branch only. A later explicit instruction to implement authorizes delivery through a review pull request. Merging requires separate authorization.
+Plan status: In progress.
+Execution status: 17 of 19 tasks verified locally; pinned bootstrap and PR delivery remain open.
+Authorization gate: The user authorized end-to-end implementation and a review pull request at 2026-09-05T22:05:29+10:00. Merging requires separate authorization.
 
 ## 1. Situation
 
@@ -91,7 +91,7 @@ Separate role names, structural validation, and evidential claims. A well-formed
 
 ### Worked examples from the original conversation
 
-These examples make the intended change reviewable. E01-E04 explain the bounded pilot and its shared guidance; E05-E07 retain the wider conversation as context and explicit non-goals. None authorizes another process, schema, datatype, keyword, tool, or teaching scenario. Code fences below are plan illustrations, not generated product files or claims of executed checks. The 19 implementation tasks remain unchanged and open.
+These examples make the intended change reviewable. E01-E04 explain the bounded pilot and its shared guidance; E05-E07 retain the wider conversation as context and explicit non-goals. None authorizes another process, schema, datatype, keyword, tool, or teaching scenario. Code fences below are plan illustrations, not generated product files or claims of executed checks. The 19 implementation tasks remain unchanged; their verified status is tracked below.
 
 #### E01: From a vague instruction to explicit roles
 
@@ -272,50 +272,50 @@ E01-E03 explain the existing P01.03 and P02.01-P02.03 acceptance work. E04 expla
 
 ### Phase 1: Establish the baseline
 Objective: Capture the exact contracts and scope that the wording change must preserve.
-- [ ] Key task: P01.01 Read applicable AGENTS owners, the pilot and its schema/fixture dependencies, authoring generators, relevant checks, and matching specialist references before editing.
-- [ ] Key task: P01.02 Record baseline checks, pilot structure, fixture outputs, product sizes, protected file fingerprints, and validator identity in implementation evidence.
-- [ ] Key task: P01.03 Review the proposed sentence against the role table; record that no subject, criterion, output, authority, or proof obligation is lost or invented.
+- [x] Key task: P01.01 Read applicable AGENTS owners, the pilot and its schema/fixture dependencies, authoring generators, relevant checks, and matching specialist references before editing.
+- [x] Key task: P01.02 Record baseline checks, pilot structure, fixture outputs, product sizes, protected file fingerprints, and validator identity in implementation evidence.
+- [x] Key task: P01.03 Review the proposed sentence against the role table; record that no subject, criterion, output, authority, or proof obligation is lost or invented.
 Success criteria: Evidence identifies the exact pilot, protected contracts, observed baseline results, and the limited intended prose change.
 Transition trigger: Baseline evidence and the role-preservation review are recorded under this plan.
 
 ### Phase 2: Refine one exemplar
 Objective: Demonstrate the convention through the existing pipeline rather than a new tutorial subsystem.
-- [ ] Key task: P02.01 Refine only the selected ACT sentence in its Python source, retaining process identity, schemas, bindings, call order, and the existing sample.
-- [ ] Key task: P02.02 Record the before/after role explanation in completion evidence; use the generated working example as the portable exemplar instead of maintaining a second authored copy.
-- [ ] Key task: P02.03 Extend existing checks for valid bindings, missing or wrong-type values, unexpected outputs, and non-empty but unjustified decision text; distinguish structural rejection from a shape-valid judgment that still needs review.
+- [x] Key task: P02.01 Refine only the selected ACT sentence in its Python source, retaining process identity, schemas, bindings, call order, and the existing sample.
+- [x] Key task: P02.02 Record the before/after role explanation in completion evidence; use the generated working example as the portable exemplar instead of maintaining a second authored copy.
+- [x] Key task: P02.03 Extend existing checks for valid bindings, missing or wrong-type values, unexpected outputs, and non-empty but unjustified decision text; distinguish structural rejection from a shape-valid judgment that still needs review.
 Success criteria: Fixture outputs and layouts stay the same. Existing mechanisms reject malformed values without misreporting valid structure as sound reasoning. Structural comparison permits only the reviewed action-text change.
 Transition trigger: Focused checks pass and their evidential limits are recorded.
 
 ### Phase 3: Derive shared conventions
 Objective: Extract a few reusable rules without new syntax or a large vocabulary catalogue.
-- [ ] Key task: P03.01 Refine overlapping entries in `oak/rules/guidance.py`; add only indispensable rules for explicit roles, relationships, schema-backed bindings, and appropriate outputs or effects.
-- [ ] Key task: P03.02 Include the validate/assess/publish contrast and validation limits while preserving alternative domain wording and exact tool names. Do not turn the contrast into a callable vocabulary.
-- [ ] Key task: P03.03 Assign every changed or added rule one guide owner in `build/authoring_guides.py`; update applicable AGENTS pointers only where needed, without copying the rules into multiple owners.
-- [ ] Key task: P03.04 Extend existing guidance checks for single ownership and shared delivery; demonstrate that alternative well-formed ACT prose still parses. Do not implement English-word rejection or claim general semantic equivalence from fixtures.
+- [x] Key task: P03.01 Refine overlapping entries in `oak/rules/guidance.py`; add only indispensable rules for explicit roles, relationships, schema-backed bindings, and appropriate outputs or effects.
+- [x] Key task: P03.02 Include the validate/assess/publish contrast and validation limits while preserving alternative domain wording and exact tool names. Do not turn the contrast into a callable vocabulary.
+- [x] Key task: P03.03 Assign every changed or added rule one guide owner in `build/authoring_guides.py`; update applicable AGENTS pointers only where needed, without copying the rules into multiple owners.
+- [x] Key task: P03.04 Extend existing guidance checks for single ownership and shared delivery; demonstrate that alternative well-formed ACT prose still parses. Do not implement English-word rejection or claim general semantic equivalence from fixtures.
 Success criteria: Each convention has one maintained source and a concrete exemplar. No registry, mandatory phrase template, new format, or parser restriction has appeared.
 Transition trigger: Shared ownership and focused authoring checks pass within the agreed scope.
 
 ### Phase 4: Refresh the capability
 Objective: Deliver matching skill and agent knowledge with truthful identity and unchanged scope.
-- [ ] Key task: P04.01 Commit changed package sources, pin the optional validator to that immutable source revision, recompute the complete package fingerprint, and confirm the unchanged dependency fingerprint. Advance skill version 2.1.0 to 2.2.0 without changing validator logic or consent behaviour.
-- [ ] Key task: P04.02 Regenerate scenario snapshots, catalogue, skill references, teaching documents, assembled agent, and affected generated authoring reference through source owners. Never patch generated files by hand.
-- [ ] Key task: P04.03 Preserve existing size and line limits. Revise overlapping guidance or shorten redundant explanation in touched guides without removing obligations, teaching documents, grammar material, or validator consent information; do not raise the limits.
-- [ ] Key task: P04.04 Verify skill/agent knowledge and execution parity, closed detached teaching bundles, inert embedded examples, and rejection of supporting operational fusion.
+- [x] Key task: P04.01 Commit changed package sources, pin the optional validator to that immutable source revision, recompute the complete package fingerprint, and confirm the unchanged dependency fingerprint. Advance skill version 2.1.0 to 2.2.0 without changing validator logic or consent behaviour.
+- [x] Key task: P04.02 Regenerate scenario snapshots, catalogue, skill references, teaching documents, assembled agent, and affected generated authoring reference through source owners. Never patch generated files by hand.
+- [x] Key task: P04.03 Preserve existing size and line limits. Revise overlapping guidance or shorten redundant explanation in touched guides without removing obligations, teaching documents, grammar material, or validator consent information; do not raise the limits.
+- [x] Key task: P04.04 Verify skill/agent knowledge and execution parity, closed detached teaching bundles, inert embedded examples, and rejection of supporting operational fusion.
 Success criteria: Fingerprints match the retrievable pinned revision; generated forms share the changed guidance and full teaching mapping; budgets and scope checks pass. Grammar, shared schemas, dependencies, and runtime implementation stay unchanged.
 Transition trigger: Generated products and capability identity pass their checks together.
 
 ### Phase 5: Verify and deliver
 Objective: Complete the bounded change with reproducible evidence and a review pull request.
-- [ ] Key task: P05.01 Run compilation, catalogue and package generators, `python -m build.examples`, and `python build/examples.py`, retaining detached, rejection, scope, and parity checks.
+- [x] Key task: P05.01 Run compilation, catalogue and package generators, `python -m build.examples`, and `python build/examples.py`, retaining detached, rejection, scope, and parity checks.
 - [ ] Key task: P05.02 Run the existing approved detached validator bootstrap and cache-reuse integration against the new immutable revision, preserving separate end-user installation consent in both authoring forms.
-- [ ] Key task: P05.03 Repeat generation with no product diff; compare protected files and pilot structures to the baseline; remove obsolete live teaching wording while preserving historical before/after evidence.
-- [ ] Key task: P05.04 Review the final diff for changed meaning, duplicated guidance, invented capabilities, and overstated proof; fix findings and re-run affected checks before recording the verdict.
+- [x] Key task: P05.03 Repeat generation with no product diff; compare protected files and pilot structures to the baseline; remove obsolete live teaching wording while preserving historical before/after evidence.
+- [x] Key task: P05.04 Review the final diff for changed meaning, duplicated guidance, invented capabilities, and overstated proof; fix findings and re-run affected checks before recording the verdict.
 - [ ] Key task: P05.05 Commit the complete change and `report.md` with per-task evidence, open its PR to main, verify final-head CI, and complete checkboxes only against observed evidence. Do not merge.
 Success criteria: All applicable tasks have evidence, both full checks and final-head CI pass, generation is stable, and the unmerged PR links the plan and report. Blocked tasks remain explicitly open.
 Transition trigger: The complete change is delivered for review at a verified final head.
 
 ### Coordinating Instructions
-- Timeline: create the plan now; start execution only after explicit approval. These phases constitute one delivery, not deferred feature releases.
+- Timeline: execution was authorized at 2026-09-05T22:05:29+10:00. These phases constitute one delivery, not deferred feature releases.
 - Boundaries: matrix/collection types, typeshed import, ontologies, function systems, backend replacement, and wider vocabulary standardisation are outside this change.
 - Operating guidelines: example first, one owner per rule, preserved negation and obligation, existing generators and verification entry points.
 - Risk mitigation: review prose separately from structural tests; retain fixture-host disclosures; account for package fingerprints before capability publication.
@@ -334,7 +334,7 @@ Transition trigger: The complete change is delivered for review at a verified fi
 | Shared contracts | Two existing schemas | `examples/schemas/shape_gallery.py` | AVAILABLE |
 | Guidance and packaging | Existing owners | `oak/rules/guidance.py`, `build/authoring_guides.py`, `build/authoring.py` | AVAILABLE |
 | Verification | Existing checks and CI | `build/checks/`, `build/AGENTS.md`, `.github/workflows/verify.yml` | AVAILABLE |
-| Execution approval | One explicit instruction | User | PENDING |
+| Execution approval | One explicit instruction | User | AVAILABLE |
 
 Supply: Reuse existing dependencies and fixtures. Add no package, runtime service, model account, or dataset.
 Transportation: Commit sources and generated products to this branch. The eventual PR carries the diff; shared generators deliver identical teaching to both forms.
@@ -357,9 +357,9 @@ Reporting: Separate observed structural validation, fixture behaviour, prose rev
 | Decision | Authority | Escalation |
 | --- | --- | --- |
 | Create this plan and branch | Agent under current request | User |
-| Implement and open its review PR | User's later explicit instruction | User |
+| Implement and open its review PR | Agent under the user's execution authorization | User |
 | Add syntax, types, dependencies, mandatory wording, or a broader pilot | User | Stop scope expansion and report conflict |
 | Merge | User's separate authorization | User |
 
 ### Acknowledgement
-The scope is acknowledged as plan creation only. Readiness is not implementation approval, and no implementation result is claimed here.
+The user has authorized this bounded implementation and its review PR. No merge is authorized; completed tasks require observed evidence.

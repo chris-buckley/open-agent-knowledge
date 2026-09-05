@@ -27,7 +27,7 @@ RULE_OWNERS = (
     ("map-state", "separate-lifetimes", "keep-local-values"),
     ("map-interfaces", "emit-complete"),
     ("map-triggers", "route-receive", "declare-triggers"),
-    ("map-processes", "name-process", "contract-work", "compose-work", "use-native-act", "use-exact-tool", "parallelize-tools", "delegate-document", "compose-conditions", "separate-layout"),
+    ("map-processes", "name-process", "contract-work", "describe-action-roles", "distinguish-action-promises", "compose-work", "use-native-act", "use-exact-tool", "parallelize-tools", "delegate-document", "compose-conditions", "separate-layout"),
     ("map-instructions",),
     ("write-document",),
     ("validate-draft", "emit-document"),
@@ -55,20 +55,17 @@ def knowledge_nodes(script: str, version: str, revision: str) -> dict[str, Node]
         owned_constant("oak/node/AGENTS.md", "part-responsibilities"),
         owned_constant("oak/AGENTS.md", "host-boundary"),
         Constant(id="reading", form="text", value=(
-            "Read these numbered guides in authoring order, not rendered section order. "
-            "Read only the guides needed for the current work. The skill entry routes the work; "
-            "supporting files define fixed knowledge and reusable shapes. Empty parts are omitted. "
-            "Use references/examples/catalog.oak.md to select a complete teaching scenario. "
-            "The assembled agent contains the same material with local targets. No Python, package, "
-            "network access, or validator is needed to author or interpret either form.")),
+            "Load needed guides in authoring order, not render order. The entry routes work; "
+            "supporting files supply fixed knowledge and reusable shapes. Omit empty parts. "
+            "Select complete scenarios via references/examples/catalog.oak.md. The assembled agent "
+            "has identical knowledge with local targets. Authoring and interpretation of either "
+            "form need no Python, package, network, or validator.")),
     ]
     constants[1] += [Constant(id="populated-shapes", form="text", value=populated_examples()),
                      Constant(id="shape-notes", form="text", value=(
-                         "The four schemas below are ordinary reusable shapes, not a closed catalogue. "
-                         "Each named populated-shapes example shows filled output without WHERE or schema wrappers. "
-                         "A one-row table is deliberate fixed cardinality. Repeated placeholder names reuse one value; "
-                         "an ellipsis does not declare repeated typed rows. Extend a justified template explicitly. "
-                         "Do not turn a comparison, hierarchy, explanation, or complete code file into a generic list."))]
+                         "populated-shapes shows filled instances of these four reusable schemas without WHERE "
+                         "or schema wrappers. The one-row table is fixed-cardinality. Extend templates explicitly "
+                         "when justified; apply the schema guidance above."))]
     constants[2].append(Constant(id="forms", form="csv", value=[
         {"form": form, "use": use} for form, use in (
             ("JSON", "short fixed scalars, arrays, or objects"),
@@ -81,10 +78,10 @@ def knowledge_nodes(script: str, version: str, revision: str) -> dict[str, Node]
     constants[4].append(Constant(id="boundaries", value="Reuse an existing schema at a boundary; do not redefine its shape inside the interface. Interface instances are not ambient mutable storage."))
     constants[5].append(Constant(id="routing", value="An event describes an outside occurrence. An optional source identifies one receiving interface; its schema must resolve identically to process input, with no seeds. A guard requires a state read and may compare literals or fixed constants; it cannot read process bindings. Internal work uses CALL, never triggers."))
     constants[6].append(Constant(id="scopes", form="text", value=(
-        "A process binding is immutable within its frame. CALL promotes declared outputs; child branches "
-        "and iterations have local scope. IF does not promote branch-local outputs to its parent. "
-        "EMIT inside the relevant branch or use declared process contracts instead of inventing persistent state. "
-        "Use assertions, conditions, loops, and parallel steps only when the source justifies their semantics.")))
+        "Bindings are immutable per frame. CALL promotes declared outputs; branches and iterations "
+        "have local scope. IF never promotes child outputs. EMIT in the branch or use process "
+        "contracts, not invented state. Assertions, conditions, loops, and parallel steps need "
+        "source-justified semantics.")))
     constants[7].append(Constant(id="last-decision", value="After the other six responsibilities are represented, ask what meaning remains. Keep only that irreducible policy in instructions. Generated interpretation guidance is derived from the node; do not author copies of it."))
     examples = teaching_examples()
     constants[8] += [
