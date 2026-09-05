@@ -38,7 +38,7 @@ A running assistant may propose a diagonal projection or explicitly place the th
 
 ## Study design
 
-Use the previous selected seed-7 network as one fixed teacher. All new trials start from that same published network. Fresh data seeds are 107, 223, and 331, not new teacher-training seeds. One shared-context assistant makes fresh decisions separately for each data seed. These are not independent language-model runs; subsequent replay records zero decisions.
+Use the previous selected seed-7 network as one fixed teacher. All new trials start from that same published network. Fresh data seeds are 107, 223, and 331, not new teacher-training seeds. One shared-context assistant makes fresh decisions separately for each data seed. These are not independent language-model runs; subsequent replay records zero new decisions.
 
 Use fresh training and development mixtures containing both short and sixteen-entry tables and near distractors. The earlier stressed tests motivated this new protocol but are not reused as fresh test evidence. Freeze all data recipes and source hashes before scored proposals. An implementation-only seed-zero pilot is separate.
 

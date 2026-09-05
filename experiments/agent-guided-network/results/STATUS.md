@@ -17,7 +17,7 @@ The [first run report](first-run/REPORT.md) records an actual sequential-assista
 
 Code and study hashes, data identities, proposals, observations, decisions, selected network hashes, environment, and numerical results are retained under first-run. The actual complete run's snapshots and standalone exports can be regenerated using the recorded replay command. The representative initial and learned seed-7 OAK snapshots are committed as inspectable source documents.
 
-Repository CI is separate from scientific evidence. The [delivery report](../../../docs/plans/0010-agent-guided-network/report.md) records publication checks. No result establishes the correctness of all possible predictions or an advantage attributable to semantic agent understanding.
+Repository CI is separate from scientific evidence. The [delivery report](../../../docs/plans/0011-agent-guided-network/report.md) records publication checks. No result establishes the correctness of all possible predictions or an advantage attributable to semantic agent understanding.
 
 ## Attention follow-on
 

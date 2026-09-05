@@ -33,7 +33,7 @@ The design starts from `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a` on `experiment
 
 ## 2. Mission
 
-Record and execute the authorised sequential-assistant feasibility and attention studies, while retaining open tasks for the broader research programme.
+Record and execute the authorised sequential-assistant feasibility, attention, and compression studies, while retaining open tasks for the broader research programme.
 
 Task: Deliver the requested documentation-first commit, an executable numerical prototype, actual assistant decisions, measured comparisons, and agent-free export evidence.
 Purpose: Make the user's learning intent precise, testable, and independent of inference-time agents.
@@ -106,9 +106,30 @@ Objective: Deliver reproducible attention nodes and measured limits on the exist
 Success criteria: Source, representative OAK nodes, raw evidence, report, and passing CI checks are available on the same branch; first-run experimental evidence is preserved with navigation repaired.
 Transition trigger: The attention follow-on is delivered; unperformed broad-study tasks remain open.
 
+### Phase 9: Define compression and consolidate learning
+Objective: Turn the clarified compression intent into a falsifiable study and evidence-linked index.
+- [x] Key task: P09.01 Commit the compression protocol and learning index before scored observations; retain stable finding IDs and scope limits.
+- [x] Key task: P09.02 Implement exact folding, bounded dense/sparse/diagonal/tied encodings, OAK contracts, controls, size accounting, and preflight tests; freeze source and data recipes.
+Success criteria: Protocol commit 35317423 and the recorded source freeze precede seven live proposals; 22 preflight checks pass.
+Transition trigger: The frozen study is ready for real direct-placement decisions.
+
+### Phase 10: Measure compact direct placement
+Objective: Compare retained capability and actual storage without confusing task structure with agent advantage.
+- [x] Key task: P10.01 Make fresh shared-context decisions on all three data seeds, preserve rejections, and close all model selections before final testing.
+- [x] Key task: P10.02 Measure all declared controls, teacher fidelity, harder stress behaviour, paired uncertainty, parameter/index bytes, OAK bytes, and complete exports.
+Success criteria: Seven live proposals and all measured outcomes are retained; the four-candidate search match and exact algorithmic control are reported alongside compression.
+Transition trigger: Selection-closed raw measurements and honest separate verdicts exist.
+
+### Phase 11: Verify compression delivery
+Objective: Publish the tested experiment and consolidate every supported finding on the same branch.
+- [x] Key task: P11.01 Verify isolated exports, actual OAK execution, old-study preservation, and a complete replay with zero new assistant decisions.
+- [ ] Key task: P11.02 Run full repository and all experiment verification, publish the exact tested tree, inspect CI results, and link final evidence from the learning index and report.
+Success criteria: The source, representative numerical OAK documents, evidence, learning index, and observed verification are delivered without modifying main or claiming agent superiority.
+Transition trigger: Compression delivery passes; broader independent-agent and matched total-cost work remains open.
+
 ### Coordinating Instructions
 - Timeline: design requested on 5 September 2026; the bounded follow-on run was authorised and executed on that date.
-- Boundaries: the user also authorised the attention follow-on on 5 September 2026. Preserve the first run; independent-agent, semantic-description ablation, and hundred-node studies remain open.
+- Boundaries: the user authorised attention on 5 September and compression with a maintained learning index on 6 September 2026, Brisbane time. Preserve earlier raw studies; independent-agent, semantic-description, hundred-node, and general-AI compression studies remain open.
 - Operating guidelines: follow the experiment's node, training, export, and benchmark contracts; use the full repository verification entry points for implementation changes.
 - Risk mitigation: preserve a revision-pinned incumbent, protect the final test set, and separate schema validity from observed numerical success.
 
