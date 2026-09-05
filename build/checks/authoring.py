@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import re
+from pathlib import Path, PurePosixPath
+from tempfile import TemporaryDirectory
 
 import yaml
 from oak import (ACT, Act, Arrival, Constant, ConstantValue, Emit, Instruction,
@@ -75,16 +77,47 @@ def validate_authoring_skill() -> None:
     schema_guide = parse(actual["references/01-schemas.oak.md"])
     require(schema_guide.schemas == list(SHAPES), "shape definitions drifted")
     require(next(c.value for c in schema_guide.constants if c.id == "populated-shapes") == populated_examples(), "populated examples drifted")
-    for path, example in teaching_examples().items():
+    teaching = teaching_examples()
+    require(next(c.value for c in fused.constants if c.id.endswith("-teaching")) == teaching,
+            "assembled agent lost or changed inert teaching documents")
+    for path, example in teaching.items():
         require((PACKAGE / path).read_text() == example + "\n", "teaching example is stale")
-        resolve(parse(example))
+        resolve(parse(example), source=path, root=str(PurePosixPath(path).parent), load=teaching.get)
+    _teaching_scope(actual, fused, teaching)
     _execution_parity(actual, fused)
     _fusion_rejections()
 
 
+
+def _teaching_scope(documents: dict[str, str], fused: Node, teaching: dict[str, str]) -> None:
+    """Actual exported files close locally; embedded operational examples stay inert."""
+    from build.checks.human_examples import validate_closed_bundle
+    from examples.catalog import core
+    with TemporaryDirectory(prefix="oak-skill-teaching-") as temporary:
+        root = Path(temporary)
+        for path in teaching:
+            destination = root / path
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes((PACKAGE / path).read_bytes())
+        for scenario in core():
+            validate_closed_bundle(root / "references" / "examples" / scenario.name)
+    def unexpected_action(*args):
+        raise RuntimeError("an embedded example became active")
+    for path, text in teaching.items():
+        example = parse(text)
+        if example.instructions or example.state or example.triggers or example.processes or example.interfaces:
+            rejects(lambda: tree({**documents, "references/unsafe-example.oak.md": text}),
+                    "operational teaching was accepted as active fusion knowledge")
+        for trigger in example.triggers:
+            if trigger.source is None:
+                result = execute(fused, Arrival(event=trigger.event), {}, act=unexpected_action)
+                require(not result.emissions and not result.state and result.process is None,
+                        "embedded example arrival changed authoring behavior")
+
+
 def _execution_parity(documents: dict[str, str], fused: Node) -> None:
     """Native host fixtures prove dataflow parity, not arbitrary model quality."""
-    candidate = teaching_examples()["references/examples/01-fixed-knowledge.oak.md"]
+    candidate = teaching_examples()["references/examples/fixed_knowledge/example.oak.md"]
     original = parse(documents[ENTRY])
     scenarios = (
         (False, False, False, "unused"),

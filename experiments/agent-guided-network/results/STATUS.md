@@ -13,7 +13,7 @@ Recorded: 2026-09-05.
 | Engineering verdict | Not reached | Requires measured training and export evidence. |
 | Scientific verdict | Not reached | Requires the predeclared controlled comparisons. |
 
-Documentation checks and repository CI, when reported, verify the design package and repository consistency. They are not evidence that this learning experiment works. Delivery evidence belongs in [the report](../../../docs/plans/0008-agent-guided-network/report.md).
+Documentation checks and repository CI, when reported, verify the design package and repository consistency. They are not evidence that this learning experiment works. Delivery evidence belongs in [the report](../../../docs/plans/0009-agent-guided-network/report.md).
 
 When actual runs exist, create one directory per immutable run under this directory. Include the study configuration and source revisions, data split identities, model/provider identity, seeds, allowed agent context, proposals and decisions, resource accounting, measured results, export checks, and the verdict. Use existing OAK shapes for authored run knowledge and machine-readable measurement outputs where appropriate.
 

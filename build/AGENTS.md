@@ -12,7 +12,7 @@ source,output
 build/ebnf.py,outputs/oak.ebnf
 build/docs.py,outputs/docs
 build/authoring.py and build/authoring_guides.py,skills/oak-authoring knowledge and outputs/oak-authoring.oak.md
-examples Python modules,sibling .oak.md snapshots
+examples/catalog.py and registered Python sources,"scenario siblings, local dependency copies, and examples/catalog.oak.md"
 >>
 
 full-verification-command: "python -m build.examples"
@@ -32,6 +32,20 @@ freshness-rules: YAML<<
 - Inspect generated changes before committing them.
 - Treat EBNF as syntax documentation rather than validation authority.
 >>
+
+example-checks: YAML<<
+- Run the catalogue-driven checks in build/checks/human_examples.py through the existing
+  complete entry point, including original shared schema examples and the repeat-marker
+  helper exception.
+- Check actual scenario file sets, both canonical groupings, bounded document closure,
+  source-derived snapshot equality, and all declared demonstrations in detached copies
+  with repository imports and network blocked.
+- Exercise rejected missing dependencies, escaping and symlink targets, stale or missing
+  snapshots, duplicate registration, missing teaching stages, and changed sample deliveries.
+- Use build/checks/authoring.py to verify detached teaching closure, literal preservation,
+  refused operational fusion, and skill-agent execution parity; retain the existing
+  consent, identity, and byte limits.
+>>
 </constants>
 
 <processes>
@@ -45,6 +59,9 @@ ACT Enforce <PRODUCT_LIMITS> and <AGENT_CHECKS> while validating generated and s
 )
 ACT Apply <PLAN_CHECKS> to persistent plan records and their verification examples. (
   PLAN_CHECKS=$constant.plan-checks,
+)
+ACT Apply <EXAMPLES> when source registration, fixture delivery, or shared teaching changes. (
+  EXAMPLES=$constant.example-checks,
 )
 ACT Run <MODULE_CHECK> and <DIRECT_CHECK> after compilation and generation. (
   MODULE_CHECK=$constant.full-verification-command,

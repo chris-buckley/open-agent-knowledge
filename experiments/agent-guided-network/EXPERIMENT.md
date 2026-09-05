@@ -217,12 +217,12 @@ experiments/
     results/
       STATUS.md
 
-docs/plans/0008-agent-guided-network/
+docs/plans/0009-agent-guided-network/
   plan.md
   report.md
 ```
 
-This file is the complete conceptual synthesis and decision rationale. Supporting files own precise contracts, procedures, research attribution, and evidence status without creating a second architecture. The [SMEAC plan](../../docs/plans/0008-agent-guided-network/plan.md) owns implementation tasks and authorisation gates; the [report](../../docs/plans/0008-agent-guided-network/report.md) records delivery evidence.
+This file is the complete conceptual synthesis and decision rationale. Supporting files own precise contracts, procedures, research attribution, and evidence status without creating a second architecture. The [SMEAC plan](../../docs/plans/0009-agent-guided-network/plan.md) owns implementation tasks and authorisation gates; the [report](../../docs/plans/0009-agent-guided-network/report.md) records delivery evidence.
 
 During implementation, actual node `.oak.md` documents belong in `nodes/`, training code beside its protocol, numerical adapter/export code in `runtime/`, and the evaluator/tests beside the benchmark. Reusable schemas should be authored as OAK documents when implemented; this design does not introduce a second task-specific configuration language. A distributable training skill belongs in the repository's normal `skills/` product area only when it is genuinely implemented and packaged.
 

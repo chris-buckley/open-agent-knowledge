@@ -5,7 +5,7 @@ Each process is the exact ordered way to do one task; follow its typed steps fro
 </instructions>
 
 <constants>
-owned-concern: "Practical OAK authoring, naming, decomposition, executable examples, and sibling render conventions."
+owned-concern: "Practical OAK authoring, naming, decomposition, self-contained scenario sources, and sibling render conventions."
 
 authoring-method: ["identify the knowledge boundary", "place each fact in one justified structured part", "define reusable schemas before their consumers", "separate values by lifetime", "route outside occurrences through triggers", "keep work local to processes", "emit complete results", "apply the root part-authoring-priority"]
 
@@ -30,6 +30,26 @@ evidence-authoring-rules: ["apply findings before freezing and verifying the fin
 schema-authoring-rules: ["apply the shape-selection guidance owned by oak/rules/guidance.py", "pair each demonstrated template with a complete populated instance", "use shaped schemas in working agents rather than only in the schema collection", "label fixed-cardinality examples and distinguish binding checks from presentation checks", "keep repetition sketches out of executable examples until their semantics are accepted", "keep SMEAC phases compact with checkbox key tasks, plain labelled objective, success criteria, and transition trigger lines, and no internal blank lines"]
 
 example-contract: ["render", "parse", "resolve when required", "round-trip", "write one canonical sibling .oak.md snapshot", "register in repository verification"]
+
+scenario-contract: YAML<<
+- Register each scenario once in examples/catalog.py. Keep stable snake_case directories,
+  example.py and example.oak.md entries, and supporting document pairs in their scenario.
+- Keep reusable schema definitions under examples/schemas. Generate local dependency
+  documents and scenario bindings.py copies from their shared source owners; never
+  edit delivery copies.
+- Use the generated examples/catalog.oak.md for learning order, omitted parts, host
+  disclosures, document paths, and regeneration or detached commands. Do not add directory
+  README indexes.
+- A self-contained OAK scenario contains its complete document graph and sample data.
+  It does not vendor the OAK runtime. Distinguish repository-only Python regeneration
+  from declared detached demonstrations.
+- Retain collaborating operational documents as separate files; relocate only typed
+  targets and explicit source identities, not literal payloads, templates, or tool
+  names.
+- Keep small fixtures in their owning Python source and derive sample.oak.md when
+  teaching needs them. The selected four-stage core is fixed knowledge, shaped information,
+  typed stateless work, and persistent state.
+>>
 </constants>
 
 <processes>
@@ -48,6 +68,9 @@ ACT Apply <EVIDENCE> to examples that verify and accept work. (
   EVIDENCE=$constant.evidence-authoring-rules,
 )
 ACT Complete <CONTRACT> before accepting the example. (CONTRACT=$constant.example-contract)
+ACT Apply <SCENARIOS> when registering and delivering a scenario, then refresh all example-owned files with python -m examples.catalog. (
+  SCENARIOS=$constant.scenario-contract,
+)
 ACT Use outputs/oak.ebnf and outputs/docs only when exact syntax or model fields are required. ()
 </process>
 </processes>

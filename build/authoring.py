@@ -75,6 +75,9 @@ def write() -> Path:
     for path in (PACKAGE / "references").rglob("*"):
         if path.is_file() and path.suffix in {".md", ".ebnf"} and path not in expected:
             path.unlink()
+    for path in sorted((PACKAGE / "references").rglob("*"), reverse=True):
+        if path.is_dir() and not any(path.iterdir()):
+            path.rmdir()
     (ROOT / "outputs" / "authoring.md").unlink(missing_ok=True)
     for path, text in expected.items():
         path.parent.mkdir(parents=True, exist_ok=True)

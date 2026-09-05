@@ -45,7 +45,7 @@ host,"model selection, credentials, transport, tool implementations, scheduling,
 >>
 
 guide-1-reading: TEXT<<
-Read these numbered guides in authoring order, not rendered section order. Read only the guides needed for the current work. The skill entry routes the work; supporting files define fixed knowledge and reusable shapes. Empty parts are omitted. The assembled agent contains the same material with local targets. No Python, package, network access, or validator is needed to author or interpret either form.
+Read these numbered guides in authoring order, not rendered section order. Read only the guides needed for the current work. The skill entry routes the work; supporting files define fixed knowledge and reusable shapes. Empty parts are omitted. Use references/examples/catalog.oak.md to select a complete teaching scenario. The assembled agent contains the same material with local targets. No Python, package, network access, or validator is needed to author or interpret either form.
 >>
 
 guide-2-guidance: YAML<<
@@ -402,157 +402,17 @@ surface_node = ? <instructions>
 </interfaces> ? ;
 >>
 
-guide-9-fixed-example: TEXT<<
-~~~~instructions
-Constants hold values that do not change while the knowledge runs.
-~~~~
-
-~~~~constants
-service-name: "Task board"
-
-title-limit: 120
-~~~~
->>
-
-guide-9-stateless-example: TEXT<<
-~~~~instructions
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
-Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
-ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
-RECEIVES accepts one complete instance of its schema.
-A source-backed trigger supplies the received instance as the selected process input.
-EMITS publishes one complete instance of its schema.
-EMIT without bindings fills the target schema from same-named visible process bindings.
-Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-Each trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
-Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
-
-Keep the proposed change limited to the supplied request.
-~~~~
-
-~~~~schemas
-~~~schema;id="change-request"
-<REQUEST>
-
-WHERE:
-- <REQUEST> is string; is non-empty.
-~~~
-
-~~~schema;id="guide-1-option-comparison";name="Option Comparison";purpose="Compare current and proposed behaviour for one criterion."
-| Criterion | Current | Proposed |
-| --- | --- | --- |
-| <CRITERION> | <CURRENT> | <PROPOSED> |
-
-WHERE:
-- <CRITERION> is string; matches `^[^|\r\n]+$`.
-- <CURRENT> is string; matches `^[^|\r\n]+$`.
-- <PROPOSED> is string; matches `^[^|\r\n]+$`.
-~~~
-
-~~~schema;id="guide-1-decision-brief";name="Decision Brief";purpose="State one decision and explain its rationale."
-## Decision
-<DECISION>
-
-### Rationale
-<RATIONALE>
-
-WHERE:
-- <DECISION> is string; is non-empty.
-- <RATIONALE> is string; is non-empty.
-~~~
-
-~~~schema;id="guide-1-work-outline";name="Work Outline";purpose="Nest one implementation step and its check beneath one goal."
-1. <GOAL>
-   1. <STEP>
-      1. <CHECK>
-
-WHERE:
-- <GOAL> is string; is non-empty; is one line.
-- <STEP> is string; is non-empty; is one line.
-- <CHECK> is string; is non-empty; is one line.
-~~~
-
-~~~schema;id="guide-1-code-file";name="Code File";purpose="Present one Python file with its complete source."
-### <FILE_PATH>
-
-```python
-<CODE>
-```
-
-WHERE:
-- <FILE_PATH> is path; matches `^[A-Za-z0-9_./\-]+$`.
-- <CODE> is string; is non-empty.
-~~~
-~~~~
-
-~~~~triggers
-change-requested(
-  event="A small code change needs explanation.",
-  source=interface.request,
-  process=process.prepare-change,
-)
-~~~~
-
-~~~~processes
-~~~process;id="compare-options";name="Compare options";input="schema.change-request";output="schema.guide-1-option-comparison"
-ACT input="schema.change-request" output="schema.guide-1-option-comparison": Compare current and proposed behaviour for <REQUEST>; produce <CRITERION>, <CURRENT>, and <PROPOSED>. (
-  REQUEST=$REQUEST,
-) -> CRITERION, CURRENT, PROPOSED
-~~~
-
-~~~process;id="decide-change";name="Decide change";input="schema.guide-1-option-comparison";output="schema.guide-1-decision-brief"
-ACT input="schema.guide-1-option-comparison" output="schema.guide-1-decision-brief": For <CRITERION>, weigh <CURRENT> against <PROPOSED> and produce <DECISION> and <RATIONALE>. (
-  CRITERION=$CRITERION,
-  CURRENT=$CURRENT,
-  PROPOSED=$PROPOSED,
-) -> DECISION, RATIONALE
-~~~
-
-~~~process;id="plan-change";name="Plan change";input="schema.guide-1-decision-brief";output="schema.guide-1-work-outline"
-ACT input="schema.guide-1-decision-brief" output="schema.guide-1-work-outline": Plan <DECISION> under <RATIONALE>; produce one <GOAL>, implementation <STEP>, and nested <CHECK>. (
-  DECISION=$DECISION,
-  RATIONALE=$RATIONALE,
-) -> GOAL, STEP, CHECK
-~~~
-
-~~~process;id="write-file";name="Write file";input="schema.guide-1-work-outline";output="schema.guide-1-code-file"
-ACT input="schema.guide-1-work-outline" output="schema.guide-1-code-file": Implement <STEP> for <GOAL> and <CHECK>; produce <FILE_PATH> and complete Python <CODE>. (
-  GOAL=$GOAL,
-  STEP=$STEP,
-  CHECK=$CHECK,
-) -> FILE_PATH, CODE
-~~~
-
-~~~process;id="prepare-change";name="Prepare change";input="schema.change-request"
-CALL process.compare-options (REQUEST=$REQUEST) -> CRITERION, CURRENT, PROPOSED
-EMIT interface.comparison
-CALL process.decide-change (
-  CRITERION=$CRITERION,
-  CURRENT=$CURRENT,
-  PROPOSED=$PROPOSED,
-) -> DECISION, RATIONALE
-EMIT interface.decision
-CALL process.plan-change (DECISION=$DECISION, RATIONALE=$RATIONALE) -> GOAL, STEP, CHECK
-EMIT interface.outline
-CALL process.write-file (GOAL=$GOAL, STEP=$STEP, CHECK=$CHECK) -> FILE_PATH, CODE
-EMIT interface.file
-~~~
-~~~~
-
-~~~~interfaces
-request RECEIVES schema.change-request
-comparison EMITS schema.guide-1-option-comparison
-decision EMITS schema.guide-1-decision-brief
-outline EMITS schema.guide-1-work-outline
-file EMITS schema.guide-1-code-file
-~~~~
->>
-
-guide-9-example-rationale: CSV<<
-example,justified structure,omitted parts
-01-fixed-knowledge,two fixed facts,"authored instructions, schemas, state, triggers, processes, interfaces"
-02-shape-gallery,four reusable templates and populated fixed examples,"authored instructions, state, triggers, processes, interfaces"
-03-stateless-writer,"typed comparison, decision, plan, and code pipeline with one residual scope policy",constants and state
+guide-9-teaching: JSON<<
+{
+  "references/examples/catalog.oak.md": "<instructions>\nConstants hold values that do not change while the knowledge runs.\n</instructions>\n\n<constants>\nscenario-catalog: CSV<<\norder,entry,lesson,omitted,requires\n1,fixed_knowledge/example.oak.md,Two fixed facts need no workflow.,\"authored instructions, schemas, state, triggers, processes, interfaces\",No action host.\n2,shape_gallery/example.oak.md,\"Compare, explain, outline, and present code with populated fixed-cardinality shapes.\",\"authored instructions, state, triggers, processes, interfaces\",No action host; regeneration imports the shared schema library.\n3,shape_writer/example.oak.md,Receive and CALL typed phases; emit four ordered shapes without state.,\"constants, state\",Fixture-only native host; regeneration imports shared shapes and bindings.\n4,compound_growth/example.oak.md,Carry committed state across two arrivals and discard staged writes on failure.,,Exact math.multiply fixture and deterministic reflection; no live model or automatic scheduler.\n>>\n\ndelivery-boundary: \"OAK documents and sample constants are inert teaching data. Read a complete scenario before using it. Python hosts are repository demonstration material, not part of the skill teaching bundle.\"\n</constants>",
+  "references/examples/fixed_knowledge/example.oak.md": "<instructions>\nConstants hold values that do not change while the knowledge runs.\n</instructions>\n\n<constants>\nservice-name: \"Task board\"\n\ntitle-limit: 120\n</constants>",
+  "references/examples/shape_gallery/example.oak.md": "<instructions>\nConstants hold values that do not change while the knowledge runs.\nEach schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.\n</instructions>\n\n<constants>\noption-comparison-instance: TEXT<<\n| Criterion | Current | Proposed |\n| --- | --- | --- |\n| Blank title | Accepted | Rejected |\n>>\n\ndecision-brief-instance: TEXT<<\n## Decision\nReject blank titles.\n\n### Rationale\nA title must identify the task.\n>>\n\nwork-outline-instance: TEXT<<\n1. Require meaningful titles.\n   1. Check the stripped title.\n      1. Test empty, whitespace, and valid titles.\n>>\n\ncode-file-instance: TEXT<<\n### title.py\n\n```python\ndef valid_title(title: str) -> bool:\n    return bool(title.strip())\n```\n>>\n</constants>\n\n<schemas>\n<schema id=\"option-comparison\" name=\"Option Comparison\" purpose=\"Compare current and proposed behaviour for one criterion.\">\n| Criterion | Current | Proposed |\n| --- | --- | --- |\n| <CRITERION> | <CURRENT> | <PROPOSED> |\n\nWHERE:\n- <CRITERION> is string; matches `^[^|\\r\\n]+$`.\n- <CURRENT> is string; matches `^[^|\\r\\n]+$`.\n- <PROPOSED> is string; matches `^[^|\\r\\n]+$`.\n</schema>\n\n<schema id=\"decision-brief\" name=\"Decision Brief\" purpose=\"State one decision and explain its rationale.\">\n## Decision\n<DECISION>\n\n### Rationale\n<RATIONALE>\n\nWHERE:\n- <DECISION> is string; is non-empty.\n- <RATIONALE> is string; is non-empty.\n</schema>\n\n<schema id=\"work-outline\" name=\"Work Outline\" purpose=\"Nest one implementation step and its check beneath one goal.\">\n1. <GOAL>\n   1. <STEP>\n      1. <CHECK>\n\nWHERE:\n- <GOAL> is string; is non-empty; is one line.\n- <STEP> is string; is non-empty; is one line.\n- <CHECK> is string; is non-empty; is one line.\n</schema>\n\n<schema id=\"code-file\" name=\"Code File\" purpose=\"Present one Python file with its complete source.\">\n### <FILE_PATH>\n\n```python\n<CODE>\n```\n\nWHERE:\n- <FILE_PATH> is path; matches `^[A-Za-z0-9_./\\-]+$`.\n- <CODE> is string; is non-empty.\n</schema>\n</schemas>",
+  "references/examples/shape_writer/example.oak.md": "<instructions>\n$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.\nProcess input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.\nACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.\nRECEIVES accepts one complete instance of its schema.\nA source-backed trigger supplies the received instance as the selected process input.\nEMITS publishes one complete instance of its schema.\nEMIT without bindings fills the target schema from same-named visible process bindings.\nEach schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.\nEach trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.\nEach process is the exact ordered way to do one task; follow its typed steps from top to bottom.\n\nKeep the proposed change limited to the supplied request.\n</instructions>\n\n<schemas>\n<schema id=\"change-request\">\n<REQUEST>\n\nWHERE:\n- <REQUEST> is string; is non-empty.\n</schema>\n</schemas>\n\n<triggers>\nchange-requested(\n  event=\"A small code change needs explanation.\",\n  source=interface.request,\n  process=process.prepare-change,\n)\n</triggers>\n\n<processes>\n<process id=\"compare-options\" name=\"Compare options\" input=\"schema.change-request\" output=\"shape_gallery.oak.md#schema.option-comparison\">\nACT input=\"schema.change-request\" output=\"shape_gallery.oak.md#schema.option-comparison\": Compare current and proposed behaviour for <REQUEST>; produce <CRITERION>, <CURRENT>, and <PROPOSED>. (\n  REQUEST=$REQUEST,\n) -> CRITERION, CURRENT, PROPOSED\n</process>\n\n<process id=\"decide-change\" name=\"Decide change\" input=\"shape_gallery.oak.md#schema.option-comparison\" output=\"shape_gallery.oak.md#schema.decision-brief\">\nACT input=\"shape_gallery.oak.md#schema.option-comparison\" output=\"shape_gallery.oak.md#schema.decision-brief\": For <CRITERION>, weigh <CURRENT> against <PROPOSED> and produce <DECISION> and <RATIONALE>. (\n  CRITERION=$CRITERION,\n  CURRENT=$CURRENT,\n  PROPOSED=$PROPOSED,\n) -> DECISION, RATIONALE\n</process>\n\n<process id=\"plan-change\" name=\"Plan change\" input=\"shape_gallery.oak.md#schema.decision-brief\" output=\"shape_gallery.oak.md#schema.work-outline\">\nACT input=\"shape_gallery.oak.md#schema.decision-brief\" output=\"shape_gallery.oak.md#schema.work-outline\": Plan <DECISION> under <RATIONALE>; produce one <GOAL>, implementation <STEP>, and nested <CHECK>. (\n  DECISION=$DECISION,\n  RATIONALE=$RATIONALE,\n) -> GOAL, STEP, CHECK\n</process>\n\n<process id=\"write-file\" name=\"Write file\" input=\"shape_gallery.oak.md#schema.work-outline\" output=\"shape_gallery.oak.md#schema.code-file\">\nACT input=\"shape_gallery.oak.md#schema.work-outline\" output=\"shape_gallery.oak.md#schema.code-file\": Implement <STEP> for <GOAL> and <CHECK>; produce <FILE_PATH> and complete Python <CODE>. (\n  GOAL=$GOAL,\n  STEP=$STEP,\n  CHECK=$CHECK,\n) -> FILE_PATH, CODE\n</process>\n\n<process id=\"prepare-change\" name=\"Prepare change\" input=\"schema.change-request\">\nCALL process.compare-options (REQUEST=$REQUEST) -> CRITERION, CURRENT, PROPOSED\nEMIT interface.comparison\nCALL process.decide-change (\n  CRITERION=$CRITERION,\n  CURRENT=$CURRENT,\n  PROPOSED=$PROPOSED,\n) -> DECISION, RATIONALE\nEMIT interface.decision\nCALL process.plan-change (DECISION=$DECISION, RATIONALE=$RATIONALE) -> GOAL, STEP, CHECK\nEMIT interface.outline\nCALL process.write-file (GOAL=$GOAL, STEP=$STEP, CHECK=$CHECK) -> FILE_PATH, CODE\nEMIT interface.file\n</process>\n</processes>\n\n<interfaces>\nrequest RECEIVES schema.change-request\ncomparison EMITS shape_gallery.oak.md#schema.option-comparison\ndecision EMITS shape_gallery.oak.md#schema.decision-brief\noutline EMITS shape_gallery.oak.md#schema.work-outline\nfile EMITS shape_gallery.oak.md#schema.code-file\n</interfaces>",
+  "references/examples/shape_writer/shape_gallery.oak.md": "<instructions>\nConstants hold values that do not change while the knowledge runs.\nEach schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.\n</instructions>\n\n<constants>\noption-comparison-instance: TEXT<<\n| Criterion | Current | Proposed |\n| --- | --- | --- |\n| Blank title | Accepted | Rejected |\n>>\n\ndecision-brief-instance: TEXT<<\n## Decision\nReject blank titles.\n\n### Rationale\nA title must identify the task.\n>>\n\nwork-outline-instance: TEXT<<\n1. Require meaningful titles.\n   1. Check the stripped title.\n      1. Test empty, whitespace, and valid titles.\n>>\n\ncode-file-instance: TEXT<<\n### title.py\n\n```python\ndef valid_title(title: str) -> bool:\n    return bool(title.strip())\n```\n>>\n</constants>\n\n<schemas>\n<schema id=\"option-comparison\" name=\"Option Comparison\" purpose=\"Compare current and proposed behaviour for one criterion.\">\n| Criterion | Current | Proposed |\n| --- | --- | --- |\n| <CRITERION> | <CURRENT> | <PROPOSED> |\n\nWHERE:\n- <CRITERION> is string; matches `^[^|\\r\\n]+$`.\n- <CURRENT> is string; matches `^[^|\\r\\n]+$`.\n- <PROPOSED> is string; matches `^[^|\\r\\n]+$`.\n</schema>\n\n<schema id=\"decision-brief\" name=\"Decision Brief\" purpose=\"State one decision and explain its rationale.\">\n## Decision\n<DECISION>\n\n### Rationale\n<RATIONALE>\n\nWHERE:\n- <DECISION> is string; is non-empty.\n- <RATIONALE> is string; is non-empty.\n</schema>\n\n<schema id=\"work-outline\" name=\"Work Outline\" purpose=\"Nest one implementation step and its check beneath one goal.\">\n1. <GOAL>\n   1. <STEP>\n      1. <CHECK>\n\nWHERE:\n- <GOAL> is string; is non-empty; is one line.\n- <STEP> is string; is non-empty; is one line.\n- <CHECK> is string; is non-empty; is one line.\n</schema>\n\n<schema id=\"code-file\" name=\"Code File\" purpose=\"Present one Python file with its complete source.\">\n### <FILE_PATH>\n\n```python\n<CODE>\n```\n\nWHERE:\n- <FILE_PATH> is path; matches `^[A-Za-z0-9_./\\-]+$`.\n- <CODE> is string; is non-empty.\n</schema>\n</schemas>",
+  "references/examples/shape_writer/sample.oak.md": "<instructions>\nConstants hold values that do not change while the knowledge runs.\n</instructions>\n\n<constants>\nrequest: {\"REQUEST\": \"Reject blank task titles with one Python predicate.\"}\n\nsteps: [{\"schema\": \"shape_gallery.oak.md#schema.option-comparison\", \"interface\": \"interface.comparison\", \"input\": {\"REQUEST\": \"Reject blank task titles with one Python predicate.\"}, \"output\": {\"CRITERION\": \"Blank title\", \"CURRENT\": \"Accepted\", \"PROPOSED\": \"Rejected\"}}, {\"schema\": \"shape_gallery.oak.md#schema.decision-brief\", \"interface\": \"interface.decision\", \"input\": {\"CRITERION\": \"Blank title\", \"CURRENT\": \"Accepted\", \"PROPOSED\": \"Rejected\"}, \"output\": {\"DECISION\": \"Reject blank titles.\", \"RATIONALE\": \"A title must identify the task.\"}}, {\"schema\": \"shape_gallery.oak.md#schema.work-outline\", \"interface\": \"interface.outline\", \"input\": {\"DECISION\": \"Reject blank titles.\", \"RATIONALE\": \"A title must identify the task.\"}, \"output\": {\"GOAL\": \"Require meaningful titles.\", \"STEP\": \"Check the stripped title.\", \"CHECK\": \"Test empty, whitespace, and valid titles.\"}}, {\"schema\": \"shape_gallery.oak.md#schema.code-file\", \"interface\": \"interface.file\", \"input\": {\"GOAL\": \"Require meaningful titles.\", \"STEP\": \"Check the stripped title.\", \"CHECK\": \"Test empty, whitespace, and valid titles.\"}, \"output\": {\"FILE_PATH\": \"title.py\", \"CODE\": \"def valid_title(title: str) -> bool:\\n    return bool(title.strip())\"}}]\n\nhost: \"A deterministic adapter supports only this fixture, not arbitrary requests or live inference.\"\n</constants>",
+  "references/examples/compound_growth/example.oak.md": "<instructions>\n$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.\nConditions are typed trees; ALL, ANY, and NOT compose comparisons; ASSERT fails a false condition; FOREACH is sequential; WHILE tests before each bounded iteration; PAR outputs become visible only at JOIN.\nProcess input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.\nACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.\nEvent-backed trigger seeds fill the selected process input schema; each seeded value validates before the process runs.\nEMITS publishes one complete instance of its schema.\nText after `: ` states boundary meaning absent from the interface schema.\nAS binds one constant or state value to one schema placeholder; the value must satisfy that placeholder at resolution and before each state write commits.\nConstants hold values that do not change while the knowledge runs.\nEach schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.\nState holds values that persist and can change while processes run.\nEach trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.\nEach process is the exact ordered way to do one task; follow its typed steps from top to bottom.\n\nRun this machine continuously: after each cycle commits, apply the same arrival again.\n</instructions>\n\n<constants>\ngrowth-rate AS schema.scaling.FACTOR: 1.05\n\nreflection-step AS schema.scaling.FACTOR: 8\n</constants>\n\n<schemas>\n<schema id=\"scaling\" name=\"Scaling\" purpose=\"Carry one balance and the factor to scale it by.\">\nBalance: <BALANCE>\nFactor: <FACTOR>\n\nWHERE:\n- <BALANCE> is number; is at least 0; the non-negative balance to scale.\n- <FACTOR> is number; is at least 1; the multiplication factor.\n</schema>\n\n<schema id=\"scaled-balance\" name=\"Scaled Balance\" purpose=\"Carry the balance after one multiplication.\">\n<SCALED_BALANCE>\n\nWHERE:\n- <SCALED_BALANCE> is number; the balance after one multiplication.\n</schema>\n\n<schema id=\"growth-target\" name=\"Growth Target\" purpose=\"Carry the balance one growth cycle must reach.\">\nTarget: <TARGET>\n\nWHERE:\n- <TARGET> is number; is at least 0; the balance the cycle must reach.\n</schema>\n\n<schema id=\"reflection\" name=\"Reflection\" purpose=\"Carry one growth reflection for the chat.\">\nBalance: <BALANCE>\nReflection: <REFLECTION>\n\nWHERE:\n- <BALANCE> is number; the balance at the end of the cycle.\n- <REFLECTION> is string; is non-empty; the reflection on this growth cycle.\n</schema>\n</schemas>\n\n<state>\ncurrent-balance AS schema.scaling.BALANCE: 100\nreflection-target AS schema.scaling.BALANCE: 800\n</state>\n\n<triggers>\ngrowth-requested(\n  event=\"Continue growing the balance.\",\n  process=process.grow-balance,\n  seed=(TARGET=$state.reflection-target),\n)\n</triggers>\n\n<processes>\n<process id=\"scale-balance\" name=\"Scale balance\" input=\"schema.scaling\" output=\"schema.scaled-balance\">\nACT TOOL \"math.multiply\" input=\"schema.scaling\" output=\"schema.scaled-balance\": Multiply <BALANCE> by <FACTOR> and round to 2 decimals to produce <SCALED_BALANCE>. (\n  BALANCE=$BALANCE,\n  FACTOR=$FACTOR,\n) -> SCALED_BALANCE\n</process>\n\n<process id=\"grow-balance\" name=\"Grow balance\" input=\"schema.growth-target\">\nWHILE $state.current-balance is less than $TARGET LIMIT 60:\n  CALL process.scale-balance (\n    BALANCE=$state.current-balance,\n    FACTOR=$constant.growth-rate,\n  ) -> SCALED_BALANCE\n  SET state.current-balance = $SCALED_BALANCE\nACT Reflect on <BALANCE> reaching <TARGET> and produce <REFLECTION>. (\n  BALANCE=$state.current-balance,\n  TARGET=$TARGET,\n) -> REFLECTION\nCALL process.scale-balance (\n  BALANCE=$state.reflection-target,\n  FACTOR=$constant.reflection-step,\n) -> SCALED_BALANCE\nSET state.reflection-target = $SCALED_BALANCE\nEMIT interface.reflection-output (BALANCE=$state.current-balance, REFLECTION=$REFLECTION)\n</process>\n</processes>\n\n<interfaces>\nreflection-output EMITS schema.reflection: \"The reflection written to the chat before the next cycle starts.\"\n</interfaces>",
+  "references/examples/compound_growth/sample.oak.md": "<instructions>\nConstants hold values that do not change while the knowledge runs.\n</instructions>\n\n<constants>\narrival: {\"event\": \"Continue growing the balance.\", \"count\": 2}\n\ninitial-state: {\"state.current-balance\": 100, \"state.reflection-target\": 800}\n\nexpected-states: [{\"state.current-balance\": 815.04, \"state.reflection-target\": 6400}, {\"state.current-balance\": 6642.28, \"state.reflection-target\": 51200}]\n\nexpected-emissions: [{\"BALANCE\": 815.04, \"REFLECTION\": \"Balance 815.04 passed target 800.\"}, {\"BALANCE\": 6642.28, \"REFLECTION\": \"Balance 6642.28 passed target 6400.\"}]\n\nfailure: \"A reflection failure after staged growth leaves caller state unchanged and returns no committed result. Host calls are not rolled back.\"\n\nhost: \"Exact math.multiply arithmetic and deterministic reflection; two fixture arrivals, not an automatic infinite scheduler.\"\n</constants>"
+}
 >>
 
 guide-10-guidance: YAML<<
@@ -562,7 +422,7 @@ guide-10-guidance: YAML<<
   result outside the authored document.
 >>
 
-guide-10-identity: {"version": "2.0.0", "validator-revision": "dac756b5424f7b1e19fc6f87ffc0400e90319b96"}
+guide-10-identity: {"version": "2.1.0", "validator-revision": "dac756b5424f7b1e19fc6f87ffc0400e90319b96"}
 
 guide-10-validation-policy: YAML<<
 - Run programmatic validation only when the user requests it. Authoring and interpretation
@@ -617,7 +477,7 @@ from urllib.request import urlopen
 import venv
 from zipfile import BadZipFile, ZipFile
 
-SKILL_VERSION = "2.0.0"
+SKILL_VERSION = "2.1.0"
 REPOSITORY = "chris-buckley/open-agent-knowledge"
 REVISION = "dac756b5424f7b1e19fc6f87ffc0400e90319b96"
 SOURCE_SHA256 = "06b44c4d4f2cb29e986952d734fcee984bdea5c055152071758790595b7eeafe"
@@ -1047,10 +907,11 @@ ACT Apply <GUIDANCE> to <DESIGN_6> and <SOURCE> to decide instructions; omit unj
   DESIGN_6=$DESIGN_6,
   SOURCE=$SOURCE,
 ) -> DESIGN_7
-ACT Review <DESIGN_7> against <REVIEW>, <GRAMMAR>, and the supplied teaching examples. Produce <CANDIDATE> as one OAK node in canonical section order, without claiming a programmatic check. (
+ACT Review <DESIGN_7> against <REVIEW>, <GRAMMAR>, and the complete scenarios in <TEACHING>. Produce <CANDIDATE> as one OAK node in canonical section order, without claiming a programmatic check. (
   DESIGN_7=$DESIGN_7,
   REVIEW=$constant.guide-9-review,
   GRAMMAR=$constant.guide-9-oak-ebnf,
+  TEACHING=$constant.guide-9-teaching,
 ) -> CANDIDATE
 IF $VALIDATE equals true:
   CALL process.validate-and-deliver (CANDIDATE=$CANDIDATE)

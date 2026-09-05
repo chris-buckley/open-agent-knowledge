@@ -10,10 +10,9 @@ from oak import (ACT, BindingValue, Call, Compare, Constant, ConstantValue, Emit
                  If, Interface, LiteralValue, Node, NonEmpty, Process,
                  Schema, Trigger, Type, ValueBinding, parse, render, where)
 from oak.rules import AUTHORING_GUIDANCE
-from examples.agents import shape_writer
+from examples.catalog import teaching_examples
 from examples.schemas.shape_gallery import EXPECTED_INSTANCES, SHAPES, shape_gallery_node
 from build.ebnf import grammar
-from build.fusion import fuse
 
 ROOT = Path(__file__).resolve().parents[1]
 GUIDES = (
@@ -41,20 +40,6 @@ def owned_constant(path: str, identifier: str) -> Constant:
     return next(item for item in node.constants if item.id == identifier)
 
 
-def teaching_examples() -> dict[str, str]:
-    """Keep examples inert during fusion, including the stateless working pipeline."""
-    knowledge = Node(constants=[Constant(id="service-name", value="Task board"), Constant(id="title-limit", value=120)])
-    writer = fuse({
-        shape_writer.SOURCE: render(shape_writer.shape_writer_node),
-        "examples/schemas/shape_gallery.oak.md": render(Node(schemas=list(SHAPES))),
-    }, entry=shape_writer.SOURCE)
-    return {
-        "references/examples/01-fixed-knowledge.oak.md": render(knowledge, grouping="markdown"),
-        "references/examples/02-shape-gallery.oak.md": render(shape_gallery_node, grouping="markdown"),
-        "references/examples/03-stateless-writer.oak.md": render(writer, grouping="markdown"),
-    }
-
-
 def populated_examples() -> str:
     """Keep table, hierarchy, sections, and code visible instead of YAML-escaped."""
     return "\n\n".join(f"{schema.name}\n{EXPECTED_INSTANCES[schema.id]}" for schema in SHAPES)
@@ -73,6 +58,7 @@ def knowledge_nodes(script: str, version: str, revision: str) -> dict[str, Node]
             "Read these numbered guides in authoring order, not rendered section order. "
             "Read only the guides needed for the current work. The skill entry routes the work; "
             "supporting files define fixed knowledge and reusable shapes. Empty parts are omitted. "
+            "Use references/examples/catalog.oak.md to select a complete teaching scenario. "
             "The assembled agent contains the same material with local targets. No Python, package, "
             "network access, or validator is needed to author or interpret either form.")),
     ]
@@ -110,14 +96,8 @@ def knowledge_nodes(script: str, version: str, revision: str) -> dict[str, Node]
             "The examples are fixed teaching data, not additional agents or outside entry points to execute.",
         ]),
         Constant(id="oak-ebnf", form="text", value=grammar().rstrip("\n")),
-        Constant(id="fixed-example", form="text", value=examples["references/examples/01-fixed-knowledge.oak.md"]),
-        Constant(id="stateless-example", form="text", value=examples["references/examples/03-stateless-writer.oak.md"]),
-        Constant(id="example-rationale", form="csv", value=[
-            dict(zip(("example", "justified structure", "omitted parts"), row, strict=True)) for row in [
-            ["01-fixed-knowledge", "two fixed facts", "authored instructions, schemas, state, triggers, processes, interfaces"],
-            ["02-shape-gallery", "four reusable templates and populated fixed examples", "authored instructions, state, triggers, processes, interfaces"],
-            ["03-stateless-writer", "typed comparison, decision, plan, and code pipeline with one residual scope policy", "constants and state"],
-        ]]),
+        # JSON strings preserve nested OAK block delimiters verbatim as inert data.
+        Constant(id="teaching", form="json", value=examples),
     ]
     constants[9] += [
         Constant(id="identity", value={"version": version, "validator-revision": revision}),
@@ -177,8 +157,8 @@ def entry_node() -> Node:
         steps.append(ACT(text, inputs=bindings, outputs=[result]))
         previous = result
     steps += [
-        ACT("Review <DESIGN_7> against <REVIEW>, <GRAMMAR>, and the supplied teaching examples. Produce <CANDIDATE> as one OAK node in canonical section order, without claiming a programmatic check.",
-            inputs=[local("DESIGN_7"), knowledge("REVIEW", 8, "review"), knowledge("GRAMMAR", 8, "oak-ebnf")], outputs=["CANDIDATE"]),
+        ACT("Review <DESIGN_7> against <REVIEW>, <GRAMMAR>, and the complete scenarios in <TEACHING>. Produce <CANDIDATE> as one OAK node in canonical section order, without claiming a programmatic check.",
+            inputs=[local("DESIGN_7"), knowledge("REVIEW", 8, "review"), knowledge("GRAMMAR", 8, "oak-ebnf"), knowledge("TEACHING", 8, "teaching")], outputs=["CANDIDATE"]),
         If(condition=Compare(left=BindingValue(binding="VALIDATE"), operator="equals", right=LiteralValue(value=True)),
            then=[Call(process="process.validate-and-deliver", inputs=[local("CANDIDATE")])],
            otherwise=[Emit(interface="interface.authored-document", bindings=[

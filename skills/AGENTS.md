@@ -11,7 +11,7 @@ capability-sources: CSV<<
 source,owns
 build/authoring_guides.py,guide composition and the authoring workflow
 oak/rules/guidance.py,shared package authoring rules
-examples/schemas/shape_gallery.py and examples/agents/shape_writer.py,"shape definitions, populated instances, and the working teaching pipeline"
+examples/catalog.py and its registered sources,"shared teaching selection, scenario documents, sample data, and catalogue; source layout is owned by examples/AGENTS.md"
 skills/oak-authoring/scripts/validate.py,"optional runtime helper, skill version, immutable validator revision, and fingerprints"
 build/authoring.py and build/fusion.py,"standard skill metadata, generated knowledge files, and agent assembly"
 >>
@@ -22,6 +22,10 @@ delivery-contract: YAML<<
   not add provider-specific metadata or unused assets.
 - Treat generated knowledge guides as the identical input documents for the skill
   and agent, not independently maintained prompts. Keep grammar material in EBNF.
+- Deliver the registered core under references/examples with its generated catalogue.
+  Embed the identical complete document mapping as literal JSON knowledge in the review
+  guide and assembled agent; Python demonstration hosts stay in repository scenario
+  bundles.
 - Keep the skill entry as the only operational scope. Supporting fusion documents
   may define constants and schemas only. Refuse authored policy, state, arrivals,
   processes, or interfaces in supporting documents instead of widening their scope.

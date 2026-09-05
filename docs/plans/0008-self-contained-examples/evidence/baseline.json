@@ -1,0 +1,57 @@
+{
+  "revision": "c396b6e771efd7236b6a0f47edfef65ca731d545",
+  "tree": "32dc36770c68812e39a9a2ec3c4df811eca4219e",
+  "product_baseline": "cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a",
+  "baseline_checks": {
+    "python -m build.examples": 0,
+    "python build/examples.py": 0
+  },
+  "remote_baseline_run": 33961608238,
+  "snapshots": {
+    "examples/agents/amendment_reviewer.oak.md": "14151147a25324382b093cfba5cc5a8109099c26cc7bcf5721507e419a41fd0f",
+    "examples/agents/compound_growth.oak.md": "0b0ca898c0ee875b712b674670f09ddb762ce66ee068c823524d79381353809a",
+    "examples/agents/delegation.oak.md": "00dd20f2b75dbd550b85609fa340b22c472f03d27b883ae727e9c8fc042b41c6",
+    "examples/agents/implementer.oak.md": "a49dba352946ced3fdf5eafaa3f9229697866138fbfdfc8aaf20ffeb96e11405",
+    "examples/agents/interpreter_context.oak.md": "c1dea9109e767fe3b6e447b3d068dc31e88958123d19bd3fbf35cfd3b332da8f",
+    "examples/agents/shape_writer.oak.md": "a6b972cea75ff1e2784a4a8ce053dac0738e77a9bed3d544fe4ebcb85a37a802",
+    "examples/agents/successor.oak.md": "571c7c2c0d64907b15bc208cb18a85bfc8b5f143e295b0d2ee1e5c4d674e14c4",
+    "examples/agents/successor_verifier.oak.md": "efb71aba437e500926cfb4c211d2e85e46cfd6ff22dc9a480a4d0ca844958c70",
+    "examples/agents/task_reviewer.oak.md": "94b9b691712ea4af32a143a309af13895999939176ef73f088dc677c9b5c8358",
+    "examples/schemas/api_coverage_table.oak.md": "fc5cfa532de160f790047a38c3aecb64609f3e1ec217667e8ffe34ed56d6e7ff",
+    "examples/schemas/code_changes.oak.md": "46f78f1ecf8bffe34aa61d6777966da3e03550398910fd902eea823b2d665815",
+    "examples/schemas/code_map.oak.md": "429ead0e2d4a9336da870628f33575e125570e4b04bed6532811e500ba4e36cf",
+    "examples/schemas/docs_index.oak.md": "64283806f54d44b9a82437b6258217886c8c39c10900469005d9bf55c58a6174",
+    "examples/schemas/error.oak.md": "e69e704051bbfbbbfec63c09d2d3a7de7ca772f32c50cb3462f53736c99e928f",
+    "examples/schemas/hierarchical_outline.oak.md": "3b72ed951a412598b229758913e451dad810982ed16e769cca9e1cd854a64377",
+    "examples/schemas/ideation_list.oak.md": "e081dc19bc26ac2beb6c99a2b27a3a20c8ca9464b79d0862a5118a2e6942d7c4",
+    "examples/schemas/link_manifest.oak.md": "3b6cc5d0349929960a3735c9aef6be5cd3a4af38cdbfbf2adeaa893c69e7d6d1",
+    "examples/schemas/process_execution_table.oak.md": "dbf07c116ed6146c9fb011149376a3925475d1ebc6d3bbbf60e738fd43033a36",
+    "examples/schemas/shape_gallery.oak.md": "f8b549a2c1c8f891e43bc976789d514d7f5f147167cded03edb824d53afbbd03",
+    "examples/schemas/smeac_plan.oak.md": "9323a9b62333cafc20917b68f621743b88c904902cdf773eda82fab25932b39b",
+    "examples/schemas/verification.oak.md": "cc4cfa3c782fec11f4151066962f3fec042a45a1c8efb061ede2f94734f3dc75"
+  },
+  "product_bytes": {
+    "skills/oak-authoring/SKILL.md": 8234,
+    "outputs/oak-authoring.oak.md": 51952
+  },
+  "path_map": {
+    "examples/agents/compound_growth.py": "examples/compound_growth/example.py",
+    "examples/agents/compound_growth.oak.md": "examples/compound_growth/example.oak.md",
+    "examples/agents/delegation.py": "examples/delegation/example.py",
+    "examples/agents/delegation.oak.md": "examples/delegation/example.oak.md",
+    "examples/agents/task_reviewer.py": "examples/delegation/task_reviewer.py",
+    "examples/agents/task_reviewer.oak.md": "examples/delegation/task_reviewer.oak.md",
+    "examples/agents/implementer.py": "examples/implementer/example.py",
+    "examples/agents/implementer.oak.md": "examples/implementer/example.oak.md",
+    "examples/agents/interpreter_context.py": "examples/interpreter_context/example.py",
+    "examples/agents/interpreter_context.oak.md": "examples/interpreter_context/example.oak.md",
+    "examples/agents/shape_writer.py": "examples/shape_writer/example.py",
+    "examples/agents/shape_writer.oak.md": "examples/shape_writer/example.oak.md",
+    "examples/agents/successor.py": "examples/successor/example.py",
+    "examples/agents/successor.oak.md": "examples/successor/example.oak.md",
+    "examples/agents/amendment_reviewer.py": "examples/successor/amendment_reviewer.py",
+    "examples/agents/amendment_reviewer.oak.md": "examples/successor/amendment_reviewer.oak.md",
+    "examples/agents/successor_verifier.py": "examples/successor/successor_verifier.py",
+    "examples/agents/successor_verifier.oak.md": "examples/successor/successor_verifier.oak.md"
+  }
+}
