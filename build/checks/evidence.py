@@ -11,7 +11,7 @@ from typing import cast
 
 from pydantic import JsonValue
 
-from examples.agents import implementer
+from examples.implementer import example as implementer
 from examples.schemas.verification import VERIFICATION_FIELDS
 from oak.context import InterpreterContext
 from oak.execute.executor import execute
@@ -142,7 +142,7 @@ class VerificationHost:
             Arrival(interface="interface.task-request-input", values={
                 "TASK_BRIEF": "Reject blank titles.", "CONTEXT": "The fixed candidate.py fixture.",
             }),
-            {}, source="examples/agents/implementer.oak.md", load=implementer.load_document,
+            {}, source="examples/implementer/example.oak.md", load=implementer.load_document,
             tools=self.tools(), interpreter=self.interpret,
         )
 

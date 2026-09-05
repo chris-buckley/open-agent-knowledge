@@ -27,7 +27,7 @@ Report status, changes, verification, commit, and review findings.
 <constants>
 commit-convention: "type(scope): imperative summary"
 
-required-check AS ../schemas/verification.oak.md#schema.verification.CHECK: "implementation-checks-v1"
+required-check AS verification.oak.md#schema.verification.CHECK: "implementation-checks-v1"
 </constants>
 
 <schemas>
@@ -198,8 +198,8 @@ ACT TOOL "changes.snapshot" input="schema.changeset" output="schema.candidate": 
 ) -> CANDIDATE, REVISION
 </process>
 
-<process id="test-changeset" name="Test changeset" input="schema.candidate" output="../schemas/verification.oak.md#schema.verification">
-ACT TOOL "checks.verify-changeset" input="schema.candidate" output="../schemas/verification.oak.md#schema.verification": Inspect immutable <CANDIDATE> requested at <REVISION>; run the versioned implementation checks and record actual <VERIFIED_SUBJECT>, <VERIFIED_REVISION>, <CHECK>, <PASSED>, and <EVIDENCE>. (
+<process id="test-changeset" name="Test changeset" input="schema.candidate" output="verification.oak.md#schema.verification">
+ACT TOOL "checks.verify-changeset" input="schema.candidate" output="verification.oak.md#schema.verification": Inspect immutable <CANDIDATE> requested at <REVISION>; run the versioned implementation checks and record actual <VERIFIED_SUBJECT>, <VERIFIED_REVISION>, <CHECK>, <PASSED>, and <EVIDENCE>. (
   CANDIDATE=$CANDIDATE,
   REVISION=$REVISION,
 ) -> VERIFIED_SUBJECT, VERIFIED_REVISION, CHECK, PASSED, EVIDENCE

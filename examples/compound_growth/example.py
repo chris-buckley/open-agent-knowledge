@@ -1,12 +1,20 @@
-"""Author one endless grow-and-reflect machine with schema-bound constants, state, trigger seeds, and tool contracts."""
+"""Two host-driven growth cycles with persistent state and bounded local work.
+
+The arithmetic adapter computes real fixture values; reflection is deterministic,
+not model inference. The demonstration runs exactly two arrivals, not an endless
+host scheduler. It also checks failure after staged writes without promising
+rollback of external effects. Regenerate with the repository module command;
+run a detached copy with `python example.py` and an installed OAK runtime.
+"""
 
 from __future__ import annotations
 
 from pathlib import Path
 import sys
+from copy import deepcopy
 
 ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT) not in sys.path:
+if (ROOT / "oak").is_dir() and str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from oak import (
@@ -19,6 +27,7 @@ from oak import (
     Constant,
     ConstantValue,
     Emit,
+    ExecutionError,
     Instruction,
     Interface,
     Node,
@@ -231,6 +240,28 @@ growth_node = Node(
 TARGET = Path(__file__).with_suffix(".oak.md")
 
 
+EXPECTED_STATES = [
+    {"state.current-balance": 815.04, "state.reflection-target": 6400},
+    {"state.current-balance": 6642.28, "state.reflection-target": 51200},
+]
+EXPECTED_EMISSIONS = [
+    {"BALANCE": 815.04, "REFLECTION": "Balance 815.04 passed target 800."},
+    {"BALANCE": 6642.28, "REFLECTION": "Balance 6642.28 passed target 6400."},
+]
+
+
+def sample() -> Node:
+    """Supply inert, complete fixture input and expected outputs from this source."""
+    return Node(constants=[
+        Constant(id="arrival", value={"event": EVENT_GROWTH_REQUESTED, "count": 2}),
+        Constant(id="initial-state", value={STATE_CURRENT_BALANCE: 100, STATE_REFLECTION_TARGET: 800}),
+        Constant(id="expected-states", value=EXPECTED_STATES),
+        Constant(id="expected-emissions", value=EXPECTED_EMISSIONS),
+        Constant(id="failure", value="A reflection failure after staged growth leaves caller state unchanged and returns no committed result. Host calls are not rolled back."),
+        Constant(id="host", value="Exact math.multiply arithmetic and deterministic reflection; two fixture arrivals, not an automatic infinite scheduler."),
+    ])
+
+
 def _multiply_tool(_step, values):
     return {PLACEHOLDER_SCALED_BALANCE: round(values[PLACEHOLDER_BALANCE] * values[PLACEHOLDER_FACTOR], 2)}
 
@@ -255,9 +286,12 @@ def build() -> str:
             output=SCHEMA_SCALED_BALANCE,
         )
     }
-    state = {STATE_CURRENT_BALANCE: 100, STATE_REFLECTION_TARGET: 800}
+    initial = {STATE_CURRENT_BALANCE: 100, STATE_REFLECTION_TARGET: 800}
+    state = dict(initial)
+    observed_states = []
     emissions = []
     for _cycle in range(2):
+        before_cycle = dict(state)
         cycle_execution = execute(
             parsed,
             Arrival(event=EVENT_GROWTH_REQUESTED),
@@ -265,7 +299,10 @@ def build() -> str:
             act=_reflect_act,
             tools=tools,
         )
+        if state != before_cycle:
+            raise RuntimeError("successful execution mutated caller state")
         state = dict(cycle_execution.state)
+        observed_states.append(state)
         emissions.extend(cycle_execution.emissions)
     if len(emissions) != 2:
         raise RuntimeError("compound growth did not emit one reflection per cycle")
@@ -274,6 +311,28 @@ def build() -> str:
         and emissions[1].values[PLACEHOLDER_BALANCE] >= emissions[0].values[PLACEHOLDER_BALANCE] * 8
     ):
         raise RuntimeError("compound growth cycles did not build the balance")
+    if observed_states != EXPECTED_STATES or [dict(item.values) for item in emissions] != EXPECTED_EMISSIONS:
+        raise RuntimeError("growth fixture changed its exact states or emissions")
+    # The host has already been called and state has been staged when reflection fails.
+    # OAK must discard its staged values; those host calls are not undone.
+    caller = dict(initial)
+    caller_before = deepcopy(caller)
+    host_calls = []
+    def fail_reflection(_step, values):
+        host_calls.append(dict(values))
+        raise ValueError("fixture reflection failure after growth")
+    try:
+        execute(parsed, Arrival(event=EVENT_GROWTH_REQUESTED), caller, act=fail_reflection, tools=tools)
+    except ExecutionError as error:
+        if error.code != "act_failed":
+            raise
+    else:
+        raise RuntimeError("the failing host was accepted")
+    if caller != caller_before or not host_calls or host_calls[0][PLACEHOLDER_BALANCE] != 815.04:
+        raise RuntimeError("failure did not preserve the transaction boundary")
+    retry = execute(parsed, Arrival(event=EVENT_GROWTH_REQUESTED), caller, act=_reflect_act, tools=tools)
+    if dict(retry.state) != EXPECTED_STATES[0] or len(retry.emissions) != 1:
+        raise RuntimeError("failed execution leaked staged state or emissions")
     return rendered
 
 

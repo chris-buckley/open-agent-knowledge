@@ -31,29 +31,29 @@ change-requested(
 </triggers>
 
 <processes>
-<process id="compare-options" name="Compare options" input="schema.change-request" output="../schemas/shape_gallery.oak.md#schema.option-comparison">
-ACT input="schema.change-request" output="../schemas/shape_gallery.oak.md#schema.option-comparison": Compare current and proposed behaviour for <REQUEST>; produce <CRITERION>, <CURRENT>, and <PROPOSED>. (
+<process id="compare-options" name="Compare options" input="schema.change-request" output="shape_gallery.oak.md#schema.option-comparison">
+ACT input="schema.change-request" output="shape_gallery.oak.md#schema.option-comparison": Compare current and proposed behaviour for <REQUEST>; produce <CRITERION>, <CURRENT>, and <PROPOSED>. (
   REQUEST=$REQUEST,
 ) -> CRITERION, CURRENT, PROPOSED
 </process>
 
-<process id="decide-change" name="Decide change" input="../schemas/shape_gallery.oak.md#schema.option-comparison" output="../schemas/shape_gallery.oak.md#schema.decision-brief">
-ACT input="../schemas/shape_gallery.oak.md#schema.option-comparison" output="../schemas/shape_gallery.oak.md#schema.decision-brief": For <CRITERION>, weigh <CURRENT> against <PROPOSED> and produce <DECISION> and <RATIONALE>. (
+<process id="decide-change" name="Decide change" input="shape_gallery.oak.md#schema.option-comparison" output="shape_gallery.oak.md#schema.decision-brief">
+ACT input="shape_gallery.oak.md#schema.option-comparison" output="shape_gallery.oak.md#schema.decision-brief": For <CRITERION>, weigh <CURRENT> against <PROPOSED> and produce <DECISION> and <RATIONALE>. (
   CRITERION=$CRITERION,
   CURRENT=$CURRENT,
   PROPOSED=$PROPOSED,
 ) -> DECISION, RATIONALE
 </process>
 
-<process id="plan-change" name="Plan change" input="../schemas/shape_gallery.oak.md#schema.decision-brief" output="../schemas/shape_gallery.oak.md#schema.work-outline">
-ACT input="../schemas/shape_gallery.oak.md#schema.decision-brief" output="../schemas/shape_gallery.oak.md#schema.work-outline": Plan <DECISION> under <RATIONALE>; produce one <GOAL>, implementation <STEP>, and nested <CHECK>. (
+<process id="plan-change" name="Plan change" input="shape_gallery.oak.md#schema.decision-brief" output="shape_gallery.oak.md#schema.work-outline">
+ACT input="shape_gallery.oak.md#schema.decision-brief" output="shape_gallery.oak.md#schema.work-outline": Plan <DECISION> under <RATIONALE>; produce one <GOAL>, implementation <STEP>, and nested <CHECK>. (
   DECISION=$DECISION,
   RATIONALE=$RATIONALE,
 ) -> GOAL, STEP, CHECK
 </process>
 
-<process id="write-file" name="Write file" input="../schemas/shape_gallery.oak.md#schema.work-outline" output="../schemas/shape_gallery.oak.md#schema.code-file">
-ACT input="../schemas/shape_gallery.oak.md#schema.work-outline" output="../schemas/shape_gallery.oak.md#schema.code-file": Implement <STEP> for <GOAL> and <CHECK>; produce <FILE_PATH> and complete Python <CODE>. (
+<process id="write-file" name="Write file" input="shape_gallery.oak.md#schema.work-outline" output="shape_gallery.oak.md#schema.code-file">
+ACT input="shape_gallery.oak.md#schema.work-outline" output="shape_gallery.oak.md#schema.code-file": Implement <STEP> for <GOAL> and <CHECK>; produce <FILE_PATH> and complete Python <CODE>. (
   GOAL=$GOAL,
   STEP=$STEP,
   CHECK=$CHECK,
@@ -78,8 +78,8 @@ EMIT interface.file
 
 <interfaces>
 request RECEIVES schema.change-request
-comparison EMITS ../schemas/shape_gallery.oak.md#schema.option-comparison
-decision EMITS ../schemas/shape_gallery.oak.md#schema.decision-brief
-outline EMITS ../schemas/shape_gallery.oak.md#schema.work-outline
-file EMITS ../schemas/shape_gallery.oak.md#schema.code-file
+comparison EMITS shape_gallery.oak.md#schema.option-comparison
+decision EMITS shape_gallery.oak.md#schema.decision-brief
+outline EMITS shape_gallery.oak.md#schema.work-outline
+file EMITS shape_gallery.oak.md#schema.code-file
 </interfaces>

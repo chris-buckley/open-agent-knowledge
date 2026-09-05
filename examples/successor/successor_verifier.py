@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT) not in sys.path:
+if (ROOT / "oak").is_dir() and str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from oak import (
@@ -25,7 +25,10 @@ from oak import (
     resolve,
     where,
 )
-from examples.agents.bindings import local_bindings
+if __package__:
+    from examples.bindings import local_bindings
+else:
+    from bindings import local_bindings
 
 SCHEMA_SUCCESSOR_VERIFICATION_REQUEST = "schema.successor-verification-request"
 SCHEMA_SUCCESSOR_PROOF = "schema.successor-proof"

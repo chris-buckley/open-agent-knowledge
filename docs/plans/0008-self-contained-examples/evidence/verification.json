@@ -1,0 +1,77 @@
+{
+  "candidate_product_sha256": "3476d694910ea0dc0f7fa855105ba5d102351f2aaafbf342f01317c42d167f4c",
+  "fingerprint_method": "SHA256 of sorted path + NUL + SHA256(file bytes) + LF for oak, build, examples, skills, outputs and pyproject.toml; exclude __pycache__ and *.pyc. Plan records and CI transport are outside this product identity.",
+  "commands": {
+    "python -m compileall -q oak build examples skills/oak-authoring/scripts": 0,
+    "python -m examples.catalog": 0,
+    "python -m build.ebnf": 0,
+    "python -m build.docs": 0,
+    "python -m build.authoring": 0,
+    "python -m build.examples": 0,
+    "python build/examples.py": 0
+  },
+  "registered_checks": [
+    "validate_compact_specimens",
+    "validate_compact_lexing",
+    "validate_compact_control",
+    "validate_compact_triggers",
+    "validate_compact_layout",
+    "validate_compact_short_circuit",
+    "validate_compact_loop_bounds",
+    "validate_compact_routing",
+    "validate_compact_frames",
+    "validate_compact_relative_targets",
+    "validate_text_examples",
+    "validate_metadata",
+    "validate_resolution",
+    "validate_interfaces",
+    "validate_execution",
+    "validate_interpreter_context",
+    "validate_evidence",
+    "validate_while",
+    "validate_part_omission",
+    "validate_act_authoring",
+    "validate_contract_rules",
+    "validate_source_routing",
+    "validate_json_ld_style_display",
+    "validate_human_examples",
+    "validate_shapes",
+    "validate_authoring_skill",
+    "validate_optional_validator",
+    "validate_plans",
+    "validate_agents",
+    "validate_surfaces",
+    "validate_outputs",
+    "validate_architecture"
+  ],
+  "scenario_count": 8,
+  "teaching_stages": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "teaching_document_count": 8,
+  "detached_commands": {
+    "fixed_knowledge": "example.py",
+    "shape_writer": "run.py",
+    "compound_growth": "example.py",
+    "interpreter_context": "example.py",
+    "implementer": "example.py",
+    "delegation": "example.py",
+    "successor": "example.py"
+  },
+  "product_bytes": {
+    "skills/oak-authoring/SKILL.md": 8299,
+    "outputs/oak-authoring.oak.md": 63822
+  },
+  "skill_lines": 190,
+  "local_versions": {
+    "pydantic": "2.13.4",
+    "pydantic-core": "2.46.4",
+    "pydantic-settings": "2.14.1",
+    "PyYAML": "6.0.3"
+  },
+  "local_environment_limitation": "Installed pydantic-settings 2.14.1 is below the unchanged >=2.15 requirement; local results alone are not proof of declared-dependency compatibility. Remote verification installs the exact declared requirements.",
+  "remote_implementation_verification": "Pending branch upload; record observed run before delivery."
+}

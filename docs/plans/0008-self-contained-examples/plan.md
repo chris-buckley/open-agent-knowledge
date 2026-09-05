@@ -8,9 +8,9 @@ Format: `examples/schemas/smeac_plan.oak.md`
 Repository: `chris-buckley/open-agent-knowledge`
 Baseline: `main` at `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a`
 Branch: `plan/self-contained-examples`
-Plan status: Ready for implementation approval.
-Execution status: Not started. All implementation checkboxes remain open.
-Authorization gate: The current request authorizes creation and commitment of this plan only. An explicit instruction to execute this plan starts Phase 1 and authorizes delivery through a review pull request. Merging requires separate user authorization.
+Plan status: Implementation authorized.
+Execution status: Implementation verified locally; remote delivery task P06.05 remains open.
+Authorization gate: The user authorized end-to-end implementation and a review pull request at 2026-09-05T20:45:48+10:00. Merging still requires separate user authorization.
 
 ## 1. Situation
 
@@ -90,59 +90,59 @@ Keep all existing advanced scenarios discoverable and verified even when they ar
 
 ### Phase 1: Inventory and establish the baseline
 Objective: Fix the scenario boundaries, dependencies, learning coverage, and observed baseline before moving sources.
-- [ ] Key task: P01.01 Read every applicable scoped AGENTS document and affected source in full; inventory all registered agent and schema examples, collaborators, fixtures, generated consumers, and verification imports.
-- [ ] Key task: P01.02 Record a complete old-to-new path and ownership map, grouping collaborating documents by scenario and identifying shared schema sources without leaving orphaned examples.
-- [ ] Key task: P01.03 Run both repository verification entry points before changes and capture existing snapshot identities, populated outputs, available execution traces, and authoring-product byte counts; record any baseline failure without relabelling it as a pass.
-- [ ] Key task: P01.04 Select the four-stage teaching core, identify the smallest justified stateful demonstration, and establish each scenario's entry, dependency closure, requirements, and isolated execution command.
+- [x] Key task: P01.01 Read every applicable scoped AGENTS document and affected source in full; inventory all registered agent and schema examples, collaborators, fixtures, generated consumers, and verification imports.
+- [x] Key task: P01.02 Record a complete old-to-new path and ownership map, grouping collaborating documents by scenario and identifying shared schema sources without leaving orphaned examples.
+- [x] Key task: P01.03 Run both repository verification entry points before changes and capture existing snapshot identities, populated outputs, available execution traces, and authoring-product byte counts; record any baseline failure without relabelling it as a pass.
+- [x] Key task: P01.04 Select the four-stage teaching core, identify the smallest justified stateful demonstration, and establish each scenario's entry, dependency closure, requirements, and isolated execution command.
 Success criteria: Every current registration and generated consumer is accounted for; the migration and lesson maps are explicit; baseline results and size measurements are recorded as evidence, with no unresolved baseline failure hidden.
 Transition trigger: The baseline is understood, the source map preserves coverage, and implementation authorization is recorded.
 
 ### Phase 2: Establish scenario directories and local dependencies
 Objective: Reorganize complete examples without changing their demonstrated meaning or introducing duplicate source ownership.
-- [ ] Key task: P02.01 Move registered agent scenarios into their mapped directories with source and canonical sibling pairs; retain collaborating operational documents as separate local documents and remove obsolete active paths.
-- [ ] Key task: P02.02 Keep reusable schema definitions at their existing owner and generate any required scenario-local dependency renders from those definitions rather than copying editable schema code.
-- [ ] Key task: P02.03 Repair Python imports, source identities, typed relative targets, explicit loaders, fixture expectations, and generation paths; preserve contract identity relationships, process behavior, literal contents, and exact tool names.
-- [ ] Key task: P02.04 Implement the minimal explicit catalogue registration and derive example coverage and learning order from it; reuse existing build and run functions instead of introducing a second runner framework.
-- [ ] Key task: P02.05 Make each scenario's lesson, omitted parts, host requirements, fixture limitations, entry path, and regeneration or demonstration command discoverable from its source and generated catalogue.
+- [x] Key task: P02.01 Move registered agent scenarios into their mapped directories with source and canonical sibling pairs; retain collaborating operational documents as separate local documents and remove obsolete active paths.
+- [x] Key task: P02.02 Keep reusable schema definitions at their existing owner and generate any required scenario-local dependency renders from those definitions rather than copying editable schema code.
+- [x] Key task: P02.03 Repair Python imports, source identities, typed relative targets, explicit loaders, fixture expectations, and generation paths; preserve contract identity relationships, process behavior, literal contents, and exact tool names.
+- [x] Key task: P02.04 Implement the minimal explicit catalogue registration and derive example coverage and learning order from it; reuse existing build and run functions instead of introducing a second runner framework.
+- [x] Key task: P02.05 Make each scenario's lesson, omitted parts, host requirements, fixture limitations, entry path, and regeneration or demonstration command discoverable from its source and generated catalogue.
 Success criteria: The complete migration map is realized; no existing example or required dependency is orphaned; each exported OAK graph stays inside its scenario; source review and dependency checks demonstrate single ownership.
 Transition trigger: Relocated examples render, resolve, and retain their baseline fixtures and behavior.
 
 ### Phase 3: Complete the teaching progression
 Objective: Provide the smallest complete progression from fixed facts to work across arrivals.
-- [ ] Key task: P03.01 Move the existing fixed-knowledge definition out of the authoring-guide generator into its own scenario source and generate both repository and teaching forms from that source.
-- [ ] Key task: P03.02 Expose the shape-gallery lesson through a scenario entry backed by the existing shared definitions and populated instances; preserve actual presentation checks rather than asserting only binding validity.
-- [ ] Key task: P03.03 Preserve the shape-writer pipeline as the typed stateless lesson, including its complete sample request, expected intermediate and final outputs, and explicit deterministic-host limitation.
-- [ ] Key task: P03.04 Provide the selected persistent-state lesson with two or more arrivals and explicit state assertions; verify both successful progression and a failing or rejected path without claiming rollback of external effects.
-- [ ] Key task: P03.05 Add only missing fixtures or teaching steps and keep small fixtures inline when that is clearer; do not create empty fixture directories, placeholder hosts, invented tool implementations, or artificial use of all seven parts.
+- [x] Key task: P03.01 Move the existing fixed-knowledge definition out of the authoring-guide generator into its own scenario source and generate both repository and teaching forms from that source.
+- [x] Key task: P03.02 Expose the shape-gallery lesson through a scenario entry backed by the existing shared definitions and populated instances; preserve actual presentation checks rather than asserting only binding validity.
+- [x] Key task: P03.03 Preserve the shape-writer pipeline as the typed stateless lesson, including its complete sample request, expected intermediate and final outputs, and explicit deterministic-host limitation.
+- [x] Key task: P03.04 Provide the selected persistent-state lesson with two or more arrivals and explicit state assertions; verify both successful progression and a failing or rejected path without claiming rollback of external effects.
+- [x] Key task: P03.05 Add only missing fixtures or teaching steps and keep small fixtures inline when that is clearer; do not create empty fixture directories, placeholder hosts, invented tool implementations, or artificial use of all seven parts.
 Success criteria: All four lessons have complete observable examples and justified omissions; fixture assertions and populated outputs are recorded as evidence; every new scenario is justified by a documented coverage gap.
 Transition trigger: The four-stage progression passes its scenario checks and can supply teaching material without hand-maintained copies.
 
 ### Phase 4: Generate the shared skill teaching core
 Objective: Deliver the selected lessons through the existing skill and assembled agent from identical maintained sources.
-- [ ] Key task: P04.01 Generate the OAK catalogue and selected teaching directories from the shared registration, with local dependency closure and complete populated teaching material; keep bulky execution-only fixtures outside the compact core.
-- [ ] Key task: P04.02 Update guide composition, reading routes, example rationale, and review inputs to consume the registered core; remove superseded flat teaching paths and generator-owned duplicate scenario definitions.
-- [ ] Key task: P04.03 Embed the same selected teaching knowledge in the assembled agent as inert data, including any required supporting example documents; preserve the authoring entry as the only operational scope.
-- [ ] Key task: P04.04 Apply existing skill version and fingerprint policy to the changed product; retain optional-validation consent and no-install behavior, and change validator identity only when the existing source or dependency fingerprint contract requires it.
-- [ ] Key task: P04.05 Measure both delivered forms and retain the current size and line limits; reduce repetition or choose a smaller equivalent lesson rather than truncate examples, widen limits, or silently remove required teaching coverage.
+- [x] Key task: P04.01 Generate the OAK catalogue and selected teaching directories from the shared registration, with local dependency closure and complete populated teaching material; keep bulky execution-only fixtures outside the compact core.
+- [x] Key task: P04.02 Update guide composition, reading routes, example rationale, and review inputs to consume the registered core; remove superseded flat teaching paths and generator-owned duplicate scenario definitions.
+- [x] Key task: P04.03 Embed the same selected teaching knowledge in the assembled agent as inert data, including any required supporting example documents; preserve the authoring entry as the only operational scope.
+- [x] Key task: P04.04 Apply existing skill version and fingerprint policy to the changed product; retain optional-validation consent and no-install behavior, and change validator identity only when the existing source or dependency fingerprint contract requires it.
+- [x] Key task: P04.05 Measure both delivered forms and retain the current size and line limits; reduce repetition or choose a smaller equivalent lesson rather than truncate examples, widen limits, or silently remove required teaching coverage.
 Success criteria: Generated deliveries match their sources; all four stages are present in the shared core; parity, inert-example scope, fingerprint, consent, and size checks pass with recorded measurements.
 Transition trigger: Freshly generated skill and agent products pass their existing delivery checks and the new teaching-coverage checks.
 
 ### Phase 5: Verify portability and prevent regressions
 Objective: Prove the reorganization preserves behavior and make the new example contract part of normal verification.
-- [ ] Key task: P05.01 Integrate all scenario registrations with the existing verification entry point; check canonical XML and Markdown round-trips, local resolution, complete bindings, sibling snapshots, populated layouts, and every declared demonstration run.
-- [ ] Key task: P05.02 Copy each exported scenario bundle into an isolated temporary directory and resolve it with a directory-bounded loader; run applicable included fixture hosts using only the declared runtime, with no repository fallback or network dependency.
-- [ ] Key task: P05.03 Add rejection checks for missing local dependencies, escaping targets, missing or stale snapshots, duplicate registration, omitted teaching stages, and source-versus-delivery drift.
-- [ ] Key task: P05.04 Retain and extend skill-versus-agent parity and fusion rejection checks so embedded example instructions, triggers, state, interfaces, and tool-shaped literals never become active authoring behavior.
-- [ ] Key task: P05.05 Compare scenario outputs, state transitions, and emissions with the baseline or explicitly justified new fixtures; regenerate twice and require identical owned file sets and bytes, including absence of stale generated paths.
+- [x] Key task: P05.01 Integrate all scenario registrations with the existing verification entry point; check canonical XML and Markdown round-trips, local resolution, complete bindings, sibling snapshots, populated layouts, and every declared demonstration run.
+- [x] Key task: P05.02 Copy each exported scenario bundle into an isolated temporary directory and resolve it with a directory-bounded loader; run applicable included fixture hosts using only the declared runtime, with no repository fallback or network dependency.
+- [x] Key task: P05.03 Add rejection checks for missing local dependencies, escaping targets, missing or stale snapshots, duplicate registration, omitted teaching stages, and source-versus-delivery drift.
+- [x] Key task: P05.04 Retain and extend skill-versus-agent parity and fusion rejection checks so embedded example instructions, triggers, state, interfaces, and tool-shaped literals never become active authoring behavior.
+- [x] Key task: P05.05 Compare scenario outputs, state transitions, and emissions with the baseline or explicitly justified new fixtures; regenerate twice and require identical owned file sets and bytes, including absence of stale generated paths.
 Success criteria: Positive and negative checks pass; isolated-bundle runs prove the declared portability boundary; baseline comparisons, scope checks, and repeated-generation equality provide recorded evidence.
 Transition trigger: All new contract checks are registered, passing, and preserve the existing verification coverage.
 
 ### Phase 6: Update ownership, review, and deliver
 Objective: Deliver one coherent branch with accurate current documentation, complete evidence, and a review pull request.
-- [ ] Key task: P06.01 Update the affected examples, skills, build, and output ownership documents and active references from their source owners; repair historical navigational links without rewriting historical claims or path snapshots.
-- [ ] Key task: P06.02 Compile affected Python, regenerate all affected products, and run `python -m build.examples` and `python build/examples.py`; record exact commands, exit results, and the tested source revision or immutable working-tree identity.
-- [ ] Key task: P06.03 Review the complete diff and search active sources and generated products for replaced paths and duplicate definitions; confirm unchanged grammar, datatype and execution semantics, dependencies, host boundaries, and authoring validation policy.
-- [ ] Key task: P06.04 Add `report.md` with the final path map, per-task evidence, byte counts, actual check results, and limitations; mark tasks complete only when their evidence is present and independently recheck the final candidate.
+- [x] Key task: P06.01 Update the affected examples, skills, build, and output ownership documents and active references from their source owners; repair historical navigational links without rewriting historical claims or path snapshots.
+- [x] Key task: P06.02 Compile affected Python, regenerate all affected products, and run `python -m build.examples` and `python build/examples.py`; record exact commands, exit results, and the tested source revision or immutable working-tree identity.
+- [x] Key task: P06.03 Review the complete diff and search active sources and generated products for replaced paths and duplicate definitions; confirm unchanged grammar, datatype and execution semantics, dependencies, host boundaries, and authoring validation policy.
+- [x] Key task: P06.04 Add `report.md` with the final path map, per-task evidence, byte counts, actual check results, and limitations; mark tasks complete only when their evidence is present and independently recheck the final candidate.
 - [ ] Key task: P06.05 After all preceding tasks pass, commit the complete implementation on this branch, open a review pull request against `main`, inspect the actual changed-file list, and record the pull request and final commit; do not merge.
 Success criteria: Every applicable checkbox has evidence, no unexplained diff remains, both verification entry points pass, regeneration is stable, and the complete reviewed change is committed with its report and review pull request.
 Transition trigger: Mission complete when the verified branch and pull request are delivered; merge remains a separate user decision.
@@ -199,4 +199,4 @@ Reporting: Report plan preparation separately from implementation completion. Th
 
 ### Acknowledgement
 All parties MUST acknowledge receipt and understanding of this plan.
-The user's request to create the plan is recorded. Implementation authorization remains pending; plan readiness does not imply that authorization or completion of any implementation task.
+The user authorized implementation and a review pull request. The implementing agent acknowledges the plan; completion remains evidence-gated and merge is not authorized.

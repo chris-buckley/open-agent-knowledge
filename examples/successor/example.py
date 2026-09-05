@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT) not in sys.path:
+if (ROOT / "oak").is_dir() and str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from oak import (
@@ -45,22 +45,44 @@ from oak import (
     resolve,
     where,
 )
-from examples.agents.bindings import local_bindings
-from examples.agents.amendment_reviewer import (
-    INTERFACE_REVIEW_REQUEST_INPUT as WORKER_REVIEW_REQUEST_INPUT,
-    REVIEW_PLACEHOLDERS,
-    REQUEST_PLACEHOLDERS as REVIEW_REQUEST_PLACEHOLDERS,
-    amendment_reviewer_node,
-)
-from examples.agents.successor_verifier import (
-    INTERFACE_VERIFICATION_REQUEST_INPUT as WORKER_VERIFICATION_REQUEST_INPUT,
-    PROOF_PLACEHOLDERS,
-    REQUEST_PLACEHOLDERS as VERIFICATION_REQUEST_PLACEHOLDERS,
-    SCHEMA_SUCCESSOR_PROOF,
-    SCHEMA_SUCCESSOR_VERIFICATION_REQUEST,
-    TOOL_OAK_VERIFY_SUCCESSOR,
-    successor_verifier_node,
-)
+if __package__:
+    from examples.bindings import local_bindings
+else:
+    from bindings import local_bindings
+if __package__:
+    from .amendment_reviewer import (
+        INTERFACE_REVIEW_REQUEST_INPUT as WORKER_REVIEW_REQUEST_INPUT,
+        REVIEW_PLACEHOLDERS,
+        REQUEST_PLACEHOLDERS as REVIEW_REQUEST_PLACEHOLDERS,
+        amendment_reviewer_node,
+    )
+else:
+    from amendment_reviewer import (
+        INTERFACE_REVIEW_REQUEST_INPUT as WORKER_REVIEW_REQUEST_INPUT,
+        REVIEW_PLACEHOLDERS,
+        REQUEST_PLACEHOLDERS as REVIEW_REQUEST_PLACEHOLDERS,
+        amendment_reviewer_node,
+    )
+if __package__:
+    from .successor_verifier import (
+        INTERFACE_VERIFICATION_REQUEST_INPUT as WORKER_VERIFICATION_REQUEST_INPUT,
+        PROOF_PLACEHOLDERS,
+        REQUEST_PLACEHOLDERS as VERIFICATION_REQUEST_PLACEHOLDERS,
+        SCHEMA_SUCCESSOR_PROOF,
+        SCHEMA_SUCCESSOR_VERIFICATION_REQUEST,
+        TOOL_OAK_VERIFY_SUCCESSOR,
+        successor_verifier_node,
+    )
+else:
+    from successor_verifier import (
+        INTERFACE_VERIFICATION_REQUEST_INPUT as WORKER_VERIFICATION_REQUEST_INPUT,
+        PROOF_PLACEHOLDERS,
+        REQUEST_PLACEHOLDERS as VERIFICATION_REQUEST_PLACEHOLDERS,
+        SCHEMA_SUCCESSOR_PROOF,
+        SCHEMA_SUCCESSOR_VERIFICATION_REQUEST,
+        TOOL_OAK_VERIFY_SUCCESSOR,
+        successor_verifier_node,
+    )
 
 SCHEMA_REVIEWER_REQUEST = "amendment_reviewer.oak.md#schema.amendment-review-request"
 SCHEMA_REVIEWER_RESULT = "amendment_reviewer.oak.md#schema.amendment-review"
@@ -771,9 +793,9 @@ successor_node = Node(
 )
 
 TARGET = Path(__file__).with_suffix(".oak.md")
-SOURCE = "examples/agents/successor.oak.md"
-AMENDMENT_REVIEWER_SOURCE = "examples/agents/amendment_reviewer.oak.md"
-SUCCESSOR_VERIFIER_SOURCE = "examples/agents/successor_verifier.oak.md"
+SOURCE = "examples/successor/example.oak.md"
+AMENDMENT_REVIEWER_SOURCE = "examples/successor/amendment_reviewer.oak.md"
+SUCCESSOR_VERIFIER_SOURCE = "examples/successor/successor_verifier.oak.md"
 
 AMENDMENT_VALUES = {
     PLACEHOLDER_AMENDMENT_ID: "proof-carrying-successors",
