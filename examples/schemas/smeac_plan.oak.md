@@ -51,11 +51,11 @@ Intent: <LEADERS_INTENT>
 Concept of operations: <CONCEPT_OF_OPERATIONS>
 
 ### Phase <PHASE_NUMBER>: <PHASE_NAME>
-- Objective: <PHASE_OBJECTIVE>
-- Key task: <PHASE_TASK>
+Objective: <PHASE_OBJECTIVE>
+- [ ] Key task: <PHASE_TASK>
   ...
-- Success criteria: <PHASE_SUCCESS_CRITERIA>
-- Transition trigger: <TRANSITION_TRIGGER>
+Success criteria: <PHASE_SUCCESS_CRITERIA>
+Transition trigger: <TRANSITION_TRIGGER>
 ...
 
 ### Coordinating Instructions
