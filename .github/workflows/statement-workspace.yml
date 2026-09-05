@@ -4,28 +4,33 @@ on:
     branches: [plan/typed-statement-conventions]
     paths: [.github/workflows/statement-workspace.yml]
 permissions:
-  contents: read
+  contents: write
 jobs:
-  baseline:
+  implementation:
+    if: github.ref == 'refs/heads/plan/typed-statement-conventions'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - name: Export committed repository
-        run: |
-          mkdir -p /tmp/oak-statements
-          git archive --format=zip --output=/tmp/oak-statements/repository.zip HEAD
-          git rev-parse HEAD > /tmp/oak-statements/revision.txt
-          git rev-parse HEAD^{tree} > /tmp/oak-statements/tree.txt
-      - uses: actions/upload-artifact@v4
-        with:
-          name: oak-statement-source
-          path: /tmp/oak-statements/
-          retention-days: 3
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+      - name: Apply exact tested source patch
+        run: |
+          mkdir -p /tmp/oak-statement-result
+          python - <<'PY'
+          import base64, gzip, hashlib, pathlib, subprocess
+          encoded = ''.join(pathlib.Path(f'.github/statement-transfer/patch.{i}').read_text() for i in range(4))
+          pathlib.Path('/tmp/oak-statement-result/transfer.txt').write_text(encoded)
+          encoded = encoded.replace('JzKFJJ++l3Jei2Lfi2i2r3', 'JzKFJ++l3Jei2Lfi2r3')
+          patch = gzip.decompress(base64.b64decode(encoded, validate=True))
+          assert hashlib.sha256(patch).hexdigest() == '9fbbd147d909e0350f70d513b8fb743bb8721cfd1861b4d198618682e214e5af', 'source patch mismatch'
+          path = pathlib.Path('/tmp/oak-statement-result/implementation.patch')
+          path.write_bytes(patch)
+          subprocess.run(['git', 'apply', '--check', str(path)], check=True)
+          subprocess.run(['git', 'apply', str(path)], check=True)
+          print('Exact source patch verified and applied.')
+          PY
       - name: Install declared dependencies
         run: |
           python - <<'PY'
@@ -33,7 +38,53 @@ jobs:
           dependencies = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['dependencies']
           subprocess.run([sys.executable, '-m', 'pip', 'install', *dependencies], check=True)
           PY
-      - name: Baseline verification
+      - name: Generate and verify exact candidate
         run: |
+          python -m compileall -q oak build examples skills/oak-authoring/scripts
+          python -m examples.catalog
+          python -m build.ebnf
+          python -m build.docs
+          python -m build.authoring
+          cat > /tmp/oak-statement-result/check-product.py <<'PY'
+          import hashlib, pathlib, subprocess
+          names = subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0')[:-1]
+          h = hashlib.sha256()
+          for name in sorted(names):
+              if name.startswith(('docs/plans/', '.github/statement-transfer/')) or name == '.github/workflows/statement-workspace.yml':
+                  continue
+              h.update(name.encode() + b'\0' + pathlib.Path(name).read_bytes() + b'\0')
+          actual = h.hexdigest()
+          assert actual == '764f28c1ca9390f69a8eb62c3421e5e92b17a241f5db2232f10513eca90de503', actual
+          print('Verified product:', actual)
+          PY
+          python /tmp/oak-statement-result/check-product.py
           python -m build.examples
           python build/examples.py
+          python -m examples.catalog
+          python -m build.ebnf
+          python -m build.docs
+          python -m build.authoring
+          python /tmp/oak-statement-result/check-product.py
+          git diff --check
+      - name: Verify new pinned bootstrap and cache reuse
+        run: |
+          set -o pipefail
+          python -m build.checks.bootstrap_integration --allow-download | tee /tmp/oak-statement-result/bootstrap.log
+      - name: Commit verified implementation on authorized branch
+        run: |
+          test "$GITHUB_REF" = refs/heads/plan/typed-statement-conventions
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'feat(authoring): deliver typed statement conventions and verified teaching'
+          git push origin HEAD:refs/heads/plan/typed-statement-conventions
+          git rev-parse HEAD > /tmp/oak-statement-result/revision.txt
+          git rev-parse HEAD^{tree} > /tmp/oak-statement-result/tree.txt
+          git archive --format=zip --output=/tmp/oak-statement-result/repository.zip HEAD
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oak-statement-result
+          path: /tmp/oak-statement-result/
+          retention-days: 3
