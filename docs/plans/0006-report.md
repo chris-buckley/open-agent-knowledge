@@ -5,7 +5,7 @@ Classification: PUBLIC
 Plan: [0006-plan.md](0006-plan.md)
 Branch: `feat/compact-oak-syntax`
 Implementation verdict: Approved, following a separate self-review pass.
-Delivery status: implementation verified; PR creation and final delivery evidence are in progress.
+Delivery status: complete; all 101 plan tasks are evidenced and PR #12 is open for review.
 
 ## Outcome
 
@@ -77,7 +77,7 @@ The cross-version runtime comparison executes the same programmatically construc
 | Skill entry size | 8,234 bytes; limit 10,000 |
 | Standalone agent size | 51,952 bytes; limit 64,000 |
 
-The package candidate was pushed before its revision was written into the validator. A subsequent metadata/product commit publishes the matching identity. The package and dependency declaration have no diff between that pinned revision and the verified candidate. Existing validator checks exercised actual valid/invalid subprocess outcomes, not-performed results, no-consent refusal, fingerprint mismatches, cache reuse, and controlled mocked installation/error cases without silently installing a runtime validator. Real detached bootstrap remains the explicit existing PR-CI check, reported in the delivery evidence when observed.
+The package candidate was pushed before its revision was written into the validator. A subsequent metadata/product commit publishes the matching identity. The package and dependency declaration have no diff between that pinned revision and the verified candidate. Existing validator checks exercised actual valid/invalid subprocess outcomes, not-performed results, no-consent refusal, fingerprint mismatches, cache reuse, and controlled mocked installation/error cases without silently installing a runtime validator. The real detached bootstrap also passed in the existing PR workflow, run 33943314174: no-consent refusal, approved pinned download, isolated dependency installation, standalone parsing/resolution, and retained cache reuse without another permission flag.
 
 Fusion still has one operational entry document and supporting constants/schemas only. Source instructions are not transplanted across policy scopes. Typed targets are resolved and rewritten, while literal values, embedded teaching documents, templates, scripts, and tool names retain their meaning. Both capability forms come from the same generated knowledge sources; they are not independently authored prompts.
 
@@ -99,7 +99,7 @@ The existing Python example models already express the required canonical meanin
 
 ## Task-to-evidence audit
 
-Ranges below cover every task ID in the named range inclusively. The final delivery row is closed only with the confirmed PR and final verification evidence. No task is removed or labelled not applicable.
+Ranges below cover every task ID in the named range inclusively. The final delivery row is closed with the confirmed PR and observed final verification evidence. No task is removed or labelled not applicable.
 
 | Task IDs | Evidence and result |
 | --- | --- |
@@ -113,7 +113,7 @@ Ranges below cover every task ID in the named range inclusively. The final deliv
 | P07.01-P07.09 | `ListText`, shared expression rendering, trigger separator, `validate_compact_layout`, generated snapshots, all specimen grouping/style checks, and byte-stable repeated generation. |
 | P08.01-P08.08 | Source/product ownership table above; generated EBNF and reference; unchanged semantic export/schema/interchange captures; all AGENTS ownership and canonical checks; classified obsolete-syntax search. |
 | P09.01-P09.14 | S01-S12 and C01-C12 mapping below; ten registered conformance functions; 80 deterministic nested condition trees; 24 trigger field-order permutations; positive and negative contract cases; existing example writers and runner. |
-| P10.01-P10.09 | Shared guide ownership and rule routing, generated skill/agent parity checks, observed byte sizes, two-commit immutable pin sequence, actual source/dependency equality, existing authoring and optional-validator checks. Explicit detached-bootstrap evidence is added after PR CI. |
+| P10.01-P10.09 | Shared guide ownership and rule routing, generated skill/agent parity checks, observed byte sizes, two-commit immutable pin sequence, actual source/dependency equality, existing authoring and optional-validator checks. Explicit detached bootstrap passed in PR run 33943314174. |
 | P11.01-P11.06 | Compilation, generators, both complete entry points, repeated clean regeneration, seven byte-identical comparison captures, current-syntax search, and observed 58 runtime traces. |
 | P11.07-P11.09 | Separate self-review described below, resolved integration findings, repeated candidate checks, and this task/specimen/conformance evidence audit. |
 | P12.01-P12.06 | This report, complete published candidate, and the confirmed PR/final-state evidence recorded in the delivery section. PR effects and handoff are not claimed before they occur. |
@@ -143,7 +143,7 @@ Every S01-S12 specimen is defined in `build/checks/compact_fixtures.py` and exer
 | C07 | `validate_compact_frames`, `validate_compact_relative_targets` and existing execution/resolution checks: frames, promotion, tools, failures, local emissions and supported relative calls |
 | C08 | `validate_compact_layout`, specimen variants and repeated generation: 99/100/101 code points, indentation/suffix width, atomic values, recursive expansion and idempotence |
 | C09 | Existing agents, outputs, surfaces, rendering, parsing, human-example and authoring checks, plus all owning generators |
-| C10 | Existing authoring and optional-validator checks, immutable revision/fingerprint checks, product byte limits, and explicit PR-CI bootstrap when recorded |
+| C10 | Existing authoring and optional-validator checks, immutable revision/fingerprint checks, product byte limits, and successful explicit PR-CI bootstrap in run 33943314174 |
 | C11 | Both complete candidate commands, clean regeneration, separate self-review and the inclusive task-ID audit |
 | C12 | Confirmed branch and PR effects, report/plan publication, final head and final-state checks in the delivery evidence |
 
@@ -167,8 +167,12 @@ Relative-process checks use supported declared-output promotion followed by an e
 
 The implementation and generated products are committed and pushed at `8ef93c13d1a9dc0f181bc0b4200e878f44b541dc`. The package identity is pinned separately as recorded above. This report commit is evidence-only and is not the validator pin.
 
-PR: pending creation after this report is committed.
-Final checklist: delivery tasks remain open until their observed effects are recorded.
-Final CI: the successful publication runner and repeated local candidate checks are recorded above; the PR's explicit detached bootstrap and final-head results will be recorded after observation.
+PR: [#12](https://github.com/chris-buckley/open-agent-knowledge/pull/12), open and non-draft, from `feat/compact-oak-syntax` to `main`.
+Final checklist: all 101 stable task IDs are checked. The handoff response discharges P12.06 as specified by the plan; no merge is part of delivery.
+PR verification: [run 33943314174](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33943314174) passed the complete product/freshness checks and the actual detached validator bootstrap and cache reuse.
+
+Final evidence closure verifies the PR and prior CI through GitHub before changing the checklist, then runs compilation, generators, both complete entry points, explicit bootstrap, identity checks and clean regeneration against the completed documents. It commits and pushes only after those checks pass, verifies the PR head again, and exports the exact commit plus command logs. The temporary closure workflow removes itself before the final checks and commit. The closure commit is evidence-only relative to the verified product candidate; no package, generated product, dependency or permanent CI file changes during closure.
+
+The closure runner is [run 33943632760](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33943632760). Its artifact records the exact verification subject and final source bundle. Later evidence-only or identical-tree CI-trigger commits do not alter the pinned package. The final remote head is reported through the PR and the user handoff rather than inventing a self-referential hash inside this report.
 
 No merge, branch deletion, release, or force-push was performed.
