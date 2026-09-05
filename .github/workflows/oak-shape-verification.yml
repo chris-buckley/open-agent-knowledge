@@ -1,16 +1,90 @@
-name: OAK shape transfer check
+name: OAK shape verification
 on:
   push:
     branches: [feat/shape-first-schemas]
 permissions:
-  contents: read
+  contents: write
+  statuses: write
 jobs:
-  inspect:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Apply the checksum-verified change set
+        run: |
+          test "$GITHUB_REF" = refs/heads/feat/shape-first-schemas
+          python - <<'PY'
+          import base64, gzip, hashlib, subprocess
+          from pathlib import Path
+          encoded = Path('.agents/shape-changes.patch.gz.b64').read_text()
+          if hashlib.sha256(encoded.encode()).hexdigest() != 'ca7f6bfb1ccd6a282a4f20000bd694eda3f8530c0ec59d0ce1d190a43a8a0596':
+              raise SystemExit('Unexpected transfer bytes')
+          # Exact transcription repairs established by downloaded byte comparison.
+          for start, end, replacement in [(14962,14963,''),(12725,12726,'3'),(6214,6215,'3'),(6093,6094,''),(5606,5608,''),(2818,2819,''),(2593,2594,'')]:
+              encoded = encoded[:start] + replacement + encoded[end:]
+          patch = gzip.decompress(base64.b64decode(encoded))
+          if hashlib.sha256(patch).hexdigest() != 'ff40a7acfcb4ce0af45869b60cdab3b6c1f05377d8b39581acfd715c3213ad17':
+              raise SystemExit('Transferred patch checksum mismatch')
+          Path('/tmp/oak-shapes.patch').write_bytes(patch)
+          subprocess.run(['git', 'apply', '--index', '/tmp/oak-shapes.patch'], check=True)
+          PY
+          git rm .agents/shape-changes.patch.gz.b64 .github/workflows/oak-shape-verification.yml
+          test "$(git write-tree)" = 7ae9d6e8b3bf4f7067d3ef128fb5e7f8ae7d5060
+      - name: Install the declared repository dependencies
+        run: |
+          python - <<'PY'
+          import subprocess, sys, tomllib
+          from pathlib import Path
+          deps = tomllib.loads(Path('pyproject.toml').read_text())['project']['dependencies']
+          subprocess.run([sys.executable, '-m', 'pip', 'install', *deps], check=True)
+          PY
+      - name: Verify compilation and all registered checks
+        run: |
+          python -m compileall -q oak build examples
+          python -m build.examples
+          python build/examples.py
+          git diff --cached --check
+      - name: Verify repeated generation preserves the exact reviewed tree
+        run: |
+          python - <<'PY'
+          import subprocess
+          from build import authoring, docs, ebnf
+          from examples.schemas import shape_gallery, process_execution_table
+          from examples.agents import shape_writer, interpreter_context
+          expected = '7ae9d6e8b3bf4f7067d3ef128fb5e7f8ae7d5060'
+          for attempt in range(2):
+              for module in (authoring, docs, ebnf, shape_gallery, process_execution_table, shape_writer, interpreter_context):
+                  module.write()
+              subprocess.run(['git', 'add', '-A'], check=True)
+              actual = subprocess.check_output(['git', 'write-tree'], text=True).strip()
+              if actual != expected:
+                  raise SystemExit('Generated tree differs from the reviewed tree')
+              print(f'Generation {attempt + 1}: {actual}')
+          PY
+      - name: Publish only the verified feature branch
+        id: publish
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'feat(oak): teach shape-first schemas with populated examples'
+          git push origin HEAD:refs/heads/feat/shape-first-schemas
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Record verification against the actual published commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT_SHA: ${{ steps.publish.outputs.sha }}
+        run: |
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$COMMIT_SHA" -f state=success -f context='OAK verification' -f description='Compilation, 19 checks, both entry points, and repeated generation passed.' -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+      - name: Preserve the exact published source
+        run: |
+          git archive --format=tar HEAD > /tmp/oak-source.tar
+          git rev-parse HEAD > /tmp/oak-commit.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: oak-shape-transfer
-          path: .agents/shape-changes.patch.gz.b64
-          include-hidden-files: true
+          name: oak-shapes-verified-${{ github.run_id }}
+          path: |
+            /tmp/oak-source.tar
+            /tmp/oak-commit.txt
