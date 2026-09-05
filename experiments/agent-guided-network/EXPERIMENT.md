@@ -1,7 +1,7 @@
 # Agent-guided numerical networks
 
 Prepared: 2026-09-05
-Status: A four-module sequential-assistant feasibility run is implemented and measured. Engineering demonstrated on the synthetic task; no scientific superiority is established. See results/first-run/REPORT.md.
+Status: The first feasibility run and the harder attention follow-on are implemented and measured. Agent-free numerical execution is demonstrated; scientific agent superiority is not established. See results/first-run/REPORT.md and results/attention-run/REPORT.md.
 Baseline: OAK `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a`.
 Branch: `experiment/agent-guided-network`.
 
@@ -220,6 +220,15 @@ experiments/
     EXPERIMENT.md
     nodes/
       CONTRACT.md
+      initial/
+      learned/
+      attention-initial/
+      attention-learned/
+    attention/
+      ATTENTION.md
+      study.py and study.oak.md
+      author.py, numeric.py, task.py, learn.py
+      session.py, export.py, tests.py, run.py
     training/
       PROTOCOL.md
     runtime/
@@ -230,13 +239,15 @@ experiments/
       SOURCES.md
     results/
       STATUS.md
+      first-run/
+      attention-run/
 
-docs/plans/0009-agent-guided-network/
+docs/plans/0010-agent-guided-network/
   plan.md
   report.md
 ```
 
-This file is the complete conceptual synthesis and decision rationale. Supporting files own precise contracts, procedures, research attribution, and evidence status without creating a second architecture. The [SMEAC plan](../../docs/plans/0009-agent-guided-network/plan.md) owns implementation tasks and authorisation gates; the [report](../../docs/plans/0009-agent-guided-network/report.md) records delivery evidence.
+This file is the complete conceptual synthesis and decision rationale. Supporting files own precise contracts, procedures, research attribution, and evidence status without creating a second architecture. The [SMEAC plan](../../docs/plans/0010-agent-guided-network/plan.md) owns implementation tasks and authorisation gates; the [report](../../docs/plans/0010-agent-guided-network/report.md) records delivery evidence.
 
 During implementation, actual node `.oak.md` documents belong in `nodes/`, training code beside its protocol, numerical adapter/export code in `runtime/`, and the evaluator/tests beside the benchmark. Reusable schemas should be authored as OAK documents when implemented; this design does not introduce a second task-specific configuration language. A distributable training skill belongs in the repository's normal `skills/` product area only when it is genuinely implemented and packaged.
 
@@ -255,3 +266,10 @@ The running assistant made four proposals on seed 7, three accepted and one reje
 Run `python experiments/agent-guided-network/run.py test` for local checks. After installing the repository dependencies and the experiment-local `requirements.txt`, replay the recorded numerical sequence with `python experiments/agent-guided-network/run.py replay /tmp/oak-replay --recorded experiments/agent-guided-network/results/first-run`. Replay is not a new agent session.
 
 For a fresh manual session, use `prepare /tmp/oak-session`, then `observe /tmp/oak-session`. The running agent uses `propose` with `--owner`, `--method`, and `--rationale`, followed by a separate `apply` with `--proposal`. `finish` closes selection before testing and export. Use those subcommands after the same `python experiments/agent-guided-network/run.py` prefix. Never alter the frozen implementation or study during a scored session.
+
+
+## Attention follow-on
+
+The user authorised adding attention and a harder experiment on this same branch on 5 September 2026. [The attention extension](attention/ATTENTION.md) preserves the first-run evidence and introduces two linked single-head cross-attention OAK nodes, inline query/key/value/output matrices, variable-length two-hop retrieval, and held-out longer and near-distractor tests. [Its frozen OAK study](attention/study.oak.md) owns the exact numerical protocol. This is an attention mechanism, not a complete Transformer or an independent-agent population. One running assistant continues to represent the logical learning roles; exported computation remains agent-free.
+
+The [measured attention report](results/attention-run/REPORT.md) records four actual proposals on seed 7: one direct output-calibration edit accepted and three rejected. Two other seeds replayed the methods. Across these seeds, ordinary, longer-table, and near-distractor accuracies were 93.49%, 77.67%, and 38.02%. The actual seed-7 improvement was calibration, not accuracy, and a fixed numerical scaling grid found the same edit. Exports matched on all tested cases. This identifies generalisation and calibration limits, not scientific agent superiority.

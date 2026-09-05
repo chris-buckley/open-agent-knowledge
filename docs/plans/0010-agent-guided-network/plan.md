@@ -33,7 +33,7 @@ The design starts from `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a` on `experiment
 
 ## 2. Mission
 
-Record the experiment and execute the subsequently authorised four-module sequential-assistant feasibility study, while retaining open tasks for the broader research programme.
+Record and execute the authorised sequential-assistant feasibility and attention studies, while retaining open tasks for the broader research programme.
 
 Task: Deliver the requested documentation-first commit, an executable numerical prototype, actual assistant decisions, measured comparisons, and agent-free export evidence.
 Purpose: Make the user's learning intent precise, testable, and independent of inference-time agents.
@@ -64,7 +64,7 @@ Transition trigger: The numerical reference and initial tests pass on the frozen
 ### Phase 3: Implement constrained learning
 Objective: Materialise agent proposals as tested numerical parameter changes.
 - [x] Key task: P03.01 Implement observation, proposal, candidate, evaluation, and decision records with revision-aware acceptance.
-- [ ] Key task: P03.02 Implement direct-edit and behavioural-proposal fitting treatments with numerical and resource bounds. Behavioural fitting is complete; the separate direct-edit treatment remains outside the first run.
+- [x] Key task: P03.02 Implement direct-edit and behavioural-proposal fitting treatments with numerical and resource bounds. Behavioural fitting is evidenced by the first run; bounded direct projection edits are evidenced by the attention follow-on.
 - [x] Key task: P03.03 Implement independent whole-network evaluation, stale-candidate rejection, combined-update tests, and retained-incumbent rollback.
 Success criteria: Executable tests demonstrate real matrix changes, preserved revision ownership, explicit failures, and no agent contribution to scored computation.
 Transition trigger: A complete learning cycle and its negative cases pass; the bounded CPU feasibility budget is recorded in evaluation/study.oak.md.
@@ -85,9 +85,30 @@ Objective: Demonstrate that the learned numerical capability survives removal of
 Success criteria: Agent-free artifact evidence and honest comparison verdicts are recorded; no claim of hundred-node scalability is made without its own study.
 Transition trigger: The authorised experiment is complete when all applicable implementation and evaluation evidence has been reviewed.
 
+### Phase 6: Add numerical attention
+Objective: Implement the user-authorised attention extension without changing the first study.
+- [x] Key task: P06.01 Define two linked single-head attention documents, inline projection matrices, masks, canonical contracts, and a closed host profile.
+- [x] Key task: P06.02 Verify all analytic gradients, masking, numerical/OAK parity, invalid inputs, and export rejection before freezing the harder study.
+Success criteria: Twenty attention tests pass; the study states exact equations, data, budgets, baselines, stress tests, and one physical proposer.
+Transition trigger: Freeze the validated attention source and study before scored proposals.
+
+### Phase 7: Run the harder study
+Objective: Record real assistant decisions and evaluate stronger numerical controls and unseen conditions.
+- [x] Key task: P07.01 Inspect observations and record up to four actual proposals before independent evaluation; retain rejected candidates.
+- [x] Key task: P07.02 Close selection, replay methods on two additional seeds, and evaluate ordinary, longer, crowded-key, and uniform-attention intervention conditions.
+Success criteria: Revision-pinned records distinguish real decisions, numerical replay, calibration, accuracy, and resource differences.
+Transition trigger: Selected snapshot identities are closed before final metrics and their conclusions are recorded.
+
+### Phase 8: Verify attention delivery
+Objective: Deliver reproducible attention nodes and measured limits on the existing branch and PR.
+- [x] Key task: P08.01 Verify isolated numerical exports, OAK executor parity, and a complete replay of recorded attention results.
+- [ ] Key task: P08.02 Run complete repository and both experiment checks, publish the exact tested tree, and record conclusions without a superiority or scaling claim.
+Success criteria: Source, representative OAK nodes, raw evidence, report, and CI checks are available on the same branch; first-run records remain unchanged.
+Transition trigger: The attention follow-on is delivered; unperformed broad-study tasks remain open.
+
 ### Coordinating Instructions
 - Timeline: design requested on 5 September 2026; the bounded follow-on run was authorised and executed on that date.
-- Boundaries: the authorised follow-on is a four-module feasibility run; independent-agent, semantic-ablation, and hundred-node studies remain outside this run.
+- Boundaries: the user also authorised the attention follow-on on 5 September 2026. Preserve the first run; independent-agent, semantic-description ablation, and hundred-node studies remain open.
 - Operating guidelines: follow the experiment's node, training, export, and benchmark contracts; use the full repository verification entry points for implementation changes.
 - Risk mitigation: preserve a revision-pinned incumbent, protect the final test set, and separate schema validity from observed numerical success.
 
@@ -103,8 +124,8 @@ Transition trigger: The authorised experiment is complete when all applicable im
 | --- | --- | --- | --- |
 | Branch and repository access | One experiment branch | Connected GitHub tools | AVAILABLE |
 | Experiment specification | One linked design package | This change | AVAILABLE |
-| Numerical runtime | One four-module NumPy adapter | Experiment source | AVAILABLE |
-| Agent and compute budget | One assistant, six-proposal cap, bounded CPU fitting | User follow-on and frozen study | AVAILABLE |
+| Numerical runtime | First-run and two-block attention adapters | Experiment source | AVAILABLE |
+| Agent and compute budget | One assistant; separate frozen budgets, attention capped at four proposals | User follow-ons and OAK studies | AVAILABLE |
 | Sealed benchmark data | Three seeded train/dev/test splits | Frozen deterministic generator | AVAILABLE |
 
 Supply: Keep dependencies unchanged for the design package. Select maintained numerical dependencies and record versions only when implementation requires them.
@@ -123,7 +144,7 @@ Rollback: Do not modify main. During later learning, retain the accepted network
 | Task state | This SMEAC plan | Record authorisation and checkboxes | On observed task transitions |
 | Evidence | Report and immutable run records | Record actual checks and outcomes | At each delivered milestone or run |
 
-Reporting: The first-run report records measured learning and export; the delivery report distinguishes local execution from CI. PR 14 remains the review vehicle; no merge is authorised.
+Reporting: The first-run and attention reports record measured learning and export; the delivery report distinguishes local execution from CI. PR 14 remains the review vehicle; no merge is authorised.
 
 | Decision | Authority | Escalation |
 | --- | --- | --- |

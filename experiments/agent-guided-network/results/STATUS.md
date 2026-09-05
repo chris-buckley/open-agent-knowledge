@@ -17,4 +17,10 @@ The [first run report](first-run/REPORT.md) records an actual sequential-assista
 
 Code and study hashes, data identities, proposals, observations, decisions, selected network hashes, environment, and numerical results are retained under first-run. The actual complete run's snapshots and standalone exports can be regenerated using the recorded replay command. The representative initial and learned seed-7 OAK snapshots are committed as inspectable source documents.
 
-Repository CI is separate from scientific evidence. The [delivery report](../../../docs/plans/0009-agent-guided-network/report.md) records publication checks. No result establishes the correctness of all possible predictions or an advantage attributable to semantic agent understanding.
+Repository CI is separate from scientific evidence. The [delivery report](../../../docs/plans/0010-agent-guided-network/report.md) records publication checks. No result establishes the correctness of all possible predictions or an advantage attributable to semantic agent understanding.
+
+## Attention follow-on
+
+[Attention report](attention-run/REPORT.md): two linked single-head cross-attention nodes, 416 trainable scalars, and a harder variable-length two-hop retrieval task. One live assistant session made four proposals; only output calibration was accepted on seed 7. Replay seeds accepted different subsets. Ordinary accuracy does not transfer to long or nearly ambiguous inputs: three-seed means are 93.49%, 77.67%, and 38.02%.
+
+Twenty new attention tests and complete numerical replay passed locally. All nine seed/regime exports passed isolated execution with maximum observed difference 0.0, as did sampled OAK-executor parity checks. Raw observations, proposals, rejections, source/data identities, and final results are retained under attention-run. The first-run records remain unchanged. Neither the actual calibration edit nor the three-seed means establish agent superiority.
