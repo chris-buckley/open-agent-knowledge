@@ -8,8 +8,8 @@ Format: `examples/schemas/smeac_plan.oak.md`
 Repository: `chris-buckley/open-agent-knowledge`
 Baseline: `main` at `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a`
 Branch: `plan/self-contained-examples`
-Plan status: Implementation authorized.
-Execution status: Implementation verified locally; remote delivery task P06.05 remains open.
+Plan status: Complete.
+Execution status: All 29 tasks complete; delivered for review in PR #13.
 Authorization gate: The user authorized end-to-end implementation and a review pull request at 2026-09-05T20:45:48+10:00. Merging still requires separate user authorization.
 
 ## 1. Situation
@@ -143,7 +143,7 @@ Objective: Deliver one coherent branch with accurate current documentation, comp
 - [x] Key task: P06.02 Compile affected Python, regenerate all affected products, and run `python -m build.examples` and `python build/examples.py`; record exact commands, exit results, and the tested source revision or immutable working-tree identity.
 - [x] Key task: P06.03 Review the complete diff and search active sources and generated products for replaced paths and duplicate definitions; confirm unchanged grammar, datatype and execution semantics, dependencies, host boundaries, and authoring validation policy.
 - [x] Key task: P06.04 Add `report.md` with the final path map, per-task evidence, byte counts, actual check results, and limitations; mark tasks complete only when their evidence is present and independently recheck the final candidate.
-- [ ] Key task: P06.05 After all preceding tasks pass, commit the complete implementation on this branch, open a review pull request against `main`, inspect the actual changed-file list, and record the pull request and final commit; do not merge.
+- [x] Key task: P06.05 After all preceding tasks pass, commit the complete implementation on this branch, open a review pull request against `main`, inspect the actual changed-file list, and record the pull request and final commit; do not merge.
 Success criteria: Every applicable checkbox has evidence, no unexplained diff remains, both verification entry points pass, regeneration is stable, and the complete reviewed change is committed with its report and review pull request.
 Transition trigger: Mission complete when the verified branch and pull request are delivered; merge remains a separate user decision.
 
@@ -167,7 +167,7 @@ Transition trigger: Mission complete when the verified branch and pull request a
 | Repository baseline and scoped rules | One pinned revision | GitHub connection, baseline recorded above | AVAILABLE |
 | Existing examples and verification sources | All registered examples | `examples/` and `build/checks/` | AVAILABLE |
 | Plan and implementation branch | One branch | `plan/self-contained-examples` | AVAILABLE |
-| Local execution environment and declared dependencies | One isolated environment | Implementation host; checkout unavailable during preparation | PENDING |
+| Execution environment and declared dependencies | Local worktree and isolated CI | Verified repository export and GitHub Actions with declared dependencies | AVAILABLE |
 | Shared teaching and generated products | One source-derived collection | Existing authoring generators | AVAILABLE |
 
 Supply: Reuse current schema sources, fixture data, package dependencies, and generators. Do not install dependencies as part of plan preparation; preserve the separate consent policy of the delivered optional validator.

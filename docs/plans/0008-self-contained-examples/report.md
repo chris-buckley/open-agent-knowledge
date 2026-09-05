@@ -1,7 +1,7 @@
 # Self-contained examples: implementation report
 
 Plan: [SMEAC plan](plan.md)
-Status: Implementation verified locally; remote delivery pending.
+Status: Complete; delivered for review in PR #13. Not merged.
 Branch: `plan/self-contained-examples`
 Product baseline: `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a`
 Source export: `c396b6e771efd7236b6a0f47edfef65ca731d545`
@@ -37,8 +37,8 @@ The fixed-knowledge definition moves from the authoring generator to `examples/f
 | --- | --- |
 | Baseline module and direct commands | Passed locally and GitHub Actions run 33961608238 with declared dependencies. |
 | Compilation and all generation entry points | Exit 0. |
-| `python -m build.examples` | Exit 0, all 32 registered check groups. |
-| `python build/examples.py` | Exit 0. |
+| `python -m build.examples` | Exit 0 locally and in implementation/PR CI, all 32 registered check groups. |
+| `python build/examples.py` | Exit 0 locally and in implementation/PR CI. |
 | Isolated OAK scenario closure | Eight complete bundles, both groupings. |
 | Detached scripts | Seven commands, repository imports and network denied. |
 | Shared teaching | Eight exact documents, four stages, scope rejection and execution parity pass. |
@@ -47,6 +47,8 @@ The fixed-knowledge definition moves from the authoring generator to `examples/f
 | Repeated generation | 124 product files have identical paths and SHA256 hashes. |
 | Skill entry | 8299 bytes; 190 lines. Limits remain 10000 bytes and 500 lines. |
 | Assembled agent | 63822 bytes. Limit remains 64000 bytes. |
+| Declared-dependency implementation verification | Run 33963385094, job 101299087839: success, including exact product fingerprint, both full commands, repeat generation and approved validator bootstrap/cache reuse. |
+| Review PR verification | Run 33963494307, job 101299389541: success at reviewed product commit d626fc424ebf046d0ea3b92a8e94fe0a3ed633f7. |
 
 Machine-readable records: [baseline](evidence/baseline.json), [equivalence](evidence/equivalence.json), [freshness](evidence/freshness.json), [verification](evidence/verification.json).
 
@@ -84,21 +86,24 @@ The candidate fingerprint excludes planning records and temporary CI transport. 
 | P06.02 | Compilation, all generators and both required entry points passed; `evidence/verification.json` identifies the tested product independently of delivery metadata. |
 | P06.03 | Full source diff and baseline Node comparisons were reviewed. No oak implementation, library schema, grammar output, dependency declaration, tool contract or validation-consent change is present. |
 | P06.04 | This report maps every task to evidence and declares environment/fixture limitations. A second complete registered-check pass and product identity comparison preceded upload. |
-| P06.05 | Pending verified branch upload, temporary transport cleanup, review PR creation and actual changed-file inspection. No merge is authorized. |
+| P06.05 | Implementation fa4ede02530264b905fb81f02923623a34aab3dc and cleanup d626fc424ebf046d0ea3b92a8e94fe0a3ed633f7 are committed. PR #13 targets main; all 67 actual changed filenames were inspected and the portability-check patch reviewed. PR CI passed. No temporary transfer files remain and no merge occurred. |
 
 ## Limitations and review notes
 
 Fixture hosts prove their declared inputs, dataflow and expected outputs, not arbitrary model quality or live external effects. The detached implementer command validates structure; its real execution requires the named host tools. Repository evidence checks retain a simulated commit sink, labelled as such. The shape-gallery Python wrapper requires the repository library, while its delivered OAK is self-contained and needs no action host.
 
-The local environment uses Pydantic 2.13.4 but pydantic-settings 2.14.1, below the unchanged >=2.15 declaration. Remote implementation verification must install the declared dependencies before final delivery. Some combined local commands exceeded the tool execution window; individual required commands were rerun and passed. No interrupted command is counted as a pass.
+The local environment uses Pydantic 2.13.4 but pydantic-settings 2.14.1, below the unchanged >=2.15 declaration. Implementation run 33963385094 and PR run 33963494307 installed the declared dependencies and passed, resolving that local verification limitation. Some combined local commands exceeded the tool execution window; individual required commands were rerun and passed. No interrupted command is counted as a pass.
 
 The literal `examples/agents/compound_growth.py: +12 -2` remains unchanged in the delegation input fixture. It is test data, not a file lookup or active reference. Historical plan path snapshots are preserved. No historical navigational link to a moved example was found.
 
-Container DNS prevented normal clone/push. A temporary branch-only GitHub Actions workflow exported the actual committed repository; its archive SHA256 and Git tree were checked before editing. Any temporary patch transport and workspace workflow must be removed from the final PR tree. The normal verification workflow gains only example catalogue generation before its unchanged check sequence.
+Container DNS prevented normal clone/push. A temporary branch-only GitHub Actions workflow exported the actual committed repository; its archive SHA256 and Git tree were checked before editing. The temporary patch transport and workspace workflow were removed before PR creation. The cleaned remote tree exactly matched the locally reviewed tree 4723a026c4bd995f4a28aca4101fe4b12727a6df. Their creation and removal remain in branch history, not in the final PR diff. The normal verification workflow gains only example catalogue generation before its unchanged check sequence.
 
 ## Delivery
 
-Implementation commit: Pending upload.
-Review PR: Pending creation after remote verification.
-Final delivery commit: Pending PR evidence update.
+Implementation commit: `fa4ede02530264b905fb81f02923623a34aab3dc`.
+Reviewed product commit: `d626fc424ebf046d0ea3b92a8e94fe0a3ed633f7`.
+Review PR: [#13](https://github.com/chris-buckley/open-agent-knowledge/pull/13), open against `main`.
+Implementation verification: [run 33963385094](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33963385094).
+PR verification: [run 33963494307](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33963494307).
+Final evidence commit: the exact metadata-only head and its check result are recorded in the PR delivery comment, avoiding a self-referential commit hash in this file. Product identity remains the fingerprint above.
 Merge: Not performed and not authorized.

@@ -73,5 +73,39 @@
     "PyYAML": "6.0.3"
   },
   "local_environment_limitation": "Installed pydantic-settings 2.14.1 is below the unchanged >=2.15 requirement; local results alone are not proof of declared-dependency compatibility. Remote verification installs the exact declared requirements.",
-  "remote_implementation_verification": "Pending branch upload; record observed run before delivery."
+  "remote_implementation_verification": {
+    "run_id": 33963385094,
+    "job_id": 101299087839,
+    "conclusion": "success",
+    "workflow_head": "952b02ab226dd2419e2615c2de76d0cd91e7ad19",
+    "resulting_implementation_commit": "fa4ede02530264b905fb81f02923623a34aab3dc",
+    "declared_dependencies_installed": true,
+    "exact_candidate_product_fingerprint_checked": true,
+    "full_module_and_direct_checks": "passed",
+    "repeated_generation": "passed",
+    "approved_detached_validator_bootstrap_and_cache_reuse": "passed"
+  },
+  "pull_request_verification": {
+    "pull_request": 13,
+    "run_id": 33963494307,
+    "job_id": 101299389541,
+    "head_sha": "d626fc424ebf046d0ea3b92a8e94fe0a3ed633f7",
+    "conclusion": "success",
+    "declared_dependencies_installed": true,
+    "full_module_and_direct_checks": "passed",
+    "repeated_generation": "passed",
+    "approved_detached_validator_bootstrap_and_cache_reuse": "passed"
+  },
+  "delivery": {
+    "pull_request": 13,
+    "branch": "plan/self-contained-examples",
+    "base": "main",
+    "reviewed_changed_file_count": 67,
+    "reviewed_product_tree": "4723a026c4bd995f4a28aca4101fe4b12727a6df",
+    "reviewed_remote_tree_equals_local_tree": true,
+    "temporary_transfer_files_removed": true,
+    "completed_tasks": 29,
+    "merged": false,
+    "final_evidence_commit": "Exact metadata-only head and its CI result are recorded in the PR delivery comment."
+  }
 }
