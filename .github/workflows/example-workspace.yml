@@ -1,0 +1,38 @@
+name: Example implementation workspace
+on:
+  push:
+    branches: [plan/self-contained-examples]
+    paths: [.github/workflows/example-workspace.yml]
+permissions:
+  contents: read
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Export committed repository
+        run: |
+          mkdir -p /tmp/oak-workspace
+          git archive --format=zip --output=/tmp/oak-workspace/repository.zip HEAD
+          git rev-parse HEAD > /tmp/oak-workspace/revision.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oak-implementation-source
+          path: /tmp/oak-workspace/
+          retention-days: 3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install declared dependencies
+        run: |
+          python - <<'PY'
+          import pathlib, subprocess, sys, tomllib
+          dependencies = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['dependencies']
+          subprocess.run([sys.executable, '-m', 'pip', 'install', *dependencies], check=True)
+          PY
+      - name: Baseline verification
+        run: |
+          python -m build.examples
+          python build/examples.py
