@@ -1,6 +1,8 @@
 # Benchmark and verdict protocol
 
-Status: Study design; no dataset, trained network, or results are supplied.
+Status: The full-study design below remains the research target. A bounded four-module subset has run, with its pre-registration in study.oak.md and evidence in ../results/first-run/REPORT.md. Independent-agent, semantic, gradient-diagnostic, and full coordination ablations were not run.
+
+The first study uses one actual assistant session on seed 7 and numerical replay on seeds 19 and 31. It reports descriptive means and ranges, not statistical superiority. Its synthetic rule and intermediate targets are privileged information disclosed to the assistant and automatic concept control. The conventional optimiser uses end-to-end labels. These information and resource differences preclude a matched-cost causal claim.
 
 ## Task
 

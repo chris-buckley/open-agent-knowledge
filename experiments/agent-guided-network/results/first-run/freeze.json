@@ -1,0 +1,28 @@
+{
+  "agent_count": 1,
+  "code": {
+    "evaluation/export_check.py": "ab5f9e6afd82f825cea6eb3ca101d6a683c6427b9fca29b275597f9678ce17c6",
+    "evaluation/study.py": "c2ce67462697c69f858e1e04cf0b1f370d7aabfba05c89b2990ca9224809d064",
+    "evaluation/task.py": "d46953f98332620a4be20769f6ee12524764528c310e342eeead5252861f278f",
+    "evaluation/test_experiment.py": "b695e6745bce5c55f0fd6bf55343f85d99f695e0af3fb82e219d4d71c2daba3e",
+    "nodes/author.py": "a36806c2024c8cb5f8bb9becb43b7823698aaa5c1aa9c4754f412202e4efaac1",
+    "run.py": "153ec3d253dd25fdf79bfdab30cdf47909eeb68967e8dd60ce63958d03380e29",
+    "runtime/numeric.py": "8babe43d4be0ac6ea52eb1c4721b3c4f8f67a45d1ed017b658042ae7767f10d1",
+    "runtime/oak_adapter.py": "3ae7e32a0bca92a59ba0c7d36f19ca81c1abf96f5fb55bc3e33de7ca839d2598",
+    "training/optimise.py": "ed2fef5a7046d106618b9e4fba24e02bfba2ba98a809f35d72781008084ad88a",
+    "training/session.py": "b1564c39faf7a81ec02ec780849bab7eaefa5df7fae4ea7f9e7696526fa90e06"
+  },
+  "model_identity": "GPT-6 Pro (session identity, not an independently attested API model id)",
+  "numerical_module_count": 4,
+  "numpy": "2.3.5",
+  "platform": "Linux-6.18.35-x86_64-with-glibc2.41",
+  "provider_cost": null,
+  "provider_tokens": null,
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "scheduling": "sequential shared-context assistant",
+  "study": "4694870b264c5e705f4746b83c479da98ca5ef6994ade8db0120a7850124291a",
+  "token_cost_reason": "not exposed by this conversation runtime",
+  "trainable_module_count": 3,
+  "trainable_parameters": 11,
+  "upstream_baseline": "a825c588b699b453bb24703c68bb724b033b0797"
+}

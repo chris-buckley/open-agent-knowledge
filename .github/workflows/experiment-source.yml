@@ -1,4 +1,4 @@
-name: Experiment source snapshot
+name: Agent-guided network
 on:
   pull_request:
     paths:
@@ -7,14 +7,28 @@ on:
 permissions:
   contents: read
 jobs:
-  snapshot:
-    if: github.head_ref == 'experiment/agent-guided-network'
+  experiment:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install repository and experiment dependencies
+        run: |
+          python - <<'PY'
+          import pathlib, subprocess, sys, tomllib
+          dependencies = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['dependencies']
+          subprocess.run([sys.executable, '-m', 'pip', 'install', *dependencies, '-r', 'experiments/agent-guided-network/requirements.txt'], check=True)
+          PY
+      - name: Check OAK numerical contracts and replay recorded decisions
+        run: |
+          python experiments/agent-guided-network/run.py test
+          python experiments/agent-guided-network/run.py replay "$RUNNER_TEMP/oak-replay" --recorded experiments/agent-guided-network/results/first-run
+          git diff --exit-code
       - name: Package exact source without Git metadata or credentials
         run: |
           mkdir -p /tmp/oak-experiment-source
@@ -26,5 +40,11 @@ jobs:
         with:
           name: oak-experiment-source
           path: /tmp/oak-experiment-source/
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: numerical-replay-not-new-agent-decisions
+          path: ${{ runner.temp }}/oak-replay/
           if-no-files-found: error
           retention-days: 7

@@ -1,6 +1,8 @@
 # Numerical runtime and export contract
 
-Status: Proposed; no numerical adapter or exporter is implemented.
+Status: A restricted NumPy profile is implemented in numeric.py and oak_adapter.py. ONNX and general graph export remain unimplemented.
+
+The first artifact consists of model.json, inference.py, and SHA256SUMS.json. It contains inline learned weights, a fixed operation sequence, source identity, dtype, and threshold. The parameter-bearing source remains canonical OAK. The adapter uses whole-document equality against the supported profile to reject unsupported behaviour rather than interpreting prose. Observed clean-process and OAK-executor equivalence checks are in ../results/first-run/final.json.
 
 ## Runtime boundary
 

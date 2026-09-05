@@ -1,0 +1,118 @@
+[
+  {
+    "accepted": false,
+    "actor": "numerical replay, not a new assistant decision",
+    "after": {
+      "accuracy": 0.7744140625,
+      "balanced_accuracy": 0.6771662245800176,
+      "bce": 0.42738893464714334,
+      "decisions": 1024,
+      "positive_fraction": 0.33984375,
+      "worlds": 64
+    },
+    "before": {
+      "accuracy": 0.8115234375,
+      "balanced_accuracy": 0.7540722981704414,
+      "bce": 0.4933166596372319,
+      "decisions": 1024,
+      "positive_fraction": 0.33984375,
+      "worlds": 64
+    },
+    "cost": {
+      "delta_norm": 9.154337347504628,
+      "fit_rows": 2048,
+      "gradient_steps": 0,
+      "least_squares_calls": 1,
+      "preservation_rows": 0,
+      "ridge": 0.001
+    },
+    "method": "concept",
+    "owner": "right"
+  },
+  {
+    "accepted": true,
+    "actor": "numerical replay, not a new assistant decision",
+    "after": {
+      "accuracy": 0.818359375,
+      "balanced_accuracy": 0.7989866013738693,
+      "bce": 0.32173592750581886,
+      "decisions": 1024,
+      "positive_fraction": 0.33984375,
+      "worlds": 64
+    },
+    "before": {
+      "accuracy": 0.8115234375,
+      "balanced_accuracy": 0.7540722981704414,
+      "bce": 0.4933166596372319,
+      "decisions": 1024,
+      "positive_fraction": 0.33984375,
+      "worlds": 64
+    },
+    "cost": {
+      "delta_norm": 9.154337347504628,
+      "fit_rows": 2048,
+      "gradient_steps": 400,
+      "least_squares_calls": 1,
+      "preservation_rows": 0,
+      "ridge": 0.001
+    },
+    "method": "concept-head",
+    "owner": "right"
+  },
+  {
+    "accepted": true,
+    "actor": "numerical replay, not a new assistant decision",
+    "after": {
+      "accuracy": 0.9990234375,
+      "balanced_accuracy": 0.9992603550295858,
+      "bce": 0.0867634934230189,
+      "decisions": 1024,
+      "positive_fraction": 0.33984375,
+      "worlds": 64
+    },
+    "before": {
+      "accuracy": 0.818359375,
+      "balanced_accuracy": 0.7989866013738693,
+      "bce": 0.32173592750581886,
+      "decisions": 1024,
+      "positive_fraction": 0.33984375,
+      "worlds": 64
+    },
+    "cost": {
+      "delta_norm": 8.639448319619989,
+      "fit_rows": 2048,
+      "gradient_steps": 0,
+      "least_squares_calls": 1,
+      "preservation_rows": 0,
+      "ridge": 0.001
+    },
+    "method": "concept",
+    "owner": "left"
+  },
+  {
+    "accepted": true,
+    "actor": "numerical replay, not a new assistant decision",
+    "after": {
+      "accuracy": 0.9990234375,
+      "balanced_accuracy": 0.9992603550295858,
+      "bce": 0.006057066716672626,
+      "decisions": 1024,
+      "positive_fraction": 0.33984375,
+      "worlds": 64
+    },
+    "before": {
+      "accuracy": 0.9990234375,
+      "balanced_accuracy": 0.9992603550295858,
+      "bce": 0.0867634934230189,
+      "decisions": 1024,
+      "positive_fraction": 0.33984375,
+      "worlds": 64
+    },
+    "cost": {
+      "gradient_steps": 400,
+      "least_squares_calls": 0
+    },
+    "method": "head",
+    "owner": "readout"
+  }
+]

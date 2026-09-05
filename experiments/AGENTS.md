@@ -14,6 +14,8 @@ experiment-evidence: ["distinguish a proposed mechanism from an implemented mech
 experiment-boundary: "Experiments may use existing OAK contracts but do not redefine the standard or become distributable skills without a separately accepted product change."
 
 experiment-records: "Keep experimental intent in the experiment directory and implementation task state in the plan location owned by docs/AGENTS.md."
+
+experiment-proposer-accounting: "Record physical proposer count separately from logical node responsibilities; shared-context sequential role-taking is not evidence of independent agents. The agent-guided-network execution model is owned by its EXPERIMENT.md."
 </constants>
 
 <processes>

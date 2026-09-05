@@ -2,19 +2,19 @@
 
 Recorded: 2026-09-05.
 
+The [first run report](first-run/REPORT.md) records an actual sequential-assistant feasibility experiment, not simulated agents. Four proposals were made on seed 7; three were accepted. Two more seeds ran numerical replay, not additional assistant sessions.
+
 | Item | Status | Evidence |
 | --- | --- | --- |
-| Intent and design | Recorded | [EXPERIMENT.md](../EXPERIMENT.md) and its supporting contracts. |
-| Research attribution | Recorded | [Primary-source register](../research/SOURCES.md). |
-| Numerical runtime | Not implemented | No runtime measurement exists. |
-| Training integration | Not implemented | No agent-guided update has been run. |
-| Dataset and baselines | Not implemented | No scored comparison exists. |
-| Agent-free export | Not implemented | No exported artifact or equivalence result exists. |
-| Engineering verdict | Not reached | Requires measured training and export evidence. |
-| Scientific verdict | Not reached | Requires the predeclared controlled comparisons. |
+| Numerical OAK graph | Implemented, four computational modules | ../nodes/initial and ../nodes/learned |
+| Assistant matrix updates | Measured, three accepted and one rejected | first-run/7/proposals and first-run/7/decisions |
+| Controlled numerical comparisons | Small subset completed | [Raw results](first-run/final.json) |
+| Agent-free export | All three selected networks passed isolated execution | Export evidence in raw results |
+| Reproducibility | Complete fresh numerical replay matched | Replay command in EXPERIMENT.md |
+| Engineering verdict | Demonstrated on the specified synthetic task | [Measured report](first-run/REPORT.md) |
+| Scientific advantage | Not demonstrated | Strong numerical-only baseline is competitive; budgets and supervision differ |
+| Hundred-node and independent-agent studies | Not run | Remain open research questions |
 
-Documentation checks and repository CI, when reported, verify the design package and repository consistency. They are not evidence that this learning experiment works. Delivery evidence belongs in [the report](../../../docs/plans/0009-agent-guided-network/report.md).
+Code and study hashes, data identities, proposals, observations, decisions, selected network hashes, environment, and numerical results are retained under first-run. The actual complete run's snapshots and standalone exports can be regenerated using the recorded replay command. The representative initial and learned seed-7 OAK snapshots are committed as inspectable source documents.
 
-When actual runs exist, create one directory per immutable run under this directory. Include the study configuration and source revisions, data split identities, model/provider identity, seeds, allowed agent context, proposals and decisions, resource accounting, measured results, export checks, and the verdict. Use existing OAK shapes for authored run knowledge and machine-readable measurement outputs where appropriate.
-
-Keep generated large artifacts out of ordinary source commits unless deliberately approved. Use explicit artifact references and content identities when evidence is stored elsewhere. Do not add fictitious run directories, illustrative success metrics, or dummy trained weights.
+Repository CI is separate from scientific evidence. The [delivery report](../../../docs/plans/0009-agent-guided-network/report.md) records publication checks. No result establishes the correctness of all possible predictions or an advantage attributable to semantic agent understanding.

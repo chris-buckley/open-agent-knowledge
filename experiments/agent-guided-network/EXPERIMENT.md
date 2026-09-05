@@ -1,7 +1,7 @@
 # Agent-guided numerical networks
 
 Prepared: 2026-09-05
-Status: Design recorded; sequential single-agent implementation and execution authorised on 2026-09-05. No numerical result is claimed yet.
+Status: A four-module sequential-assistant feasibility run is implemented and measured. Engineering demonstrated on the synthetic task; no scientific superiority is established. See results/first-run/REPORT.md.
 Baseline: OAK `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a`.
 Branch: `experiment/agent-guided-network`.
 
@@ -177,7 +177,7 @@ Compare a strong numerical optimiser, budgeted non-agent proposal search, one ce
 
 Measure held-out predictive performance, compute and language-model cost, candidate evaluation count, update acceptance, regressions, and exported equivalence across independent seeds. Reserve a final test set outside the adaptive improvement loop. Equal candidate count and equal total resource cost are different comparisons; report both rather than hiding the cost of the agents.
 
-[The benchmark protocol](evaluation/BENCHMARK.md) owns detailed measurements and verdicts. No benchmark result exists at this stage.
+[The benchmark protocol](evaluation/BENCHMARK.md) owns the full-study design. The [first measured run](results/first-run/REPORT.md) records the implemented four-module subset and its limitations.
 
 ## Research synthesis
 
@@ -247,3 +247,11 @@ Create per-run result directories only when runs exist. Do not fill the structur
 Implement and run the numerical-first feasibility experiment with the current assistant serving all logical node-agent roles sequentially. Preserve immutable inline node parameters, behavioural proposals materialised by numerical tools, independent acceptance, and agent-free export.
 
 The user authorised execution on 2026-09-05 after requesting this documentation change as the next commit. First establish the smallest working numerical path, then make and evaluate actual assistant proposals, and report measured results with limitations. This authorisation does not claim that implementation, training, or export has already succeeded, and does not authorise merging into main.
+
+## First measured execution
+
+The running assistant made four proposals on seed 7, three accepted and one rejected. Two additional seeds replayed the chosen methods numerically. Across those three seeds, agent-guided final-test accuracy averaged 99.9268%, compared with 99.9430% for numerical-only Adam. All selected agent-free exports reproduced their source outputs exactly on the tested cases. This demonstrates the engineering mechanism, not an advantage over strong optimisation. The [measured report](results/first-run/REPORT.md), [raw results](results/first-run/final.json), and [study record](evaluation/study.oak.md) retain the evidence and resource differences.
+
+Run `python experiments/agent-guided-network/run.py test` for local checks. After installing the repository dependencies and the experiment-local `requirements.txt`, replay the recorded numerical sequence with `python experiments/agent-guided-network/run.py replay /tmp/oak-replay --recorded experiments/agent-guided-network/results/first-run`. Replay is not a new agent session.
+
+For a fresh manual session, use `prepare /tmp/oak-session`, then `observe /tmp/oak-session`. The running agent uses `propose` with `--owner`, `--method`, and `--rationale`, followed by a separate `apply` with `--proposal`. `finish` closes selection before testing and export. Use those subcommands after the same `python experiments/agent-guided-network/run.py` prefix. Never alter the frozen implementation or study during a scored session.

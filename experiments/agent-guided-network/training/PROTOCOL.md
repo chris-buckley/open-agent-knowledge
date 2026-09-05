@@ -1,6 +1,8 @@
 # Agent-guided training protocol
 
-Status: Proposed; no training coordinator or agent integration is implemented.
+Status: Manual sequential-assistant coordination and numerical replay are implemented in session.py. Direct-edit, independent-agent, and broad ablation treatments remain unimplemented.
+
+One running assistant assumes the logical roles in sequence. The first actual run is recorded under ../results/first-run. Supported proposals are concept fitting, readout-only fitting, and an explicitly joint concept-plus-readout candidate. The latter revises two matrices only after whole-network evaluation; it is not an untested merge of local successes. Source and observation hashes bind proposals to snapshots. Reproduction is labelled replay and counts zero new assistant decisions.
 
 ## Roles
 

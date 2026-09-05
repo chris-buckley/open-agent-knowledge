@@ -1,7 +1,7 @@
 # Agent-guided network design delivery
 
 Date: 2026-09-05.
-Scope: Experiment design and repository structure only.
+Original scope: Experiment design and repository structure. The follow-on execution is recorded below; the original design account is retained as history.
 Plan: [SMEAC execution record](plan.md).
 Specification: [EXPERIMENT.md](../../../experiments/agent-guided-network/EXPERIMENT.md).
 Original baseline: `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a`.
@@ -43,3 +43,15 @@ None. [Evidence status](../../../experiments/agent-guided-network/results/STATUS
 ## Verdict
 
 The requested design package is committed, its repository verification passed, and Phase 1 is complete. Implementation and experimental verdicts remain open. No write or merge into main was performed by this experiment change.
+
+## Authorised sequential-assistant execution
+
+The user subsequently authorised a real small experiment, with the current assistant acting for all logical node roles. Commit `5a25878b5ee0a42252e92d4af549ac4149cde24f` updated EXPERIMENT.md as the next commit before implementation, as requested. No autonomous fleet or external paid model API was launched.
+
+The container could not resolve github.com for cloning. Source snapshot workflow run 33965092932 produced artifact 9969158360 for commit `a825c588b699b453bb24703c68bb724b033b0797`. Its source.tar SHA256 was verified as `355ffff1de871510979b0f8ff675bf280fa3187cea8e13afd8e7b9631d2b4492` before extraction. The extracted repository's complete module verification entry point passed locally before implementation. Later numerical and OAK checks were real local execution, unlike the earlier design-only turn.
+
+The [first-run report](../../../experiments/agent-guided-network/results/first-run/REPORT.md) records four actual assistant proposals on seed 7, one rejected and three accepted, and explicitly labelled numerical replay on two more seeds. All parameters remain inline in canonical OAK snapshots. A fresh numerical replay reproduced every recorded metric. The three selected deployment artifacts ran in isolated processes without OAK or agents and matched source outputs exactly on the tested cases.
+
+Mean test accuracy was 99.9268% for the assistant-guided sequence and 99.9430% for numerical-only Adam. The engineering mechanism is demonstrated on this small synthetic task. Scientific superiority, hundred-node scaling, independent-agent effects, direct-edit comparisons, and semantic ablations are not established. Two broader plan tasks remain open instead of being marked complete without evidence.
+
+The committed numerical source is identified by the code hashes in the run freeze. [Local verification](../../../experiments/agent-guided-network/results/first-run/verification.json) records actual commands, return codes, and package versions. The final publication/CI result belongs to the PR's current head and is not inferred from an older run. No merge into main is performed.

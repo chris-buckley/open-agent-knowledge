@@ -1,6 +1,8 @@
 # Numerical node contracts
 
-Status: Proposed application contracts, not implemented OAK syntax or validators.
+Status: The fixed four-module subset is implemented by author.py and the runtime adapter; broader tensor profiles remain proposals.
+
+The [initial](initial/network.oak.md) and [learned](learned/network.oak.md) graphs contain four module documents, a root composition document, and shared contracts. Left/right matrices have shape [1,4], readout [1,3], and frozen composition [1,1]. OAK NonEmpty constraints admit nonempty JSON lists; the numerical host, not a nonexistent OAK array datatype, enforces exact shapes, finite numeric entries, and rejection of booleans. The runnable profile and budgets are frozen in ../evaluation/study.oak.md.
 Purpose: Make a module's numerical meaning, update boundary, and revision identity explicit.
 
 ## Module record
