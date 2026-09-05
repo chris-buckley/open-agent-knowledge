@@ -18,9 +18,17 @@ experiment-records: "Keep experimental intent in the experiment directory and im
 
 <processes>
 <process id="maintain-experiment" name="Maintain experiment">
-ACT Apply <LAYOUT> when creating or extending an experiment directory. (LAYOUT=$constant.experiment-layout)
-ACT Apply <EVIDENCE> to experiment status, observations, and conclusions. (EVIDENCE=$constant.experiment-evidence)
-ACT Apply <BOUNDARY> before promoting an experiment into a supported product. (BOUNDARY=$constant.experiment-boundary)
-ACT Apply <RECORDS> to separate scientific design from implementation history. (RECORDS=$constant.experiment-records)
+ACT Apply <LAYOUT> when creating or extending an experiment directory. (
+  LAYOUT=$constant.experiment-layout,
+)
+ACT Apply <EVIDENCE> to experiment status, observations, and conclusions. (
+  EVIDENCE=$constant.experiment-evidence,
+)
+ACT Apply <BOUNDARY> before promoting an experiment into a supported product. (
+  BOUNDARY=$constant.experiment-boundary,
+)
+ACT Apply <RECORDS> to separate scientific design from implementation history. (
+  RECORDS=$constant.experiment-records,
+)
 </process>
 </processes>
