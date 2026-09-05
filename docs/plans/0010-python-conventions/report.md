@@ -1,9 +1,11 @@
 # Python conventions migration report
 
-Status: Implementation verified locally; pull-request CI pending.
+Status: Complete; local verification and pull-request CI passed.
 Branch: improve/python-code-conventions
 Baseline: 21c2dc5b9366068875709e1cefab3a942f51836c
 Plan: [plan](plan.md)
+Pull request: https://github.com/chris-buckley/open-agent-knowledge/pull/16
+Verified candidate: 7a1f1bf9cc5c3cdba453b63a3b322d728e21950e
 
 ## Corrected interpretation
 
@@ -48,7 +50,7 @@ The mapping is historical evidence, not a second live rule owner. Future changes
 
 ## Verification
 
-[observed checks](evidence/verification.json) records commands, exit codes, timings, document hashes, and supplementary source checks.
+[initial checks](evidence/verification.json) records the first successful local pass. [Final checks](evidence/closeout.json) records the reconciled candidate, latest local command results, corrected decision count, and observed GitHub CI. Document hashes and migration coverage remain unchanged.
 
 The following completed successfully: compilation; python -m build.examples; python build/examples.py; example, grammar, reference, and authoring regeneration; repeat authoring generation; generated-artifact diff; and git diff --check. Generated example and skill deliveries and runtime outputs remained unchanged.
 
@@ -60,4 +62,8 @@ Earlier synchronous execution attempts timed out and were not counted as passes.
 
 ## Review and scope
 
-The final review will record removal of temporary transport workflows and remote CI before completion. No general formatter, new dependency, blanket API migration, alternate OAK authoring language, or repository-wide cosmetic rewrite is included. Main is not merged by this task.
+Main advanced to e7da4c557c1443eb5d99867c42ea0d795ace148d during the work. The branch incorporates those changes, retains the typed-statement naming rule, and moves this plan from the concurrently occupied 0009 number to 0010. Root routing now points to the OAK entry rather than the removed Markdown path.
+
+All task-created snapshot, application, and transport files are removed from the final tree. The pre-existing statement-closeout workflow from main is unchanged. An intermediate CI run rejected an extra trailing newline introduced while merging examples/AGENTS.md. The canonical bytes were restored, the local full suite passed again, and GitHub Verify OAK run 33968786024 passed on candidate 7a1f1bf, including approved detached bootstrap and cache reuse.
+
+The final closeout changes only this plan and its evidence. No general formatter, new dependency, blanket API migration, alternate OAK authoring language, or repository-wide cosmetic rewrite is included. Final review verdict: ready for user review. No independent human approval is claimed. This task does not merge the pull request or modify main.

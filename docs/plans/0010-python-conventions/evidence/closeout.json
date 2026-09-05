@@ -1,0 +1,169 @@
+{
+  "recorded": "2026-09-05T13:26:16.323545+00:00",
+  "pull_request": 16,
+  "branch": "improve/python-code-conventions",
+  "original_source_commit": "21c2dc5b9366068875709e1cefab3a942f51836c",
+  "reconciled_main": "e7da4c557c1443eb5d99867c42ea0d795ace148d",
+  "verified_candidate": "7a1f1bf9cc5c3cdba453b63a3b322d728e21950e",
+  "verified_product_tree": "c2cd307fc30af034ad4eacddeaec0012c8530d45",
+  "snapshot_commit": "40b3dd472eba9a4a79029f8f49cde74284e65a28",
+  "snapshot_tree": "1ca54bafbb5c81d5e0656a8a9769437f3a18cf86",
+  "commands": [
+    {
+      "name": "compilation",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "compileall",
+        "-q",
+        "oak",
+        "build",
+        "examples",
+        "skills/oak-authoring/scripts"
+      ],
+      "started": "2026-09-05T13:22:51.219020+00:00",
+      "seconds": 1.482,
+      "exit_code": 0
+    },
+    {
+      "name": "module-verification",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "build.examples"
+      ],
+      "started": "2026-09-05T13:22:52.700893+00:00",
+      "seconds": 48.024,
+      "exit_code": 0
+    },
+    {
+      "name": "direct-verification",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "build/examples.py"
+      ],
+      "started": "2026-09-05T13:23:40.726578+00:00",
+      "seconds": 39.124,
+      "exit_code": 0
+    },
+    {
+      "name": "example-regeneration",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "examples.catalog"
+      ],
+      "started": "2026-09-05T13:24:19.852735+00:00",
+      "seconds": 1.432,
+      "exit_code": 0
+    },
+    {
+      "name": "grammar-regeneration",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "build.ebnf"
+      ],
+      "started": "2026-09-05T13:24:21.285222+00:00",
+      "seconds": 1.485,
+      "exit_code": 0
+    },
+    {
+      "name": "reference-regeneration",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "build.docs"
+      ],
+      "started": "2026-09-05T13:24:22.770548+00:00",
+      "seconds": 1.579,
+      "exit_code": 0
+    },
+    {
+      "name": "authoring-regeneration",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "build.authoring"
+      ],
+      "started": "2026-09-05T13:24:24.351128+00:00",
+      "seconds": 1.379,
+      "exit_code": 0
+    },
+    {
+      "name": "repeat-authoring",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "build.authoring"
+      ],
+      "started": "2026-09-05T13:24:25.731009+00:00",
+      "seconds": 1.272,
+      "exit_code": 0
+    },
+    {
+      "name": "generated-diff",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "--",
+        "outputs",
+        "examples",
+        "skills/oak-authoring",
+        ":(exclude)examples/AGENTS.md"
+      ],
+      "started": "2026-09-05T13:24:27.003231+00:00",
+      "seconds": 0.033,
+      "exit_code": 0
+    },
+    {
+      "name": "whitespace-diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "started": "2026-09-05T13:24:27.036648+00:00",
+      "seconds": 0.01,
+      "exit_code": 0
+    }
+  ],
+  "ci": {
+    "run_id": 33968786024,
+    "job_id": 101313487865,
+    "workflow": "Verify OAK",
+    "result": "success",
+    "full_verification": "success",
+    "detached_bootstrap_and_cache_reuse": "success",
+    "url": "https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33968786024"
+  },
+  "source_check_correction": {
+    "file": "build/checks/coding_standards.py",
+    "function": "_read_documents",
+    "decision_count": 6,
+    "maximum_across_functions": 10,
+    "method": "one plus AST if, ternary, loop, except, comprehension, boolean operators, and match cases; not Radon"
+  },
+  "review": {
+    "verdict": "ready for user review",
+    "plan_tasks_complete": true,
+    "original_record_and_literal_hashes": "unchanged from migration evidence",
+    "generated_outputs": "unchanged from reconciled main",
+    "temporary_task_workflows": "removed",
+    "unrelated_main_changes": "preserved",
+    "runtime_api_or_behavior_changes": "none from this task",
+    "new_project_dependencies": []
+  },
+  "limitations": [
+    "No independent human approval is claimed.",
+    "Ruff, mypy, Pyright, and Radon were not run.",
+    "The preserved illustrative snippets were not all executed.",
+    "Local detached bootstrap network integration was not run; the GitHub CI step passed."
+  ],
+  "history": [
+    "The earlier synchronous tool timeouts were not counted as successful checks.",
+    "An intermediate merged candidate failed canonical AGENTS verification because of an extra trailing newline; corrected before the successful CI run.",
+    "The final closeout commit changes history and evidence only; final-commit CI is inspected separately."
+  ]
+}

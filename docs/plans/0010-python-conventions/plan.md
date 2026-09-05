@@ -11,6 +11,8 @@ OAK stores repository knowledge in scoped OAK documents. This change belongs to 
 ### Current State
 Main at 21c2dc5b9366068875709e1cefab3a942f51836c adds .agents/rules/coding-standards.md, a 1,393-line standard with 18 numbered sections. Earlier suggestions relied on four OAK-specific example-authoring rules and mischaracterised the general standard.
 
+The branch later incorporated main at e7da4c557c1443eb5d99867c42ea0d795ace148d. That concurrent change occupied plan number 0009, so this plan was moved to 0010 without changing its task identifiers.
+
 ### Challenges
 - Preservation: Retain every requirement, exception, checklist item, and teaching example.
 - Scope: General defaults must not override established OAK contracts or introduce a repository-wide cosmetic refactor.
@@ -66,8 +68,8 @@ Transition trigger: The complete candidate is ready for verification.
 Objective: Demonstrate preservation and report only observed checks.
 - [x] Key task: P03.01 Validate every OAK document, both groupings, dependency closure, teaching shapes, and rejected cases.
 - [x] Key task: P03.02 Run compilation, both complete commands, regeneration, and repeated freshness checks.
-- [ ] Key task: P03.03 Inspect the diff and source coverage; remove the temporary workflow and obsolete policy.
-- [ ] Key task: P03.04 Commit the candidate, open a pull request, inspect CI, and record the result and limitations.
+- [x] Key task: P03.03 Inspect the diff and source coverage; remove the temporary workflow and obsolete policy.
+- [x] Key task: P03.04 Commit the candidate, open a pull request, inspect CI, and record the result and limitations.
 Success criteria: Each applicable check has observed evidence; the branch is reviewable without merging main.
 Transition trigger: The completion report and pull request are delivered.
 
