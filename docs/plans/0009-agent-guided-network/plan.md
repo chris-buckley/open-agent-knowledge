@@ -49,7 +49,7 @@ Objective: Deliver the requested branch and self-contained experiment documentat
 - [x] Key task: P01.01 Read the root and applicable scoped owners and pin the repository baseline; evidence is recorded in the report.
 - [x] Key task: P01.02 Create the experiment branch and synthesise intent, architecture, sources, risks, and evidence requirements.
 - [x] Key task: P01.03 Define meaningful directories, repository routing, and an explicit not-yet-run evidence status.
-- [ ] Key task: P01.04 Commit the package, verify navigation and repository checks where executable, and record observed results and limitations.
+- [x] Key task: P01.04 Commit the package, verify navigation and repository checks where executable, and record observed results and limitations.
 Success criteria: The committed package contains EXPERIMENT.md and its linked specifications; all claimed checks have observed evidence and unavailable checks are stated.
 Transition trigger: Design delivery is recorded; Phase 2 remains gated by separate implementation authorisation.
 
