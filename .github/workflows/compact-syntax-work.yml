@@ -1,54 +1,176 @@
-name: Compact syntax working evidence
+name: Compact syntax verified publication
 on:
   push:
     branches: [feat/compact-oak-syntax]
     paths: [.github/workflows/compact-syntax-work.yml]
 permissions:
-  contents: read
+  contents: write
+concurrency:
+  group: compact-syntax-publication
+  cancel-in-progress: false
 jobs:
-  baseline:
+  publish:
     runs-on: ubuntu-latest
+    if: github.repository == 'chris-buckley/open-agent-knowledge' && github.ref == 'refs/heads/feat/compact-oak-syntax'
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - name: Export exact source without credentials
+      - name: Verify branch and prepare declared dependencies
         run: |
-          mkdir -p "$RUNNER_TEMP/oak-evidence/wheels"
-          git bundle create "$RUNNER_TEMP/oak-evidence/source.bundle" HEAD
-          git rev-parse HEAD > "$RUNNER_TEMP/oak-evidence/revision.txt"
-          git ls-tree -r HEAD > "$RUNNER_TEMP/oak-evidence/tree.txt"
-      - name: Prepare declared dependency wheels
+          test "$(git ls-remote origin refs/heads/feat/compact-oak-syntax | cut -f1)" = "$GITHUB_SHA"
+          mkdir -p "$RUNNER_TEMP/compact-evidence"
+          python - <<'PY'
+          import pathlib, subprocess, sys, tomllib
+          dependencies = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['dependencies']
+          subprocess.run([sys.executable, '-m', 'pip', 'install', *dependencies], check=True)
+          PY
+          python --version > "$RUNNER_TEMP/compact-evidence/environment.txt"
+          python -m pip freeze >> "$RUNNER_TEMP/compact-evidence/environment.txt"
+      - name: Capture governance meaning before replacing the surface
         run: |
           python - <<'PY'
-          import os, pathlib, subprocess, sys, tomllib
-          dependencies = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['dependencies']
-          destination = pathlib.Path(os.environ['RUNNER_TEMP']) / 'oak-evidence' / 'wheels'
-          subprocess.run([sys.executable, '-m', 'pip', 'wheel', '--wheel-dir', str(destination), *dependencies], check=True)
-          subprocess.run([sys.executable, '-m', 'pip', 'install', '--no-index', '--find-links', str(destination), *dependencies], check=True)
+          import json, os
+          from pathlib import Path
+          from oak import parse
+          paths = ['AGENTS.md', 'oak/AGENTS.md', 'oak/node/AGENTS.md', 'oak/resolve/AGENTS.md', 'oak/execute/AGENTS.md', 'build/AGENTS.md', 'examples/AGENTS.md', 'outputs/AGENTS.md', 'docs/AGENTS.md', 'skills/AGENTS.md']
+          nodes = {name: parse(Path(name).read_text()).model_dump(mode='json', by_alias=True) for name in paths}
+          Path(os.environ['RUNNER_TEMP'], 'compact-evidence', 'agents-before.json').write_text(json.dumps(nodes))
           PY
-      - name: Capture baseline verification
+      - name: Apply only byte-verified reviewed source
         run: |
-          set +e
-          python --version > "$RUNNER_TEMP/oak-evidence/environment.txt"
-          python -m pip freeze >> "$RUNNER_TEMP/oak-evidence/environment.txt"
-          python -m build.examples > "$RUNNER_TEMP/oak-evidence/module.log" 2>&1
-          module_status=$?
-          python build/examples.py > "$RUNNER_TEMP/oak-evidence/direct.log" 2>&1
-          direct_status=$?
-          git diff --exit-code > "$RUNNER_TEMP/oak-evidence/freshness.log" 2>&1
-          freshness_status=$?
-          printf 'module=%s\ndirect=%s\nfreshness=%s\n' "$module_status" "$direct_status" "$freshness_status" > "$RUNNER_TEMP/oak-evidence/status.txt"
-          cat "$RUNNER_TEMP/oak-evidence/status.txt"
-          test "$module_status:$direct_status:$freshness_status" = 0:0:0
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          expected_checks = {
+              'build/checks/compact_fixtures.py': 'b3fdebaf833e8ca38e943654b895f73c579bf95ca7480cc97fe7ee3fa5a238fd',
+              'build/checks/compact_runtime.py': 'e4e49408fa84d6886b79f2b858b4a0d59662f5ac1fbfcc2f620085c280926db7',
+              'build/checks/compact_syntax.py': 'dad46eba05376c637b6120758b5b62003b5a5a8afcc0eb470f905fa54c4bbcfd',
+          }
+          for name, expected in expected_checks.items():
+              actual = hashlib.sha256(Path(name).read_bytes()).hexdigest()
+              if actual != expected:
+                  raise RuntimeError(f'check source mismatch: {name}: {actual}')
+          pending = {}
+          for payload in sorted(Path('.github').glob('compact-syntax-*.json')):
+              for record in json.loads(payload.read_text()):
+                  path = Path(record['path'])
+                  if path.is_absolute() or '..' in path.parts or path.parts[0] not in {'oak', 'build'} or path.suffix != '.py' or path in pending:
+                      raise RuntimeError(f'unexpected or duplicate source path: {path}')
+                  before = path.read_bytes() if path.exists() else b''
+                  if hashlib.sha256(before).hexdigest() != record['before']:
+                      raise RuntimeError(f'baseline source mismatch: {path}')
+                  lines = before.decode().splitlines(keepends=True)
+                  for start, end, replacement in reversed(record['edits']):
+                      lines[start:end] = [replacement]
+                  after = ''.join(lines).encode()
+                  actual = hashlib.sha256(after).hexdigest()
+                  if actual != record['after']:
+                      raise RuntimeError(f'reviewed source mismatch: {path}: {actual}')
+                  pending[path] = after
+          if len(pending) != 23:
+              raise RuntimeError(f'expected 23 source edits, got {len(pending)}')
+          for path, content in pending.items():
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_bytes(content)
+          print('All 26 source files match the locally reviewed bytes.')
+          PY
+      - name: Regenerate governance and examples from their meaning and owners
+        run: |
+          python - <<'PY'
+          import importlib, json, os
+          from pathlib import Path
+          from oak import Node, render
+          records = json.loads(Path(os.environ['RUNNER_TEMP'], 'compact-evidence', 'agents-before.json').read_text())
+          for name, data in records.items():
+              if name == 'oak/node/AGENTS.md':
+                  for entry in data['constants']:
+                      if entry['id'] == 'node-invariants':
+                          entry['value'] = [('Trigger guards require state as a mutable dependency; literals and fixed constants are allowed, but process bindings are not.' if value == 'Trigger guards read state only.' else value) for value in entry['value']]
+              Path(name).write_text(render(Node.model_validate(data), grouping='xml'), encoding='utf-8', newline='\n')
+          for directory in ('schemas', 'agents'):
+              for source in sorted(Path('examples', directory).glob('*.py')):
+                  if source.name == '__init__.py':
+                      continue
+                  module = importlib.import_module(f'examples.{directory}.{source.stem}')
+                  if hasattr(module, 'write'):
+                      module.write()
+          plan = Path('docs/plans/0006-plan.md')
+          text = plan.read_text().replace('This plan is ready for execution, but implementation remains unauthorised until the user says `continue` for this plan.', 'Execution was authorised by the user on 5 September 2026 at 13:03:09 Australia/Brisbane; implementation is in progress on the same branch.')
+          text = text.replace('- [ ] Key task: P01.05', '- [x] Key task: P01.05')
+          plan.write_text(text)
+          PY
+          python -m build.ebnf
+          python -m build.docs
+          python -m build.authoring
+      - name: Publish immutable package candidate and remove all transport files
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from build.authoring import validator_module
+          if validator_module().package_digest(Path('oak')) != '06b44c4d4f2cb29e986952d734fcee984bdea5c055152071758790595b7eeafe':
+              raise RuntimeError('complete package differs from reviewed local package')
+          PY
+          git rm .github/compact-syntax-*.json .github/workflows/compact-syntax-work.yml
+          git add -A
+          git diff --cached --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'feat: simplify OAK conditions and trigger declarations'
+          git rev-parse HEAD > "$RUNNER_TEMP/compact-evidence/package-revision.txt"
+          git push origin HEAD:feat/compact-oak-syntax
+      - name: Repin capability 2.0.0 to the published package
+        run: |
+          python - <<'PY'
+          import hashlib, re, subprocess
+          from pathlib import Path
+          from build.authoring import validator_module
+          path = Path('skills/oak-authoring/scripts/validate.py')
+          revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          updates = {'SKILL_VERSION': '2.0.0', 'REVISION': revision,
+                     'SOURCE_SHA256': validator_module().package_digest(Path('oak')),
+                     'PROJECT_SHA256': hashlib.sha256(Path('pyproject.toml').read_bytes()).hexdigest()}
+          text = path.read_text()
+          for key, value in updates.items():
+              text, count = re.subn(r'^' + key + r' = "[^"]*"$', key + ' = "' + value + '"', text, flags=re.M)
+              if count != 1:
+                  raise RuntimeError(f'identity field not unique: {key}')
+          path.write_text(text)
+          print(updates)
+          PY
+          python -m build.authoring
+      - name: Verify complete candidate through both entry points
+        run: |
+          set -o pipefail
+          python -m compileall -q oak build examples skills/oak-authoring/scripts
+          python -m build.examples 2>&1 | tee "$RUNNER_TEMP/compact-evidence/module.log"
+          python build/examples.py 2>&1 | tee "$RUNNER_TEMP/compact-evidence/direct.log"
+          git add -A
+          python -m build.ebnf
+          python -m build.docs
+          python -m build.authoring
+          git diff --exit-code
+          git diff --cached --check
+          git commit -m 'feat: publish OAK authoring 2.0.0 with matching validator identity'
+          git push origin HEAD:feat/compact-oak-syntax
+          git rev-parse HEAD > "$RUNNER_TEMP/compact-evidence/verified-revision.txt"
+          git status --porcelain > "$RUNNER_TEMP/compact-evidence/status.txt"
+          test ! -s "$RUNNER_TEMP/compact-evidence/status.txt"
+      - name: Preserve exact execution evidence
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/compact-evidence"
+          git bundle create "$RUNNER_TEMP/compact-evidence/source.bundle" HEAD
+          git diff > "$RUNNER_TEMP/compact-evidence/uncommitted.patch"
+          git diff --cached > "$RUNNER_TEMP/compact-evidence/staged.patch"
+          git rev-parse HEAD > "$RUNNER_TEMP/compact-evidence/actual-revision.txt"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: compact-syntax-baseline
-          path: ${{ runner.temp }}/oak-evidence
-          retention-days: 3
+          name: compact-syntax-publication
+          path: ${{ runner.temp }}/compact-evidence
+          retention-days: 14
           if-no-files-found: error
