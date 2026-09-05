@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from build.checks.agents import validate_agents
+from build.checks.authoring import validate_authoring_skill
 from build.checks.architecture import validate_architecture
 from build.checks.context import validate_interpreter_context
 from build.checks.evidence import validate_evidence
@@ -17,6 +18,7 @@ from build.checks.human_examples import validate_human_examples
 from build.checks.interfaces import validate_interfaces
 from build.checks.metadata import validate_metadata
 from build.checks.outputs import validate_outputs
+from build.checks.optional_validator import validate_optional_validator
 from build.checks.parsing import validate_part_omission
 from build.checks.rendering import (
     validate_act_authoring,
@@ -46,6 +48,8 @@ CHECKS: tuple[Check, ...] = (
     validate_json_ld_style_display,
     validate_human_examples,
     validate_shapes,
+    validate_authoring_skill,
+    validate_optional_validator,
     validate_agents,
     validate_surfaces,
     validate_outputs,

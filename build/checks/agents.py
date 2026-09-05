@@ -23,6 +23,7 @@ AGENT_PATHS = (
     "examples/AGENTS.md",
     "outputs/AGENTS.md",
     "docs/AGENTS.md",
+    "skills/AGENTS.md",
 )
 
 MAX_AGENT_LINES = 500

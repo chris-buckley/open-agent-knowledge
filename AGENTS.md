@@ -27,6 +27,7 @@ build/AGENTS.md,"generators, checks, freshness, generated reference, and authori
 examples/AGENTS.md,"practical authoring, naming, decomposition, examples, and sibling renders"
 outputs/AGENTS.md,generated artifacts and regeneration ownership
 docs/AGENTS.md,accepted plans and completion reports as history
+skills/AGENTS.md,"portable authoring capability, skill packaging, scope-safe fusion, and optional validator identity"
 >>
 
 agent-line-limit: 500
@@ -38,7 +39,8 @@ repository-rules: YAML<<
   changing implementation files.
 - Treat AGENTS hierarchy as host scoping and never as implicit OAK imports.
 - Treat each scoped AGENTS document as the sole current owner of its named concern.
-- Use .agents as the only repository directory for agent support files.
+- Keep repository-development assistance in .agents and distributable skill products
+  in skills.
 - Do not create repository or directory README indexes.
 - Update architecture, implementation, examples, and generated outputs in one pass
   when the concern requires them.

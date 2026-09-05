@@ -1,7 +1,8 @@
-"""Generate the compact single-shot OAK authoring document."""
+"""Build the portable authoring skill and fuse its exact documents into an agent."""
 
 from __future__ import annotations
 
+import importlib.util
 from pathlib import Path
 import sys
 
@@ -9,291 +10,75 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from build.ebnf import grammar
-from examples.schemas.shape_gallery import prompt_examples
-from oak import (
-    ACT,
-    BindingValue,
-    Compare,
-    Constant,
-    ConstantValue,
-    Emit,
-    Instruction,
-    Interface,
-    LiteralValue,
-    Node,
-    NonEmpty,
-    OneOf,
-    Process,
-    Schema,
-    Set,
-    State,
-    StateValue,
-    Trigger,
-    Type,
-    ValueBinding,
-    render,
-    where,
-)
-from oak.rules import AUTHORING_GUIDANCE
-
+import yaml
+from oak import Node, render
 from oak.rules import AUTHORING_GUIDANCE as GUIDANCE_SOURCE
 from oak.surface import SURFACES as SURFACE_SOURCE
+from build.authoring_guides import entry_node, knowledge_nodes, teaching_examples
+from build.ebnf import grammar
+from build.fusion import fuse
 
-TARGET = ROOT / "outputs" / "authoring.md"
-
-ARCHITECTURE_CAPSULE = """One UTF-8 OAK document contains one idless node.
-The node has only instructions, constants, schemas, state, triggers, processes, and interfaces.
-Schemas define reusable information shapes independently of boundaries and processes.
-Constants are fixed, state persists across arrivals, process bindings are local, and interfaces carry complete boundary instances.
-Target paths connect documents into a graph; local state and interface operations stay in the active document.
-Triggers route outside occurrences; CALL composes internal process work.
-OAK text is the default authored render; JSON-LD is the interchange render.
-The host owns tools, credentials, transport, model selection, external side effects, persistence, and deployment."""
+PACKAGE = ROOT / "skills" / "oak-authoring"
+SCRIPT = PACKAGE / "scripts" / "validate.py"
+TARGET = ROOT / "outputs" / "oak-authoring.oak.md"
+ENTRY = "SKILL.oak.md"  # Virtual identity for the OAK body beneath skill metadata.
 
 
-def canonical_example() -> str:
-    """Return one compact example that exercises all seven parts."""
-    request_schema = Schema(
-        id="support-request",
-        name="Support Request",
-        purpose="Carry one support request into classification.",
-        template="Message: <MESSAGE>",
-        where=[
-            where(
-                "MESSAGE",
-                Type(of="string"),
-                NonEmpty(),
-                description="the support request text",
-            )
-        ],
-    )
-    result_schema = Schema(
-        id="support-result",
-        name="Support Result",
-        purpose="Carry one classified support request.",
-        template="## <PRIORITY>\n\n<SUMMARY>",
-        where=[
-            where(
-                "PRIORITY",
-                Type(of="string"),
-                OneOf(values=["urgent", "normal"]),
-                description="the assigned urgency",
-            ),
-            where(
-                "SUMMARY",
-                Type(of="string"),
-                NonEmpty(),
-                description="the concise request summary",
-            ),
-        ],
-    )
-    workflow_schema = Schema(
-        id="workflow-state",
-        name="Workflow State",
-        purpose="Constrain the persistent classification state.",
-        template="Status: <STATUS>",
-        where=[
-            where(
-                "STATUS",
-                Type(of="string"),
-                OneOf(values=["idle", "running"]),
-                description="the current workflow status",
-            )
-        ],
-    )
-    node = Node(
-        instructions=[
-            Instruction(
-                id="classify-support-request",
-                body="Classify each support request by urgency.",
-            )
-        ],
-        constants=[
-            Constant(
-                id="urgent-terms",
-                value=["outage", "security"],
-            )
-        ],
-        schemas=[request_schema, result_schema, workflow_schema],
-        state=[
-            State(
-                id="review-status",
-                schema="schema.workflow-state",
-                placeholder="STATUS",
-                value="idle",
-            )
-        ],
-        triggers=[
-            Trigger(
-                id="support-requested",
-                event="A support request is supplied.",
-                source="interface.request",
-                guard=Compare(
-                    left=StateValue(state="state.review-status"),
-                    operator="equals",
-                    right=LiteralValue(value="idle"),
-                ),
-                process="process.classify-request",
-            )
-        ],
-        processes=[
-            Process(
-                id="classify-request",
-                name="Classify request",
-                input="schema.support-request",
-                output="schema.support-result",
-                steps=[
-                    Set(
-                        state="state.review-status",
-                        value=LiteralValue(value="running"),
-                    ),
-                    ACT(
-                        (
-                            "Classify <MESSAGE> using <URGENT_TERMS>, "
-                            "then produce <PRIORITY> and <SUMMARY>."
-                        ),
-                        output="schema.support-result",
-                        inputs=[
-                            ValueBinding(
-                                placeholder="MESSAGE",
-                                value=BindingValue(binding="MESSAGE"),
-                            ),
-                            ValueBinding(
-                                placeholder="URGENT_TERMS",
-                                value=ConstantValue(
-                                    constant="constant.urgent-terms"
-                                ),
-                            ),
-                        ],
-                        outputs=["PRIORITY", "SUMMARY"],
-                    ),
-                    Emit(interface="interface.result"),
-                    Set(
-                        state="state.review-status",
-                        value=LiteralValue(value="idle"),
-                    ),
-                ],
-            )
-        ],
-        interfaces=[
-            Interface(
-                id="request",
-                flow="receives",
-                schema="schema.support-request",
-            ),
-            Interface(
-                id="result",
-                flow="emits",
-                schema="schema.support-result",
-            ),
-        ],
-    )
-    return render(node, grouping="xml")
+def validator_module():
+    """Read the helper's version and immutable validator identity without running it."""
+    spec = importlib.util.spec_from_file_location("oak_authoring_validator", SCRIPT)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("missing optional validator helper")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
-def tree() -> Node:
-    """Return the model-authored single-shot authoring document."""
-    oak_document_schema = Schema(
-        id="oak-document",
-        name="OAK Document",
-        purpose="Carry the one valid OAK document written from the supplied source.",
-        template="<OAK>",
-        where=[
-            where(
-                "OAK",
-                Type(of="string"),
-                NonEmpty(),
-                description="the complete valid OAK document",
-            )
-        ],
-    )
-    return Node(
-        instructions=[
-            Instruction(
-                id=guidance.id,
-                body=guidance.instruction,
-            )
-            for guidance in AUTHORING_GUIDANCE
-        ],
-        constants=[
-            Constant(
-                id="architecture-capsule",
-                form="text",
-                value=ARCHITECTURE_CAPSULE,
-            ),
-            Constant(
-                id="oak-ebnf",
-                form="text",
-                value=grammar(groupings=("xml",)).rstrip("\n"),
-            ),
-            Constant(
-                id="schema-examples",
-                form="text",
-                value=prompt_examples(),
-            ),
-            Constant(
-                id="canonical-oak",
-                form="text",
-                value=canonical_example(),
-            ),
-        ],
-        schemas=[oak_document_schema],
-        triggers=[
-            Trigger(
-                id="source-supplied",
-                event="Any source material is supplied with this prompt.",
-                process="process.write-oak",
-            )
-        ],
-        processes=[
-            Process(
-                id="write-oak",
-                name="Write OAK",
-                output="schema.oak-document",
-                steps=[
-                    ACT(
-                        "Use <EXAMPLES> to choose suitable schema shapes and derive <DRAFT> from the supplied source.",
-                        inputs=[ValueBinding(placeholder="EXAMPLES", value=ConstantValue(constant="constant.schema-examples"))],
-                        outputs=["DRAFT"],
-                    ),
-                    ACT(
-                        (
-                            "Validate <DRAFT> against the supplied architecture, "
-                            "grammar, example, and OAK contracts, then produce <OAK>."
-                        ),
-                        inputs=[
-                            ValueBinding(
-                                placeholder="DRAFT",
-                                value=BindingValue(binding="DRAFT"),
-                            )
-                        ],
-                        outputs=["OAK"],
-                    ),
-                    Emit(interface="interface.oak-document-output"),
-                ],
-            )
-        ],
-        interfaces=[
-            Interface(
-                id="oak-document-output",
-                flow="emits",
-                schema="schema.oak-document",
-                description="The sole OAK document returned to the caller.",
-            )
-        ],
-    )
+def skill_documents() -> dict[str, str]:
+    """The exact OAK material shared by progressive loading and agent fusion."""
+    validator = validator_module()
+    nodes = knowledge_nodes(SCRIPT.read_text(encoding="utf-8"), validator.SKILL_VERSION, validator.REVISION)
+    return {ENTRY: render(entry_node(), grouping="markdown"),
+            **{path: render(node, grouping="markdown") for path, node in nodes.items()}}
+
+
+def tree(documents: dict[str, str] | None = None) -> Node:
+    return fuse(documents if documents is not None else skill_documents(), entry=ENTRY)
 
 
 def authoring() -> str:
-    """Return the generated single-shot authoring document."""
-    return render(tree(), grouping="xml") + "\n"
+    return render(tree(), grouping="markdown") + "\n"
+
+
+def artifacts() -> dict[Path, str]:
+    validator = validator_module()
+    shared = skill_documents()
+    metadata = {
+        "name": "oak-authoring",
+        "description": "Author, review, or revise Open Agent Knowledge (OAK) documents from supplied knowledge. Choose justified parts and schema shapes with populated examples. Use when writing OAK; no installation is needed. Programmatic validation is optional and installation requires separate permission.",
+        "metadata": {"version": validator.SKILL_VERSION, "oak-revision": validator.REVISION,
+                     "validator-sha256": validator.SOURCE_SHA256},
+    }
+    frontmatter = "---\n" + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True) + "---\n\n"
+    return {
+        PACKAGE / "SKILL.md": frontmatter + shared[ENTRY] + "\n",
+        **{PACKAGE / path: text + "\n" for path, text in shared.items() if path != ENTRY},
+        **{PACKAGE / path: text + "\n" for path, text in teaching_examples().items()},
+        PACKAGE / "references" / "10-oak.ebnf": grammar(),
+        TARGET: render(tree(shared), grouping="markdown") + "\n",
+    }
 
 
 def write() -> Path:
-    """Write the generated authoring snapshot."""
-    TARGET.parent.mkdir(parents=True, exist_ok=True)
-    TARGET.write_text(authoring(), encoding="utf-8", newline="\n")
+    """Generate products and prune only this generator's owned document paths."""
+    expected = artifacts()
+    for path in (PACKAGE / "references").rglob("*"):
+        if path.is_file() and path.suffix in {".md", ".ebnf"} and path not in expected:
+            path.unlink()
+    (ROOT / "outputs" / "authoring.md").unlink(missing_ok=True)
+    for path, text in expected.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8", newline="\n")
     return TARGET
 
 
