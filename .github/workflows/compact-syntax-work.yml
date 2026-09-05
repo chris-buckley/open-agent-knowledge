@@ -1,0 +1,54 @@
+name: Compact syntax working evidence
+on:
+  push:
+    branches: [feat/compact-oak-syntax]
+    paths: [.github/workflows/compact-syntax-work.yml]
+permissions:
+  contents: read
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Export exact source without credentials
+        run: |
+          mkdir -p "$RUNNER_TEMP/oak-evidence/wheels"
+          git bundle create "$RUNNER_TEMP/oak-evidence/source.bundle" HEAD
+          git rev-parse HEAD > "$RUNNER_TEMP/oak-evidence/revision.txt"
+          git ls-tree -r HEAD > "$RUNNER_TEMP/oak-evidence/tree.txt"
+      - name: Prepare declared dependency wheels
+        run: |
+          python - <<'PY'
+          import os, pathlib, subprocess, sys, tomllib
+          dependencies = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['dependencies']
+          destination = pathlib.Path(os.environ['RUNNER_TEMP']) / 'oak-evidence' / 'wheels'
+          subprocess.run([sys.executable, '-m', 'pip', 'wheel', '--wheel-dir', str(destination), *dependencies], check=True)
+          subprocess.run([sys.executable, '-m', 'pip', 'install', '--no-index', '--find-links', str(destination), *dependencies], check=True)
+          PY
+      - name: Capture baseline verification
+        run: |
+          set +e
+          python --version > "$RUNNER_TEMP/oak-evidence/environment.txt"
+          python -m pip freeze >> "$RUNNER_TEMP/oak-evidence/environment.txt"
+          python -m build.examples > "$RUNNER_TEMP/oak-evidence/module.log" 2>&1
+          module_status=$?
+          python build/examples.py > "$RUNNER_TEMP/oak-evidence/direct.log" 2>&1
+          direct_status=$?
+          git diff --exit-code > "$RUNNER_TEMP/oak-evidence/freshness.log" 2>&1
+          freshness_status=$?
+          printf 'module=%s\ndirect=%s\nfreshness=%s\n' "$module_status" "$direct_status" "$freshness_status" > "$RUNNER_TEMP/oak-evidence/status.txt"
+          cat "$RUNNER_TEMP/oak-evidence/status.txt"
+          test "$module_status:$direct_status:$freshness_status" = 0:0:0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compact-syntax-baseline
+          path: ${{ runner.temp }}/oak-evidence
+          retention-days: 3
+          if-no-files-found: error
