@@ -27,9 +27,10 @@ STATUS_OK = "OK"
 process_execution_table_schema = Schema(
     id="process-execution-table",
     name="Process Execution Table",
-    purpose="Summarize process execution across processes in lexical order, one row per process.",
+    purpose="Report one process execution as a table with one data row.",
     template=(
         "| ProcessId | Name | Status | StartedAt | EndedAt | DurationMs | Outcome | Artifacts | Errors |\n"
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n"
         "| <PROCESS_ID> | <PROCESS_NAME> | <STATUS> | <STARTED_AT> | <ENDED_AT> | <DURATION_MS> | <OUTCOME> | <ARTIFACTS> | <ERRORS> |"
     ),
     where=[

@@ -41,7 +41,7 @@ title_schema = Schema(
 )
 review_schema = Schema(
     id="review", name="Review", purpose="Carry the title decision and its reason.",
-    template="Verdict: <VERDICT>\nReason: <REASON>",
+    template="## <VERDICT>\n\n<REASON>",
     where=[
         where(PLACEHOLDER_VERDICT, Type(of="string"), OneOf(values=["accept", "reject"]),
               description="whether the title is acceptable"),

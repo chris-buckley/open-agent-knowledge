@@ -22,8 +22,9 @@ WHERE:
 </schema>
 
 <schema id="review" name="Review" purpose="Carry the title decision and its reason.">
-Verdict: <VERDICT>
-Reason: <REASON>
+## <VERDICT>
+
+<REASON>
 
 WHERE:
 - <VERDICT> is string; is one of `accept`, `reject`; whether the title is acceptable.
