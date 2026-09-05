@@ -8,8 +8,8 @@ Format: `examples/schemas/smeac_plan.oak.md`
 Repository: `chris-buckley/open-agent-knowledge`
 Baseline: `main` at `4fd86cee4b85bb946a9c8ce7eab2c405e5568144`
 Branch: `plan/typed-statement-conventions`
-Plan status: In progress.
-Execution status: 17 of 19 tasks verified locally; pinned bootstrap and PR delivery remain open.
+Plan status: Complete.
+Execution status: All 19 tasks complete; delivered for review in PR #15.
 Authorization gate: The user authorized end-to-end implementation and a review pull request at 2026-09-05T22:05:29+10:00. Merging requires separate authorization.
 
 ## 1. Situation
@@ -307,10 +307,10 @@ Transition trigger: Generated products and capability identity pass their checks
 ### Phase 5: Verify and deliver
 Objective: Complete the bounded change with reproducible evidence and a review pull request.
 - [x] Key task: P05.01 Run compilation, catalogue and package generators, `python -m build.examples`, and `python build/examples.py`, retaining detached, rejection, scope, and parity checks.
-- [ ] Key task: P05.02 Run the existing approved detached validator bootstrap and cache-reuse integration against the new immutable revision, preserving separate end-user installation consent in both authoring forms.
+- [x] Key task: P05.02 Run the existing approved detached validator bootstrap and cache-reuse integration against the new immutable revision, preserving separate end-user installation consent in both authoring forms.
 - [x] Key task: P05.03 Repeat generation with no product diff; compare protected files and pilot structures to the baseline; remove obsolete live teaching wording while preserving historical before/after evidence.
 - [x] Key task: P05.04 Review the final diff for changed meaning, duplicated guidance, invented capabilities, and overstated proof; fix findings and re-run affected checks before recording the verdict.
-- [ ] Key task: P05.05 Commit the complete change and `report.md` with per-task evidence, open its PR to main, verify final-head CI, and complete checkboxes only against observed evidence. Do not merge.
+- [x] Key task: P05.05 Commit the complete change and `report.md` with per-task evidence, open its PR to main, verify final-head CI, and complete checkboxes only against observed evidence. Do not merge.
 Success criteria: All applicable tasks have evidence, both full checks and final-head CI pass, generation is stable, and the unmerged PR links the plan and report. Blocked tasks remain explicitly open.
 Transition trigger: The complete change is delivered for review at a verified final head.
 

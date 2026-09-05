@@ -209,6 +209,35 @@
       "seconds": 0.638
     }
   ],
-  "bootstrap": "Pending GitHub run with the new source pin; no local network attempt is claimed.",
-  "pr": "Not opened yet."
+  "bootstrap": {
+    "status": "passed",
+    "run_id": 33966380583,
+    "job_id": 101307137414,
+    "verified_revision": "2b542c613c5d1a7e64b597884fae4f444ac34916",
+    "declared_dependencies_installed": true,
+    "steps": [
+      "fresh isolated pinned installation",
+      "retained cache reuse"
+    ]
+  },
+  "pr": {
+    "number": 15,
+    "url": "https://github.com/chris-buckley/open-agent-knowledge/pull/15",
+    "head_sha": "d3c532fc5ea24a3c807fd8a7ced108c1a081047f",
+    "base_sha": "21c2dc5b9366068875709e1cefab3a942f51836c",
+    "run_id": 33966523488,
+    "job_id": 101307509725,
+    "conclusion": "success",
+    "mergeable": true,
+    "merged": false,
+    "final_status_commit": "Changes only plan/report/verification evidence. Its own CI is observed before handoff and recorded in the PR conversation."
+  },
+  "delivery": {
+    "implementation_commit": "288ac782c5ee940a9fba209ca4e24cd953907175",
+    "cleaned_tree": "d4614d380a43f4b0ef2e2e57d5bfc07b2dca1c4c",
+    "cleaned_tree_equals_local": true,
+    "temporary_files_removed": true,
+    "ordinary_ci_unchanged": true,
+    "main_advance": "Only .agents/rules/coding-standards.md was added; no overlapping changes."
+  }
 }

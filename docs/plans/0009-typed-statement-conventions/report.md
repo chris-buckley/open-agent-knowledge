@@ -2,7 +2,7 @@
 
 Plan: [0009](plan.md)
 Branch: `plan/typed-statement-conventions`
-Status: Local implementation verified; pinned bootstrap and PR delivery pending.
+Status: Complete; delivered for review in PR #15.
 Baseline: `82b6e66d7e50511a3212046812c6b0567cf9c3e4`, based on merged main `4fd86cee4b85bb946a9c8ce7eab2c405e5568144`.
 Package pin: `2b542c613c5d1a7e64b597884fae4f444ac34916`.
 
@@ -46,7 +46,7 @@ The same generated decision example and rule text reach the progressive skill an
 | Pilot structure | Entire normalized node equals baseline after restoring only the selected instruction text. |
 | Fixtures and populated layouts | Unchanged. |
 | Skill/agent parity, detached bundles, scope rejection, consent checks | Passed through existing full verification. |
-| Pinned download and isolated install/cache reuse | Pending GitHub verification; local network unavailable. |
+| Pinned download and isolated install/cache reuse | Passed in implementation run 33966380583 and PR run 33966523488. |
 
 The added checks use the existing schemas and actual pipeline. Missing input roles and a numeric CURRENT fail schema binding. Missing or unexpected outputs fail with `act_output_mismatch`; empty DECISION and numeric RATIONALE fail with `invalid_act_output`, before any later fixture phase runs. Two alternative sentences parse and round-trip in both groupings and retain the declared fixture dataflow.
 
@@ -84,10 +84,10 @@ The skill entry remains 8,299 bytes and 190 lines. The assembled agent is 63,943
 | P04.03 | Sizes above; guidance compaction retains all obligations through their original owners. |
 | P04.04 | Existing parity, detached closure, inert teaching, and operational fusion rejection checks pass. |
 | P05.01 | Both full entry points exit 0; all 32 registered checks also pass individually. |
-| P05.02 | Pending actual pinned bootstrap integration in GitHub. |
+| P05.02 | New-pin bootstrap and cache reuse passed in GitHub runs 33966380583 and 33966523488 with declared dependencies. |
 | P05.03 | Protected comparison, 92-product repeat-generation equality, and no obsolete sentence outside historical plan evidence. |
 | P05.04 | Implementing-agent diff and meaning review; findings resolved below. |
-| P05.05 | Pending committed delivery, review PR, and final-head CI. |
+| P05.05 | PR #15 opened; head d3c532fc5ea24a3c807fd8a7ced108c1a081047f passed run 33966523488. The final status commit changes only this plan, report, and verification record; its own CI is checked before handoff. |
 
 ## Review and operational notes
 
@@ -95,8 +95,19 @@ The first full check rejected noncanonical YAML wrapping in the new examples-own
 
 Local checks use preinstalled Pydantic 2.13.4 and pydantic-settings 2.14.1. The latter is below the repository's declared minimum 2.15, so local runs supplement, rather than replace, GitHub runs that install all declared dependencies. No dependency declaration was changed.
 
-A temporary branch-only workflow exports the committed source because direct cloning fails DNS resolution. Its artifact matches GitHub's exact Git tree. Any transfer material is removed before PR delivery; the workflow must not remain in the final product tree or alter main.
+A temporary branch-only workflow exports the committed source because direct cloning fails DNS resolution. Its artifact matches GitHub's exact Git tree. All transfer files and the temporary workflow are absent from the cleaned PR tree; their creation and removal remain in branch history. The ordinary verification workflow is unchanged.
 
 Product SHA256: `764f28c1ca9390f69a8eb62c3421e5e92b17a241f5db2232f10513eca90de503`. This hashes sorted tracked paths and bytes with NUL separators, excluding `docs/plans/` and temporary transfer/workspace paths, as described in verification evidence.
 
-Review verdict: No remaining blocking findings in the locally tested implementation. This is implementing-agent review, not an independent review. PR delivery and new-pin bootstrap remain open until observed. No merge is authorized.
+Review verdict: Approved for review delivery after all applicable checks passed. This is implementing-agent review, not an independent review. All 19 tasks have evidence. No merge is authorized.
+
+## Delivery evidence
+
+PR: [#15](https://github.com/chris-buckley/open-agent-knowledge/pull/15).
+Implementation: `288ac782c5ee940a9fba209ca4e24cd953907175`, verified in [run 33966380583](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33966380583).
+Cleaned candidate: `d3c532fc5ea24a3c807fd8a7ced108c1a081047f`, tree `d4614d380a43f4b0ef2e2e57d5bfc07b2dca1c4c`, exactly equal to the locally reviewed tree.
+PR verification: [run 33966523488](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33966523488), job `101307509725`, all steps successful, including full checks, generation freshness, and pinned bootstrap/cache reuse.
+
+During delivery main advanced to `21c2dc5b9366068875709e1cefab3a942f51836c`, adding only `.agents/rules/coding-standards.md`. This PR has no overlapping changes; GitHub reports it mergeable and its test merge passed verification. The unrelated document is not overwritten or removed.
+
+The status-only closeout preserves the tested product fingerprint above. Its final-head verification is recorded in the PR conversation after the check finishes; no commit claims to contain its own future CI result.
