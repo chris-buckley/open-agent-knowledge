@@ -1,0 +1,151 @@
+name: Compact syntax final delivery
+on:
+  push:
+    branches: [feat/compact-oak-syntax]
+    paths: [.github/workflows/compact-syntax-close.yml]
+permissions:
+  contents: write
+  pull-requests: read
+  actions: read
+concurrency:
+  group: compact-syntax-publication
+  cancel-in-progress: false
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    if: github.repository == 'chris-buckley/open-agent-knowledge' && github.ref == 'refs/heads/feat/compact-oak-syntax'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify observed PR and CI effects before closing evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(git ls-remote origin refs/heads/feat/compact-oak-syntax | cut -f1)" = "$GITHUB_SHA"
+          mkdir -p "$RUNNER_TEMP/compact-final"
+          python - <<'PY'
+          import json, os, pathlib, re, subprocess, sys, tomllib
+          from urllib.request import Request, urlopen
+          base = 'https://api.github.com/repos/chris-buckley/open-agent-knowledge/'
+          def read(path):
+              request = Request(base + path, headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
+              with urlopen(request, timeout=30) as response:
+                  return json.load(response)
+          pr = read('pulls/12')
+          assert pr['state'] == 'open' and not pr['draft'] and not pr['merged']
+          assert pr['head']['ref'] == 'feat/compact-oak-syntax' and pr['base']['ref'] == 'main'
+          assert pr['head']['sha'] == os.environ['GITHUB_SHA']
+          run = read('actions/runs/33943314174')
+          assert run['status'] == 'completed' and run['conclusion'] == 'success'
+          assert run['head_sha'] == 'f7a57cf890245535549d6877c463c34fa6686866'
+          pathlib.Path(os.environ['RUNNER_TEMP'], 'compact-final', 'prior-ci.json').write_text(json.dumps({'pr': pr['html_url'], 'run': run['html_url'], 'head': run['head_sha'], 'conclusion': run['conclusion']}))
+          dependencies = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['dependencies']
+          subprocess.run([sys.executable, '-m', 'pip', 'install', *dependencies], check=True)
+          PY
+      - name: Record completed task audit without altering the accepted design
+        run: |
+          python - <<'PY'
+          import os, pathlib, re, subprocess
+          from build.authoring import validator_module
+          script = validator_module()
+          assert script.REVISION == 'dac756b5424f7b1e19fc6f87ffc0400e90319b96'
+          assert script.SKILL_VERSION == '2.0.0'
+          assert script.package_digest(pathlib.Path('oak')) == '06b44c4d4f2cb29e986952d734fcee984bdea5c055152071758790595b7eeafe'
+          assert not subprocess.check_output(['git', 'diff', script.REVISION, '--', 'oak', 'pyproject.toml'])
+          plan = pathlib.Path('docs/plans/0006-plan.md')
+          text = plan.read_text()
+          ids = re.findall(r'^- \[[ x]\] Key task: (P\d+\.\d+)', text, re.M)
+          assert len(ids) == len(set(ids)) == 101
+          text = re.sub(r'^- \[[ x]\] Key task:', '- [x] Key task:', text, flags=re.M)
+          text = text.replace('implementation is in progress on the same branch.', 'the implementation is complete on the same branch, with PR #12 open for review and all 101 tasks evidenced in the matching completion report.')
+          text = text.replace('P01.05 remains open until continuation is actually received.', 'P01.05 was satisfied by the user continuation at 2026-09-05T13:03:09+10:00.')
+          text = text.replace('## 4. Admin and Logistics\n', '## 4. Admin and Logistics\n\nThe resource statuses below record preparation-time availability. Execution recovered a runnable checkout, completed verification and review, and opened PR #12; current evidence is in `0006-report.md`.\n')
+          text = text.replace("The user's agreement establishes the accepted syntax direction and the current request authorises preparation only. The preparation handoff acknowledges this plan on behalf of the preparing agent; the user's subsequent `continue` acknowledges the committed plan and authorises execution. No acknowledgement or approval from an absent reviewer is implied.", "The initial agreement authorised plan preparation. The user's continuation at 2026-09-05T13:03:09+10:00 acknowledged the committed plan and authorised execution on the same branch. The implementation agent completed the plan and a separate self-review; no acknowledgement or approval from an absent reviewer is implied.")
+          plan.write_text(text, encoding='utf-8', newline='\n')
+          report = pathlib.Path('docs/plans/0006-report.md')
+          text = report.read_text()
+          text = text.replace('Delivery status: implementation verified; PR creation and final delivery evidence are in progress.', 'Delivery status: complete; all 101 plan tasks are evidenced and PR #12 is open for review.')
+          text = text.replace('Real detached bootstrap remains the explicit existing PR-CI check, reported in the delivery evidence when observed.', 'The real detached bootstrap also passed in the existing PR workflow, run 33943314174: no-consent refusal, approved pinned download, isolated dependency installation, standalone parsing/resolution, and retained cache reuse without another permission flag.')
+          text = text.replace('The final delivery row is closed only with the confirmed PR and final verification evidence.', 'The final delivery row is closed with the confirmed PR and observed final verification evidence.')
+          text = text.replace('Explicit detached-bootstrap evidence is added after PR CI.', 'Explicit detached bootstrap passed in PR run 33943314174.')
+          text = text.replace('explicit PR-CI bootstrap when recorded', 'successful explicit PR-CI bootstrap in run 33943314174')
+          marker = 'PR: pending creation after this report is committed.'
+          assert marker in text
+          text = text[:text.index(marker)] + '''PR: [#12](https://github.com/chris-buckley/open-agent-knowledge/pull/12), open and non-draft, from `feat/compact-oak-syntax` to `main`.
+          Final checklist: all 101 stable task IDs are checked. The handoff response discharges P12.06 as specified by the plan; no merge is part of delivery.
+          PR verification: [run 33943314174](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33943314174) passed the complete product/freshness checks and the actual detached validator bootstrap and cache reuse.
+
+          Final evidence closure verifies the PR and prior CI through GitHub before changing the checklist, then runs compilation, generators, both complete entry points, explicit bootstrap, identity checks and clean regeneration against the completed documents. It commits and pushes only after those checks pass, verifies the PR head again, and exports the exact commit plus command logs. The temporary closure workflow removes itself before the final checks and commit. The closure commit is evidence-only relative to the verified product candidate; no package, generated product, dependency or permanent CI file changes during closure.
+
+          The closure runner is RUN_LINK. Its artifact records the exact verification subject and final source bundle. Later evidence-only or identical-tree CI-trigger commits do not alter the pinned package. The final remote head is reported through the PR and the user handoff rather than inventing a self-referential hash inside this report.
+
+          No merge, branch deletion, release, or force-push was performed.
+          '''.replace('          ', '')
+          run_link = '[run ' + os.environ['GITHUB_RUN_ID'] + '](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/' + os.environ['GITHUB_RUN_ID'] + ')'
+          text = text.replace('RUN_LINK', run_link)
+          report.write_text(text, encoding='utf-8', newline='\n')
+          assert len(re.findall(r'^- \[x\] Key task: P\d+\.\d+', plan.read_text(), re.M)) == 101
+          assert not re.search(r'^- \[ \] Key task:', plan.read_text(), re.M)
+          for path in (plan, report):
+              assert '\u2014' not in path.read_text() and '**' not in path.read_text()
+          PY
+          git rm .github/workflows/compact-syntax-close.yml
+          git add docs/plans/0006-plan.md docs/plans/0006-report.md
+          git diff --cached --check
+      - name: Run final-state verification before committing its evidence
+        run: |
+          set -o pipefail
+          python -m compileall -q oak build examples skills/oak-authoring/scripts
+          python -m build.ebnf
+          python -m build.docs
+          python -m build.authoring
+          python -m build.examples 2>&1 | tee "$RUNNER_TEMP/compact-final/module.log"
+          python build/examples.py 2>&1 | tee "$RUNNER_TEMP/compact-final/direct.log"
+          python -m build.checks.bootstrap_integration --allow-download 2>&1 | tee "$RUNNER_TEMP/compact-final/bootstrap.log"
+          python -m build.ebnf
+          python -m build.docs
+          python -m build.authoring
+          git diff --exit-code
+          git diff --cached --check
+          test ! -e .github/workflows/compact-syntax-close.yml
+          test ! -e .github/workflows/compact-syntax-work.yml
+      - name: Publish completed ledger and verify the real PR head
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'docs: complete all compact syntax plan tasks and delivery evidence'
+          git push origin HEAD:feat/compact-oak-syntax
+          git rev-parse HEAD > "$RUNNER_TEMP/compact-final/verified-revision.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/compact-final/verified-tree.txt"
+          test -z "$(git status --porcelain)"
+          python - <<'PY'
+          import json, os, pathlib, subprocess
+          from urllib.request import Request, urlopen
+          request = Request('https://api.github.com/repos/chris-buckley/open-agent-knowledge/pulls/12', headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
+          with urlopen(request, timeout=30) as response:
+              pr = json.load(response)
+          revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          assert pr['head']['sha'] == revision and pr['base']['ref'] == 'main' and pr['state'] == 'open' and not pr['merged'] and not pr['draft']
+          pathlib.Path(os.environ['RUNNER_TEMP'], 'compact-final', 'delivery.json').write_text(json.dumps({'head': revision, 'pr': pr['html_url'], 'checkboxes': 101, 'open_tasks': 0, 'module': 0, 'direct': 0, 'bootstrap': 0, 'freshness': 0, 'review': 'Approved self-review', 'merged': False}))
+          PY
+      - name: Export exact final evidence
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/compact-final"
+          git bundle create "$RUNNER_TEMP/compact-final/source.bundle" HEAD
+          git diff > "$RUNNER_TEMP/compact-final/uncommitted.patch"
+          git diff --cached > "$RUNNER_TEMP/compact-final/staged.patch"
+          git rev-parse HEAD > "$RUNNER_TEMP/compact-final/actual-revision.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compact-syntax-final
+          path: ${{ runner.temp }}/compact-final
+          retention-days: 14
+          if-no-files-found: error
