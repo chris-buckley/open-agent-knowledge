@@ -42,6 +42,7 @@ def validate_outputs() -> None:
     if [constant.id for constant in authoring_node.constants] != [
         "architecture-capsule",
         "oak-ebnf",
+        "schema-examples",
         "canonical-oak",
     ]:
         raise RuntimeError("authoring output constants are not compact")

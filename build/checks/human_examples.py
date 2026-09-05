@@ -11,6 +11,7 @@ def validate_human_examples() -> None:
         delegation,
         implementer,
         interpreter_context,
+        shape_writer,
         successor,
         successor_verifier,
         task_reviewer,
@@ -26,6 +27,7 @@ def validate_human_examples() -> None:
         link_manifest,
         process_execution_table,
         smeac_plan,
+        shape_gallery,
         verification,
     )
 
@@ -35,6 +37,7 @@ def validate_human_examples() -> None:
         delegation,
         implementer,
         interpreter_context,
+        shape_writer,
         successor_verifier,
         successor,
         task_reviewer,
@@ -48,10 +51,12 @@ def validate_human_examples() -> None:
         link_manifest,
         process_execution_table,
         smeac_plan,
+        shape_gallery,
         verification,
     )
 
     interpreter_context.run()
+    shape_writer.run()
 
     for module in examples:
         rendered = module.build()

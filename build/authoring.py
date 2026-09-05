@@ -10,6 +10,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from build.ebnf import grammar
+from examples.schemas.shape_gallery import prompt_examples
 from oak import (
     ACT,
     BindingValue,
@@ -71,7 +72,7 @@ def canonical_example() -> str:
         id="support-result",
         name="Support Result",
         purpose="Carry one classified support request.",
-        template="Priority: <PRIORITY>\nSummary: <SUMMARY>",
+        template="## <PRIORITY>\n\n<SUMMARY>",
         where=[
             where(
                 "PRIORITY",
@@ -227,6 +228,11 @@ def tree() -> Node:
                 value=grammar(groupings=("xml",)).rstrip("\n"),
             ),
             Constant(
+                id="schema-examples",
+                form="text",
+                value=prompt_examples(),
+            ),
+            Constant(
                 id="canonical-oak",
                 form="text",
                 value=canonical_example(),
@@ -247,7 +253,8 @@ def tree() -> Node:
                 output="schema.oak-document",
                 steps=[
                     ACT(
-                        "Derive <DRAFT> from the complete supplied source.",
+                        "Use <EXAMPLES> to choose suitable schema shapes and derive <DRAFT> from the supplied source.",
+                        inputs=[ValueBinding(placeholder="EXAMPLES", value=ConstantValue(constant="constant.schema-examples"))],
                         outputs=["DRAFT"],
                     ),
                     ACT(

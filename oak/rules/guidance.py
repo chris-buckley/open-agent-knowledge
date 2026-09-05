@@ -20,6 +20,22 @@ AUTHORING_GUIDANCE = (
         "Map reusable information shapes and contracts to schemas.",
     ),
     GuidanceRule(
+        "choose-schema-shape",
+        "Choose schema templates by information relationships: tables for comparison, outlines for hierarchy, sections for explanation, and fenced blocks for code; use lists only for list-shaped information.",
+    ),
+    GuidanceRule(
+        "preserve-schema-shape",
+        "Preserve requested layouts; the demonstrated shapes are examples, not a closed catalogue or a reason to force every schema into labelled fields.",
+    ),
+    GuidanceRule(
+        "separate-template-instance",
+        "Keep templates and WHERE constraints in schema definitions; populated outputs fill its slots rather than copying the schema definition.",
+    ),
+    GuidanceRule(
+        "respect-schema-cardinality",
+        "A binding supplies one value per placeholder; repeated names reuse that value, and an ellipsis alone does not create independently typed rows or sections.",
+    ),
+    GuidanceRule(
         "map-state",
         "Map values that persist and can change across arrivals to state.",
     ),

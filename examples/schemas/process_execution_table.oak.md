@@ -3,8 +3,9 @@ Each schema is one information shape: a template with <PLACEHOLDER> slots and WH
 </instructions>
 
 <schemas>
-<schema id="process-execution-table" name="Process Execution Table" purpose="Summarize process execution across processes in lexical order, one row per process.">
+<schema id="process-execution-table" name="Process Execution Table" purpose="Report one process execution as a table with one data row.">
 | ProcessId | Name | Status | StartedAt | EndedAt | DurationMs | Outcome | Artifacts | Errors |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | <PROCESS_ID> | <PROCESS_NAME> | <STATUS> | <STARTED_AT> | <ENDED_AT> | <DURATION_MS> | <OUTCOME> | <ARTIFACTS> | <ERRORS> |
 
 WHERE:

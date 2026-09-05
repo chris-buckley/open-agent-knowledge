@@ -23,6 +23,7 @@ from build.checks.rendering import (
     validate_json_ld_style_display,
 )
 from build.checks.resolution import validate_resolution
+from build.checks.shapes import validate_shapes
 from build.checks.surfaces import validate_surfaces
 from build.checks.text import validate_text_examples
 from build.checks.validation import validate_contract_rules
@@ -44,6 +45,7 @@ CHECKS: tuple[Check, ...] = (
     validate_source_routing,
     validate_json_ld_style_display,
     validate_human_examples,
+    validate_shapes,
     validate_agents,
     validate_surfaces,
     validate_outputs,
