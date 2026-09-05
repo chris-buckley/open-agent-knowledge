@@ -27,7 +27,7 @@ python-authoring-rules: YAML<<
 
 evidence-authoring-rules: ["apply findings before freezing and verifying the final candidate", "have host tools compute immutable snapshot revisions and record observed check results", "gate acceptance on matching subject, revision, required check, and successful result", "require the effect-producing host to reject drift before the effect", "do not present schema-valid evidence as proof that a check ran", "label deterministic demonstration adapters and simulated effects honestly"]
 
-schema-authoring-rules: ["apply the shape-selection guidance owned by oak/rules/guidance.py", "pair each demonstrated template with a complete populated instance", "use shaped schemas in working agents rather than only in the schema collection", "label fixed-cardinality examples and distinguish binding checks from presentation checks", "keep repetition sketches out of executable examples until their semantics are accepted"]
+schema-authoring-rules: ["apply the shape-selection guidance owned by oak/rules/guidance.py", "pair each demonstrated template with a complete populated instance", "use shaped schemas in working agents rather than only in the schema collection", "label fixed-cardinality examples and distinguish binding checks from presentation checks", "keep repetition sketches out of executable examples until their semantics are accepted", "keep SMEAC phases compact with checkbox key tasks, plain labelled objective, success criteria, and transition trigger lines, and no internal blank lines"]
 
 example-contract: ["render", "parse", "resolve when required", "round-trip", "write one canonical sibling .oak.md snapshot", "register in repository verification"]
 </constants>
