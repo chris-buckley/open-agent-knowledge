@@ -1,0 +1,2 @@
+# Experiment-local numerical dependency; repository dependencies remain unchanged.
+numpy==2.3.5
