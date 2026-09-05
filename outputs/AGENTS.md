@@ -9,7 +9,7 @@ owned-concern: "The generated-only status, source ownership, and regeneration ru
 
 output-map: CSV<<
 path,meaning,owner
-authoring.md,generated single-shot OAK authoring prompt,build/authoring.py
+oak-authoring.oak.md,standalone authoring agent assembled from the portable skill,build/authoring.py
 oak.ebnf,generated grammar reference,build/ebnf.py
 docs,generated model and surface reference,build/docs.py
 >>

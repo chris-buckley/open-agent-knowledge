@@ -11,7 +11,7 @@ generator-map: CSV<<
 source,output
 build/ebnf.py,outputs/oak.ebnf
 build/docs.py,outputs/docs
-build/authoring.py,outputs/authoring.md
+build/authoring.py and build/authoring_guides.py,skills/oak-authoring knowledge and outputs/oak-authoring.oak.md
 examples Python modules,sibling .oak.md snapshots
 >>
 
@@ -19,7 +19,7 @@ full-verification-command: "python -m build.examples"
 
 direct-verification-command: "python build/examples.py"
 
-authoring-prompt-byte-limit: 18000
+authoring-product-byte-limits: {"skill-entry": 10000, "standalone-agent": 64000}
 
 agent-graph-checks: ["exact path discovery", "canonical parse and render equality", "500-line maximum", "root router coverage", "one owned concern per file", "structured content before authored instructions", "duplicate authored-claim rejection", "obsolete owner rejection"]
 
@@ -35,7 +35,7 @@ freshness-rules: YAML<<
 <processes>
 <process id="verify-repository" name="Verify repository">
 ACT Use <GENERATORS> to regenerate every affected product from its source. (GENERATORS=$constant.generator-map)
-ACT Enforce <PROMPT_LIMIT> and <AGENT_CHECKS> while validating generated and scoped knowledge products. (PROMPT_LIMIT=$constant.authoring-prompt-byte-limit, AGENT_CHECKS=$constant.agent-graph-checks)
+ACT Enforce <PRODUCT_LIMITS> and <AGENT_CHECKS> while validating generated and scoped knowledge products. (PRODUCT_LIMITS=$constant.authoring-product-byte-limits, AGENT_CHECKS=$constant.agent-graph-checks)
 ACT Run <MODULE_CHECK> and <DIRECT_CHECK> after compilation and generation. (MODULE_CHECK=$constant.full-verification-command, DIRECT_CHECK=$constant.direct-verification-command)
 ACT Apply <FRESHNESS> and require repeated generation to leave no diff. (FRESHNESS=$constant.freshness-rules)
 </process>

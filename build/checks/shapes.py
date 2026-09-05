@@ -8,12 +8,12 @@ from collections.abc import Callable
 from pydantic import JsonValue
 from collections.abc import Mapping
 
-from oak import Act, Arrival, ExecutionError, Node, Schema, SchemaBindingError, execute, parse, render, schema_xml
+from oak import Act, Arrival, ExecutionError, Node, Schema, SchemaBindingError, execute, parse, render
 from examples.agents import shape_writer
 from examples.schemas import process_execution_table
 from examples.schemas.shape_gallery import (
     EXPECTED_INSTANCES, SAMPLE_BINDINGS, SHAPES, comparison_schema,
-    decision_schema, file_schema, outline_schema, populate_example, prompt_examples,
+    decision_schema, file_schema, outline_schema, populate_example,
 )
 
 
@@ -59,19 +59,19 @@ def _python_file(text: str) -> str:
 def validate_shapes() -> None:
     """Check bindings, populated layouts, host boundaries, and prompt exposure."""
     from build.authoring import tree
+    from build.authoring_guides import populated_examples
 
     prompt = tree()
-    examples = next(item.value for item in prompt.constants if item.id == "schema-examples")
-    if examples != prompt_examples():
-        raise RuntimeError("the authoring prompt lost its populated schema examples")
+    examples = next(item.value for item in prompt.constants if item.id.endswith("-populated-shapes"))
+    if examples != populated_examples():
+        raise RuntimeError("the authoring capability lost its populated schema examples")
 
     for schema in SHAPES:
         values = SAMPLE_BINDINGS[schema.id]
         expected = EXPECTED_INSTANCES[schema.id]
         compact = Schema(id=schema.id, template=schema.template, where=schema.where)
-        pair = schema_xml(compact) + "\nPopulated instance:\n" + expected
-        if pair not in examples:
-            raise RuntimeError(f"the prompt lost the complete {schema.id} example")
+        if expected not in examples or not any(item.template == schema.template and item.where == schema.where for item in prompt.schemas):
+            raise RuntimeError(f"the capability lost the complete {schema.id} example")
         if compact.placeholders != schema.placeholders or compact.where != schema.where:
             raise RuntimeError("compact examples changed the binding contract")
         for grouping in ("xml", "markdown"):

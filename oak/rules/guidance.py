@@ -9,7 +9,7 @@ AUTHORING_GUIDANCE = (
     ),
     GuidanceRule(
         "map-instructions",
-        "Map directives, policies, interpretation rules, and required behaviour to instructions.",
+        "Author instructions last; include only meaning that schemas, constants, state, interfaces, triggers, and processes cannot express.",
     ),
     GuidanceRule(
         "map-constants",
@@ -121,7 +121,7 @@ AUTHORING_GUIDANCE = (
     ),
     GuidanceRule(
         "validate-draft",
-        "Check the draft against the supplied grammar, example, and every stated OAK contract.",
+        "Review the draft against the grammar, populated examples, and OAK contracts; run programmatic validation only when requested and report whether it actually ran.",
     ),
     GuidanceRule(
         "write-document",
@@ -129,7 +129,7 @@ AUTHORING_GUIDANCE = (
     ),
     GuidanceRule(
         "emit-document",
-        "Emit the final OAK document as the sole response.",
+        "Return the final OAK document and, when validation is requested, an honest validation result outside the authored document.",
     ),
 )
 
