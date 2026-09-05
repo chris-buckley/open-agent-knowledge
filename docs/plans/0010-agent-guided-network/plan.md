@@ -102,8 +102,8 @@ Transition trigger: Selected snapshot identities are closed before final metrics
 ### Phase 8: Verify attention delivery
 Objective: Deliver reproducible attention nodes and measured limits on the existing branch and PR.
 - [x] Key task: P08.01 Verify isolated numerical exports, OAK executor parity, and a complete replay of recorded attention results.
-- [ ] Key task: P08.02 Run complete repository and both experiment checks, publish the exact tested tree, and record conclusions without a superiority or scaling claim.
-Success criteria: Source, representative OAK nodes, raw evidence, report, and CI checks are available on the same branch; first-run records remain unchanged.
+- [x] Key task: P08.02 Run complete repository and both experiment checks, publish the exact tested tree, and record conclusions without a superiority or scaling claim.
+Success criteria: Source, representative OAK nodes, raw evidence, report, and passing CI checks are available on the same branch; first-run experimental evidence is preserved with navigation repaired.
 Transition trigger: The attention follow-on is delivered; unperformed broad-study tasks remain open.
 
 ### Coordinating Instructions
@@ -144,7 +144,7 @@ Rollback: Do not modify main. During later learning, retain the accepted network
 | Task state | This SMEAC plan | Record authorisation and checkboxes | On observed task transitions |
 | Evidence | Report and immutable run records | Record actual checks and outcomes | At each delivered milestone or run |
 
-Reporting: The first-run and attention reports record measured learning and export; the delivery report distinguishes local execution from CI. PR 14 remains the review vehicle; no merge is authorised.
+Reporting: The first-run and attention reports record measured learning and export; the delivery report distinguishes local execution from CI. Both [repository verification](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33970792414) and [experiment tests and replay](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33970792397) passed for `16c70c2e91b49727a33c6fd575d7bd6d63ec8395`. This final task-state update does not change the tested implementation or evidence. PR 14 remains the review vehicle; no merge is authorised.
 
 | Decision | Authority | Escalation |
 | --- | --- | --- |
