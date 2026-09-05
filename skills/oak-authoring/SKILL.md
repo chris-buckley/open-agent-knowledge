@@ -5,9 +5,9 @@ description: Author, review, or revise Open Agent Knowledge (OAK) documents from
   when writing OAK; no installation is needed. Programmatic validation is optional
   and installation requires separate permission.
 metadata:
-  version: 1.0.0
-  oak-revision: 3cf76d5fa8073774d88974f0396a5177d510fbc6
-  validator-sha256: 1200a15c15f512c40dd79814d762f7e691ba431e75bcabcb339b34633f517888
+  version: 2.0.0
+  oak-revision: dac756b5424f7b1e19fc6f87ffc0400e90319b96
+  validator-sha256: 06b44c4d4f2cb29e986952d734fcee984bdea5c055152071758790595b7eeafe
 ---
 
 ~~~~instructions
