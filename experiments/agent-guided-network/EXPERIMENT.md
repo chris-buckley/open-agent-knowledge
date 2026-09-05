@@ -1,7 +1,7 @@
 # Agent-guided numerical networks
 
 Prepared: 2026-09-05
-Status: Design recorded; runtime, training, benchmarks, and export not implemented.
+Status: Design recorded; sequential single-agent implementation and execution authorised on 2026-09-05. No numerical result is claimed yet.
 Baseline: OAK `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a`.
 Branch: `experiment/agent-guided-network`.
 
@@ -14,6 +14,18 @@ After learning, remove the agents completely. The remaining matrices, mathematic
 The user's defining idea is agents participating in the learning journey, not agents remaining responsible for the learned capability. The intended eventual scale is hundreds of connected OAK-defined modules. A small, inspectable experiment comes first to test the mechanism, not to replace that ambition.
 
 The central requirement is that useful agent contributions become concrete numerical changes. A revised prompt, a persuasive explanation, or an agent correcting an answer is not a learned network update.
+
+## Execution model: one running agent, many node responsibilities
+
+The agent running this experiment acts on behalf of the logical node agents, including the proposed "100 agents". For the first execution, this is the assistant conducting the work in this conversation. It visits node responsibilities sequentially, examines numerical observations, proposes changes to the selected node's permitted matrices, and asks deterministic tools to fit and evaluate the proposed changes. No autonomous multi-agent framework, background agent fleet, or separate language-model instance per node is required.
+
+"100 agents" describes logical learning responsibilities, not a claim that 100 independent agents have been launched. Report the actual number of numerical nodes, the actual proposer count of one, and the sequential scheduling policy. The initial runnable network may be smaller. Shared conversational context means this treatment is not an independent local-agent population and cannot establish an advantage of distributed agents over a central agent.
+
+The assistant must actually inspect observations and record its chosen proposal and rationale before seeing the candidate's evaluation. A scripted optimiser replaying a recorded proposal is a reproducibility mechanism, not a new agent decision. Do not label hand-coded heuristics, numerical solvers, replay, or fabricated dialogue as autonomous agent activity.
+
+Python performs every scored forward pass and computes the fixed evaluation metrics. The running assistant may choose a behavioural target, preservation examples, a bounded parameter change, or a numerical fitting method, but cannot supply answers during scored inference or rewrite the evaluator after seeing results. Accepted candidates become new immutable OAK node revisions; current constants remain fixed during each run.
+
+The authorised next work is to implement and run a small real feasibility experiment on this same branch, compare initial, numerical-only, and agent-guided networks, and verify a standalone numerical export. Record observed improvements, ties, or regressions without assuming agent benefit. Keep final test examples outside the proposal loop, disclose privileged task knowledge and resource differences, and leave any unperformed broader ablation or scale study explicitly open. The user requested this clarification as the next commit before implementation, with progress updates during execution.
 
 ## Decisive architectural choice
 
@@ -29,9 +41,10 @@ Input -> module A -> module B -> ... -> output
        observations and diagnostics        |
             |           |                 v
 TEMPORARY LEARNING SUPPORT          fixed evaluator
-            |           |                 |
-       agent A       agent B <------ feedback
-            |           |
+                    |                     |
+        one running assistant <------ feedback
+        acting for node A, then node B, ...
+                    |
         constrained update proposals
                     |
        numerical fitting and candidate tests
@@ -47,7 +60,7 @@ Agent-free does not mean runtime-free. Ordinary numerical software still loads p
 | --- | --- |
 | OAK node | The canonical knowledge unit described by one document. It remains idless; its document path supplies graph identity. |
 | Computational module | A numerical transformation associated with an OAK node, not necessarily one scalar neuron. |
-| Wrapper agent | Temporary learning support for a module. It may propose changes but cannot contribute to scored forward computation. |
+| Wrapper agent | Temporary learning responsibility for a module. In the initial execution, the same running assistant assumes each responsibility sequentially. It cannot contribute to scored forward computation. |
 | Network | The explicit composition of numerical modules, connections, and complete input/output processing. |
 | Node revision | An immutable candidate or accepted version of a module document and its parameters. |
 | Network revision | One exact, compatible set of node revisions, topology, operation definitions, and preprocessing. |
@@ -64,7 +77,7 @@ H02, learning value: does agent-guided numerical fitting outperform strong non-a
 
 H03, meaning: do correct module descriptions and stable semantic interfaces improve proposals relative to missing or shuffled descriptions?
 
-H04, organisation: do local node agents provide an advantage over one central agent with comparable information and budget?
+H04, organisation: do local node agents provide an advantage over one central agent with comparable information and budget? Sequential role-taking by one assistant does not answer this question.
 
 H05, scale: does the approach remain useful as the number of modules grows toward hundreds? This is a later measurement target, not an established property.
 
@@ -126,7 +139,7 @@ Assign agents coherent responsibilities, not arbitrary scalar neurons. Relation 
 
 A channel called `conflict` is not proven to detect conflict. Its semantics need supervision or intervention tests. [Concept bottleneck models, R08](research/SOURCES.md), motivate meaningful intermediate contracts, but their use of concept correction at test time does not satisfy our agent-free inference requirement.
 
-Keep large numerical inspections in numerical tools rather than filling the language-model context with complete matrices. One shared language model may serve many logical wrappers. Separate ownership, evidence, and revision identity matter more than running hundreds of separately hosted models.
+Keep large numerical inspections in numerical tools rather than filling the language-model context with complete matrices. One shared language model may serve many logical wrappers. Separate ownership, evidence, and revision identity matter more than running hundreds of separately hosted models. The first execution uses the running assistant for all of those responsibilities, as specified above.
 
 Agents need not act after every example. Invoke them for persistent failure clusters, stalled improvement, or predeclared review intervals while numerical optimisation performs routine fitting. Count the cost of both activities.
 
@@ -136,7 +149,7 @@ A final network score does not identify which module should change. Use end-to-e
 
 A minimal interference example is `y = w1 * w2` with target `1` and initial `w1 = w2 = 0.5`. Either agent can propose changing its own weight to `2`, which is perfect while the other weight remains `0.5`. Combining both individually successful proposals produces `4`.
 
-Therefore every proposal names its exact baseline network revision. Agents may propose in parallel, but acceptance initially proceeds sequentially or through small jointly evaluated groups. Re-evaluate stale proposals and combinations. Never merge local successes merely because their edited files differ.
+Therefore every proposal names its exact baseline network revision. Acceptance initially proceeds sequentially. Future agents may propose in parallel, but combinations must be jointly evaluated. Re-evaluate stale proposals and combinations. Never merge local successes merely because their edited files differ.
 
 Retain the best-known network separately from exploratory candidates. Coordinated improvements may require a bounded search branch, but an exploratory regression must not silently replace the accepted network. The full lifecycle and rejection rules are in [the training protocol](training/PROTOCOL.md).
 
@@ -154,13 +167,13 @@ PyTorch and ONNX provide a possible route for a supported subset, not a universa
 
 ## First experiment and scientific controls
 
-Begin with about 16 meaningful modules on a synthetic compositional-relation task with deterministic ground truth. Inputs are numerical relation tables; output labels are calculated by an exact reference evaluator. Relation instances are data, not automatically learned parameters. The node matrices parameterise computation across examples.
+Begin with a small network, with about 16 meaningful modules as the initial design target, on a synthetic compositional-relation task with deterministic ground truth. The executing assistant may choose a smaller feasibility instance and must record its actual size before running comparisons. Inputs are numerical relation tables; output labels are calculated by an exact reference evaluator. Relation instances are data, not automatically learned parameters. The node matrices parameterise computation across examples.
 
 A small permissions-style composition, such as a person's roles composed with role capabilities, is an understandable smoke test. It is not evidence that learned embeddings prove permissions or that the approach improves training. Real policy enforcement is outside this experiment.
 
 Freeze the exact task, topology, operators, dataset split, acceptance criteria, and budget before scored comparisons. Use held-out entity assignments and relation combinations where meaningful, expose any extra rule knowledge given to agents, and do not let wrappers inspect the final test set.
 
-Compare a strong numerical optimiser, budgeted non-agent proposal search, one central training agent, local agents with direct edits, and local agents with numerical fitting. Include matched numerical fitting without agents to separate the solver's contribution from the agent's. Test missing or shuffled descriptions and local-only versus whole-network acceptance.
+Compare a strong numerical optimiser, budgeted non-agent proposal search, one central training agent, local agents with direct edits, and local agents with numerical fitting in the full study. Include matched numerical fitting without agents to separate the solver's contribution from the agent's. Test missing or shuffled descriptions and local-only versus whole-network acceptance. The first sequential-assistant run compares initial, numerical-only, and agent-guided networks; it does not claim that all full-study treatments have been run.
 
 Measure held-out predictive performance, compute and language-model cost, candidate evaluation count, update acceptance, regressions, and exported equivalence across independent seeds. Reserve a final test set outside the adaptive improvement loop. Equal candidate count and equal total resource cost are different comparisons; report both rather than hiding the cost of the agents.
 
@@ -196,6 +209,7 @@ Measure held-out predictive performance, compute and language-model cost, candid
 | Dense matrices overwhelm agent context or cost | Semantic modules, summaries, constrained edits, and measured budgets. |
 | Parameter changes erase useful behaviour | Preservation cases, bounded updates, retained incumbent, and rollback. |
 | Scaling fails beyond the small network | Report the measured limit; do not extrapolate to hundreds. |
+| One assistant is mistaken for independent agents | Record one proposer, sequential node roles, shared context, and actual node count. |
 
 ## Directory structure and ownership
 
@@ -230,6 +244,6 @@ Create per-run result directories only when runs exist. Do not fill the structur
 
 ## Current decision
 
-Proceed with the design package for a numerical-first network, immutable inline node parameters, temporary local learning wrappers, behavioural proposals materialised by numerical tools, independent acceptance, and agent-free export.
+Implement and run the numerical-first feasibility experiment with the current assistant serving all logical node-agent roles sequentially. Preserve immutable inline node parameters, behavioural proposals materialised by numerical tools, independent acceptance, and agent-free export.
 
-The next implementation must establish the smallest working numerical path before adding learning agents. It must then test whether those agents contribute a measurable advantage. This branch records that experiment; it does not claim that the network is implemented, trained, or successful.
+The user authorised execution on 2026-09-05 after requesting this documentation change as the next commit. First establish the smallest working numerical path, then make and evaluate actual assistant proposals, and report measured results with limitations. This authorisation does not claim that implementation, training, or export has already succeeded, and does not authorise merging into main.
