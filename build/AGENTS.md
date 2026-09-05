@@ -46,6 +46,8 @@ example-checks: YAML<<
   refused operational fusion, and skill-agent execution parity; retain the existing
   consent, identity, and byte limits.
 >>
+
+coding-standard-checks: ["validate the pure OAK entry and every routed Python topic in both groupings", "require exact bounded document closure, unique source sections, and complete inert example references", "exercise rejected missing, duplicate, escaping, noncanonical, and malformed knowledge plus symbolic-link inputs", "keep migration evidence historical and general style judgement distinct from structural validation"]
 </constants>
 
 <processes>
@@ -59,6 +61,9 @@ ACT Enforce <PRODUCT_LIMITS> and <AGENT_CHECKS> while validating generated and s
 )
 ACT Apply <PLAN_CHECKS> to persistent plan records and their verification examples. (
   PLAN_CHECKS=$constant.plan-checks,
+)
+ACT Apply <CHECKS> when Python convention knowledge or its root routing changes. (
+  CHECKS=$constant.coding-standard-checks,
 )
 ACT Apply <EXAMPLES> when source registration, fixture delivery, or shared teaching changes. (
   EXAMPLES=$constant.example-checks,

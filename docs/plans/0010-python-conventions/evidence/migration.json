@@ -1,0 +1,1241 @@
+{
+  "baseline_commit": "21c2dc5b9366068875709e1cefab3a942f51836c",
+  "baseline_tree": "8ed6877fc92dae59d5e2d616a9f875d56b5fa25b",
+  "source_path": ".agents/rules/coding-standards.md",
+  "source_blob": "7e2e16b7108d1f9b9b2d3f9dcb6811c9767b39c8",
+  "source_sha256": "d2fb0b6ecb7ad94e067ffea0bced6f93b9924f473c7a93a6ad7d2636550cfd0d",
+  "headings": [
+    {
+      "section": "1",
+      "title": "Governing principles"
+    },
+    {
+      "section": "2",
+      "title": "Precedence"
+    },
+    {
+      "section": "3",
+      "title": "Core style"
+    },
+    {
+      "section": "3.1",
+      "title": "Type everything meaningful"
+    },
+    {
+      "section": "3.2",
+      "title": "Keep structures flat and data-oriented"
+    },
+    {
+      "section": "3.3",
+      "title": "Put stable values near the top"
+    },
+    {
+      "section": "3.4",
+      "title": "Use enums for finite semantic choices"
+    },
+    {
+      "section": "3.5",
+      "title": "Write short descriptive helpers"
+    },
+    {
+      "section": "3.6",
+      "title": "Keep one line per coherent idea"
+    },
+    {
+      "section": "3.7",
+      "title": "Mark non-public names explicitly"
+    },
+    {
+      "section": "3.8",
+      "title": "Separate conceptual groups with blank lines"
+    },
+    {
+      "section": "3.9",
+      "title": "Use one semantic vocabulary"
+    },
+    {
+      "section": "4",
+      "title": "Domain modelling"
+    },
+    {
+      "section": "4.1",
+      "title": "Validate once at the boundary"
+    },
+    {
+      "section": "4.2",
+      "title": "Make invalid states difficult or impossible to construct"
+    },
+    {
+      "section": "4.3",
+      "title": "Distinguish interchangeable primitives"
+    },
+    {
+      "section": "4.4",
+      "title": "Preserve the meaning of absence"
+    },
+    {
+      "section": "4.5",
+      "title": "Prefer immutable values at boundaries"
+    },
+    {
+      "section": "5",
+      "title": "Function and API design"
+    },
+    {
+      "section": "5.1",
+      "title": "Use the narrowest useful input protocol"
+    },
+    {
+      "section": "5.2",
+      "title": "Make ambiguous parameters keyword-only"
+    },
+    {
+      "section": "5.3",
+      "title": "Keep public APIs small and explicit"
+    },
+    {
+      "section": "5.4",
+      "title": "Depend on behaviour at real boundaries"
+    },
+    {
+      "section": "5.5",
+      "title": "Preserve public signatures during refactors"
+    },
+    {
+      "section": "6",
+      "title": "Control flow and complexity"
+    },
+    {
+      "section": "6.1",
+      "title": "Use guard clauses"
+    },
+    {
+      "section": "6.2",
+      "title": "Keep cyclomatic complexity low"
+    },
+    {
+      "section": "6.3",
+      "title": "Make finite branching exhaustive"
+    },
+    {
+      "section": "6.4",
+      "title": "Keep one responsibility per function"
+    },
+    {
+      "section": "7",
+      "title": "State, effects, and determinism"
+    },
+    {
+      "section": "7.1",
+      "title": "Keep pure computation separate from I/O"
+    },
+    {
+      "section": "7.2",
+      "title": "Inject nondeterministic inputs"
+    },
+    {
+      "section": "7.3",
+      "title": "Prepare before committing"
+    },
+    {
+      "section": "7.4",
+      "title": "Define deterministic ordering"
+    },
+    {
+      "section": "8",
+      "title": "Errors and validation"
+    },
+    {
+      "section": "8.1",
+      "title": "Catch only expected exceptions"
+    },
+    {
+      "section": "8.2",
+      "title": "Use exceptions for caller errors and assertions for invariants"
+    },
+    {
+      "section": "8.3",
+      "title": "Write actionable error messages"
+    },
+    {
+      "section": "9",
+      "title": "Resources, performance, and numerical behaviour"
+    },
+    {
+      "section": "9.1",
+      "title": "Express resource lifetimes with context managers"
+    },
+    {
+      "section": "9.2",
+      "title": "Stream when materialization is unnecessary"
+    },
+    {
+      "section": "9.3",
+      "title": "Choose domain-correct numeric and time primitives"
+    },
+    {
+      "section": "9.4",
+      "title": "Optimize after measuring"
+    },
+    {
+      "section": "10",
+      "title": "Imports and dependencies"
+    },
+    {
+      "section": "10.1",
+      "title": "Prefer the standard library"
+    },
+    {
+      "section": "10.2",
+      "title": "Keep imports explicit"
+    },
+    {
+      "section": "10.3",
+      "title": "Pin and justify runtime dependencies"
+    },
+    {
+      "section": "11",
+      "title": "Documentation"
+    },
+    {
+      "section": "11.1",
+      "title": "Use rare terse STE comments"
+    },
+    {
+      "section": "11.2",
+      "title": "Keep docstrings concise and contractual"
+    },
+    {
+      "section": "11.3",
+      "title": "Preserve rationale near unusual choices"
+    },
+    {
+      "section": "11.4",
+      "title": "Teach changes with focused before-and-after examples"
+    },
+    {
+      "section": "12",
+      "title": "Testing and verification"
+    },
+    {
+      "section": "12.1",
+      "title": "Reduce the test surface before adding tests"
+    },
+    {
+      "section": "12.2",
+      "title": "Test observable behaviour"
+    },
+    {
+      "section": "12.3",
+      "title": "Cover the important behavioural classes"
+    },
+    {
+      "section": "12.4",
+      "title": "Run checks before and after refactoring"
+    },
+    {
+      "section": "12.5",
+      "title": "Report complexity after nontrivial refactors"
+    },
+    {
+      "section": "13",
+      "title": "Formatting and layout"
+    },
+    {
+      "section": "13.1",
+      "title": "Keep small signatures horizontal"
+    },
+    {
+      "section": "13.2",
+      "title": "Group code by concept"
+    },
+    {
+      "section": "14",
+      "title": "Maintainability architecture"
+    },
+    {
+      "section": "14.1",
+      "title": "Keep one abstraction level per function"
+    },
+    {
+      "section": "14.2",
+      "title": "Give each domain rule one authoritative home"
+    },
+    {
+      "section": "14.3",
+      "title": "Separate queries from commands"
+    },
+    {
+      "section": "14.4",
+      "title": "Make dependency direction explicit"
+    },
+    {
+      "section": "14.5",
+      "title": "Make objective conventions executable"
+    },
+    {
+      "section": "14.6",
+      "title": "Treat public behaviour as a compatibility contract"
+    },
+    {
+      "section": "14.7",
+      "title": "Use type-system guards during refactoring"
+    },
+    {
+      "section": "14.8",
+      "title": "Separate user output from operational logging"
+    },
+    {
+      "section": "14.9",
+      "title": "Name tests as a behaviour index"
+    },
+    {
+      "section": "15",
+      "title": "Patterns to avoid"
+    },
+    {
+      "section": "16",
+      "title": "Preferred implementation flow"
+    },
+    {
+      "section": "17",
+      "title": "Review checklist"
+    },
+    {
+      "section": "18",
+      "title": "Final judgement rule"
+    }
+  ],
+  "source_rule_count": 63,
+  "source_requirement_count": 380,
+  "source_example_count": 68,
+  "source_table_count": 1,
+  "review_question_count": 42,
+  "preservation": "Every source requirement, table, and normalized code literal equals its parsed OAK destination. Markdown inline delimiters and checklist markers become text and ordered data; final code-fence newlines are not part of the code literal.",
+  "sections": [
+    {
+      "section": "1",
+      "title": "Governing principles",
+      "document": "coding-standards.oak.md",
+      "requirements": 15,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "4c14ee20a71e7b3b2722ed97be57a15a9d91ee8c2280cfcf4571940afe9a31dd"
+    },
+    {
+      "section": "2",
+      "title": "Precedence",
+      "document": "coding-standards.oak.md",
+      "requirements": 7,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "69fb0375424e45681fc472b984d1b9197417ba669b7cdf24f93d0f89e53c907d"
+    },
+    {
+      "section": "3.1",
+      "title": "Type everything meaningful",
+      "document": "python/types.oak.md",
+      "requirements": 2,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "2e9df32cc0bc3d92e485233ae6d92267476f3ba088712be00e107255c0e1d510"
+    },
+    {
+      "section": "3.2",
+      "title": "Keep structures flat and data-oriented",
+      "document": "python/types.oak.md",
+      "requirements": 7,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "5d5ba2288702837e8163d7b1d019b1e645c968350a93c462d40ac2a1ea78e36c"
+    },
+    {
+      "section": "3.3",
+      "title": "Put stable values near the top",
+      "document": "python/naming.oak.md",
+      "requirements": 2,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "3cd0140b15c9883ffa19bf9bb90287ed079714e87cd8f739be5e6a2d12a37617"
+    },
+    {
+      "section": "3.4",
+      "title": "Use enums for finite semantic choices",
+      "document": "python/types.oak.md",
+      "requirements": 2,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "63ac57bb7c5e26f34e60c8fcfea9293df66c61a441c40a0a9fd8d42422035d46"
+    },
+    {
+      "section": "3.5",
+      "title": "Write short descriptive helpers",
+      "document": "python/design.oak.md",
+      "requirements": 8,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "60f6e1c3225c6519220c6fcbc2039d45e18399247048eda12cc303e36375ade7"
+    },
+    {
+      "section": "3.6",
+      "title": "Keep one line per coherent idea",
+      "document": "python/layout.oak.md",
+      "requirements": 2,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "058b5689cb2514572bcb126a346e1ee03f1f1ea2ce603287aedc57a9c0ee0a05"
+    },
+    {
+      "section": "3.7",
+      "title": "Mark non-public names explicitly",
+      "document": "python/naming.oak.md",
+      "requirements": 14,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "9e8e7d12c3009bfea80028b331700256024adc0ca04ed402c5ac62b01732bb34"
+    },
+    {
+      "section": "3.8",
+      "title": "Separate conceptual groups with blank lines",
+      "document": "python/layout.oak.md",
+      "requirements": 7,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "8c43f6b6b06329447a3fe8928913d86b228bb96a704ee1c02644316bac7c0e1d"
+    },
+    {
+      "section": "3.9",
+      "title": "Use one semantic vocabulary",
+      "document": "python/naming.oak.md",
+      "requirements": 31,
+      "examples": 5,
+      "tables": 0,
+      "record_sha256": "3bfff117d20bdbd017eb1f25e0bc2056d905fb818db65b7a5def1df61ff212f0"
+    },
+    {
+      "section": "4.1",
+      "title": "Validate once at the boundary",
+      "document": "python/types.oak.md",
+      "requirements": 1,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "0f0a20387eb77656e5bf412844a87cdf0ebf35fc6849a3c8301e75490e1ecfec"
+    },
+    {
+      "section": "4.2",
+      "title": "Make invalid states difficult or impossible to construct",
+      "document": "python/types.oak.md",
+      "requirements": 1,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "3d7e94c447b46e0d6bcf8a93824083cf432744cacfeb5af94dc9abb9d75007a2"
+    },
+    {
+      "section": "4.3",
+      "title": "Distinguish interchangeable primitives",
+      "document": "python/types.oak.md",
+      "requirements": 1,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "79e42ac8fd00ff894c384a9bd159f68584021c6a29685fc1cce5bf6d5a94f6eb"
+    },
+    {
+      "section": "4.4",
+      "title": "Preserve the meaning of absence",
+      "document": "python/types.oak.md",
+      "requirements": 1,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "493775fbcedaca6a1578434d9101e17b5baa4460646b2440fb6182c23421a556"
+    },
+    {
+      "section": "4.5",
+      "title": "Prefer immutable values at boundaries",
+      "document": "python/types.oak.md",
+      "requirements": 2,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "ffb9819159e5521e0c9f99356e89453771ae916f165bcdb6bccbd0f0503d2d21"
+    },
+    {
+      "section": "5.1",
+      "title": "Use the narrowest useful input protocol",
+      "document": "python/types.oak.md",
+      "requirements": 5,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "a0d9137a8d5dfe899e18a69fa50272014efa69d2c9cc1ee79082e64bde847028"
+    },
+    {
+      "section": "5.2",
+      "title": "Make ambiguous parameters keyword-only",
+      "document": "python/types.oak.md",
+      "requirements": 1,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "2f92d066d259de36e8c3125208162d61c4a287f7706078467ebe4707b1e21bce"
+    },
+    {
+      "section": "5.3",
+      "title": "Keep public APIs small and explicit",
+      "document": "python/types.oak.md",
+      "requirements": 1,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "abce13e9a78c85e80def33f965110aaa83a960cfcb90b5fbe75d260955e12551"
+    },
+    {
+      "section": "5.4",
+      "title": "Depend on behaviour at real boundaries",
+      "document": "python/types.oak.md",
+      "requirements": 2,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "83c5cf0a15c2c29a0f102cc0a026f9ce6ea43d8b8b24c89d58961382e1556acd"
+    },
+    {
+      "section": "5.5",
+      "title": "Preserve public signatures during refactors",
+      "document": "python/types.oak.md",
+      "requirements": 1,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "fa7d901f6db51c4810232f99365baea5639b76133fc4058486ba0f175e9506b0"
+    },
+    {
+      "section": "6.1",
+      "title": "Use guard clauses",
+      "document": "python/design.oak.md",
+      "requirements": 1,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "2d8f9a86b8d1d6a3c25f23b240f7e97232020eab51f054d35ac0e1b2ff14fcb0"
+    },
+    {
+      "section": "6.2",
+      "title": "Keep cyclomatic complexity low",
+      "document": "python/design.oak.md",
+      "requirements": 16,
+      "examples": 0,
+      "tables": 1,
+      "record_sha256": "c284a8952fa47be11c2e3f60d164831416599ec2cc2c69414bb0f47b4f6d4e41"
+    },
+    {
+      "section": "6.3",
+      "title": "Make finite branching exhaustive",
+      "document": "python/design.oak.md",
+      "requirements": 0,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "9edc599156f20eacb3e1ffbd6384bce138cf557c58dd848510b252922c205e16"
+    },
+    {
+      "section": "6.4",
+      "title": "Keep one responsibility per function",
+      "document": "python/design.oak.md",
+      "requirements": 1,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "6d31d25b773992cee77ca7d39376111964fab8fc182cabf659ed9938722d7a44"
+    },
+    {
+      "section": "7.1",
+      "title": "Keep pure computation separate from I/O",
+      "document": "python/effects.oak.md",
+      "requirements": 1,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "3ad55fa49a5336af0de83e0c4a262c979ca6c21b44260e831f65d2817e91fb77"
+    },
+    {
+      "section": "7.2",
+      "title": "Inject nondeterministic inputs",
+      "document": "python/effects.oak.md",
+      "requirements": 1,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "f9841a34ea45de7b680647106ff8adbfd5e78a65c2e18efefa505faf6bf2de35"
+    },
+    {
+      "section": "7.3",
+      "title": "Prepare before committing",
+      "document": "python/effects.oak.md",
+      "requirements": 2,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "1d6ebff868b6755f17b3b8526eb491618991a93e49902409aa7002c5d5f91654"
+    },
+    {
+      "section": "7.4",
+      "title": "Define deterministic ordering",
+      "document": "python/effects.oak.md",
+      "requirements": 2,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "e2fcf2fa77e0f51d860960ede0ce568f3f078a68de8485fd7704a522b94a8bdd"
+    },
+    {
+      "section": "8.1",
+      "title": "Catch only expected exceptions",
+      "document": "python/effects.oak.md",
+      "requirements": 2,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "995b60e4de96c2a0acfbd890ef35ed25cba7e7fbbf4e8ce8736ae31fc16a2c97"
+    },
+    {
+      "section": "8.2",
+      "title": "Use exceptions for caller errors and assertions for invariants",
+      "document": "python/effects.oak.md",
+      "requirements": 1,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "72c0ca4f17edf843f8a3bcef3053d1f06428f371147c1541c4ae5d8572f27669"
+    },
+    {
+      "section": "8.3",
+      "title": "Write actionable error messages",
+      "document": "python/effects.oak.md",
+      "requirements": 1,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "dd9005e5b0422fa396c80f484567cd205438cf4e02a1753b2c02852d4e862c90"
+    },
+    {
+      "section": "9.1",
+      "title": "Express resource lifetimes with context managers",
+      "document": "python/effects.oak.md",
+      "requirements": 1,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "22e6c953101671a7c368d1292e0294c45913b814bcd223a8979213ff081464db"
+    },
+    {
+      "section": "9.2",
+      "title": "Stream when materialization is unnecessary",
+      "document": "python/effects.oak.md",
+      "requirements": 2,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "e8399af6916e27dcf3102ad76d27b11f91b9d49f43d4db1a5bdb0772ffaea688"
+    },
+    {
+      "section": "9.3",
+      "title": "Choose domain-correct numeric and time primitives",
+      "document": "python/effects.oak.md",
+      "requirements": 5,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "9b3c211678539ab6e42f80dd561f3bcd2aa930e4884ff9e5d992435a13b582f2"
+    },
+    {
+      "section": "9.4",
+      "title": "Optimize after measuring",
+      "document": "python/effects.oak.md",
+      "requirements": 2,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "548de1a7e6b6d0e4cbd1fbe93468805b5bd1c3c953b4fe00b40c15e6ce03c5b0"
+    },
+    {
+      "section": "10.1",
+      "title": "Prefer the standard library",
+      "document": "python/dependencies.oak.md",
+      "requirements": 2,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "e4310e4ef147df6d8611c6ee047fcf9fa780b0b3e817978977a191c5ea4ae0a5"
+    },
+    {
+      "section": "10.2",
+      "title": "Keep imports explicit",
+      "document": "python/dependencies.oak.md",
+      "requirements": 5,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "be73962a99bf58d502a8c3fe92c627eef06367d0dde58e92c6f30694f4db60f9"
+    },
+    {
+      "section": "10.3",
+      "title": "Pin and justify runtime dependencies",
+      "document": "python/dependencies.oak.md",
+      "requirements": 1,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "ef54e9156b45346c4407c1f5f57424a57e5a9f2ca995faf5748093190dcf245f"
+    },
+    {
+      "section": "11.1",
+      "title": "Use rare terse STE comments",
+      "document": "python/documentation.oak.md",
+      "requirements": 18,
+      "examples": 4,
+      "tables": 0,
+      "record_sha256": "5f5a28f5e07929b1a78eeeb7ba44a3ae7c7af286b04aecf6438b0943724ca2b3"
+    },
+    {
+      "section": "11.2",
+      "title": "Keep docstrings concise and contractual",
+      "document": "python/documentation.oak.md",
+      "requirements": 2,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "7f0aeb0295839698a8786afdbee760de34fe5b91820691d0b3d76fb3d70010d5"
+    },
+    {
+      "section": "11.3",
+      "title": "Preserve rationale near unusual choices",
+      "document": "python/documentation.oak.md",
+      "requirements": 1,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "c7c69219d12267c816d1257327c5227ddf786d5b0bfffc5a9ac2bf09f716a741"
+    },
+    {
+      "section": "11.4",
+      "title": "Teach changes with focused before-and-after examples",
+      "document": "python/documentation.oak.md",
+      "requirements": 10,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "c2d20210c436bf9ef2422d30ef478cd46fa9e1874b4d39e6ab2087a5f583e99e"
+    },
+    {
+      "section": "12.1",
+      "title": "Reduce the test surface before adding tests",
+      "document": "python/verification.oak.md",
+      "requirements": 16,
+      "examples": 4,
+      "tables": 0,
+      "record_sha256": "dab1f744a2a4a2e550c59a0e5393c6d8764170086e6474365a1689ab9bed8ffd"
+    },
+    {
+      "section": "12.2",
+      "title": "Test observable behaviour",
+      "document": "python/verification.oak.md",
+      "requirements": 1,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "7da4318f5363babacf65f156349e2004c5f36262332da4f0778ccbb773f00192"
+    },
+    {
+      "section": "12.3",
+      "title": "Cover the important behavioural classes",
+      "document": "python/verification.oak.md",
+      "requirements": 7,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "5bbb6224cd34d291a1b5aebddb4bca8c64b0a506bdc58363506a6ed235eac16e"
+    },
+    {
+      "section": "12.4",
+      "title": "Run checks before and after refactoring",
+      "document": "python/verification.oak.md",
+      "requirements": 2,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "102ec2634891cec46ab9a73d7140dc65084a2ea522d6a93536ad04300a813a8c"
+    },
+    {
+      "section": "12.5",
+      "title": "Report complexity after nontrivial refactors",
+      "document": "python/verification.oak.md",
+      "requirements": 1,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "dc7c71116ee05a41331f4dfee0ba162b983928a2f1f977d22e9b24980f1bdc12"
+    },
+    {
+      "section": "13.1",
+      "title": "Keep small signatures horizontal",
+      "document": "python/layout.oak.md",
+      "requirements": 7,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "621693b375c3d051e357b83f31fcfa7373ec32be225fa6d20408905bc80b2d33"
+    },
+    {
+      "section": "13.2",
+      "title": "Group code by concept",
+      "document": "python/layout.oak.md",
+      "requirements": 8,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "a65797854df83ac67f2df687a004a831e738671267610ace02aebe6ef1d3df5f"
+    },
+    {
+      "section": "14.1",
+      "title": "Keep one abstraction level per function",
+      "document": "python/design.oak.md",
+      "requirements": 7,
+      "examples": 2,
+      "tables": 0,
+      "record_sha256": "e11a81f025791827b519e59bfc5ece6866ae2351b9dfe562971aa4396671cdc7"
+    },
+    {
+      "section": "14.2",
+      "title": "Give each domain rule one authoritative home",
+      "document": "python/design.oak.md",
+      "requirements": 4,
+      "examples": 3,
+      "tables": 0,
+      "record_sha256": "10f5c328545167a06b6aa90f64078711a293a96ddee0a163b81bf6ebcdadc6d5"
+    },
+    {
+      "section": "14.3",
+      "title": "Separate queries from commands",
+      "document": "python/design.oak.md",
+      "requirements": 7,
+      "examples": 2,
+      "tables": 0,
+      "record_sha256": "8536d3fac8d6afe311d44ddd7d1850768c8df4fd4b5f4ccc5f3d90986263a699"
+    },
+    {
+      "section": "14.4",
+      "title": "Make dependency direction explicit",
+      "document": "python/design.oak.md",
+      "requirements": 10,
+      "examples": 3,
+      "tables": 0,
+      "record_sha256": "d41e7596277ea8f01538d652dcc386489851484447d9f30442f6c6885f4f1f3b"
+    },
+    {
+      "section": "14.5",
+      "title": "Make objective conventions executable",
+      "document": "python/verification.oak.md",
+      "requirements": 9,
+      "examples": 2,
+      "tables": 0,
+      "record_sha256": "dd8a9d071d400bc732d134df8708a22558f73bd6abadee8cc8875bed278df464"
+    },
+    {
+      "section": "14.6",
+      "title": "Treat public behaviour as a compatibility contract",
+      "document": "python/design.oak.md",
+      "requirements": 16,
+      "examples": 2,
+      "tables": 0,
+      "record_sha256": "1096776e76edcb8a5a54c1a888f0db70835bdc0eef8606ffc9696b2cb2346fdc"
+    },
+    {
+      "section": "14.7",
+      "title": "Use type-system guards during refactoring",
+      "document": "python/types.oak.md",
+      "requirements": 8,
+      "examples": 4,
+      "tables": 0,
+      "record_sha256": "7f62c6b9ddddf3ba6125e200176317d6a6bdc71c8497923b34300047a3831bfd"
+    },
+    {
+      "section": "14.8",
+      "title": "Separate user output from operational logging",
+      "document": "python/effects.oak.md",
+      "requirements": 10,
+      "examples": 2,
+      "tables": 0,
+      "record_sha256": "d0d00e1b98ab048803ebf16ddb7a40b940e5521be992840bae6cd1987f96471b"
+    },
+    {
+      "section": "14.9",
+      "title": "Name tests as a behaviour index",
+      "document": "python/verification.oak.md",
+      "requirements": 5,
+      "examples": 4,
+      "tables": 0,
+      "record_sha256": "625e196868343b4ecd7d55a2bcfc54ab8d9f31646ae12dfeca769c14a013a63b"
+    },
+    {
+      "section": "15",
+      "title": "Patterns to avoid",
+      "document": "coding-standards.oak.md",
+      "requirements": 27,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "2e27a847845f5bc14011a25d1f14ea0dd2fc83a2adcb09579938e1a9642b5bda"
+    },
+    {
+      "section": "16",
+      "title": "Preferred implementation flow",
+      "document": "coding-standards.oak.md",
+      "requirements": 1,
+      "examples": 1,
+      "tables": 0,
+      "record_sha256": "cc6aec6faa34f72547f6af98f59ccb369543a46523842459a5dd6618e648e301"
+    },
+    {
+      "section": "17",
+      "title": "Review checklist",
+      "document": "python/verification.oak.md",
+      "requirements": 43,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "f2db9b9dda7ad980381939344649b6f541b3724685bd968e03819469aae45a5e"
+    },
+    {
+      "section": "18",
+      "title": "Final judgement rule",
+      "document": "coding-standards.oak.md",
+      "requirements": 1,
+      "examples": 0,
+      "tables": 0,
+      "record_sha256": "eb34b20a6e7f388d109becec201a5eea8c17c16f0e8bd92e4a5c22713499fdac"
+    }
+  ],
+  "examples": [
+    {
+      "id": "example-16-1",
+      "section": "16",
+      "sha256": "4fad488790ae74f9ddcd724823e86202919e8071bd076c7902f240232168d1a0"
+    },
+    {
+      "id": "example-3-3-1",
+      "section": "3.3",
+      "sha256": "c191d51fffcc49522f531ed40b774952bdfaae4668eb84ea9c1007da0fbc6d80"
+    },
+    {
+      "id": "example-3-7-1",
+      "section": "3.7",
+      "sha256": "b72b0400e645b126f96333b6c3875d655ab9f71708a6da31b7d6494273ec9bb9"
+    },
+    {
+      "id": "example-3-9-1",
+      "section": "3.9",
+      "sha256": "946e3f1ba081673e947480698177d5ddb9e4a73ab14d39b90b9d700f5d4b4e99"
+    },
+    {
+      "id": "example-3-9-2",
+      "section": "3.9",
+      "sha256": "f6a84a1e10038bd97107f8bb2c7f660206bad9d0076dd1b927c3933aaca3caa9"
+    },
+    {
+      "id": "example-3-9-3",
+      "section": "3.9",
+      "sha256": "6d2a515048e9aadb39c3148fe744a73066416b61b4e7b375e0df195693b4c50a"
+    },
+    {
+      "id": "example-3-9-4",
+      "section": "3.9",
+      "sha256": "9a6ad50eee89e2a5bde9fdc5a2310dcaf34adcd952a67c83fb58d9eff7e3e8e2"
+    },
+    {
+      "id": "example-3-9-5",
+      "section": "3.9",
+      "sha256": "2ac601bfd4c4b82f0729dccb944f6c9d71a4b51e38d49a34ca4f49ed769830b1"
+    },
+    {
+      "id": "example-3-6-1",
+      "section": "3.6",
+      "sha256": "8f020065436b65e3f79f7f4a1adf1bbee147a1bb048a621b69b6b6131f0ba6f8"
+    },
+    {
+      "id": "example-3-8-1",
+      "section": "3.8",
+      "sha256": "e97107bcc7a89fc70543902249c986042d0515814976787d7f72748aae1ce52c"
+    },
+    {
+      "id": "example-13-1-1",
+      "section": "13.1",
+      "sha256": "a150238f0af60ce7d01cc2c151c5be91ebbd4d65c2426dd6b31345f786c8c287"
+    },
+    {
+      "id": "example-13-2-1",
+      "section": "13.2",
+      "sha256": "f34a00204f085f87496dc0a3347af17d477abf81fdcb76a315320f6024271e7a"
+    },
+    {
+      "id": "example-3-1-1",
+      "section": "3.1",
+      "sha256": "961fa5d0fa313155cf3bb70cec697d160627f62e0d4e5a399f5e965205226abe"
+    },
+    {
+      "id": "example-3-2-1",
+      "section": "3.2",
+      "sha256": "58cdf09ecf572a8be5d7c0447a11690710f1d6bbee976e0c1d0325d22454a418"
+    },
+    {
+      "id": "example-3-4-1",
+      "section": "3.4",
+      "sha256": "d50de02495aef9c4d250ef4a5588a47949c01776a2d84e0db5371dc45a09dcf0"
+    },
+    {
+      "id": "example-4-1-1",
+      "section": "4.1",
+      "sha256": "59f63694fb591b982796491385bc39259a7e53eab5ad09a2c046832f78962ef8"
+    },
+    {
+      "id": "example-4-2-1",
+      "section": "4.2",
+      "sha256": "09156f50dd43a905d9c24ee6b83549373f0632288f000c2083ae7393ac409b62"
+    },
+    {
+      "id": "example-4-3-1",
+      "section": "4.3",
+      "sha256": "a17f7dba1dba1c5caf72410f0e93848472dee8667cc61d2c3eab0a4fc33cd34d"
+    },
+    {
+      "id": "example-4-4-1",
+      "section": "4.4",
+      "sha256": "dd102e888d1ff09e455dda7486a8cb63474c151410228f5d4e41085f712becdf"
+    },
+    {
+      "id": "example-5-1-1",
+      "section": "5.1",
+      "sha256": "bdef2cfb416d5c00d6561022ff75f7e8ec09c0b8fcf75ad90881f24504c43ec4"
+    },
+    {
+      "id": "example-5-2-1",
+      "section": "5.2",
+      "sha256": "71e09a99af7cd96b1f536a3cd1251588cdf80f64203b9457d50131999c3aba71"
+    },
+    {
+      "id": "example-5-4-1",
+      "section": "5.4",
+      "sha256": "4f6ca9b63e07baed474da9bf3d78eb029d317a3ca1585d8a8bbfb353db8f1e75"
+    },
+    {
+      "id": "example-14-7-1",
+      "section": "14.7",
+      "sha256": "c1db7690b718870b54eae0e78d57bf50882a3819c994b853e7fdb278950ae84e"
+    },
+    {
+      "id": "example-14-7-2",
+      "section": "14.7",
+      "sha256": "88b449c0617dc8c10218845ff7cfd6cf310cf1643db388d7f88518db30a0cdb5"
+    },
+    {
+      "id": "example-14-7-3",
+      "section": "14.7",
+      "sha256": "9c08f2ad5c1c7f8914ed5f9ff1bc8055629ea4ede546afb12086d2a5f7163ea3"
+    },
+    {
+      "id": "example-14-7-4",
+      "section": "14.7",
+      "sha256": "b27c7bd4c6d0eba478ce190090f2287f54883ab5b9d29e90a0a8910f1f8a7547"
+    },
+    {
+      "id": "example-3-5-1",
+      "section": "3.5",
+      "sha256": "de8beaee34ededcb7ef4d8531b189735f265cc17bd2792c8329f13be8956d687"
+    },
+    {
+      "id": "example-6-1-1",
+      "section": "6.1",
+      "sha256": "efdbffbad97809ba13a06827fcb6cae53f11055bd5f2fb8001b193fa8e6885a3"
+    },
+    {
+      "id": "example-6-3-1",
+      "section": "6.3",
+      "sha256": "0d4c5b996f7b4528703ab3dad93843a157bb60227072a7141f640d0bd6714e46"
+    },
+    {
+      "id": "example-14-1-1",
+      "section": "14.1",
+      "sha256": "2bbab5b240b3f1a595729cb180c34976cc3f449d48c8c512f3bea1a9d94b6557"
+    },
+    {
+      "id": "example-14-1-2",
+      "section": "14.1",
+      "sha256": "ed1e7af415330ad56165507436e9e5b6898619afbf028e8133b1337bc137e0a3"
+    },
+    {
+      "id": "example-14-2-1",
+      "section": "14.2",
+      "sha256": "39860109df2c99b7e7450ca9eacc2db2ce4ed98959eb9b77981fca38b92c666e"
+    },
+    {
+      "id": "example-14-2-2",
+      "section": "14.2",
+      "sha256": "4128cb2c5de880db2d33a43cad9e8f3c269db731377317256a69257a43183fa1"
+    },
+    {
+      "id": "example-14-2-3",
+      "section": "14.2",
+      "sha256": "c97c30d924cbb437f93c8ac098d6a60ef1503c5c7c13383c968272b587949c4e"
+    },
+    {
+      "id": "example-14-3-1",
+      "section": "14.3",
+      "sha256": "fbac4ced0210d787a1d8edc124fadde74042fe7a4c10e7466946460f0b969306"
+    },
+    {
+      "id": "example-14-3-2",
+      "section": "14.3",
+      "sha256": "4ad9dd4e6943d26badac785ee2d9a2fac81e2dc9389a297dc176b2257363ab1b"
+    },
+    {
+      "id": "example-14-4-1",
+      "section": "14.4",
+      "sha256": "bb33932f3aaf1bffa651891676237b91326b23e9b389cf5f4065a402c5922275"
+    },
+    {
+      "id": "example-14-4-2",
+      "section": "14.4",
+      "sha256": "f7b72d81416a229754cb7cdb2c0e661cc6c5680387b5f8df71a352c98dba4c3d"
+    },
+    {
+      "id": "example-14-4-3",
+      "section": "14.4",
+      "sha256": "a54e9dd8616775da45231aca34611299b01a54cbe3ba95edf1d47f385d368d92"
+    },
+    {
+      "id": "example-14-6-1",
+      "section": "14.6",
+      "sha256": "4abe122e34ddee02cd873abfc8be0feda277724a3d7bb89bb16374bd2e4f82d7"
+    },
+    {
+      "id": "example-14-6-2",
+      "section": "14.6",
+      "sha256": "5f1954f756e23ff375e5a92df665e50463d4cf78898a9fbce7fd0fdb8f4a14ce"
+    },
+    {
+      "id": "example-7-1-1",
+      "section": "7.1",
+      "sha256": "50f780325ff2ce253eacd31446eea4aacd9fdb6655de6b8a3bbafe45efc9e999"
+    },
+    {
+      "id": "example-7-2-1",
+      "section": "7.2",
+      "sha256": "d91e0007049731b1269b7a58cee8e9a711da900e8af3f5af04f34b421a849a10"
+    },
+    {
+      "id": "example-7-3-1",
+      "section": "7.3",
+      "sha256": "d9aa8483d54d26e43432c69ed229bed282e6a2f8353ccd393cb595bbea8f0dde"
+    },
+    {
+      "id": "example-7-4-1",
+      "section": "7.4",
+      "sha256": "8f020065436b65e3f79f7f4a1adf1bbee147a1bb048a621b69b6b6131f0ba6f8"
+    },
+    {
+      "id": "example-8-1-1",
+      "section": "8.1",
+      "sha256": "9dfca6714007eab5a18ebc8eecf28a6b3354f1a880086064171ed82414e84482"
+    },
+    {
+      "id": "example-8-2-1",
+      "section": "8.2",
+      "sha256": "cfe7eee28a2841b2b610bf2ab177567497ac2838687c1025eec7edc0605f40d1"
+    },
+    {
+      "id": "example-9-1-1",
+      "section": "9.1",
+      "sha256": "8013629d20929a7360a468dfbe7ff8e20e61670b2727290fd28a3bdd7bc683f4"
+    },
+    {
+      "id": "example-14-8-1",
+      "section": "14.8",
+      "sha256": "220a12364eecf503742ebccb1f09593027d4c72f6a8e50b3eebe0305fcbfa598"
+    },
+    {
+      "id": "example-14-8-2",
+      "section": "14.8",
+      "sha256": "df25d80531eb9fdbbbdafa01d97e8aff585fd4fdafcffe47cc9bc0ef9297de73"
+    },
+    {
+      "id": "example-11-1-1",
+      "section": "11.1",
+      "sha256": "eeb536800bf1e2859454e744c4fc20858902151202b4af991afbf597b53a3423"
+    },
+    {
+      "id": "example-11-1-2",
+      "section": "11.1",
+      "sha256": "9f4d3d90816fe3ee5c1a707b8f8af9cfd994a8c4b0371823c57b53dea076f9c3"
+    },
+    {
+      "id": "example-11-1-3",
+      "section": "11.1",
+      "sha256": "1260a657f9f3b4ffda919f4a311c6a72cdfeb5b2746f9a52a55417a9f71100d9"
+    },
+    {
+      "id": "example-11-1-4",
+      "section": "11.1",
+      "sha256": "bac88397e1dd5c1fb04de06f13ecb64dc3c08a1c246a871c2981e0b76346e006"
+    },
+    {
+      "id": "example-11-4-1",
+      "section": "11.4",
+      "sha256": "b0dcdbbeb3b9d5afa59fd9a4ff584c4eea65b98ab8f70c40160714e570eda9e6"
+    },
+    {
+      "id": "example-12-1-1",
+      "section": "12.1",
+      "sha256": "033d2945a851a595d5cf7dd4ff39e25dea6bb161d38adbd53c4beda10ebb70bb"
+    },
+    {
+      "id": "example-12-1-2",
+      "section": "12.1",
+      "sha256": "16e579c15b19031cdc1aae794529ddc96bb8980ed543c1f548fb954b3fc01898"
+    },
+    {
+      "id": "example-12-1-3",
+      "section": "12.1",
+      "sha256": "3be1bf0496f7a69544ba87bfba4a8a2fcd1293d5c563699f3da4317659652957"
+    },
+    {
+      "id": "example-12-1-4",
+      "section": "12.1",
+      "sha256": "257bf7789adcd82103c2d423e4ec53c2f24f28fca9b3fb3c48ff23a26427dfbb"
+    },
+    {
+      "id": "example-12-2-1",
+      "section": "12.2",
+      "sha256": "3672223bda29121a18c26b98e9556423cbe67e830a392487184f015b502f4ac5"
+    },
+    {
+      "id": "example-12-4-1",
+      "section": "12.4",
+      "sha256": "7b2464e4dd790930bdd4b91cb95b0010e3e78c3640093391b34fae710aa768ab"
+    },
+    {
+      "id": "example-12-5-1",
+      "section": "12.5",
+      "sha256": "a47452d51752ae71f86fd4c483c856b8f5e5e89ba60155853a70892cbe6739c3"
+    },
+    {
+      "id": "example-14-5-1",
+      "section": "14.5",
+      "sha256": "dd3b03f9d41e0effb906878d84dcb095a50ab162e0b707d3db9bfb9e61aa914e"
+    },
+    {
+      "id": "example-14-5-2",
+      "section": "14.5",
+      "sha256": "9d2dd607d98eef8395d83b530c0fb9911f71958a92ff343aa579736b1f8260da"
+    },
+    {
+      "id": "example-14-9-1",
+      "section": "14.9",
+      "sha256": "9c6ac514369d2581fba11e34251540531d325e637f0ecfd09df2aa071838dec0"
+    },
+    {
+      "id": "example-14-9-2",
+      "section": "14.9",
+      "sha256": "55dbfd93878773872abad66134ffc63ed595223ff970aa5c6643c3585d5ff597"
+    },
+    {
+      "id": "example-14-9-3",
+      "section": "14.9",
+      "sha256": "3300c49751aa7582934cc4b693d16d54130c313abe4d3e858f4fcac47290d9cc"
+    },
+    {
+      "id": "example-14-9-4",
+      "section": "14.9",
+      "sha256": "5b6dae8e4bf1c988513dd264a61297d41558553d1a723494e093d252e79cfc15"
+    }
+  ],
+  "refinements": {
+    "layout": [
+      "literal-whitespace"
+    ],
+    "types": [
+      "inferred-locals"
+    ],
+    "effects": [
+      "operation-snapshot",
+      "diagnostic-contracts"
+    ],
+    "verification": [
+      "independent-expectations"
+    ]
+  }
+}

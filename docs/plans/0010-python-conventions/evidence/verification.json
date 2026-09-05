@@ -1,0 +1,233 @@
+{
+  "recorded": "2026-09-05T13:03:51.930044+00:00",
+  "baseline_commit": "21c2dc5b9366068875709e1cefab3a942f51836c",
+  "python": "3.13.5",
+  "commands": [
+    {
+      "name": "compilation",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "compileall",
+        "-q",
+        "oak",
+        "build",
+        "examples",
+        "skills/oak-authoring/scripts"
+      ],
+      "started": "2026-09-05T13:01:22.440988+00:00",
+      "seconds": 0.819,
+      "exit_code": 0
+    },
+    {
+      "name": "module-verification",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "build.examples"
+      ],
+      "started": "2026-09-05T13:01:23.260124+00:00",
+      "seconds": 37.424,
+      "exit_code": 0
+    },
+    {
+      "name": "direct-verification",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "build/examples.py"
+      ],
+      "started": "2026-09-05T13:02:00.684123+00:00",
+      "seconds": 36.385,
+      "exit_code": 0
+    },
+    {
+      "name": "example-regeneration",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "examples.catalog"
+      ],
+      "started": "2026-09-05T13:02:37.069224+00:00",
+      "seconds": 1.594,
+      "exit_code": 0
+    },
+    {
+      "name": "grammar-regeneration",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "build.ebnf"
+      ],
+      "started": "2026-09-05T13:02:38.664309+00:00",
+      "seconds": 1.095,
+      "exit_code": 0
+    },
+    {
+      "name": "reference-regeneration",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "build.docs"
+      ],
+      "started": "2026-09-05T13:02:39.759419+00:00",
+      "seconds": 1.679,
+      "exit_code": 0
+    },
+    {
+      "name": "authoring-regeneration",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "build.authoring"
+      ],
+      "started": "2026-09-05T13:02:41.440198+00:00",
+      "seconds": 1.34,
+      "exit_code": 0
+    },
+    {
+      "name": "repeat-authoring",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "build.authoring"
+      ],
+      "started": "2026-09-05T13:02:42.780875+00:00",
+      "seconds": 1.225,
+      "exit_code": 0
+    },
+    {
+      "name": "generated-diff",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "--",
+        "outputs",
+        "examples",
+        "skills/oak-authoring",
+        ":(exclude)examples/AGENTS.md"
+      ],
+      "started": "2026-09-05T13:02:44.006190+00:00",
+      "seconds": 0.017,
+      "exit_code": 0
+    },
+    {
+      "name": "whitespace-diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "started": "2026-09-05T13:02:44.023084+00:00",
+      "seconds": 0.008,
+      "exit_code": 0
+    }
+  ],
+  "knowledge": {
+    "documents": 9,
+    "original_sections": 63,
+    "original_text_items": 380,
+    "original_literals": 68,
+    "original_tables": 1,
+    "review_questions": 42,
+    "added_refinements": 5,
+    "added_before_after_pairs": 4,
+    "round_trip_groupings": [
+      "xml",
+      "markdown"
+    ],
+    "rejected_case_count": 12,
+    "source_record_hashes": "all 63 match the migrated records",
+    "source_literal_hashes": "all 68 match the migrated literals"
+  },
+  "files": [
+    {
+      "path": ".agents/rules/coding-standards.oak.md",
+      "lines": 168,
+      "sha256": "dd5000b087068c4e4b3e0896d6f663d47c2fe8f28d11c58da5ddca4439d2058e"
+    },
+    {
+      "path": ".agents/rules/python/dependencies.oak.md",
+      "lines": 36,
+      "sha256": "df45520936174511660fed07cbeb7d3b00b05eae0054125abd4a194849d8db7d"
+    },
+    {
+      "path": ".agents/rules/python/design.oak.md",
+      "lines": 398,
+      "sha256": "57d8f15eb8a8267e326b508c96460edee2ee8b0e5d761134ca07c11cd8398b65"
+    },
+    {
+      "path": ".agents/rules/python/documentation.oak.md",
+      "lines": 173,
+      "sha256": "528f6b61d38696504c39366ea356bf3b5d166cda6c546f218e215674e14084ee"
+    },
+    {
+      "path": ".agents/rules/python/effects.oak.md",
+      "lines": 306,
+      "sha256": "c6a34a4764c878313ea65be113a3d9199e8983984c13735e93828a86e3836c50"
+    },
+    {
+      "path": ".agents/rules/python/layout.oak.md",
+      "lines": 170,
+      "sha256": "4e19ae7cd0e3671814a1ceb14a0d3c5c2c943f2eee311f54375647793638f8e5"
+    },
+    {
+      "path": ".agents/rules/python/naming.oak.md",
+      "lines": 217,
+      "sha256": "c740d9cbf5b351f20103285a8d953afe1ad2522dd5d33c68647ccd55e9fa6a84"
+    },
+    {
+      "path": ".agents/rules/python/types.oak.md",
+      "lines": 372,
+      "sha256": "23c982101a363f8bc746695299a9a85a5d47eb4fddf3b0b64baf41c203b767cb"
+    },
+    {
+      "path": ".agents/rules/python/verification.oak.md",
+      "lines": 430,
+      "sha256": "94a437a64dc40f6ee41476ffd0a327a67d3e9cdeee0bbda53dfec2a75641f366"
+    }
+  ],
+  "supplementary_source_checks": {
+    "new_checker_max_line_length": 118,
+    "new_checker_callable_annotations": "all parameters and returns annotated",
+    "decision_counts": {
+      "validate_coding_standards": 3,
+      "_read_documents": 5,
+      "_constant": 3,
+      "_text": 3,
+      "_strings": 3,
+      "_rows": 5,
+      "_topic_paths": 10,
+      "_validate_table": 6,
+      "_validate_rules": 6,
+      "_indexed_examples": 5,
+      "_validate_example_owners": 5,
+      "_validate_examples": 10,
+      "_validate_documents": 5,
+      "_validate_document": 8,
+      "_validate_section_coverage": 8,
+      "_validate_round_trip": 3,
+      "_changed_constant": 1,
+      "_expect_rejection": 3,
+      "_validate_rejections": 1,
+      "_validate_rejected_rules": 1,
+      "_validate_rejected_examples": 1,
+      "_validate_rejected_symlink": 3,
+      "_validate_shapes": 5
+    },
+    "decision_count_method": "one plus AST if, ternary, loop, except, comprehension, boolean operators, and match cases; not Radon"
+  },
+  "not_run": [
+    "Ruff",
+    "mypy",
+    "Pyright",
+    "Radon",
+    "all illustrative source excerpts as executable programs",
+    "detached bootstrap network integration locally"
+  ],
+  "execution_notes": [
+    "Earlier synchronous tool calls timed out before completion; those attempts were not counted as passes. A bounded subprocess then completed the exact required commands and recorded their exit codes.",
+    "No standalone formatting or typing tool was added; structural OAK validity is distinct from subjective Python style.",
+    "CI status is recorded separately after publication."
+  ]
+}
