@@ -1,0 +1,62 @@
+name: Statement verified closeout
+on:
+  push:
+    branches: [plan/typed-statement-conventions]
+    paths: [.github/workflows/statement-closeout.yml]
+permissions:
+  contents: write
+jobs:
+  closeout:
+    if: github.ref == 'refs/heads/plan/typed-statement-conventions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Record observed verification only
+        run: |
+          test "$(git rev-parse HEAD^)" = d3c532fc5ea24a3c807fd8a7ced108c1a081047f
+          python - <<'PY'
+          from pathlib import Path
+          import json, subprocess
+          root = Path('docs/plans/0009-typed-statement-conventions')
+          p = root / 'plan.md'
+          s = p.read_text().replace('Plan status: In progress.', 'Plan status: Complete.').replace('Execution status: 17 of 19 tasks verified locally; pinned bootstrap and PR delivery remain open.', 'Execution status: All 19 tasks complete; delivered for review in PR #15.').replace('- [ ] Key task: P05.02 ', '- [x] Key task: P05.02 ').replace('- [ ] Key task: P05.05 ', '- [x] Key task: P05.05 ')
+          p.write_text(s)
+          p = root / 'report.md'
+          s = p.read_text().replace('Status: Local implementation verified; pinned bootstrap and PR delivery pending.', 'Status: Complete; delivered for review in PR #15.').replace('| Pinned download and isolated install/cache reuse | Pending GitHub verification; local network unavailable. |', '| Pinned download and isolated install/cache reuse | Passed in implementation run 33966380583 and PR run 33966523488. |').replace('| P05.02 | Pending actual pinned bootstrap integration in GitHub. |', '| P05.02 | New-pin bootstrap and cache reuse passed in GitHub runs 33966380583 and 33966523488 with declared dependencies. |').replace('| P05.05 | Pending committed delivery, review PR, and final-head CI. |', '| P05.05 | PR #15 opened; head d3c532fc5ea24a3c807fd8a7ced108c1a081047f passed run 33966523488. The final status commit changes only this plan, report, and verification record; its own CI is checked before handoff. |').replace('Any transfer material is removed before PR delivery; the workflow must not remain in the final product tree or alter main.', 'All transfer files and the temporary workflow are absent from the cleaned PR tree; their creation and removal remain in branch history. The ordinary verification workflow is unchanged.').replace('Review verdict: No remaining blocking findings in the locally tested implementation. This is implementing-agent review, not an independent review. PR delivery and new-pin bootstrap remain open until observed. No merge is authorized.', 'Review verdict: Approved for review delivery after all applicable checks passed. This is implementing-agent review, not an independent review. All 19 tasks have evidence. No merge is authorized.')
+          s += '''\n## Delivery evidence\n\nPR: [#15](https://github.com/chris-buckley/open-agent-knowledge/pull/15).\nImplementation: `288ac782c5ee940a9fba209ca4e24cd953907175`, verified in [run 33966380583](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33966380583).\nCleaned candidate: `d3c532fc5ea24a3c807fd8a7ced108c1a081047f`, tree `d4614d380a43f4b0ef2e2e57d5bfc07b2dca1c4c`, exactly equal to the locally reviewed tree.\nPR verification: [run 33966523488](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33966523488), job `101307509725`, all steps successful, including full checks, generation freshness, and pinned bootstrap/cache reuse.\n\nDuring delivery main advanced to `21c2dc5b9366068875709e1cefab3a942f51836c`, adding only `.agents/rules/coding-standards.md`. This PR has no overlapping changes; GitHub reports it mergeable and its test merge passed verification. The unrelated document is not overwritten or removed.\n\nThe status-only closeout preserves the tested product fingerprint above. Its final-head verification is recorded in the PR conversation after the check finishes; no commit claims to contain its own future CI result.\n'''
+          p.write_text(s)
+          p = root / 'evidence/verification.json'
+          j = json.loads(p.read_text())
+          j['bootstrap'] = {'status':'passed', 'run_id':33966380583, 'job_id':101307137414, 'verified_revision':'2b542c613c5d1a7e64b597884fae4f444ac34916', 'declared_dependencies_installed':True, 'steps':['fresh isolated pinned installation','retained cache reuse']}
+          j['pr'] = {'number':15, 'url':'https://github.com/chris-buckley/open-agent-knowledge/pull/15', 'head_sha':'d3c532fc5ea24a3c807fd8a7ced108c1a081047f', 'base_sha':'21c2dc5b9366068875709e1cefab3a942f51836c', 'run_id':33966523488, 'job_id':101307509725, 'conclusion':'success', 'mergeable':True, 'merged':False, 'final_status_commit':'Changes only plan/report/verification evidence. Its own CI is observed before handoff and recorded in the PR conversation.'}
+          j['delivery'] = {'implementation_commit':'288ac782c5ee940a9fba209ca4e24cd953907175', 'cleaned_tree':'d4614d380a43f4b0ef2e2e57d5bfc07b2dca1c4c', 'cleaned_tree_equals_local':True, 'temporary_files_removed':True, 'ordinary_ci_unchanged':True, 'main_advance':'Only .agents/rules/coding-standards.md was added; no overlapping changes.'}
+          p.write_text(json.dumps(j, indent=2)+'\n')
+          expected = {'plan.md':'d37128beb5dba85cda16ea2c834e8ba6a327f0fa','report.md':'3c262a4e71c20384043b6e0c6dcc850ed797f4b5','evidence/verification.json':'96ed2206a287b38fb206e2091476d079ed5064bd'}
+          for name, blob in expected.items():
+              actual = subprocess.check_output(['git','hash-object',str(root/name)]).decode().strip()
+              assert actual == blob, (name, actual)
+          print('Closeout files exactly match checked local content.')
+          PY
+      - name: Validate closeout plan
+        run: |
+          python - <<'PY'
+          import pathlib, subprocess, sys, tomllib
+          dependencies = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['dependencies']
+          subprocess.run([sys.executable, '-m', 'pip', 'install', *dependencies], check=True)
+          PY
+          python -c 'from build.checks.plans import validate_plans; validate_plans()'
+          git diff --check
+      - name: Commit documentation-only closeout
+        run: |
+          test "$GITHUB_REF" = refs/heads/plan/typed-statement-conventions
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/plans/0009-typed-statement-conventions
+          git commit -m 'docs: complete statement plan with observed PR verification'
+          git push origin HEAD:refs/heads/plan/typed-statement-conventions

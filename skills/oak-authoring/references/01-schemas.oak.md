@@ -16,7 +16,7 @@ guidance: YAML<<
 - A binding supplies one value per placeholder; repeated names reuse that value, and
   an ellipsis alone does not create independently typed rows or sections.
 - Bind constants, state, processes, actions, and interfaces to schemas where values
-  must validate.
+  must validate; role names alone are not types.
 >>
 
 populated-shapes: TEXT<<
@@ -47,7 +47,7 @@ def valid_title(title: str) -> bool:
 >>
 
 shape-notes: TEXT<<
-The four schemas below are ordinary reusable shapes, not a closed catalogue. Each named populated-shapes example shows filled output without WHERE or schema wrappers. A one-row table is deliberate fixed cardinality. Repeated placeholder names reuse one value; an ellipsis does not declare repeated typed rows. Extend a justified template explicitly. Do not turn a comparison, hierarchy, explanation, or complete code file into a generic list.
+populated-shapes shows filled instances of these four reusable schemas without WHERE or schema wrappers. The one-row table is fixed-cardinality. Extend templates explicitly when justified; apply the schema guidance above.
 >>
 ~~~~
 

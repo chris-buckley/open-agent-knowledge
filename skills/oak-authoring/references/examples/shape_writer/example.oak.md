@@ -38,7 +38,7 @@ ACT input="schema.change-request" output="shape_gallery.oak.md#schema.option-com
 </process>
 
 <process id="decide-change" name="Decide change" input="shape_gallery.oak.md#schema.option-comparison" output="shape_gallery.oak.md#schema.decision-brief">
-ACT input="shape_gallery.oak.md#schema.option-comparison" output="shape_gallery.oak.md#schema.decision-brief": For <CRITERION>, weigh <CURRENT> against <PROPOSED> and produce <DECISION> and <RATIONALE>. (
+ACT input="shape_gallery.oak.md#schema.option-comparison" output="shape_gallery.oak.md#schema.decision-brief": Assess <CURRENT> and <PROPOSED> against <CRITERION>; produce <DECISION> and <RATIONALE>. (
   CRITERION=$CRITERION,
   CURRENT=$CURRENT,
   PROPOSED=$PROPOSED,

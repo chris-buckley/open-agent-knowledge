@@ -1,0 +1,243 @@
+{
+  "protected_file_count": 150,
+  "protected_digest": "7b2ef5786b2a35f741b8f81f2a59ebc5f33c13403e5fd82eccd13f006fea1dcf",
+  "protected_equal": true,
+  "pilot_change": {
+    "before": "For <CRITERION>, weigh <CURRENT> against <PROPOSED> and produce <DECISION> and <RATIONALE>.",
+    "after": "Assess <CURRENT> and <PROPOSED> against <CRITERION>; produce <DECISION> and <RATIONALE>.",
+    "only_this_instruction_changed": true,
+    "role_review": "CURRENT and PROPOSED remain the assessed alternatives; CRITERION remains the standard; DECISION and RATIONALE remain outputs. No obligation, negation, authority, named tool, schema, binding, step order, or effect is added or removed. This is a prose review, not a measured model-quality result."
+  },
+  "fixtures_unchanged": true,
+  "validator_logic_unchanged": true,
+  "dependency_fingerprint_unchanged": true,
+  "validator_identity": {
+    "SKILL_VERSION": "2.2.0",
+    "REVISION": "2b542c613c5d1a7e64b597884fae4f444ac34916",
+    "SOURCE_SHA256": "e9c301a254ec8897698816091bac99cc117d8e0fa052192e728d356d19c27bd1",
+    "PROJECT_SHA256": "2412c436c0ffaa05c604da2d58be4b72c443b37efcaa094380845fd0fe3a3702"
+  },
+  "package_pin_tree": "c48dedf0a567f3182337801a69a028cab9373930",
+  "generated_file_count": 92,
+  "generated_digest": "3b505325b3010d9f5fa228e6c74676f2a88020d1e719eff4483b0bda9399a2ce",
+  "repeated_generation_equal": true,
+  "product_file_count": 495,
+  "product_digest": "764f28c1ca9390f69a8eb62c3421e5e92b17a241f5db2232f10513eca90de503",
+  "product_digest_scope": "All git tracked files except docs/plans/ and the temporary statement-workspace workflow; transfer files are never included.",
+  "product_sizes": {
+    "skills/oak-authoring/SKILL.md": 8299,
+    "outputs/oak-authoring.oak.md": 63943
+  },
+  "skill_entry_lines": 190,
+  "review": "No remaining blocking findings in the bounded change. This is implementing-agent review, not an independent reviewer.",
+  "resolved_findings": [
+    "Canonicalised the new examples/AGENTS.md pointer with the OAK renderer.",
+    "Removed duplicate shape explanation instead of raising size limits; preserve-schema-shape, respect-schema-cardinality, and choose-schema-shape retain those obligations.",
+    "Ran the two complete entry points separately after grouped tool timeouts; explicit exit codes are recorded."
+  ],
+  "checks": {
+    "python -m build.examples": {
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "python build/examples.py": {
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  },
+  "check_groups": [
+    {
+      "check": "validate_compact_specimens",
+      "status": "passed",
+      "seconds": 0.2
+    },
+    {
+      "check": "validate_compact_lexing",
+      "status": "passed",
+      "seconds": 0.003
+    },
+    {
+      "check": "validate_compact_control",
+      "status": "passed",
+      "seconds": 0.05
+    },
+    {
+      "check": "validate_compact_triggers",
+      "status": "passed",
+      "seconds": 0.021
+    },
+    {
+      "check": "validate_compact_layout",
+      "status": "passed",
+      "seconds": 0.001
+    },
+    {
+      "check": "validate_compact_short_circuit",
+      "status": "passed",
+      "seconds": 0.022
+    },
+    {
+      "check": "validate_compact_loop_bounds",
+      "status": "passed",
+      "seconds": 0.022
+    },
+    {
+      "check": "validate_compact_routing",
+      "status": "passed",
+      "seconds": 0.017
+    },
+    {
+      "check": "validate_compact_frames",
+      "status": "passed",
+      "seconds": 0.005
+    },
+    {
+      "check": "validate_compact_relative_targets",
+      "status": "passed",
+      "seconds": 0.002
+    },
+    {
+      "check": "validate_text_examples",
+      "status": "passed",
+      "seconds": 0.001
+    },
+    {
+      "check": "validate_metadata",
+      "status": "passed",
+      "seconds": 0.136
+    },
+    {
+      "check": "validate_resolution",
+      "status": "passed",
+      "seconds": 0.002
+    },
+    {
+      "check": "validate_interfaces",
+      "status": "passed",
+      "seconds": 0.007
+    },
+    {
+      "check": "validate_execution",
+      "status": "passed",
+      "seconds": 0.003
+    },
+    {
+      "check": "validate_interpreter_context",
+      "status": "passed",
+      "seconds": 0.015
+    },
+    {
+      "check": "validate_evidence",
+      "status": "passed",
+      "seconds": 0.176
+    },
+    {
+      "check": "validate_while",
+      "status": "passed",
+      "seconds": 0.001
+    },
+    {
+      "check": "validate_part_omission",
+      "status": "passed",
+      "seconds": 0.0
+    },
+    {
+      "check": "validate_act_authoring",
+      "status": "passed",
+      "seconds": 0.001
+    },
+    {
+      "check": "validate_contract_rules",
+      "status": "passed",
+      "seconds": 0.001
+    },
+    {
+      "check": "validate_source_routing",
+      "status": "passed",
+      "seconds": 0.001
+    },
+    {
+      "check": "validate_json_ld_style_display",
+      "status": "passed",
+      "seconds": 0.001
+    },
+    {
+      "check": "validate_human_examples",
+      "status": "passed",
+      "seconds": 6.047
+    },
+    {
+      "check": "validate_shapes",
+      "status": "passed",
+      "seconds": 0.103
+    },
+    {
+      "check": "validate_authoring_skill",
+      "status": "passed",
+      "seconds": 0.492
+    },
+    {
+      "check": "validate_optional_validator",
+      "status": "passed",
+      "seconds": 4.791
+    },
+    {
+      "check": "validate_plans",
+      "status": "passed",
+      "seconds": 0.01
+    },
+    {
+      "check": "validate_agents",
+      "status": "passed",
+      "seconds": 0.059
+    },
+    {
+      "check": "validate_surfaces",
+      "status": "passed",
+      "seconds": 7.639
+    },
+    {
+      "check": "validate_outputs",
+      "status": "passed",
+      "seconds": 0.306
+    },
+    {
+      "check": "validate_architecture",
+      "status": "passed",
+      "seconds": 0.638
+    }
+  ],
+  "bootstrap": {
+    "status": "passed",
+    "run_id": 33966380583,
+    "job_id": 101307137414,
+    "verified_revision": "2b542c613c5d1a7e64b597884fae4f444ac34916",
+    "declared_dependencies_installed": true,
+    "steps": [
+      "fresh isolated pinned installation",
+      "retained cache reuse"
+    ]
+  },
+  "pr": {
+    "number": 15,
+    "url": "https://github.com/chris-buckley/open-agent-knowledge/pull/15",
+    "head_sha": "d3c532fc5ea24a3c807fd8a7ced108c1a081047f",
+    "base_sha": "21c2dc5b9366068875709e1cefab3a942f51836c",
+    "run_id": 33966523488,
+    "job_id": 101307509725,
+    "conclusion": "success",
+    "mergeable": true,
+    "merged": false,
+    "final_status_commit": "Changes only plan/report/verification evidence. Its own CI is observed before handoff and recorded in the PR conversation."
+  },
+  "delivery": {
+    "implementation_commit": "288ac782c5ee940a9fba209ca4e24cd953907175",
+    "cleaned_tree": "d4614d380a43f4b0ef2e2e57d5bfc07b2dca1c4c",
+    "cleaned_tree_equals_local": true,
+    "temporary_files_removed": true,
+    "ordinary_ci_unchanged": true,
+    "main_advance": "Only .agents/rules/coding-standards.md was added; no overlapping changes."
+  }
+}
