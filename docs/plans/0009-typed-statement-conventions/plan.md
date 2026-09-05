@@ -89,6 +89,187 @@ Use a contextual contrast: `validate` checks an identified contract; `assess` ma
 
 Separate role names, structural validation, and evidential claims. A well-formed rationale can be wrong; declaring a tool does not supply it; fluent prose does not implement an effect. Keep these distinctions in shared guidance without a new truth checker or weakened validation.
 
+### Worked examples from the original conversation
+
+These examples make the intended change reviewable. E01-E04 explain the bounded pilot and its shared guidance; E05-E07 retain the wider conversation as context and explicit non-goals. None authorizes another process, schema, datatype, keyword, tool, or teaching scenario. Code fences below are plan illustrations, not generated product files or claims of executed checks. The 19 implementation tasks remain unchanged and open.
+
+#### E01: From a vague instruction to explicit roles
+
+Illustrative weak wording from the conversation, not a quotation from the existing example:
+
+```text
+Review the information and decide what to do.
+```
+
+Role-explicit wording from the conversation:
+
+```text
+Assess <EVIDENCE> against <CRITERION>;
+produce <FINDING> and <RATIONALE>.
+```
+
+The subject is the evidence, the standard is the criterion, and the results are a finding and its rationale. Names alone do not supply these values, validate them, or prove that the assessment is right. Existing input/output schemas and bindings must carry the actual contract.
+
+The selected pilot uses CURRENT and PROPOSED as its subjects, CRITERION as its standard, and DECISION and RATIONALE as its results. Keep those existing names. Do not rename them to EVIDENCE or FINDING merely to imitate the conversational example, and do not introduce nominal Evidence or Finding types.
+
+Other role patterns illustrate why a fixed noun-verb sequence is too weak:
+
+```text
+Select <CANDIDATE> from <CANDIDATES> using <CRITERION>.
+Derive <RESULT> from <INPUT> using <RULE>.
+Publish <REPORT> to <DESTINATION>.
+```
+
+These are prose patterns, not callable signatures or new commands. Selection needs candidates and a criterion; derivation needs inputs and a rule; publication needs an authorized effect and a destination. Do not invent a collection contract, result receipt, or host capability to fill an attractive template. Include only roles justified by the task.
+
+#### E02: The actual pilot in Python and OAK
+
+The current and proposed action sentences are recorded above under Selected pilot. This is the proposed ACT expression inside the existing `decide_change_process.steps`, using its existing imports, constants, helper, and schemas:
+
+```python
+ACT(
+    "Assess <CURRENT> and <PROPOSED> against <CRITERION>; "
+    "produce <DECISION> and <RATIONALE>.",
+    input=SCHEMA_COMPARISON,
+    output=SCHEMA_DECISION,
+    inputs=local_bindings(PLACEHOLDERS_COMPARISON),
+    outputs=PLACEHOLDERS_DECISION,
+)
+```
+
+The corresponding current-syntax OAK fragment is below. It belongs inside the existing `process.decide-change`; it is not a complete standalone document. The referenced local schema document and visible input bindings remain required.
+
+```text
+ACT input="shape_gallery.oak.md#schema.option-comparison" output="shape_gallery.oak.md#schema.decision-brief": Assess <CURRENT> and <PROPOSED> against <CRITERION>; produce <DECISION> and <RATIONALE>. (
+  CRITERION=$CRITERION,
+  CURRENT=$CURRENT,
+  PROPOSED=$PROPOSED,
+) -> DECISION, RATIONALE
+```
+
+Only the instruction string changes. The input role order, schema identities, immutable local bindings, declared outputs, process identity, surrounding CALLs, and emission order stay unchanged. ACT remains interpreter-native; the example does not add an ASSESS opcode or a named tool.
+
+For the same intended task, an alternative such as the following must remain syntactically acceptable. Its wording still needs human meaning review; parser acceptance is not proof of semantic equivalence.
+
+```text
+Compare <CURRENT> with <PROPOSED> using <CRITERION>;
+produce <DECISION> and explain it in <RATIONALE>.
+```
+
+#### E03: Populated values and honest validation boundaries
+
+The existing fixture supplies these decision-step inputs:
+
+```json
+{"CRITERION": "Blank title", "CURRENT": "Accepted", "PROPOSED": "Rejected"}
+```
+
+Its existing expected output bindings are unchanged:
+
+```json
+{"DECISION": "Reject blank titles.", "RATIONALE": "A title must identify the task."}
+```
+
+The populated decision schema remains shaped information rather than a copy of its definition:
+
+```markdown
+## Decision
+Reject blank titles.
+
+### Rationale
+A title must identify the task.
+```
+
+The constraints and expected check behaviour below come from the pilot's existing schemas in `examples/schemas/shape_gallery.py` and the existing action boundary. They specify implementation checks to retain or add, not tests already performed by this plan amendment.
+
+| Case | Example change | Expected boundary |
+| --- | --- | --- |
+| Valid fixture | Use the input and output objects above. | Binding validation succeeds; the demonstration also compares the exact expected result. |
+| Wrong input type | Set CURRENT to the number 23. | The input schema rejects a number where a string is required. |
+| Missing result | Omit RATIONALE. | Complete output binding validation rejects the missing role. |
+| Empty result | Set DECISION to an empty string. | The decision schema's non-empty constraint rejects it. |
+| Unexpected result | Add an undeclared CONFIDENCE output. | The action's exact declared-output boundary rejects the extra output. |
+| Well-formed but contrary judgment | Set DECISION to "Accept blank titles." and RATIONALE to "No reason is needed." | Both remain non-empty strings, so the schema alone accepts them. The exact fixture expectation differs, and judgment quality still requires review. |
+
+The final row is essential: a deterministic fixture demonstrates specific dataflow and expected values, not general correctness of an interpreter's reasoning. Better words do not turn structural validation into a truth checker. Pydantic remains the structural validation backend; this change neither replaces it nor claims that arbitrary English is validated by Rust.
+
+#### E04: Verbs describe different promises
+
+The following are advisory sentence examples, not additional implementation targets:
+
+| Verb | Role-explicit prose | What it promises, and what it does not |
+| --- | --- | --- |
+| validate | Validate the payload against the named schema; report violations. | Check an identified contract through an actual check. Do not infer that one ran merely from a valid report shape. |
+| assess | Assess the evidence against the criterion; produce a finding and rationale. | Make a judgment against an explicit standard. Do not label it a deterministic proof unless evidence supports that claim. |
+| publish | Publish the report to the destination. | Request an external effect through an available, authorized host capability. Do not invent a tool or claim delivery before its result is observed. |
+
+A generated report is not automatically a published report. An EMIT step stages a complete interface instance under OAK execution semantics; successful host delivery is a separate claim. Native ACT is not automatically pure, and a verb alone does not determine whether an action has external effects. Keep those effects and their evidence explicit where the task requires them.
+
+Use the validate/assess/publish contrast in the shared guidance. Do not mechanically replace every use of review, check, weigh, decide, or another domain verb. This plan is about clear responsibility, not a universal synonym ban.
+
+#### E05: Function templates and modifiers without a second language
+
+The original typeshed sampling suggested templates such as `is_<state>`, `is_<relation>_to`, `contains_<what>`, and `<verb>_<object>`, plus modifiers such as negation and `_ignoring_<aspect>`. Retain the useful idea of a base meaning with explicit participants. Do not import those spellings as functions or extend the condition grammar in this pilot.
+
+For relationships that OAK already supports, the sampled name can point to an existing expression rather than create an alias:
+
+| Sampled vocabulary idea | Existing OAK condition fragment | Interpretation |
+| --- | --- | --- |
+| is_equal_to | `$CURRENT equals $PROPOSED` | Compare two already bound values. |
+| is_not_equal_to | `NOT($CURRENT equals $PROPOSED)` | Negate the comparison result; no new negative predicate is introduced. |
+| is_greater_than_or_equal_to | `$COUNT is at least $constant.minimum-count` | Use the established ordered-comparison phrase. |
+
+These fragments assume the referenced bindings or constant exist and are valid for their comparisons. They do not add those bindings to the pilot, and an evaluation error is not a false value that negation turns into success.
+
+Potential future vocabulary still needs a contract, not just a grammatical suffix:
+
+| Earlier idea | Question that must be settled before any future implementation |
+| --- | --- |
+| equal to, greater than, subset of | What operand types and relation semantics apply? A preposition is wording, not a type system. |
+| contains_only | Are duplicates allowed, is order meaningful, and must every listed value occur? |
+| is_close_to | Which absolute or relative tolerance applies, and how are boundary cases handled? |
+| is_equal_to_ignoring_case | Which explicit text-comparison policy applies? Do not infer it from the suffix alone. |
+| is_file or contents_of | Is the operation checking a supplied observation or consulting the host filesystem? |
+| send_body or disconnect | Which exact host capability implements the effect, and what result may be claimed? |
+
+No typeshed harvesting, modifier engine, predicate registry, or additional operator is part of this plan. The relation examples clarify the distinction between vocabulary, typed arguments, and executable semantics.
+
+#### E06: Locate the earlier concepts without reserving new words
+
+This table preserves context from the original brainstorming. It is not an adopted glossary or a requirement to add all these terms to shared guidance.
+
+| Original concepts | Concrete distinction to preserve |
+| --- | --- |
+| ENTITY and EVENT | A task is an entity under discussion; a task request arriving is an occurrence. Only outside arrivals route through triggers; ordered internal work stays in processes. |
+| PREMISE and CONDITION | "Assume the supplied observations are complete" is a premise, not verified evidence. `$state.review-status equals "ready"` is a condition fragment, provided that state entry exists. |
+| PERMITS | "The policy permits publication" describes a policy decision; it neither grants host credentials nor performs publication. |
+| IN and OUT | Process input/output contracts describe local work; RECEIVES and EMITS describe document boundaries. Do not erase that distinction with one generic pair of labels. |
+| DENOTES and DERIVE | "CRITERION denotes the comparison standard" explains a role. "Derive a result from inputs using a rule" describes work. |
+| SENSE and ORGANISE | Prefer task-specific descriptions such as "Observe the supplied signal" or "Group the records by category" when those are the actual responsibilities. No observation or grouping capability is added here. |
+| DEVOID | An empty string, an empty collection, a null value, and a missing binding are different cases; a poetic absence word must not collapse them. |
+| RESPONSIBILITY and ATTENTION | Responsibility can identify who owns a check. Attention can describe which criterion to prioritise. Neither implies control over an interpreter's hidden model internals. |
+| PROFOUND | State a reviewable objective such as "Explain the trade-off and one counterexample" rather than pretending a qualitative adjective is a deterministic constraint. |
+
+The pilot takes only the immediately useful lesson: make participants, standards, outputs, and evidential limits explicit. Wider ontology and vocabulary design remains outside this delivery.
+
+#### E07: Matrices remain context, not a hidden type extension
+
+The earlier matrix discussion can already be illustrated as fixed JSON knowledge. This current-syntax constants fragment is explanatory and is not added to the selected scenario:
+
+```text
+<constants>
+cost-matrix: [[2, 5, 8], [3, 7, 9]]
+
+scenario-cube: [[[2, 5, 8], [3, 7, 9]], [[4, 6, 10], [5, 8, 12]]]
+</constants>
+```
+
+These values illustrate a two-dimensional matrix and a three-axis array. Naming a constant matrix or cube does not itself impose numeric element, rectangularity, axis, or dimensional contracts. A future typed-collection proposal would need to specify those separately. This plan adds neither matrix types nor array operators, and it leaves Pydantic dependencies unchanged.
+
+### Example-to-task traceability
+
+E01-E03 explain the existing P01.03 and P02.01-P02.03 acceptance work. E04 explains P03.02; E05 reinforces advisory wording and unchanged parser acceptance in P03.04. E06-E07 document the existing scope boundary rather than create implementation tasks. The maintained production exemplar remains the source-owned decision process and its generated teaching copies, not these historical plan excerpts.
+
 ### Phase 1: Establish the baseline
 Objective: Capture the exact contracts and scope that the wording change must preserve.
 - [ ] Key task: P01.01 Read applicable AGENTS owners, the pilot and its schema/fixture dependencies, authoring generators, relevant checks, and matching specialist references before editing.
