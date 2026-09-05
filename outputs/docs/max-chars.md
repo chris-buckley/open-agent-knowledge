@@ -8,6 +8,8 @@ MaxChars: The bound value has at most n characters.
 <constants>
 example-1: "is at most 160 characters"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_constraint_max_chars = ? is at most <N> characters ? ;
 >>

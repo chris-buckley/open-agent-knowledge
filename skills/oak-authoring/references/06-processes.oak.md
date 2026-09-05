@@ -15,6 +15,10 @@ guidance: YAML<<
 - Use `PAR` and `JOIN` only for independent exact tool actions.
 - Model a delegated agent as its own typed OAK document and dispatch it through an
   exact host tool contract.
+- Use the same explicit recursive condition structure for branches, loop conditions,
+  assertions, and guards; preserve child order and bounded-loop failures.
+- Use delimiter continuation for long expressions and indentation for ordered action
+  suites; follow the shared grammar instead of inventing another layout dialect.
 >>
 
 scopes: TEXT<<

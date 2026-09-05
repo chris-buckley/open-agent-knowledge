@@ -14,6 +14,8 @@ Remove a process step after a path that always fails.
 <constants>
 example-1: "<process id=\"normalise\" name=\"Normalise name\" input=\"schema.raw-name\" output=\"schema.normal-name\">\nACT Normalise <RAW_NAME> into <NORMAL_NAME>. (RAW_NAME=$RAW_NAME) -> NORMAL_NAME\n</process>"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_process = ? <process id="<ID>" name="<NAME>" input="<INPUT>" output="<OUTPUT>">
 <STEPS>

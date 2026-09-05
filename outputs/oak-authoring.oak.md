@@ -1,5 +1,5 @@
 ~~~~instructions
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
 RECEIVES accepts one complete instance of its schema.
@@ -8,7 +8,7 @@ EMITS publishes one complete instance of its schema.
 EMIT without bindings fills the target schema from same-named visible process bindings.
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-Each trigger is one fact group: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
+Each trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 ~~~~
 
@@ -136,9 +136,11 @@ guide-6-guidance: YAML<<
 - Map outside events, receive sources, state guards, and selected work to triggers.
 - Route each receive interface through one source-backed trigger into a process with
   the same resolved input schema.
+- Declare each trigger once with named fields; omit unused fields and keep source
+  payloads separate from event seeds.
 >>
 
-guide-6-routing: "An event describes an outside occurrence. An optional source identifies one receiving interface; its schema must resolve identically to process input, with no seeds. A guard reads state only. Internal work uses CALL, never triggers."
+guide-6-routing: "An event describes an outside occurrence. An optional source identifies one receiving interface; its schema must resolve identically to process input, with no seeds. A guard requires a state read and may compare literals or fixed constants; it cannot read process bindings. Internal work uses CALL, never triggers."
 
 guide-7-guidance: YAML<<
 - Map ordered local work to processes.
@@ -152,6 +154,10 @@ guide-7-guidance: YAML<<
 - Use `PAR` and `JOIN` only for independent exact tool actions.
 - Model a delegated agent as its own typed OAK document and dispatch it through an
   exact host tool contract.
+- Use the same explicit recursive condition structure for branches, loop conditions,
+  assertions, and guards; preserve child order and bounded-loop failures.
+- Use delimiter continuation for long expressions and indentation for ordered action
+  suites; follow the shared grammar instead of inventing another layout dialect.
 >>
 
 guide-7-scopes: TEXT<<
@@ -217,9 +223,62 @@ markdown_interfaces_part = "~~~~interfaces", lf, text_body, "~~~~" ;
 xml_body_entry = "<", entry_tag, attributes, ">", lf, text_body, "</", entry_tag, ">" ;
 markdown_body_entry = "~~~", entry_tag, markdown_attributes, lf, text_body, "~~~" ;
 entry_tag = "schema" | "process" ;
-trigger_fact = "trigger.", slug_id, ".", trigger_field, " := ", trigger_value ;
-trigger_field = "event" | "source" | "guard" | "process" | ( "seed.", placeholder ) ;
-trigger_value = ? one field-typed value; a composite guard continues on indented condition lines ? ;
+condition = comparison | all_condition | any_condition | not_condition ;
+comparison = process_value, comparison_operator, process_value ;
+all_condition = "ALL", "(", condition, ",", condition, { ",", condition }, [ "," ], ")" ;
+any_condition = "ANY", "(", condition, ",", condition, { ",", condition }, [ "," ], ")" ;
+not_condition = "NOT", "(", condition, [ "," ], ")" ;
+process_value = json_value | "$", value_target ;
+value_target = constant_target | local_state_target | placeholder ;
+constant_target = [ relative_document_path, "#" ], "constant.", slug_id ;
+process_target = [ relative_document_path, "#" ], "process.", slug_id ;
+local_state_target = "state.", slug_id ;
+local_interface_target = "interface.", slug_id ;
+value_binding = placeholder, "=", process_value ;
+binding_list = "(", [ value_binding, { ",", value_binding }, [ "," ] ], ")" ;
+output_bindings = "->", placeholder, { ",", placeholder } ;
+trigger_declaration = slug_id, "(", trigger_field, { ",", trigger_field }, [ "," ], ")", logical_nl ;
+trigger_field = "event", "=", json_string | "source", "=", local_interface_target | "guard", "=", condition | "process", "=", process_target | "seed", "=", binding_list ;
+if_statement = "IF", condition, ":", suite, [ "ELSE", ":", suite ] ;
+while_statement = "WHILE", condition, "LIMIT", positive_integer, ":", suite ;
+assert_statement = "ASSERT", condition, logical_nl, [ indent, "MESSAGE", json_string, logical_nl, dedent ] ;
+call_statement = "CALL", process_target, binding_list, [ output_bindings ], logical_nl ;
+emit_statement = "EMIT", local_interface_target, [ binding_list ], logical_nl ;
+set_statement = "SET", local_state_target, "=", process_value, logical_nl ;
+fail_statement = "FAIL", json_string, logical_nl ;
+suite = logical_nl, indent, process_step, { process_step }, dedent ;
+process_step = if_statement | while_statement | assert_statement | call_statement | emit_statement | set_statement | fail_statement | surface_act_native | surface_act_tool | surface_step_foreach | surface_step_par | surface_step_join ;
+positive_integer = ? an ASCII decimal integer literal with value greater than zero ? ;
+json_string = ? one double-quoted JSON string, with JSON escapes ? ;
+logical_nl = ? physical LF outside balanced delimiters; blank lines are ignored inside process suites ? ;
+indent = ? exactly two additional spaces for a suite or MESSAGE metadata; tabs are invalid ? ;
+dedent = ? return to the immediately enclosing suite indentation ? ;
+comparison_operator = "equals" | "does not equal" | "is less than" | "is at most" | "is greater than" | "is at least" ;
+(* Expression productions describe tokens, not a host-language expression evaluator.
+Spaces separate words; punctuation is recognized only outside strings at its delimiter depth.
+The $ token is adjacent to its value target. JSON owns its internal whitespace and delimiters.
+One condition grammar serves IF, WHILE, ASSERT, and trigger guards.
+ALL and ANY require at least two conditions; NOT requires exactly one.
+Condition operators preserve the authored tree and left-to-right short-circuit order.
+IF and WHILE headers end with a colon; their non-empty action suites indent two spaces.
+ELSE aligns with its IF and immediately follows its suite, allowing blank lines.
+WHILE requires LIMIT and one positive decimal integer literal; exhaustion while true fails.
+ASSERT has a condition and optional indented MESSAGE metadata, not an action suite.
+Balanced parentheses continue one logical statement across physical lines without action scopes.
+OAK lists accept a trailing comma; JSON values retain their separate JSON grammar.
+Trigger fields are named, unique, and may be authored in any order; event and process are required.
+Canonical trigger field order is event, source, guard, process, seed; absent optionals are omitted.
+Do not author guard=true or an empty seed; a source-backed trigger has no seed field.
+A seed is an ordered named-binding list using the same value grammar as process inputs.
+Strings, JSON literals, and typed targets are consumed as whole tokens before separators or operators.
+Structural tabs, positional fields, truthiness, general calls, comments, infix aliases, and chained comparisons are invalid.
+Canonical expression width is 100 Unicode code points, including indentation, prefixes, and suffixes.
+Flat lists have no trailing comma; expanded lists put one item per line with a trailing comma and two-space indentation.
+Closing delimiters align with their owning line; nested lists apply the same width rule recursively.
+Indivisible values and prose may exceed the soft width; formatting never rewrites their contents.
+Empty explicit EMIT bindings, empty seeds, and source-backed seeds are invalid.
+Trigger events are non-blank single-line strings after decoding; guards must read state.
+*)
 constant = inline_constant | text_constant | json_constant | csv_constant | yaml_constant ;
 inline_constant = slug_id, [ as_clause ], ": ", json_value ;
 text_constant = slug_id, [ as_clause ], ": TEXT<<", lf, text_body, ">>" ;
@@ -288,43 +347,30 @@ surface_value_literal = ? <VALUE> ? ;
 surface_value_constant = ? $<CONSTANT> ? ;
 surface_value_state = ? $<STATE> ? ;
 surface_value_binding = ? $<BINDING> ? ;
-surface_value_binding_line = ? <PLACEHOLDER>=<VALUE> ? ;
-surface_condition_compare = ? <LEFT> <OPERATOR> <RIGHT> ? ;
-surface_condition_all = ? ALL:
-  <CONDITIONS> ? ;
-surface_condition_any = ? ANY:
-  <CONDITIONS> ? ;
-surface_condition_not = ? NOT:
-  <CONDITION> ? ;
+surface_value_binding_line = value_binding ;
+surface_condition_compare = comparison ;
+surface_condition_all = all_condition ;
+surface_condition_any = any_condition ;
+surface_condition_not = not_condition ;
 surface_act_native = ? ACT input="<INPUT>" output="<OUTPUT>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
 surface_act_tool = ? ACT TOOL "<TOOL>" input="<INPUT>" output="<OUTPUT>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
-surface_step_set = ? SET <STATE> = <VALUE> ? ;
-surface_step_emit_inferred = ? EMIT <INTERFACE> ? ;
-surface_step_emit_explicit = ? EMIT <INTERFACE> (<BINDINGS>) ? ;
-surface_step_if = ? IF <CONDITION>:
-THEN:
-  <THEN>
-ELSE:
-  <OTHERWISE> ? ;
-surface_step_call = ? CALL <PROCESS> (<INPUTS>) -> <OUTPUTS> ? ;
-surface_step_fail = ? FAIL <MESSAGE> ? ;
-surface_step_assert = ? ASSERT <CONDITION>
-MESSAGE <MESSAGE> ? ;
+surface_step_set = set_statement ;
+surface_step_emit_inferred = "EMIT", local_interface_target, logical_nl ;
+surface_step_emit_explicit = "EMIT", local_interface_target, binding_list, logical_nl ;
+surface_step_if = if_statement ;
+surface_step_call = call_statement ;
+surface_step_fail = fail_statement ;
+surface_step_assert = assert_statement ;
 surface_step_foreach = ? FOREACH <BINDING> IN <VALUE>:
   <STEPS> ? ;
-surface_step_while = ? WHILE <CONDITION> LIMIT <LIMIT>:
-  <STEPS> ? ;
+surface_step_while = while_statement ;
 surface_step_par = ? PAR:
   <STEPS> ? ;
 surface_step_join = ? JOIN ? ;
 surface_process = ? <process id="<ID>" name="<NAME>" input="<INPUT>" output="<OUTPUT>">
 <STEPS>
 </process> ? ;
-surface_trigger = ? trigger.<ID>.event := <EVENT>
-trigger.<ID>.source := <SOURCE>
-trigger.<ID>.guard := <GUARD>
-trigger.<ID>.process := <PROCESS>
-trigger.<ID>.seed.<SEED> ? ;
+surface_trigger = trigger_declaration ;
 surface_interface_receives = ? <ID> RECEIVES <SCHEMA_ID>: <DESCRIPTION> ? ;
 surface_interface_emits = ? <ID> EMITS <SCHEMA_ID>: <DESCRIPTION> ? ;
 surface_node = ? <instructions>
@@ -370,7 +416,7 @@ title-limit: 120
 
 guide-9-stateless-example: TEXT<<
 ~~~~instructions
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
 RECEIVES accepts one complete instance of its schema.
@@ -378,7 +424,7 @@ A source-backed trigger supplies the received instance as the selected process i
 EMITS publishes one complete instance of its schema.
 EMIT without bindings fills the target schema from same-named visible process bindings.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-Each trigger is one fact group: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
+Each trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 
 Keep the proposed change limited to the supplied request.
@@ -440,32 +486,51 @@ WHERE:
 ~~~~
 
 ~~~~triggers
-trigger.change-requested.event := "A small code change needs explanation."
-trigger.change-requested.source := interface.request
-trigger.change-requested.process := process.prepare-change
+change-requested(
+  event="A small code change needs explanation.",
+  source=interface.request,
+  process=process.prepare-change,
+)
 ~~~~
 
 ~~~~processes
 ~~~process;id="compare-options";name="Compare options";input="schema.change-request";output="schema.guide-1-option-comparison"
-ACT input="schema.change-request" output="schema.guide-1-option-comparison": Compare current and proposed behaviour for <REQUEST>; produce <CRITERION>, <CURRENT>, and <PROPOSED>. (REQUEST=$REQUEST) -> CRITERION, CURRENT, PROPOSED
+ACT input="schema.change-request" output="schema.guide-1-option-comparison": Compare current and proposed behaviour for <REQUEST>; produce <CRITERION>, <CURRENT>, and <PROPOSED>. (
+  REQUEST=$REQUEST,
+) -> CRITERION, CURRENT, PROPOSED
 ~~~
 
 ~~~process;id="decide-change";name="Decide change";input="schema.guide-1-option-comparison";output="schema.guide-1-decision-brief"
-ACT input="schema.guide-1-option-comparison" output="schema.guide-1-decision-brief": For <CRITERION>, weigh <CURRENT> against <PROPOSED> and produce <DECISION> and <RATIONALE>. (CRITERION=$CRITERION, CURRENT=$CURRENT, PROPOSED=$PROPOSED) -> DECISION, RATIONALE
+ACT input="schema.guide-1-option-comparison" output="schema.guide-1-decision-brief": For <CRITERION>, weigh <CURRENT> against <PROPOSED> and produce <DECISION> and <RATIONALE>. (
+  CRITERION=$CRITERION,
+  CURRENT=$CURRENT,
+  PROPOSED=$PROPOSED,
+) -> DECISION, RATIONALE
 ~~~
 
 ~~~process;id="plan-change";name="Plan change";input="schema.guide-1-decision-brief";output="schema.guide-1-work-outline"
-ACT input="schema.guide-1-decision-brief" output="schema.guide-1-work-outline": Plan <DECISION> under <RATIONALE>; produce one <GOAL>, implementation <STEP>, and nested <CHECK>. (DECISION=$DECISION, RATIONALE=$RATIONALE) -> GOAL, STEP, CHECK
+ACT input="schema.guide-1-decision-brief" output="schema.guide-1-work-outline": Plan <DECISION> under <RATIONALE>; produce one <GOAL>, implementation <STEP>, and nested <CHECK>. (
+  DECISION=$DECISION,
+  RATIONALE=$RATIONALE,
+) -> GOAL, STEP, CHECK
 ~~~
 
 ~~~process;id="write-file";name="Write file";input="schema.guide-1-work-outline";output="schema.guide-1-code-file"
-ACT input="schema.guide-1-work-outline" output="schema.guide-1-code-file": Implement <STEP> for <GOAL> and <CHECK>; produce <FILE_PATH> and complete Python <CODE>. (GOAL=$GOAL, STEP=$STEP, CHECK=$CHECK) -> FILE_PATH, CODE
+ACT input="schema.guide-1-work-outline" output="schema.guide-1-code-file": Implement <STEP> for <GOAL> and <CHECK>; produce <FILE_PATH> and complete Python <CODE>. (
+  GOAL=$GOAL,
+  STEP=$STEP,
+  CHECK=$CHECK,
+) -> FILE_PATH, CODE
 ~~~
 
 ~~~process;id="prepare-change";name="Prepare change";input="schema.change-request"
 CALL process.compare-options (REQUEST=$REQUEST) -> CRITERION, CURRENT, PROPOSED
 EMIT interface.comparison
-CALL process.decide-change (CRITERION=$CRITERION, CURRENT=$CURRENT, PROPOSED=$PROPOSED) -> DECISION, RATIONALE
+CALL process.decide-change (
+  CRITERION=$CRITERION,
+  CURRENT=$CURRENT,
+  PROPOSED=$PROPOSED,
+) -> DECISION, RATIONALE
 EMIT interface.decision
 CALL process.plan-change (DECISION=$DECISION, RATIONALE=$RATIONALE) -> GOAL, STEP, CHECK
 EMIT interface.outline
@@ -924,12 +989,15 @@ WHERE:
 ~~~~
 
 ~~~~triggers
-trigger.authoring-requested.event := "OAK authoring is requested for supplied source material."
-trigger.authoring-requested.process := process.capture-request
-
-trigger.request-received.event := "A complete OAK authoring request is received."
-trigger.request-received.source := interface.authoring-input
-trigger.request-received.process := process.author-document
+authoring-requested(
+  event="OAK authoring is requested for supplied source material.",
+  process=process.capture-request,
+)
+request-received(
+  event="A complete OAK authoring request is received.",
+  source=interface.authoring-input,
+  process=process.author-document,
+)
 ~~~~
 
 ~~~~processes
@@ -939,38 +1007,89 @@ CALL process.author-document (SOURCE=$SOURCE, VALIDATE=$VALIDATE)
 ~~~
 
 ~~~process;id="author-document";name="Author document";input="schema.authoring-request"
-ACT Use <STRUCTURE> and the complete supplied <SOURCE> to establish <SCOPE>; consult the rest of that structure guide only as needed. (STRUCTURE=$constant.guide-1-guidance, SOURCE=$SOURCE) -> SCOPE
-ACT Apply <GUIDANCE> to <SCOPE> and <SOURCE> to decide schemas; omit unjustified entries and produce <DESIGN_1>. Use the supplied schema definitions and their <POPULATED> instances to preserve the requested information shape. (GUIDANCE=$constant.guide-2-guidance, SCOPE=$SCOPE, SOURCE=$SOURCE, POPULATED=$constant.guide-2-populated-shapes) -> DESIGN_1
-ACT Apply <GUIDANCE> to <DESIGN_1> and <SOURCE> to decide constants; omit unjustified entries and produce <DESIGN_2>. (GUIDANCE=$constant.guide-3-guidance, DESIGN_1=$DESIGN_1, SOURCE=$SOURCE) -> DESIGN_2
-ACT Apply <GUIDANCE> to <DESIGN_2> and <SOURCE> to decide state; omit unjustified entries and produce <DESIGN_3>. (GUIDANCE=$constant.guide-4-guidance, DESIGN_2=$DESIGN_2, SOURCE=$SOURCE) -> DESIGN_3
-ACT Apply <GUIDANCE> to <DESIGN_3> and <SOURCE> to decide interfaces; omit unjustified entries and produce <DESIGN_4>. (GUIDANCE=$constant.guide-5-guidance, DESIGN_3=$DESIGN_3, SOURCE=$SOURCE) -> DESIGN_4
-ACT Apply <GUIDANCE> to <DESIGN_4> and <SOURCE> to decide triggers; omit unjustified entries and produce <DESIGN_5>. (GUIDANCE=$constant.guide-6-guidance, DESIGN_4=$DESIGN_4, SOURCE=$SOURCE) -> DESIGN_5
-ACT Apply <GUIDANCE> to <DESIGN_5> and <SOURCE> to decide processes; omit unjustified entries and produce <DESIGN_6>. (GUIDANCE=$constant.guide-7-guidance, DESIGN_5=$DESIGN_5, SOURCE=$SOURCE) -> DESIGN_6
-ACT Apply <GUIDANCE> to <DESIGN_6> and <SOURCE> to decide instructions; omit unjustified entries and produce <DESIGN_7>. (GUIDANCE=$constant.guide-8-guidance, DESIGN_6=$DESIGN_6, SOURCE=$SOURCE) -> DESIGN_7
-ACT Review <DESIGN_7> against <REVIEW>, <GRAMMAR>, and the supplied teaching examples. Produce <CANDIDATE> as one OAK node in canonical section order, without claiming a programmatic check. (DESIGN_7=$DESIGN_7, REVIEW=$constant.guide-9-review, GRAMMAR=$constant.guide-9-oak-ebnf) -> CANDIDATE
+ACT Use <STRUCTURE> and the complete supplied <SOURCE> to establish <SCOPE>; consult the rest of that structure guide only as needed. (
+  STRUCTURE=$constant.guide-1-guidance,
+  SOURCE=$SOURCE,
+) -> SCOPE
+ACT Apply <GUIDANCE> to <SCOPE> and <SOURCE> to decide schemas; omit unjustified entries and produce <DESIGN_1>. Use the supplied schema definitions and their <POPULATED> instances to preserve the requested information shape. (
+  GUIDANCE=$constant.guide-2-guidance,
+  SCOPE=$SCOPE,
+  SOURCE=$SOURCE,
+  POPULATED=$constant.guide-2-populated-shapes,
+) -> DESIGN_1
+ACT Apply <GUIDANCE> to <DESIGN_1> and <SOURCE> to decide constants; omit unjustified entries and produce <DESIGN_2>. (
+  GUIDANCE=$constant.guide-3-guidance,
+  DESIGN_1=$DESIGN_1,
+  SOURCE=$SOURCE,
+) -> DESIGN_2
+ACT Apply <GUIDANCE> to <DESIGN_2> and <SOURCE> to decide state; omit unjustified entries and produce <DESIGN_3>. (
+  GUIDANCE=$constant.guide-4-guidance,
+  DESIGN_2=$DESIGN_2,
+  SOURCE=$SOURCE,
+) -> DESIGN_3
+ACT Apply <GUIDANCE> to <DESIGN_3> and <SOURCE> to decide interfaces; omit unjustified entries and produce <DESIGN_4>. (
+  GUIDANCE=$constant.guide-5-guidance,
+  DESIGN_3=$DESIGN_3,
+  SOURCE=$SOURCE,
+) -> DESIGN_4
+ACT Apply <GUIDANCE> to <DESIGN_4> and <SOURCE> to decide triggers; omit unjustified entries and produce <DESIGN_5>. (
+  GUIDANCE=$constant.guide-6-guidance,
+  DESIGN_4=$DESIGN_4,
+  SOURCE=$SOURCE,
+) -> DESIGN_5
+ACT Apply <GUIDANCE> to <DESIGN_5> and <SOURCE> to decide processes; omit unjustified entries and produce <DESIGN_6>. (
+  GUIDANCE=$constant.guide-7-guidance,
+  DESIGN_5=$DESIGN_5,
+  SOURCE=$SOURCE,
+) -> DESIGN_6
+ACT Apply <GUIDANCE> to <DESIGN_6> and <SOURCE> to decide instructions; omit unjustified entries and produce <DESIGN_7>. (
+  GUIDANCE=$constant.guide-8-guidance,
+  DESIGN_6=$DESIGN_6,
+  SOURCE=$SOURCE,
+) -> DESIGN_7
+ACT Review <DESIGN_7> against <REVIEW>, <GRAMMAR>, and the supplied teaching examples. Produce <CANDIDATE> as one OAK node in canonical section order, without claiming a programmatic check. (
+  DESIGN_7=$DESIGN_7,
+  REVIEW=$constant.guide-9-review,
+  GRAMMAR=$constant.guide-9-oak-ebnf,
+) -> CANDIDATE
 IF $VALIDATE equals true:
-  THEN:
-    CALL process.validate-and-deliver (CANDIDATE=$CANDIDATE)
-  ELSE:
-    EMIT interface.authored-document (OAK=$CANDIDATE, VALIDATION="Programmatic validation was not performed (not requested).")
+  CALL process.validate-and-deliver (CANDIDATE=$CANDIDATE)
+ELSE:
+  EMIT interface.authored-document (
+    OAK=$CANDIDATE,
+    VALIDATION="Programmatic validation was not performed (not requested).",
+  )
 ~~~
 
 ~~~process;id="validate-and-deliver";name="Check validator";input="schema.oak-candidate"
-ACT output="schema.validator-check": Apply <POLICY> to check <CANDIDATE> with the exact <HELPER> without --allow-install. Reuse matching code when available. Return the actual <REPORT> and set <INSTALL_REQUIRED> true only for permission-required, not for invalid OAK or an unavailable execution tool. (POLICY=$constant.guide-10-validation-policy, HELPER=$constant.guide-10-validator-script, CANDIDATE=$CANDIDATE) -> INSTALL_REQUIRED, REPORT
+ACT output="schema.validator-check": Apply <POLICY> to check <CANDIDATE> with the exact <HELPER> without --allow-install. Reuse matching code when available. Return the actual <REPORT> and set <INSTALL_REQUIRED> true only for permission-required, not for invalid OAK or an unavailable execution tool. (
+  POLICY=$constant.guide-10-validation-policy,
+  HELPER=$constant.guide-10-validator-script,
+  CANDIDATE=$CANDIDATE,
+) -> INSTALL_REQUIRED, REPORT
 IF $INSTALL_REQUIRED equals true:
-  THEN:
-    ACT output="schema.installation-consent": Ask the user for permission to download the OAK revision in <IDENTITY> and install its dependencies in an isolated retained environment. Set <APPROVED> true only after explicit approval; a validation request alone is not approval. (IDENTITY=$constant.guide-10-identity) -> APPROVED
-    IF $APPROVED equals true:
-      THEN:
-        CALL process.finalize-validation (CANDIDATE=$CANDIDATE, REPORT=$REPORT, ALLOW_INSTALL=true)
-      ELSE:
-        EMIT interface.authored-document (OAK=$CANDIDATE, VALIDATION="Programmatic validation was not performed (installation declined).")
+  ACT output="schema.installation-consent": Ask the user for permission to download the OAK revision in <IDENTITY> and install its dependencies in an isolated retained environment. Set <APPROVED> true only after explicit approval; a validation request alone is not approval. (
+    IDENTITY=$constant.guide-10-identity,
+  ) -> APPROVED
+  IF $APPROVED equals true:
+    CALL process.finalize-validation (CANDIDATE=$CANDIDATE, REPORT=$REPORT, ALLOW_INSTALL=true)
   ELSE:
-    CALL process.finalize-validation (CANDIDATE=$CANDIDATE, REPORT=$REPORT, ALLOW_INSTALL=false)
+    EMIT interface.authored-document (
+      OAK=$CANDIDATE,
+      VALIDATION="Programmatic validation was not performed (installation declined).",
+    )
+ELSE:
+  CALL process.finalize-validation (CANDIDATE=$CANDIDATE, REPORT=$REPORT, ALLOW_INSTALL=false)
 ~~~
 
 ~~~process;id="finalize-validation";name="Report validation";input="schema.validation-context"
-ACT output="schema.authoring-result": Use <REPORT> for <CANDIDATE> under <POLICY>. With <ALLOW_INSTALL> true, run the exact <HELPER> with --allow-install; otherwise never download or install. Repair reported authoring errors when possible and recheck changed documents under the same permission. Do not rerun an unchanged successful check. Produce <OAK> and truthful <VALIDATION>, including errors or why a check could not run. (REPORT=$REPORT, CANDIDATE=$CANDIDATE, ALLOW_INSTALL=$ALLOW_INSTALL, POLICY=$constant.guide-10-validation-policy, HELPER=$constant.guide-10-validator-script) -> OAK, VALIDATION
+ACT output="schema.authoring-result": Use <REPORT> for <CANDIDATE> under <POLICY>. With <ALLOW_INSTALL> true, run the exact <HELPER> with --allow-install; otherwise never download or install. Repair reported authoring errors when possible and recheck changed documents under the same permission. Do not rerun an unchanged successful check. Produce <OAK> and truthful <VALIDATION>, including errors or why a check could not run. (
+  REPORT=$REPORT,
+  CANDIDATE=$CANDIDATE,
+  ALLOW_INSTALL=$ALLOW_INSTALL,
+  POLICY=$constant.guide-10-validation-policy,
+  HELPER=$constant.guide-10-validator-script,
+) -> OAK, VALIDATION
 EMIT interface.authored-document
 ~~~
 ~~~~

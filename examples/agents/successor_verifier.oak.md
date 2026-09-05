@@ -1,5 +1,5 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
 RECEIVES accepts one complete instance of its schema.
@@ -8,7 +8,7 @@ EMITS publishes one complete instance of its schema.
 EMIT without bindings fills the target schema from same-named visible process bindings.
 Text after `: ` states boundary meaning absent from the interface schema.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-Each trigger is one fact group: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
+Each trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 
 Verify the candidate independently from the compiler that produced it.
@@ -53,14 +53,21 @@ WHERE:
 </schemas>
 
 <triggers>
-trigger.successor-verification-requested.event := "A successor verification is requested."
-trigger.successor-verification-requested.source := interface.verification-request
-trigger.successor-verification-requested.process := process.verify-successor
+successor-verification-requested(
+  event="A successor verification is requested.",
+  source=interface.verification-request,
+  process=process.verify-successor,
+)
 </triggers>
 
 <processes>
 <process id="verify-successor" name="Verify successor" input="schema.successor-verification-request" output="schema.successor-proof">
-ACT TOOL "oak.verify-successor" input="schema.successor-verification-request" output="schema.successor-proof": Verify <CANDIDATE_OAK> against <CURRENT_OAK>, <AMENDMENT>, and <PROTECTED_INVARIANTS>, then produce <VALID>, <PARSES>, <RESOLVES>, <CANONICAL>, <INVARIANTS_PRESERVED>, <SCOPE_EXACT>, and <PROOF>. (CURRENT_OAK=$CURRENT_OAK, CANDIDATE_OAK=$CANDIDATE_OAK, AMENDMENT=$AMENDMENT, PROTECTED_INVARIANTS=$PROTECTED_INVARIANTS) -> VALID, PARSES, RESOLVES, CANONICAL, INVARIANTS_PRESERVED, SCOPE_EXACT, PROOF
+ACT TOOL "oak.verify-successor" input="schema.successor-verification-request" output="schema.successor-proof": Verify <CANDIDATE_OAK> against <CURRENT_OAK>, <AMENDMENT>, and <PROTECTED_INVARIANTS>, then produce <VALID>, <PARSES>, <RESOLVES>, <CANONICAL>, <INVARIANTS_PRESERVED>, <SCOPE_EXACT>, and <PROOF>. (
+  CURRENT_OAK=$CURRENT_OAK,
+  CANDIDATE_OAK=$CANDIDATE_OAK,
+  AMENDMENT=$AMENDMENT,
+  PROTECTED_INVARIANTS=$PROTECTED_INVARIANTS,
+) -> VALID, PARSES, RESOLVES, CANONICAL, INVARIANTS_PRESERVED, SCOPE_EXACT, PROOF
 EMIT interface.proof
 </process>
 </processes>

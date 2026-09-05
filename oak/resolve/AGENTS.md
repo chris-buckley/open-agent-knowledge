@@ -1,5 +1,5 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Constants hold values that do not change while the knowledge runs.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 </instructions>
@@ -34,8 +34,15 @@ graph-rules: YAML<<
 <processes>
 <process id="change-resolution" name="Change resolution">
 ACT Use <TARGETS> to preserve local and relative target meaning. (TARGETS=$constant.target-forms)
-ACT Keep <RELATIVE> as the only relative entry parts and <LOCAL> inside the active document. (RELATIVE=$constant.relative-target-parts, LOCAL=$constant.local-only-operations)
-ACT Follow <ORDER> for deterministic reachable graph construction. (ORDER=$constant.resolution-order)
-ACT Apply <RULES> to loading, identity, contract validation, and cycle detection. (RULES=$constant.graph-rules)
+ACT Keep <RELATIVE> as the only relative entry parts and <LOCAL> inside the active document. (
+  RELATIVE=$constant.relative-target-parts,
+  LOCAL=$constant.local-only-operations,
+)
+ACT Follow <ORDER> for deterministic reachable graph construction. (
+  ORDER=$constant.resolution-order,
+)
+ACT Apply <RULES> to loading, identity, contract validation, and cycle detection. (
+  RULES=$constant.graph-rules,
+)
 </process>
 </processes>

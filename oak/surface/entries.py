@@ -141,11 +141,8 @@ ENTRY_SURFACES_AFTER_PROCESSES = (
         "trigger",
         Trigger,
         (
-            "trigger.<ID>.event := <EVENT>\n"
-            "trigger.<ID>.source := <SOURCE>\n"
-            "trigger.<ID>.guard := <GUARD>\n"
-            "trigger.<ID>.process := <PROCESS>\n"
-            "trigger.<ID>.seed.<SEED>"
+            "<ID>(event=<EVENT>, source=<SOURCE>, guard=<GUARD>, "
+            "process=<PROCESS>, seed=(<SEED>))"
         ),
         rendered=(
             "id",

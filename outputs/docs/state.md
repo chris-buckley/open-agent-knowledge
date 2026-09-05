@@ -12,6 +12,8 @@ Do not bind a placeholder that has a placeholder-valued bound.
 <constants>
 example-1: "status: \"ready\""
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_state = ? <ID> AS <SCHEMA_ID>.<PLACEHOLDER>: <VALUE> ? ;
 >>

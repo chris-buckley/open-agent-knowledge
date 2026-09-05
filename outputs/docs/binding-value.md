@@ -8,6 +8,8 @@ BindingValue: One value read from a visible process-local binding.
 <constants>
 example-1: "$RESULT"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_value_binding = ? $<BINDING> ? ;
 >>

@@ -1,5 +1,5 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Constants hold values that do not change while the knowledge runs.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 </instructions>
@@ -22,9 +22,16 @@ history-rules: ["plans are active only while their named change is in progress",
 
 <processes>
 <process id="maintain-history" name="Maintain history">
-ACT Use <RECORDS> to choose the correct numbered plan or matching completion report. (RECORDS=$constant.record-types)
-ACT Use <FORMAT> and <PLAN_RULES> when preparing a new plan. (FORMAT=$constant.plan-format, PLAN_RULES=$constant.plan-authoring-rules)
-ACT Apply <RULES> before changing status, checkboxes, evidence, or verdict. (RULES=$constant.history-rules)
+ACT Use <RECORDS> to choose the correct numbered plan or matching completion report. (
+  RECORDS=$constant.record-types,
+)
+ACT Use <FORMAT> and <PLAN_RULES> when preparing a new plan. (
+  FORMAT=$constant.plan-format,
+  PLAN_RULES=$constant.plan-authoring-rules,
+)
+ACT Apply <RULES> before changing status, checkboxes, evidence, or verdict. (
+  RULES=$constant.history-rules,
+)
 ACT Read a historical plan only when the user or active task names it. ()
 </process>
 </processes>

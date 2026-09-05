@@ -1,5 +1,5 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Constants hold values that do not change while the knowledge runs.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 </instructions>
@@ -47,11 +47,20 @@ transaction-contract: YAML<<
 
 <processes>
 <process id="change-execution" name="Change execution">
-ACT Validate <INPUTS> and one of <ARRIVALS> before trigger selection. (INPUTS=$constant.execution-inputs, ARRIVALS=$constant.arrival-forms)
-ACT Apply <SELECTION> after exact event or source matching and authored-order guard evaluation. (SELECTION=$constant.trigger-selection)
-ACT Preserve <STEPS> across process frames, tools, calls, branches, loops, parallel work, and emissions. (STEPS=$constant.step-contracts)
+ACT Validate <INPUTS> and one of <ARRIVALS> before trigger selection. (
+  INPUTS=$constant.execution-inputs,
+  ARRIVALS=$constant.arrival-forms,
+)
+ACT Apply <SELECTION> after exact event or source matching and authored-order guard evaluation. (
+  SELECTION=$constant.trigger-selection,
+)
+ACT Preserve <STEPS> across process frames, tools, calls, branches, loops, parallel work, and emissions. (
+  STEPS=$constant.step-contracts,
+)
 ACT Apply <NATIVE> to interpreter-native action dispatch. (NATIVE=$constant.native-action-contract)
-ACT Apply <TRANSACTION> to every success and failure path. (TRANSACTION=$constant.transaction-contract)
+ACT Apply <TRANSACTION> to every success and failure path. (
+  TRANSACTION=$constant.transaction-contract,
+)
 ACT Use stable execution error codes and retain suppressed parallel child failures when available. ()
 </process>
 </processes>

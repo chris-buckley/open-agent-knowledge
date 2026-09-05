@@ -7,18 +7,18 @@ Give each ALL or ANY condition at least two children.
 </instructions>
 
 <constants>
-example-1: "ALL:\n  $state.status equals \"ready\"\n  $state.count is greater than 0"
+example-1: "ALL($state.status equals \"ready\", $state.count is greater than 0)"
+
+syntax-reference: "outputs/oak.ebnf"
 
 grammar: TEXT<<
-surface_condition_all = ? ALL:
-  <CONDITIONS> ? ;
+surface_condition_all = all_condition ;
 >>
 </constants>
 
 <schemas>
 <schema id="condition-all" name="All" purpose="Every child condition must be true in authored order.">
-ALL:
-  <CONDITIONS>
+ALL(<CONDITIONS>)
 
 WHERE:
 - <CONDITIONS> is string; is non-empty; The child conditions in authored order..

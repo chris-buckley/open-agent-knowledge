@@ -10,6 +10,8 @@ Give each lines constraint a minimum, maximum, or both.
 <constants>
 example-1: "has at most 1 line"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_constraint_lines = ? has <MIN> to <MAX> lines ? ;
 >>

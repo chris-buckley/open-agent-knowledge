@@ -16,7 +16,9 @@ Name a tool exposed by the supplied exact tool registry.
 <constants>
 example-1: "ACT Turn <REQUEST> into <RESULT>. (REQUEST=\"Example request.\") -> RESULT"
 
-example-2: "ACT TOOL \"mcp__docs__search\" input=\"schema.query\" output=\"schema.result\": Find <QUERY> and return <RESULT>. (QUERY=\"OAK\") -> RESULT"
+example-2: "ACT TOOL \"mcp__docs__search\" input=\"schema.query\" output=\"schema.result\": Find <QUERY> and return <RESULT>. (\n  QUERY=\"OAK\",\n) -> RESULT"
+
+syntax-reference: "outputs/oak.ebnf"
 
 grammar: TEXT<<
 surface_act_native = ? ACT input="<INPUT>" output="<OUTPUT>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;

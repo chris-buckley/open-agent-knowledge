@@ -1,5 +1,5 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Constants hold values that do not change while the knowledge runs.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 </instructions>
@@ -49,11 +49,21 @@ context-selection-contract: ["default to the complete resolved graph when prose 
 
 <processes>
 <process id="change-package" name="Change package">
-ACT Use <BOUNDARY> to keep OAK meaning separate from host implementation. (BOUNDARY=$constant.host-boundary)
-ACT Use <REPRESENTATIONS> to preserve one canonical meaning across every supported form. (REPRESENTATIONS=$constant.representation-map)
-ACT Apply <DEPENDENCIES> before changing package imports or ownership. (DEPENDENCIES=$constant.package-dependencies)
-ACT Apply <CONTRACTS> to each model, parser, renderer, vocabulary, surface, rule, and public export change. (CONTRACTS=$constant.representation-contracts)
-ACT Apply <CONTEXT> when deriving interpreter task views. (CONTEXT=$constant.context-selection-contract)
+ACT Use <BOUNDARY> to keep OAK meaning separate from host implementation. (
+  BOUNDARY=$constant.host-boundary,
+)
+ACT Use <REPRESENTATIONS> to preserve one canonical meaning across every supported form. (
+  REPRESENTATIONS=$constant.representation-map,
+)
+ACT Apply <DEPENDENCIES> before changing package imports or ownership. (
+  DEPENDENCIES=$constant.package-dependencies,
+)
+ACT Apply <CONTRACTS> to each model, parser, renderer, vocabulary, surface, rule, and public export change. (
+  CONTRACTS=$constant.representation-contracts,
+)
+ACT Apply <CONTEXT> when deriving interpreter task views. (
+  CONTEXT=$constant.context-selection-contract,
+)
 ACT Read the matching specialist skill before changing Pydantic, JSON Schema, or JSON-LD behavior. ()
 </process>
 </processes>

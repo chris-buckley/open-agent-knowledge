@@ -170,8 +170,9 @@ def validate_act_authoring() -> None:
                 'ACT TOOL "jobs.status" '
                 'input="schema.job" '
                 'output="schema.status": '
-                "Read <JOB_ID> and produce <STATUS>. "
-                "(JOB_ID=$state.job-id) -> STATUS"
+                "Read <JOB_ID> and produce <STATUS>. (\n"
+                "  JOB_ID=$state.job-id,\n"
+                ") -> STATUS"
             ),
         ),
     )

@@ -11,8 +11,10 @@ Keep the local process call graph acyclic.
 <constants>
 example-1: "CALL process.normalise (RAW_NAME=\" ada \") -> NORMAL_NAME"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
-surface_step_call = ? CALL <PROCESS> (<INPUTS>) -> <OUTPUTS> ? ;
+surface_step_call = call_statement ;
 >>
 </constants>
 

@@ -1,5 +1,5 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 RECEIVES accepts one complete instance of its schema.
 A source-backed trigger supplies the received instance as the selected process input.
@@ -7,7 +7,7 @@ EMITS publishes one complete instance of its schema.
 EMIT without bindings fills the target schema from same-named visible process bindings.
 Text after `: ` states boundary meaning absent from the interface schema.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-Each trigger is one fact group: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
+Each trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 
 Review only the scope defined by the supplied task brief.
@@ -82,26 +82,41 @@ WHERE:
 </schemas>
 
 <triggers>
-trigger.review-requested.event := "A task review is requested."
-trigger.review-requested.source := interface.review-request-input
-trigger.review-requested.process := process.review-task
+review-requested(
+  event="A task review is requested.",
+  source=interface.review-request-input,
+  process=process.review-task,
+)
 </triggers>
 
 <processes>
 <process id="read-evidence" name="Read evidence" input="schema.review-request" output="schema.review-evidence">
-ACT Inspect <TASK_BRIEF>, <IMPLEMENTATION_REPORT>, and <DIFF> once and produce <EVIDENCE>. (TASK_BRIEF=$TASK_BRIEF, IMPLEMENTATION_REPORT=$IMPLEMENTATION_REPORT, DIFF=$DIFF) -> EVIDENCE
+ACT Inspect <TASK_BRIEF>, <IMPLEMENTATION_REPORT>, and <DIFF> once and produce <EVIDENCE>. (
+  TASK_BRIEF=$TASK_BRIEF,
+  IMPLEMENTATION_REPORT=$IMPLEMENTATION_REPORT,
+  DIFF=$DIFF,
+) -> EVIDENCE
 </process>
 
 <process id="validate-compliance" name="Validate compliance" input="schema.compliance-request" output="schema.compliance">
-ACT Compare <EVIDENCE> with <TASK_BRIEF> and produce <SPEC_COMPLIANCE>. (EVIDENCE=$EVIDENCE, TASK_BRIEF=$TASK_BRIEF) -> SPEC_COMPLIANCE
+ACT Compare <EVIDENCE> with <TASK_BRIEF> and produce <SPEC_COMPLIANCE>. (
+  EVIDENCE=$EVIDENCE,
+  TASK_BRIEF=$TASK_BRIEF,
+) -> SPEC_COMPLIANCE
 </process>
 
 <process id="assess-evidence" name="Assess evidence" input="schema.review-evidence" output="schema.assessment">
-ACT Assess <EVIDENCE> and produce <STRENGTHS>, <ISSUES>, and <ASSESSMENT>. (EVIDENCE=$EVIDENCE) -> STRENGTHS, ISSUES, ASSESSMENT
+ACT Assess <EVIDENCE> and produce <STRENGTHS>, <ISSUES>, and <ASSESSMENT>. (
+  EVIDENCE=$EVIDENCE,
+) -> STRENGTHS, ISSUES, ASSESSMENT
 </process>
 
 <process id="review-task" name="Review task" input="schema.review-request">
-CALL process.read-evidence (TASK_BRIEF=$TASK_BRIEF, IMPLEMENTATION_REPORT=$IMPLEMENTATION_REPORT, DIFF=$DIFF) -> EVIDENCE
+CALL process.read-evidence (
+  TASK_BRIEF=$TASK_BRIEF,
+  IMPLEMENTATION_REPORT=$IMPLEMENTATION_REPORT,
+  DIFF=$DIFF,
+) -> EVIDENCE
 CALL process.validate-compliance (EVIDENCE=$EVIDENCE, TASK_BRIEF=$TASK_BRIEF) -> SPEC_COMPLIANCE
 CALL process.assess-evidence (EVIDENCE=$EVIDENCE) -> STRENGTHS, ISSUES, ASSESSMENT
 EMIT interface.task-review-output

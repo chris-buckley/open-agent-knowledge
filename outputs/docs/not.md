@@ -6,18 +6,18 @@ Not: One child condition whose result is inverted.
 </instructions>
 
 <constants>
-example-1: "NOT:\n  $state.status equals \"closed\""
+example-1: "NOT($state.status equals \"closed\")"
+
+syntax-reference: "outputs/oak.ebnf"
 
 grammar: TEXT<<
-surface_condition_not = ? NOT:
-  <CONDITION> ? ;
+surface_condition_not = not_condition ;
 >>
 </constants>
 
 <schemas>
 <schema id="condition-not" name="Not" purpose="One child condition whose result is inverted.">
-NOT:
-  <CONDITION>
+NOT(<CONDITION>)
 
 WHERE:
 - <CONDITION> is string; is non-empty; The child condition to invert..

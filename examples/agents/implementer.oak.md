@@ -1,5 +1,5 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Conditions are typed trees; ALL, ANY, and NOT compose comparisons; ASSERT fails a false condition; FOREACH is sequential; WHILE tests before each bounded iteration; PAR outputs become visible only at JOIN.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
@@ -10,7 +10,7 @@ Text after `: ` states boundary meaning absent from the interface schema.
 AS binds one constant or state value to one schema placeholder; the value must satisfy that placeholder at resolution and before each state write commits.
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-Each trigger is one fact group: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
+Each trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 
 Read the task brief and supplied context before implementation.
@@ -169,15 +169,23 @@ WHERE:
 </schemas>
 
 <triggers>
-trigger.implementation-requested.event := "An implementation task arrives."
-trigger.implementation-requested.source := interface.task-request-input
-trigger.implementation-requested.process := process.implement-task
+implementation-requested(
+  event="An implementation task arrives.",
+  source=interface.task-request-input,
+  process=process.implement-task,
+)
 </triggers>
 
 <processes>
 <process id="plan-task" name="Plan task" input="schema.task-request" output="schema.implementation-plan">
-ACT Read <TASK_BRIEF> with <CONTEXT> and produce <DRAFT_PLAN> and <QUESTIONS>. (TASK_BRIEF=$TASK_BRIEF, CONTEXT=$CONTEXT) -> DRAFT_PLAN, QUESTIONS
-ACT Resolve <QUESTIONS> into <DRAFT_PLAN> and produce <PLAN>. (QUESTIONS=$QUESTIONS, DRAFT_PLAN=$DRAFT_PLAN) -> PLAN
+ACT Read <TASK_BRIEF> with <CONTEXT> and produce <DRAFT_PLAN> and <QUESTIONS>. (
+  TASK_BRIEF=$TASK_BRIEF,
+  CONTEXT=$CONTEXT,
+) -> DRAFT_PLAN, QUESTIONS
+ACT Resolve <QUESTIONS> into <DRAFT_PLAN> and produce <PLAN>. (
+  QUESTIONS=$QUESTIONS,
+  DRAFT_PLAN=$DRAFT_PLAN,
+) -> PLAN
 </process>
 
 <process id="implement-plan" name="Implement plan" input="schema.implementation-plan" output="schema.changeset">
@@ -185,19 +193,30 @@ ACT Implement <PLAN> exactly and produce <CHANGESET>. (PLAN=$PLAN) -> CHANGESET
 </process>
 
 <process id="snapshot-changeset" name="Snapshot changeset" input="schema.changeset" output="schema.candidate">
-ACT TOOL "changes.snapshot" input="schema.changeset" output="schema.candidate": Freeze <CHANGESET>, including all verification-relevant inputs, as immutable <CANDIDATE> and compute its SHA-256 <REVISION>. (CHANGESET=$CHANGESET) -> CANDIDATE, REVISION
+ACT TOOL "changes.snapshot" input="schema.changeset" output="schema.candidate": Freeze <CHANGESET>, including all verification-relevant inputs, as immutable <CANDIDATE> and compute its SHA-256 <REVISION>. (
+  CHANGESET=$CHANGESET,
+) -> CANDIDATE, REVISION
 </process>
 
 <process id="test-changeset" name="Test changeset" input="schema.candidate" output="../schemas/verification.oak.md#schema.verification">
-ACT TOOL "checks.verify-changeset" input="schema.candidate" output="../schemas/verification.oak.md#schema.verification": Inspect immutable <CANDIDATE> requested at <REVISION>; run the versioned implementation checks and record actual <VERIFIED_SUBJECT>, <VERIFIED_REVISION>, <CHECK>, <PASSED>, and <EVIDENCE>. (CANDIDATE=$CANDIDATE, REVISION=$REVISION) -> VERIFIED_SUBJECT, VERIFIED_REVISION, CHECK, PASSED, EVIDENCE
+ACT TOOL "checks.verify-changeset" input="schema.candidate" output="../schemas/verification.oak.md#schema.verification": Inspect immutable <CANDIDATE> requested at <REVISION>; run the versioned implementation checks and record actual <VERIFIED_SUBJECT>, <VERIFIED_REVISION>, <CHECK>, <PASSED>, and <EVIDENCE>. (
+  CANDIDATE=$CANDIDATE,
+  REVISION=$REVISION,
+) -> VERIFIED_SUBJECT, VERIFIED_REVISION, CHECK, PASSED, EVIDENCE
 </process>
 
 <process id="review-changeset" name="Review changeset" input="schema.planned-changeset" output="schema.review-findings">
-ACT Review <CHANGESET> against <PLAN> and produce <FINDINGS>. (CHANGESET=$CHANGESET, PLAN=$PLAN) -> FINDINGS
+ACT Review <CHANGESET> against <PLAN> and produce <FINDINGS>. (
+  CHANGESET=$CHANGESET,
+  PLAN=$PLAN,
+) -> FINDINGS
 </process>
 
 <process id="apply-findings" name="Apply findings" input="schema.reviewed-changeset" output="schema.completion">
-ACT Apply <FINDINGS> to <CHANGESET> and produce <REVISED_CHANGESET>, <SUMMARY>, and <STATUS>. (FINDINGS=$FINDINGS, CHANGESET=$CHANGESET) -> REVISED_CHANGESET, SUMMARY, STATUS
+ACT Apply <FINDINGS> to <CHANGESET> and produce <REVISED_CHANGESET>, <SUMMARY>, and <STATUS>. (
+  FINDINGS=$FINDINGS,
+  CHANGESET=$CHANGESET,
+) -> REVISED_CHANGESET, SUMMARY, STATUS
 </process>
 
 <process id="commit-changeset" name="Commit changeset" input="schema.verified-changeset" output="schema.commit">
@@ -209,7 +228,16 @@ ASSERT $CHECK equals $constant.required-check
   MESSAGE "The evidence does not cover the required checks."
 ASSERT $PASSED equals true
   MESSAGE "The required checks failed."
-ACT TOOL "changes.commit-verified" input="schema.verified-changeset" output="schema.commit": Reject drift before any side effect; commit exactly immutable <CANDIDATE> at <REVISION> with <COMMIT_CONVENTION> using <VERIFIED_SUBJECT>, <VERIFIED_REVISION>, <CHECK>, <PASSED>, and <EVIDENCE>, then return <COMMIT> and <COMMITTED_REVISION>. (CANDIDATE=$CANDIDATE, REVISION=$REVISION, VERIFIED_SUBJECT=$VERIFIED_SUBJECT, VERIFIED_REVISION=$VERIFIED_REVISION, CHECK=$CHECK, PASSED=$PASSED, EVIDENCE=$EVIDENCE, COMMIT_CONVENTION=$COMMIT_CONVENTION) -> COMMIT, COMMITTED_REVISION
+ACT TOOL "changes.commit-verified" input="schema.verified-changeset" output="schema.commit": Reject drift before any side effect; commit exactly immutable <CANDIDATE> at <REVISION> with <COMMIT_CONVENTION> using <VERIFIED_SUBJECT>, <VERIFIED_REVISION>, <CHECK>, <PASSED>, and <EVIDENCE>, then return <COMMIT> and <COMMITTED_REVISION>. (
+  CANDIDATE=$CANDIDATE,
+  REVISION=$REVISION,
+  VERIFIED_SUBJECT=$VERIFIED_SUBJECT,
+  VERIFIED_REVISION=$VERIFIED_REVISION,
+  CHECK=$CHECK,
+  PASSED=$PASSED,
+  EVIDENCE=$EVIDENCE,
+  COMMIT_CONVENTION=$COMMIT_CONVENTION,
+) -> COMMIT, COMMITTED_REVISION
 ASSERT $COMMITTED_REVISION equals $REVISION
   MESSAGE "The host committed a different revision; external effects cannot be rolled back by OAK."
 </process>
@@ -218,15 +246,41 @@ ASSERT $COMMITTED_REVISION equals $REVISION
 CALL process.plan-task (TASK_BRIEF=$TASK_BRIEF, CONTEXT=$CONTEXT) -> PLAN
 CALL process.implement-plan (PLAN=$PLAN) -> CHANGESET
 CALL process.review-changeset (PLAN=$PLAN, CHANGESET=$CHANGESET) -> FINDINGS
-CALL process.apply-findings (CHANGESET=$CHANGESET, FINDINGS=$FINDINGS) -> REVISED_CHANGESET, SUMMARY, STATUS
+CALL process.apply-findings (
+  CHANGESET=$CHANGESET,
+  FINDINGS=$FINDINGS,
+) -> REVISED_CHANGESET, SUMMARY, STATUS
 IF $STATUS equals "blocked":
-  THEN:
-    EMIT interface.escalation-output (STATUS=$STATUS, SUMMARY=$SUMMARY, FINDINGS=$FINDINGS)
-  ELSE:
-    CALL process.snapshot-changeset (CHANGESET=$REVISED_CHANGESET) -> CANDIDATE, REVISION
-    CALL process.test-changeset (CANDIDATE=$CANDIDATE, REVISION=$REVISION) -> VERIFIED_SUBJECT, VERIFIED_REVISION, CHECK, PASSED, EVIDENCE
-    CALL process.commit-changeset (CANDIDATE=$CANDIDATE, REVISION=$REVISION, VERIFIED_SUBJECT=$VERIFIED_SUBJECT, VERIFIED_REVISION=$VERIFIED_REVISION, CHECK=$CHECK, PASSED=$PASSED, EVIDENCE=$EVIDENCE, COMMIT_CONVENTION=$constant.commit-convention) -> COMMIT, COMMITTED_REVISION
-    EMIT interface.implementation-report-output (STATUS=$STATUS, SUMMARY=$SUMMARY, CANDIDATE=$CANDIDATE, REVISION=$REVISION, VERIFIED_SUBJECT=$VERIFIED_SUBJECT, VERIFIED_REVISION=$VERIFIED_REVISION, CHECK=$CHECK, PASSED=$PASSED, EVIDENCE=$EVIDENCE, COMMIT=$COMMIT, FINDINGS=$FINDINGS)
+  EMIT interface.escalation-output (STATUS=$STATUS, SUMMARY=$SUMMARY, FINDINGS=$FINDINGS)
+ELSE:
+  CALL process.snapshot-changeset (CHANGESET=$REVISED_CHANGESET) -> CANDIDATE, REVISION
+  CALL process.test-changeset (
+    CANDIDATE=$CANDIDATE,
+    REVISION=$REVISION,
+  ) -> VERIFIED_SUBJECT, VERIFIED_REVISION, CHECK, PASSED, EVIDENCE
+  CALL process.commit-changeset (
+    CANDIDATE=$CANDIDATE,
+    REVISION=$REVISION,
+    VERIFIED_SUBJECT=$VERIFIED_SUBJECT,
+    VERIFIED_REVISION=$VERIFIED_REVISION,
+    CHECK=$CHECK,
+    PASSED=$PASSED,
+    EVIDENCE=$EVIDENCE,
+    COMMIT_CONVENTION=$constant.commit-convention,
+  ) -> COMMIT, COMMITTED_REVISION
+  EMIT interface.implementation-report-output (
+    STATUS=$STATUS,
+    SUMMARY=$SUMMARY,
+    CANDIDATE=$CANDIDATE,
+    REVISION=$REVISION,
+    VERIFIED_SUBJECT=$VERIFIED_SUBJECT,
+    VERIFIED_REVISION=$VERIFIED_REVISION,
+    CHECK=$CHECK,
+    PASSED=$PASSED,
+    EVIDENCE=$EVIDENCE,
+    COMMIT=$COMMIT,
+    FINDINGS=$FINDINGS,
+  )
 </process>
 </processes>
 

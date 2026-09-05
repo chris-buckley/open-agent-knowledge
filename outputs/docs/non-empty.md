@@ -8,6 +8,8 @@ NonEmpty: The bound value has at least one character or item.
 <constants>
 example-1: "is non-empty"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_constraint_non_empty = ? is non-empty ? ;
 >>

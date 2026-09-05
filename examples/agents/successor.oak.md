@@ -1,5 +1,5 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Conditions are typed trees; ALL, ANY, and NOT compose comparisons; ASSERT fails a false condition; FOREACH is sequential; WHILE tests before each bounded iteration; PAR outputs become visible only at JOIN.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
@@ -11,7 +11,7 @@ AS binds one constant or state value to one schema placeholder; the value must s
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 State holds values that persist and can change while processes run.
-Each trigger is one fact group: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
+Each trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 
 Treat the current OAK document as immutable.
@@ -162,70 +162,135 @@ pending-rationale AS schema.governance.RATIONALE: ""
 </state>
 
 <triggers>
-trigger.amendment-proposed.event := "An amendment is proposed."
-trigger.amendment-proposed.source := interface.amendment
-trigger.amendment-proposed.process := process.start-succession
-
-trigger.evidence-supplied.event := "Evidence for the pending amendment is supplied."
-trigger.evidence-supplied.source := interface.evidence
-trigger.evidence-supplied.guard := $state.review-status equals "needs-evidence"
-trigger.evidence-supplied.process := process.resume-succession
+amendment-proposed(
+  event="An amendment is proposed.",
+  source=interface.amendment,
+  process=process.start-succession,
+)
+evidence-supplied(
+  event="Evidence for the pending amendment is supplied.",
+  source=interface.evidence,
+  guard=$state.review-status equals "needs-evidence",
+  process=process.resume-succession,
+)
 </triggers>
 
 <processes>
 <process id="dispatch-review" name="Dispatch review" input="amendment_reviewer.oak.md#schema.amendment-review-request" output="amendment_reviewer.oak.md#schema.amendment-review">
-ACT TOOL "agent.amendment-reviewer" input="amendment_reviewer.oak.md#schema.amendment-review-request" output="amendment_reviewer.oak.md#schema.amendment-review": For <AMENDMENT_ID>, challenge <AMENDMENT> with <RATIONALE> and <EVIDENCE> against <CURRENT_OAK> and <PROTECTED_INVARIANTS>, then produce <DECISION>, <REVIEW_FINDINGS>, and <EVIDENCE_REQUEST>. (CURRENT_OAK=$CURRENT_OAK, AMENDMENT_ID=$AMENDMENT_ID, AMENDMENT=$AMENDMENT, RATIONALE=$RATIONALE, EVIDENCE=$EVIDENCE, PROTECTED_INVARIANTS=$PROTECTED_INVARIANTS) -> DECISION, REVIEW_FINDINGS, EVIDENCE_REQUEST
+ACT TOOL "agent.amendment-reviewer" input="amendment_reviewer.oak.md#schema.amendment-review-request" output="amendment_reviewer.oak.md#schema.amendment-review": For <AMENDMENT_ID>, challenge <AMENDMENT> with <RATIONALE> and <EVIDENCE> against <CURRENT_OAK> and <PROTECTED_INVARIANTS>, then produce <DECISION>, <REVIEW_FINDINGS>, and <EVIDENCE_REQUEST>. (
+  CURRENT_OAK=$CURRENT_OAK,
+  AMENDMENT_ID=$AMENDMENT_ID,
+  AMENDMENT=$AMENDMENT,
+  RATIONALE=$RATIONALE,
+  EVIDENCE=$EVIDENCE,
+  PROTECTED_INVARIANTS=$PROTECTED_INVARIANTS,
+) -> DECISION, REVIEW_FINDINGS, EVIDENCE_REQUEST
 </process>
 
 <process id="dispatch-verification" name="Dispatch verification" input="successor_verifier.oak.md#schema.successor-verification-request" output="successor_verifier.oak.md#schema.successor-proof">
-ACT TOOL "agent.successor-verifier" input="successor_verifier.oak.md#schema.successor-verification-request" output="successor_verifier.oak.md#schema.successor-proof": Verify <CANDIDATE_OAK> against <CURRENT_OAK>, <AMENDMENT>, and <PROTECTED_INVARIANTS>, then produce <VALID>, <PARSES>, <RESOLVES>, <CANONICAL>, <INVARIANTS_PRESERVED>, <SCOPE_EXACT>, and <PROOF>. (CURRENT_OAK=$CURRENT_OAK, CANDIDATE_OAK=$CANDIDATE_OAK, AMENDMENT=$AMENDMENT, PROTECTED_INVARIANTS=$PROTECTED_INVARIANTS) -> VALID, PARSES, RESOLVES, CANONICAL, INVARIANTS_PRESERVED, SCOPE_EXACT, PROOF
+ACT TOOL "agent.successor-verifier" input="successor_verifier.oak.md#schema.successor-verification-request" output="successor_verifier.oak.md#schema.successor-proof": Verify <CANDIDATE_OAK> against <CURRENT_OAK>, <AMENDMENT>, and <PROTECTED_INVARIANTS>, then produce <VALID>, <PARSES>, <RESOLVES>, <CANONICAL>, <INVARIANTS_PRESERVED>, <SCOPE_EXACT>, and <PROOF>. (
+  CURRENT_OAK=$CURRENT_OAK,
+  CANDIDATE_OAK=$CANDIDATE_OAK,
+  AMENDMENT=$AMENDMENT,
+  PROTECTED_INVARIANTS=$PROTECTED_INVARIANTS,
+) -> VALID, PARSES, RESOLVES, CANONICAL, INVARIANTS_PRESERVED, SCOPE_EXACT, PROOF
 </process>
 
 <process id="start-succession" name="Start succession" input="schema.amendment-proposal">
-CALL process.govern-succession (AMENDMENT_ID=$AMENDMENT_ID, AMENDMENT=$AMENDMENT, RATIONALE=$RATIONALE, EVIDENCE=$EVIDENCE, RESUME=false)
+CALL process.govern-succession (
+  AMENDMENT_ID=$AMENDMENT_ID,
+  AMENDMENT=$AMENDMENT,
+  RATIONALE=$RATIONALE,
+  EVIDENCE=$EVIDENCE,
+  RESUME=false,
+)
 </process>
 
 <process id="resume-succession" name="Resume succession" input="schema.evidence-supplement">
-CALL process.govern-succession (AMENDMENT_ID=$AMENDMENT_ID, AMENDMENT=$state.pending-amendment, RATIONALE=$state.pending-rationale, EVIDENCE=$EVIDENCE, RESUME=true)
+CALL process.govern-succession (
+  AMENDMENT_ID=$AMENDMENT_ID,
+  AMENDMENT=$state.pending-amendment,
+  RATIONALE=$state.pending-rationale,
+  EVIDENCE=$EVIDENCE,
+  RESUME=true,
+)
 </process>
 
 <process id="govern-succession" name="Govern succession" input="schema.amendment-cycle">
 IF $RESUME equals true:
-  THEN:
-    ASSERT $AMENDMENT_ID equals $state.pending-amendment-id
-      MESSAGE "The evidence does not match the pending amendment."
+  ASSERT $AMENDMENT_ID equals $state.pending-amendment-id
+    MESSAGE "The evidence does not match the pending amendment."
 SET state.pending-amendment-id = $AMENDMENT_ID
 SET state.pending-amendment = $AMENDMENT
 SET state.pending-rationale = $RATIONALE
 SET state.review-status = "reviewing"
-CALL process.dispatch-review (CURRENT_OAK=$constant.current-oak, AMENDMENT_ID=$AMENDMENT_ID, AMENDMENT=$AMENDMENT, RATIONALE=$RATIONALE, EVIDENCE=$EVIDENCE, PROTECTED_INVARIANTS=$constant.protected-invariants) -> DECISION, REVIEW_FINDINGS, EVIDENCE_REQUEST
+CALL process.dispatch-review (
+  CURRENT_OAK=$constant.current-oak,
+  AMENDMENT_ID=$AMENDMENT_ID,
+  AMENDMENT=$AMENDMENT,
+  RATIONALE=$RATIONALE,
+  EVIDENCE=$EVIDENCE,
+  PROTECTED_INVARIANTS=$constant.protected-invariants,
+) -> DECISION, REVIEW_FINDINGS, EVIDENCE_REQUEST
 IF $DECISION equals "accept":
-  THEN:
-    ACT TOOL "oak.compile-successor" input="schema.accepted-amendment" output="schema.candidate-successor": Apply <AMENDMENT_ID>: <AMENDMENT> with <RATIONALE> and <REVIEW_FINDINGS> to <CURRENT_OAK> at <CURRENT_REVISION> while preserving <PROTECTED_INVARIANTS>, then produce <CANDIDATE_OAK>. (CURRENT_OAK=$constant.current-oak, CURRENT_REVISION=$state.current-revision, AMENDMENT_ID=$AMENDMENT_ID, AMENDMENT=$AMENDMENT, RATIONALE=$RATIONALE, REVIEW_FINDINGS=$REVIEW_FINDINGS, PROTECTED_INVARIANTS=$constant.protected-invariants) -> CANDIDATE_OAK
-    CALL process.dispatch-verification (CURRENT_OAK=$constant.current-oak, CANDIDATE_OAK=$CANDIDATE_OAK, AMENDMENT=$AMENDMENT, PROTECTED_INVARIANTS=$constant.protected-invariants) -> VALID, PARSES, RESOLVES, CANONICAL, INVARIANTS_PRESERVED, SCOPE_EXACT, PROOF
-    ASSERT $VALID equals true
-      MESSAGE "The successor proof is not valid."
-    ASSERT $PARSES equals true
-      MESSAGE "The successor does not parse."
-    ASSERT $RESOLVES equals true
-      MESSAGE "The successor does not resolve."
-    ASSERT $CANONICAL equals true
-      MESSAGE "The successor is not canonical."
-    ASSERT $INVARIANTS_PRESERVED equals true
-      MESSAGE "The successor breaks a protected invariant."
-    ASSERT $SCOPE_EXACT equals true
-      MESSAGE "The successor contains an unexplained change."
-    ACT Advance <CURRENT_REVISION> and produce <PRIOR_REVISION> and <NEXT_REVISION>. (CURRENT_REVISION=$state.current-revision) -> PRIOR_REVISION, NEXT_REVISION
-    SET state.current-revision = $NEXT_REVISION
-    SET state.review-status = "ratified"
-    EMIT interface.successor (DECISION=$DECISION, AMENDMENT_ID=$AMENDMENT_ID, AMENDMENT=$AMENDMENT, RATIONALE=$RATIONALE, PRIOR_REVISION=$PRIOR_REVISION, NEXT_REVISION=$NEXT_REVISION, CANDIDATE_OAK=$CANDIDATE_OAK, VALID=$VALID, PARSES=$PARSES, RESOLVES=$RESOLVES, CANONICAL=$CANONICAL, INVARIANTS_PRESERVED=$INVARIANTS_PRESERVED, SCOPE_EXACT=$SCOPE_EXACT, PROOF=$PROOF)
+  ACT TOOL "oak.compile-successor" input="schema.accepted-amendment" output="schema.candidate-successor": Apply <AMENDMENT_ID>: <AMENDMENT> with <RATIONALE> and <REVIEW_FINDINGS> to <CURRENT_OAK> at <CURRENT_REVISION> while preserving <PROTECTED_INVARIANTS>, then produce <CANDIDATE_OAK>. (
+    CURRENT_OAK=$constant.current-oak,
+    CURRENT_REVISION=$state.current-revision,
+    AMENDMENT_ID=$AMENDMENT_ID,
+    AMENDMENT=$AMENDMENT,
+    RATIONALE=$RATIONALE,
+    REVIEW_FINDINGS=$REVIEW_FINDINGS,
+    PROTECTED_INVARIANTS=$constant.protected-invariants,
+  ) -> CANDIDATE_OAK
+  CALL process.dispatch-verification (
+    CURRENT_OAK=$constant.current-oak,
+    CANDIDATE_OAK=$CANDIDATE_OAK,
+    AMENDMENT=$AMENDMENT,
+    PROTECTED_INVARIANTS=$constant.protected-invariants,
+  ) -> VALID, PARSES, RESOLVES, CANONICAL, INVARIANTS_PRESERVED, SCOPE_EXACT, PROOF
+  ASSERT $VALID equals true
+    MESSAGE "The successor proof is not valid."
+  ASSERT $PARSES equals true
+    MESSAGE "The successor does not parse."
+  ASSERT $RESOLVES equals true
+    MESSAGE "The successor does not resolve."
+  ASSERT $CANONICAL equals true
+    MESSAGE "The successor is not canonical."
+  ASSERT $INVARIANTS_PRESERVED equals true
+    MESSAGE "The successor breaks a protected invariant."
+  ASSERT $SCOPE_EXACT equals true
+    MESSAGE "The successor contains an unexplained change."
+  ACT Advance <CURRENT_REVISION> and produce <PRIOR_REVISION> and <NEXT_REVISION>. (
+    CURRENT_REVISION=$state.current-revision,
+  ) -> PRIOR_REVISION, NEXT_REVISION
+  SET state.current-revision = $NEXT_REVISION
+  SET state.review-status = "ratified"
+  EMIT interface.successor (
+    DECISION=$DECISION,
+    AMENDMENT_ID=$AMENDMENT_ID,
+    AMENDMENT=$AMENDMENT,
+    RATIONALE=$RATIONALE,
+    PRIOR_REVISION=$PRIOR_REVISION,
+    NEXT_REVISION=$NEXT_REVISION,
+    CANDIDATE_OAK=$CANDIDATE_OAK,
+    VALID=$VALID,
+    PARSES=$PARSES,
+    RESOLVES=$RESOLVES,
+    CANONICAL=$CANONICAL,
+    INVARIANTS_PRESERVED=$INVARIANTS_PRESERVED,
+    SCOPE_EXACT=$SCOPE_EXACT,
+    PROOF=$PROOF,
+  )
+ELSE:
+  IF $DECISION equals "needs-evidence":
+    SET state.review-status = "needs-evidence"
   ELSE:
-    IF $DECISION equals "needs-evidence":
-      THEN:
-        SET state.review-status = "needs-evidence"
-      ELSE:
-        SET state.review-status = "rejected"
-    EMIT interface.review-outcome (DECISION=$DECISION, REVIEW_FINDINGS=$REVIEW_FINDINGS, EVIDENCE_REQUEST=$EVIDENCE_REQUEST)
+    SET state.review-status = "rejected"
+  EMIT interface.review-outcome (
+    DECISION=$DECISION,
+    REVIEW_FINDINGS=$REVIEW_FINDINGS,
+    EVIDENCE_REQUEST=$EVIDENCE_REQUEST,
+  )
 </process>
 </processes>
 

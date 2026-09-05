@@ -1,5 +1,5 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
 RECEIVES accepts one complete instance of its schema.
@@ -7,7 +7,7 @@ A source-backed trigger supplies the received instance as the selected process i
 EMITS publishes one complete instance of its schema.
 EMIT without bindings fills the target schema from same-named visible process bindings.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-Each trigger is one fact group: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
+Each trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 
 Keep the proposed change limited to the supplied request.
@@ -23,32 +23,51 @@ WHERE:
 </schemas>
 
 <triggers>
-trigger.change-requested.event := "A small code change needs explanation."
-trigger.change-requested.source := interface.request
-trigger.change-requested.process := process.prepare-change
+change-requested(
+  event="A small code change needs explanation.",
+  source=interface.request,
+  process=process.prepare-change,
+)
 </triggers>
 
 <processes>
 <process id="compare-options" name="Compare options" input="schema.change-request" output="../schemas/shape_gallery.oak.md#schema.option-comparison">
-ACT input="schema.change-request" output="../schemas/shape_gallery.oak.md#schema.option-comparison": Compare current and proposed behaviour for <REQUEST>; produce <CRITERION>, <CURRENT>, and <PROPOSED>. (REQUEST=$REQUEST) -> CRITERION, CURRENT, PROPOSED
+ACT input="schema.change-request" output="../schemas/shape_gallery.oak.md#schema.option-comparison": Compare current and proposed behaviour for <REQUEST>; produce <CRITERION>, <CURRENT>, and <PROPOSED>. (
+  REQUEST=$REQUEST,
+) -> CRITERION, CURRENT, PROPOSED
 </process>
 
 <process id="decide-change" name="Decide change" input="../schemas/shape_gallery.oak.md#schema.option-comparison" output="../schemas/shape_gallery.oak.md#schema.decision-brief">
-ACT input="../schemas/shape_gallery.oak.md#schema.option-comparison" output="../schemas/shape_gallery.oak.md#schema.decision-brief": For <CRITERION>, weigh <CURRENT> against <PROPOSED> and produce <DECISION> and <RATIONALE>. (CRITERION=$CRITERION, CURRENT=$CURRENT, PROPOSED=$PROPOSED) -> DECISION, RATIONALE
+ACT input="../schemas/shape_gallery.oak.md#schema.option-comparison" output="../schemas/shape_gallery.oak.md#schema.decision-brief": For <CRITERION>, weigh <CURRENT> against <PROPOSED> and produce <DECISION> and <RATIONALE>. (
+  CRITERION=$CRITERION,
+  CURRENT=$CURRENT,
+  PROPOSED=$PROPOSED,
+) -> DECISION, RATIONALE
 </process>
 
 <process id="plan-change" name="Plan change" input="../schemas/shape_gallery.oak.md#schema.decision-brief" output="../schemas/shape_gallery.oak.md#schema.work-outline">
-ACT input="../schemas/shape_gallery.oak.md#schema.decision-brief" output="../schemas/shape_gallery.oak.md#schema.work-outline": Plan <DECISION> under <RATIONALE>; produce one <GOAL>, implementation <STEP>, and nested <CHECK>. (DECISION=$DECISION, RATIONALE=$RATIONALE) -> GOAL, STEP, CHECK
+ACT input="../schemas/shape_gallery.oak.md#schema.decision-brief" output="../schemas/shape_gallery.oak.md#schema.work-outline": Plan <DECISION> under <RATIONALE>; produce one <GOAL>, implementation <STEP>, and nested <CHECK>. (
+  DECISION=$DECISION,
+  RATIONALE=$RATIONALE,
+) -> GOAL, STEP, CHECK
 </process>
 
 <process id="write-file" name="Write file" input="../schemas/shape_gallery.oak.md#schema.work-outline" output="../schemas/shape_gallery.oak.md#schema.code-file">
-ACT input="../schemas/shape_gallery.oak.md#schema.work-outline" output="../schemas/shape_gallery.oak.md#schema.code-file": Implement <STEP> for <GOAL> and <CHECK>; produce <FILE_PATH> and complete Python <CODE>. (GOAL=$GOAL, STEP=$STEP, CHECK=$CHECK) -> FILE_PATH, CODE
+ACT input="../schemas/shape_gallery.oak.md#schema.work-outline" output="../schemas/shape_gallery.oak.md#schema.code-file": Implement <STEP> for <GOAL> and <CHECK>; produce <FILE_PATH> and complete Python <CODE>. (
+  GOAL=$GOAL,
+  STEP=$STEP,
+  CHECK=$CHECK,
+) -> FILE_PATH, CODE
 </process>
 
 <process id="prepare-change" name="Prepare change" input="schema.change-request">
 CALL process.compare-options (REQUEST=$REQUEST) -> CRITERION, CURRENT, PROPOSED
 EMIT interface.comparison
-CALL process.decide-change (CRITERION=$CRITERION, CURRENT=$CURRENT, PROPOSED=$PROPOSED) -> DECISION, RATIONALE
+CALL process.decide-change (
+  CRITERION=$CRITERION,
+  CURRENT=$CURRENT,
+  PROPOSED=$PROPOSED,
+) -> DECISION, RATIONALE
 EMIT interface.decision
 CALL process.plan-change (DECISION=$DECISION, RATIONALE=$RATIONALE) -> GOAL, STEP, CHECK
 EMIT interface.outline

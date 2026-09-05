@@ -10,6 +10,8 @@ Give FOREACH a value that resolves to a JSON list.
 <constants>
 example-1: "FOREACH ITEM IN [\"a\", \"b\"]:\n  ACT Transform <ITEM> into <RESULT>. (ITEM=$ITEM) -> RESULT"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_step_foreach = ? FOREACH <BINDING> IN <VALUE>:
   <STEPS> ? ;

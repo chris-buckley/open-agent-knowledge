@@ -14,6 +14,8 @@ example-1: "request RECEIVES schema.request-shape"
 
 example-2: "result EMITS ../shared/contracts.oak.md#schema.result-shape: \"Returned only to the coordinator.\""
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_interface_receives = ? <ID> RECEIVES <SCHEMA_ID>: <DESCRIPTION> ? ;
 surface_interface_emits = ? <ID> EMITS <SCHEMA_ID>: <DESCRIPTION> ? ;

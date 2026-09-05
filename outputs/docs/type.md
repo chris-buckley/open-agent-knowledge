@@ -8,6 +8,8 @@ Type: The bound value has one datatype from the vocabulary catalog.
 <constants>
 example-1: "is string"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_constraint_type = ? is <OF> ? ;
 >>
