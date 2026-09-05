@@ -29,6 +29,13 @@ jobs:
           python experiments/agent-guided-network/run.py test
           python experiments/agent-guided-network/run.py replay "$RUNNER_TEMP/oak-replay" --recorded experiments/agent-guided-network/results/first-run
           git diff --exit-code
+      - name: Check attention and replay its recorded decisions
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: |
+          python experiments/agent-guided-network/attention/run.py test
+          python experiments/agent-guided-network/attention/run.py replay "$RUNNER_TEMP/oak-attention-replay" --recorded experiments/agent-guided-network/results/attention-run
+          git diff --exit-code
       - name: Package exact source without Git metadata or credentials
         run: |
           mkdir -p /tmp/oak-experiment-source
@@ -46,5 +53,11 @@ jobs:
         with:
           name: numerical-replay-not-new-agent-decisions
           path: ${{ runner.temp }}/oak-replay/
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: attention-replay-not-new-agent-decisions
+          path: ${{ runner.temp }}/oak-attention-replay/
           if-no-files-found: error
           retention-days: 7
