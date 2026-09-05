@@ -21,6 +21,7 @@ from build.checks.compact_runtime import (
     validate_compact_frames,
     validate_compact_relative_targets,
 )
+from build.checks.coding_standards import validate_coding_standards
 from build.checks.context import validate_interpreter_context
 from build.checks.evidence import validate_evidence
 from build.checks.execution import (
@@ -77,6 +78,7 @@ CHECKS: tuple[Check, ...] = (
     validate_optional_validator,
     validate_plans,
     validate_agents,
+    validate_coding_standards,
     validate_surfaces,
     validate_outputs,
     validate_architecture,

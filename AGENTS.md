@@ -37,8 +37,6 @@ part-authoring-priority: ["schemas", "constants", "state", "interfaces", "trigge
 repository-rules: YAML<<
 - Read the root and every routed AGENTS document that applies before inspecting or
   changing implementation files.
-- Before Python design, implementation, refactoring, or review, read and apply .agents/rules/coding-standards.md
-  within the applicable repository contracts.
 - Treat AGENTS hierarchy as host scoping and never as implicit OAK imports.
 - Treat each scoped AGENTS document as the sole current owner of its named concern.
 - Keep repository-development assistance in .agents and distributable skill products
@@ -86,6 +84,8 @@ communication-contract: YAML<<
 - State uncertainty directly.
 - Avoid jargon, filler, praise, and repetition.
 >>
+
+coding-standard: ".agents/rules/coding-standards.oak.md"
 </constants>
 
 <schemas>
@@ -126,6 +126,10 @@ branch-merged(event="A repository branch is merged.", process=process.clean-merg
 ACT Use <ROUTER> to select and read every scoped AGENTS document that applies to <PATHS> before changing implementation. (
   ROUTER=$constant.agent-router,
   PATHS=$PATHS,
+)
+ACT For Python work in <PATHS>, read <STANDARD> and its routed topic documents before implementation; apply these defaults after scoped repository contracts. (
+  PATHS=$PATHS,
+  STANDARD=$constant.coding-standard,
 )
 ACT Apply <PART_PRIORITY> to represent <TASK>; add authored instructions only after no structured OAK part can carry the meaning. (
   PART_PRIORITY=$constant.part-authoring-priority,
