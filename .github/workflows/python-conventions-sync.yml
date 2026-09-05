@@ -1,0 +1,19 @@
+name: Snapshot reconciled Python conventions
+on:
+  push:
+    branches: [improve/python-code-conventions]
+    paths: [.github/workflows/python-conventions-sync.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Archive the reconciled candidate
+        run: git archive --format=zip --output=source.zip HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-conventions-reconciled
+          path: source.zip
+          retention-days: 1

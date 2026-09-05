@@ -7,6 +7,7 @@ from collections.abc import Callable
 
 from pydantic import JsonValue
 from collections.abc import Mapping
+from copy import deepcopy
 
 from oak import Act, Arrival, ExecutionError, Node, Schema, SchemaBindingError, execute, parse, render
 from examples.shape_writer import example as shape_writer
@@ -133,6 +134,7 @@ def validate_shapes() -> None:
         raise RuntimeError("the complete code example does not implement its decision")
 
     shape_writer.run()
+    _decision_statement()
     _rejects(
         lambda: execute(
             shape_writer.shape_writer_node,
@@ -160,6 +162,87 @@ def validate_shapes() -> None:
             raise RuntimeError(f"shaped output failed at the wrong boundary: {error.code}") from error
     else:
         raise RuntimeError("the executor accepted an invalid shaped output")
+
+
+def _decision_statement() -> None:
+    """Validate roles and boundary failures, not the truth of a judgment."""
+    action = shape_writer.decide_change_process.steps[0]
+    expected_inputs = SAMPLE_BINDINGS[comparison_schema.id]
+    expected_outputs = SAMPLE_BINDINGS[decision_schema.id]
+    if (action.input != shape_writer.SCHEMA_COMPARISON
+            or action.output != shape_writer.SCHEMA_DECISION
+            or [binding.placeholder for binding in action.inputs] != list(expected_inputs)
+            or action.outputs != list(expected_outputs) or action.tool is not None):
+        raise RuntimeError("the decision statement lost its native typed roles")
+    comparison_schema.bind(expected_inputs)
+    decision_schema.bind(expected_outputs)
+    for missing in expected_inputs:
+        _rejects(lambda: comparison_schema.bind({k: v for k, v in expected_inputs.items() if k != missing}),
+                 SchemaBindingError)
+    _rejects(lambda: comparison_schema.bind({**expected_inputs, "CURRENT": 23}), SchemaBindingError)
+
+    # Exercise the real pipeline's ACT output boundary. No later phase may run
+    # after a malformed decision, even though comparison work already happened.
+    cases = (
+        ({"DECISION": expected_outputs["DECISION"]}, "act_output_mismatch"),
+        ({**expected_outputs, "CONFIDENCE": 0.9}, "act_output_mismatch"),
+        ({**expected_outputs, "DECISION": ""}, "invalid_act_output"),
+        ({**expected_outputs, "RATIONALE": 23}, "invalid_act_output"),
+    )
+    for output, code in cases:
+        seen = []
+        def host(step: Act, values: Mapping[str, JsonValue]) -> Mapping[str, JsonValue]:
+            seen.append(step.output)
+            if step.output == shape_writer.SCHEMA_DECISION:
+                if dict(values) != expected_inputs:
+                    raise RuntimeError("decision inputs changed before evaluation")
+                return output
+            return shape_writer.fixture_host(step, values)
+        try:
+            execute(shape_writer.shape_writer_node,
+                    Arrival(interface=shape_writer.INTERFACE_REQUEST,
+                            values={"REQUEST": shape_writer.SAMPLE_REQUEST}), {}, act=host,
+                    source=shape_writer.SOURCE, load=shape_writer.documents().get)
+        except ExecutionError as error:
+            if error.code != code:
+                raise RuntimeError(f"decision failed at {error.code}, expected {code}") from error
+        else:
+            raise RuntimeError("a malformed decision was accepted")
+        if seen != [shape_writer.SCHEMA_COMPARISON, shape_writer.SCHEMA_DECISION]:
+            raise RuntimeError("a later fixture phase ran after a malformed decision")
+
+    # Both values satisfy the schema but contradict the declared fixture. This
+    # is intentionally accepted structurally, not certified as a sound judgment.
+    contrary = {"DECISION": "Accept blank titles.", "RATIONALE": "No reason is needed."}
+    decision_schema.bind(contrary)
+    if populate_example(decision_schema, contrary) == EXPECTED_INSTANCES[decision_schema.id]:
+        raise RuntimeError("contrary judgment unexpectedly matches the expected fixture")
+    _rejects(lambda: shape_writer.fixture_host(shape_writer.plan_change_process.steps[0], contrary), ValueError)
+
+    # Advisory wording is not parser policy. Check a different well-formed
+    # sentence in both groupings without a new opcode, type, or scenario.
+    data = shape_writer.shape_writer_node.model_dump(by_alias=True)
+    alternatives = (
+        "Compare <CURRENT> with <PROPOSED> using <CRITERION>; produce <DECISION> and explain it in <RATIONALE>.",
+        "Weigh <CURRENT> and <PROPOSED> against <CRITERION>; return <DECISION> with <RATIONALE>.",
+    )
+    for instruction in alternatives:
+        candidate = deepcopy(data)
+        process = next(p for p in candidate["processes"] if p["id"] == "decide-change")
+        process["steps"][0]["instruction"] = instruction
+        node = Node.model_validate(candidate)
+        for grouping in ("xml", "markdown"):
+            text = render(node, grouping=grouping)
+            recovered = parse(text)
+            step = next(p for p in recovered.processes if p.id == "decide-change").steps[0]
+            if step.instruction != instruction or render(recovered, grouping=grouping) != text:
+                raise RuntimeError("alternative statement wording was restricted or rewritten")
+            result = execute(recovered, Arrival(interface=shape_writer.INTERFACE_REQUEST,
+                             values={"REQUEST": shape_writer.SAMPLE_REQUEST}), {},
+                             act=shape_writer.fixture_host, source=shape_writer.SOURCE,
+                             load=shape_writer.documents().get)
+            if [dict(e.values) for e in result.emissions] != [SAMPLE_BINDINGS[s.id] for s in SHAPES]:
+                raise RuntimeError("alternative wording changed fixture dataflow")
 
 
 __all__ = ["validate_shapes"]

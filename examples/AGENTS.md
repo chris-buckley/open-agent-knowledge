@@ -15,6 +15,8 @@ naming-rules: YAML<<
 - Name process ids with an action first and object second.
 - Replace vague nouns and verbs with exact domain language.
 - Preserve supplied tool names verbatim.
+- Apply the statement conventions owned by oak/rules/guidance.py; do not maintain
+  a separate phrase dictionary here.
 >>
 
 python-authoring-rules: YAML<<

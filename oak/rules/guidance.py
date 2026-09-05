@@ -92,6 +92,14 @@ AUTHORING_GUIDANCE = (
         "Give reusable process phases input and output schemas when their values need contracts.",
     ),
     GuidanceRule(
+        "describe-action-roles",
+        "Name an action's participants, their relationship or criterion, and required results or effects. Omit unjustified roles; prefer natural domain wording over a mandatory sentence template.",
+    ),
+    GuidanceRule(
+        "distinguish-action-promises",
+        "Prefer validate for a named contract check, assess for judgment against a criterion, and publish for a host-authorized external effect; these words add no capability. Schema validity proves neither sound judgment nor performed work; EMIT does not prove delivery. Native ACT can have effects; preserve exact tool names.",
+    ),
+    GuidanceRule(
         "compose-work",
         "Keep multi-phase entry processes as orchestrators that compose reusable processes with `CALL`.",
     ),
@@ -125,7 +133,7 @@ AUTHORING_GUIDANCE = (
     ),
     GuidanceRule(
         "bind-values",
-        "Bind constants, state, processes, actions, and interfaces to schemas where values must validate.",
+        "Bind constants, state, processes, actions, and interfaces to schemas where values must validate; role names alone are not types.",
     ),
     GuidanceRule(
         "emit-complete",

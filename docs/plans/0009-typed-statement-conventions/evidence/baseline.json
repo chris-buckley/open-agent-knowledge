@@ -1,0 +1,593 @@
+{
+  "source_revision": "82b6e66d7e50511a3212046812c6b0567cf9c3e4",
+  "archive_revision": "fee97153cb454f68a7742a7a59bb75244d6f9f42",
+  "archive_tree": "525371f01830c671c188f692fb15be05d4b38e2d",
+  "archive_tree_matches": true,
+  "baseline_ci": {
+    "run_id": 33965141124,
+    "job_id": 101303822700,
+    "conclusion": "success",
+    "declared_dependencies_installed": true
+  },
+  "local_checks": {
+    "python -m build.examples": 0,
+    "python build/examples.py": 0,
+    "check_groups": 32
+  },
+  "local_versions": {
+    "pydantic": "2.13.4",
+    "pydantic-core": "2.46.4",
+    "pydantic-settings": "2.14.1",
+    "pydantic-extra-types": "2.11.1",
+    "PyYAML": "6.0.3"
+  },
+  "local_limitation": "Preinstalled pydantic-settings 2.14.1 is below declared >=2.15; GitHub verification installs declared dependencies. Local checks supplement CI.",
+  "protected_files": [
+    ".github/workflows/verify.yml",
+    "examples/schemas/__init__.py",
+    "examples/schemas/api_coverage_table.oak.md",
+    "examples/schemas/api_coverage_table.py",
+    "examples/schemas/code_changes.oak.md",
+    "examples/schemas/code_changes.py",
+    "examples/schemas/code_map.oak.md",
+    "examples/schemas/code_map.py",
+    "examples/schemas/docs_index.oak.md",
+    "examples/schemas/docs_index.py",
+    "examples/schemas/error.oak.md",
+    "examples/schemas/error.py",
+    "examples/schemas/hierarchical_outline.oak.md",
+    "examples/schemas/hierarchical_outline.py",
+    "examples/schemas/ideation_list.oak.md",
+    "examples/schemas/ideation_list.py",
+    "examples/schemas/link_manifest.oak.md",
+    "examples/schemas/link_manifest.py",
+    "examples/schemas/process_execution_table.oak.md",
+    "examples/schemas/process_execution_table.py",
+    "examples/schemas/repeat_marker.py",
+    "examples/schemas/shape_gallery.oak.md",
+    "examples/schemas/shape_gallery.py",
+    "examples/schemas/smeac_plan.oak.md",
+    "examples/schemas/smeac_plan.py",
+    "examples/schemas/verification.oak.md",
+    "examples/schemas/verification.py",
+    "oak/AGENTS.md",
+    "oak/__init__.py",
+    "oak/authoring.py",
+    "oak/base.py",
+    "oak/context.py",
+    "oak/defaults.py",
+    "oak/execute/AGENTS.md",
+    "oak/execute/__init__.py",
+    "oak/execute/actions.py",
+    "oak/execute/context.py",
+    "oak/execute/executor.py",
+    "oak/execute/models.py",
+    "oak/execute/steps.py",
+    "oak/execute/values.py",
+    "oak/node/AGENTS.md",
+    "oak/node/__init__.py",
+    "oak/node/dump.py",
+    "oak/node/index.py",
+    "oak/node/interpretation.py",
+    "oak/node/model.py",
+    "oak/node/parts/__init__.py",
+    "oak/node/parts/constants.py",
+    "oak/node/parts/entry.py",
+    "oak/node/parts/instructions.py",
+    "oak/node/parts/interfaces.py",
+    "oak/node/parts/part.py",
+    "oak/node/parts/processes/__init__.py",
+    "oak/node/parts/processes/conditions.py",
+    "oak/node/parts/processes/model.py",
+    "oak/node/parts/processes/operators.py",
+    "oak/node/parts/processes/steps.py",
+    "oak/node/parts/processes/targets.py",
+    "oak/node/parts/processes/values.py",
+    "oak/node/parts/schemas/__init__.py",
+    "oak/node/parts/schemas/binding.py",
+    "oak/node/parts/schemas/constraints.py",
+    "oak/node/parts/schemas/model.py",
+    "oak/node/parts/state.py",
+    "oak/node/parts/triggers.py",
+    "oak/node/structure.py",
+    "oak/node/validation/__init__.py",
+    "oak/node/validation/conditions.py",
+    "oak/node/validation/contracts.py",
+    "oak/node/validation/flow.py",
+    "oak/node/validation/node.py",
+    "oak/node/validation/processes.py",
+    "oak/node/validation/tools.py",
+    "oak/node/validation/triggers.py",
+    "oak/node/validation/values.py",
+    "oak/parse/__init__.py",
+    "oak/parse/conditions.py",
+    "oak/parse/cursor.py",
+    "oak/parse/data.py",
+    "oak/parse/document.py",
+    "oak/parse/errors.py",
+    "oak/parse/expressions.py",
+    "oak/parse/fragments.py",
+    "oak/parse/grouping.py",
+    "oak/parse/interfaces.py",
+    "oak/parse/processes.py",
+    "oak/parse/schemas.py",
+    "oak/parse/steps.py",
+    "oak/parse/triggers.py",
+    "oak/parse/values.py",
+    "oak/render/__init__.py",
+    "oak/render/json_ld/__init__.py",
+    "oak/render/json_ld/context.py",
+    "oak/render/json_ld/document.py",
+    "oak/render/json_ld/entries.py",
+    "oak/render/json_ld/identifiers.py",
+    "oak/render/json_ld/values.py",
+    "oak/render/oak/__init__.py",
+    "oak/render/oak/arrangement.py",
+    "oak/render/oak/data.py",
+    "oak/render/oak/expressions.py",
+    "oak/render/oak/groupings.py",
+    "oak/render/oak/instructions.py",
+    "oak/render/oak/interfaces.py",
+    "oak/render/oak/processes.py",
+    "oak/render/oak/styles.py",
+    "oak/render/oak/triggers.py",
+    "oak/render/selection.py",
+    "oak/resolve/AGENTS.md",
+    "oak/resolve/__init__.py",
+    "oak/resolve/contracts.py",
+    "oak/resolve/errors.py",
+    "oak/resolve/graph.py",
+    "oak/resolve/paths.py",
+    "oak/resolve/references.py",
+    "oak/resolve/resolver.py",
+    "oak/rules/__init__.py",
+    "oak/rules/model.py",
+    "oak/rules/validation.py",
+    "oak/surface/__init__.py",
+    "oak/surface/constraints.py",
+    "oak/surface/entries.py",
+    "oak/surface/model.py",
+    "oak/surface/processes.py",
+    "oak/surface/registry.py",
+    "oak/surface/syntax.py",
+    "oak/vocabulary/__init__.py",
+    "oak/vocabulary/datatypes/__init__.py",
+    "oak/vocabulary/datatypes/datetime.py",
+    "oak/vocabulary/datatypes/names.py",
+    "oak/vocabulary/datatypes/quantity.py",
+    "oak/vocabulary/display/__init__.py",
+    "oak/vocabulary/display/datetime.py",
+    "oak/vocabulary/display/number.py",
+    "oak/vocabulary/display/quantity.py",
+    "oak/vocabulary/syntax.py",
+    "oak/vocabulary/text/__init__.py",
+    "oak/vocabulary/text/dotted_path.py",
+    "oak/vocabulary/text/non_blank_line.py",
+    "oak/vocabulary/text/placeholder.py",
+    "oak/vocabulary/text/process_name.py",
+    "oak/vocabulary/text/regex_pattern.py",
+    "oak/vocabulary/text/slug_id.py",
+    "oak/vocabulary/text/target_path.py",
+    "oak/vocabulary/text/value_reference.py",
+    "oak/vocabulary/units.py",
+    "outputs/oak.ebnf",
+    "pyproject.toml",
+    "skills/oak-authoring/references/10-oak.ebnf"
+  ],
+  "protected_digest": "7b2ef5786b2a35f741b8f81f2a59ebc5f33c13403e5fd82eccd13f006fea1dcf",
+  "digest_method": "SHA256 of sorted repository path UTF-8 + NUL + file bytes + NUL",
+  "pilot_node": {
+    "instructions": [
+      {
+        "part": "instructions",
+        "body": "Keep the proposed change limited to the supplied request."
+      }
+    ],
+    "constants": [],
+    "schemas": [
+      {
+        "id": "change-request",
+        "part": "schemas",
+        "name": null,
+        "purpose": null,
+        "template": "<REQUEST>",
+        "where": [
+          {
+            "placeholder": "REQUEST",
+            "constraints": [
+              {
+                "kind": "type",
+                "of": "string"
+              },
+              {
+                "kind": "non_empty"
+              }
+            ],
+            "examples": [],
+            "description": null
+          }
+        ]
+      }
+    ],
+    "state": [],
+    "triggers": [
+      {
+        "id": "change-requested",
+        "part": "triggers",
+        "event": "A small code change needs explanation.",
+        "source": "interface.request",
+        "guard": true,
+        "process": "process.prepare-change",
+        "seed": []
+      }
+    ],
+    "processes": [
+      {
+        "id": "compare-options",
+        "part": "processes",
+        "name": "Compare options",
+        "input": "schema.change-request",
+        "output": "shape_gallery.oak.md#schema.option-comparison",
+        "steps": [
+          {
+            "kind": "act",
+            "tool": null,
+            "input": "schema.change-request",
+            "output": "shape_gallery.oak.md#schema.option-comparison",
+            "instruction": "Compare current and proposed behaviour for <REQUEST>; produce <CRITERION>, <CURRENT>, and <PROPOSED>.",
+            "inputs": [
+              {
+                "placeholder": "REQUEST",
+                "value": {
+                  "source": "binding",
+                  "binding": "REQUEST"
+                }
+              }
+            ],
+            "outputs": [
+              "CRITERION",
+              "CURRENT",
+              "PROPOSED"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "decide-change",
+        "part": "processes",
+        "name": "Decide change",
+        "input": "shape_gallery.oak.md#schema.option-comparison",
+        "output": "shape_gallery.oak.md#schema.decision-brief",
+        "steps": [
+          {
+            "kind": "act",
+            "tool": null,
+            "input": "shape_gallery.oak.md#schema.option-comparison",
+            "output": "shape_gallery.oak.md#schema.decision-brief",
+            "instruction": "For <CRITERION>, weigh <CURRENT> against <PROPOSED> and produce <DECISION> and <RATIONALE>.",
+            "inputs": [
+              {
+                "placeholder": "CRITERION",
+                "value": {
+                  "source": "binding",
+                  "binding": "CRITERION"
+                }
+              },
+              {
+                "placeholder": "CURRENT",
+                "value": {
+                  "source": "binding",
+                  "binding": "CURRENT"
+                }
+              },
+              {
+                "placeholder": "PROPOSED",
+                "value": {
+                  "source": "binding",
+                  "binding": "PROPOSED"
+                }
+              }
+            ],
+            "outputs": [
+              "DECISION",
+              "RATIONALE"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "plan-change",
+        "part": "processes",
+        "name": "Plan change",
+        "input": "shape_gallery.oak.md#schema.decision-brief",
+        "output": "shape_gallery.oak.md#schema.work-outline",
+        "steps": [
+          {
+            "kind": "act",
+            "tool": null,
+            "input": "shape_gallery.oak.md#schema.decision-brief",
+            "output": "shape_gallery.oak.md#schema.work-outline",
+            "instruction": "Plan <DECISION> under <RATIONALE>; produce one <GOAL>, implementation <STEP>, and nested <CHECK>.",
+            "inputs": [
+              {
+                "placeholder": "DECISION",
+                "value": {
+                  "source": "binding",
+                  "binding": "DECISION"
+                }
+              },
+              {
+                "placeholder": "RATIONALE",
+                "value": {
+                  "source": "binding",
+                  "binding": "RATIONALE"
+                }
+              }
+            ],
+            "outputs": [
+              "GOAL",
+              "STEP",
+              "CHECK"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "write-file",
+        "part": "processes",
+        "name": "Write file",
+        "input": "shape_gallery.oak.md#schema.work-outline",
+        "output": "shape_gallery.oak.md#schema.code-file",
+        "steps": [
+          {
+            "kind": "act",
+            "tool": null,
+            "input": "shape_gallery.oak.md#schema.work-outline",
+            "output": "shape_gallery.oak.md#schema.code-file",
+            "instruction": "Implement <STEP> for <GOAL> and <CHECK>; produce <FILE_PATH> and complete Python <CODE>.",
+            "inputs": [
+              {
+                "placeholder": "GOAL",
+                "value": {
+                  "source": "binding",
+                  "binding": "GOAL"
+                }
+              },
+              {
+                "placeholder": "STEP",
+                "value": {
+                  "source": "binding",
+                  "binding": "STEP"
+                }
+              },
+              {
+                "placeholder": "CHECK",
+                "value": {
+                  "source": "binding",
+                  "binding": "CHECK"
+                }
+              }
+            ],
+            "outputs": [
+              "FILE_PATH",
+              "CODE"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "prepare-change",
+        "part": "processes",
+        "name": "Prepare change",
+        "input": "schema.change-request",
+        "output": null,
+        "steps": [
+          {
+            "kind": "call",
+            "process": "process.compare-options",
+            "inputs": [
+              {
+                "placeholder": "REQUEST",
+                "value": {
+                  "source": "binding",
+                  "binding": "REQUEST"
+                }
+              }
+            ],
+            "outputs": [
+              "CRITERION",
+              "CURRENT",
+              "PROPOSED"
+            ]
+          },
+          {
+            "kind": "emit",
+            "interface": "interface.comparison",
+            "bindings": []
+          },
+          {
+            "kind": "call",
+            "process": "process.decide-change",
+            "inputs": [
+              {
+                "placeholder": "CRITERION",
+                "value": {
+                  "source": "binding",
+                  "binding": "CRITERION"
+                }
+              },
+              {
+                "placeholder": "CURRENT",
+                "value": {
+                  "source": "binding",
+                  "binding": "CURRENT"
+                }
+              },
+              {
+                "placeholder": "PROPOSED",
+                "value": {
+                  "source": "binding",
+                  "binding": "PROPOSED"
+                }
+              }
+            ],
+            "outputs": [
+              "DECISION",
+              "RATIONALE"
+            ]
+          },
+          {
+            "kind": "emit",
+            "interface": "interface.decision",
+            "bindings": []
+          },
+          {
+            "kind": "call",
+            "process": "process.plan-change",
+            "inputs": [
+              {
+                "placeholder": "DECISION",
+                "value": {
+                  "source": "binding",
+                  "binding": "DECISION"
+                }
+              },
+              {
+                "placeholder": "RATIONALE",
+                "value": {
+                  "source": "binding",
+                  "binding": "RATIONALE"
+                }
+              }
+            ],
+            "outputs": [
+              "GOAL",
+              "STEP",
+              "CHECK"
+            ]
+          },
+          {
+            "kind": "emit",
+            "interface": "interface.outline",
+            "bindings": []
+          },
+          {
+            "kind": "call",
+            "process": "process.write-file",
+            "inputs": [
+              {
+                "placeholder": "GOAL",
+                "value": {
+                  "source": "binding",
+                  "binding": "GOAL"
+                }
+              },
+              {
+                "placeholder": "STEP",
+                "value": {
+                  "source": "binding",
+                  "binding": "STEP"
+                }
+              },
+              {
+                "placeholder": "CHECK",
+                "value": {
+                  "source": "binding",
+                  "binding": "CHECK"
+                }
+              }
+            ],
+            "outputs": [
+              "FILE_PATH",
+              "CODE"
+            ]
+          },
+          {
+            "kind": "emit",
+            "interface": "interface.file",
+            "bindings": []
+          }
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "id": "request",
+        "part": "interfaces",
+        "flow": "receives",
+        "schema": "schema.change-request",
+        "description": null
+      },
+      {
+        "id": "comparison",
+        "part": "interfaces",
+        "flow": "emits",
+        "schema": "shape_gallery.oak.md#schema.option-comparison",
+        "description": null
+      },
+      {
+        "id": "decision",
+        "part": "interfaces",
+        "flow": "emits",
+        "schema": "shape_gallery.oak.md#schema.decision-brief",
+        "description": null
+      },
+      {
+        "id": "outline",
+        "part": "interfaces",
+        "flow": "emits",
+        "schema": "shape_gallery.oak.md#schema.work-outline",
+        "description": null
+      },
+      {
+        "id": "file",
+        "part": "interfaces",
+        "flow": "emits",
+        "schema": "shape_gallery.oak.md#schema.code-file",
+        "description": null
+      }
+    ]
+  },
+  "sample_bindings": {
+    "option-comparison": {
+      "CRITERION": "Blank title",
+      "CURRENT": "Accepted",
+      "PROPOSED": "Rejected"
+    },
+    "decision-brief": {
+      "DECISION": "Reject blank titles.",
+      "RATIONALE": "A title must identify the task."
+    },
+    "work-outline": {
+      "GOAL": "Require meaningful titles.",
+      "STEP": "Check the stripped title.",
+      "CHECK": "Test empty, whitespace, and valid titles."
+    },
+    "code-file": {
+      "FILE_PATH": "title.py",
+      "CODE": "def valid_title(title: str) -> bool:\n    return bool(title.strip())"
+    }
+  },
+  "expected_instances": {
+    "option-comparison": "| Criterion | Current | Proposed |\n| --- | --- | --- |\n| Blank title | Accepted | Rejected |",
+    "decision-brief": "## Decision\nReject blank titles.\n\n### Rationale\nA title must identify the task.",
+    "work-outline": "1. Require meaningful titles.\n   1. Check the stripped title.\n      1. Test empty, whitespace, and valid titles.",
+    "code-file": "### title.py\n\n```python\ndef valid_title(title: str) -> bool:\n    return bool(title.strip())\n```"
+  },
+  "observed_fixture_outputs": [
+    "| Criterion | Current | Proposed |\n| --- | --- | --- |\n| Blank title | Accepted | Rejected |",
+    "## Decision\nReject blank titles.\n\n### Rationale\nA title must identify the task.",
+    "1. Require meaningful titles.\n   1. Check the stripped title.\n      1. Test empty, whitespace, and valid titles.",
+    "### title.py\n\n```python\ndef valid_title(title: str) -> bool:\n    return bool(title.strip())\n```"
+  ],
+  "product_sizes": {
+    "skills/oak-authoring/SKILL.md": 8299,
+    "outputs/oak-authoring.oak.md": 63822
+  },
+  "validator_identity": {
+    "SKILL_VERSION": "2.1.0",
+    "REVISION": "dac756b5424f7b1e19fc6f87ffc0400e90319b96",
+    "SOURCE_SHA256": "06b44c4d4f2cb29e986952d734fcee984bdea5c055152071758790595b7eeafe",
+    "PROJECT_SHA256": "2412c436c0ffaa05c604da2d58be4b72c443b37efcaa094380845fd0fe3a3702"
+  }
+}
