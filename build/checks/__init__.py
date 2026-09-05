@@ -7,6 +7,20 @@ from collections.abc import Callable
 from build.checks.agents import validate_agents
 from build.checks.authoring import validate_authoring_skill
 from build.checks.architecture import validate_architecture
+from build.checks.compact_syntax import (
+    validate_compact_specimens,
+    validate_compact_lexing,
+    validate_compact_control,
+    validate_compact_triggers,
+    validate_compact_layout,
+)
+from build.checks.compact_runtime import (
+    validate_compact_short_circuit,
+    validate_compact_loop_bounds,
+    validate_compact_routing,
+    validate_compact_frames,
+    validate_compact_relative_targets,
+)
 from build.checks.context import validate_interpreter_context
 from build.checks.evidence import validate_evidence
 from build.checks.execution import (
@@ -33,6 +47,16 @@ from build.checks.validation import validate_contract_rules
 Check = Callable[[], None]
 
 CHECKS: tuple[Check, ...] = (
+    validate_compact_specimens,
+    validate_compact_lexing,
+    validate_compact_control,
+    validate_compact_triggers,
+    validate_compact_layout,
+    validate_compact_short_circuit,
+    validate_compact_loop_bounds,
+    validate_compact_routing,
+    validate_compact_frames,
+    validate_compact_relative_targets,
     validate_text_examples,
     validate_metadata,
     validate_resolution,

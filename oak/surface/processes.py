@@ -83,21 +83,21 @@ PROCESS_SURFACES = (
     _surface(
         "condition-all",
         All,
-        "ALL:\n  <CONDITIONS>",
+        "ALL(<CONDITIONS>)",
         rendered=("conditions",),
         fixed=("kind",),
     ),
     _surface(
         "condition-any",
         Any,
-        "ANY:\n  <CONDITIONS>",
+        "ANY(<CONDITIONS>)",
         rendered=("conditions",),
         fixed=("kind",),
     ),
     _surface(
         "condition-not",
         Not,
-        "NOT:\n  <CONDITION>",
+        "NOT(<CONDITION>)",
         rendered=("condition",),
         fixed=("kind",),
     ),
@@ -163,7 +163,7 @@ PROCESS_SURFACES = (
     _surface(
         "step-if",
         If,
-        "IF <CONDITION>:\nTHEN:\n  <THEN>\nELSE:\n  <OTHERWISE>",
+        "IF <CONDITION>:\n  <THEN>\nELSE:\n  <OTHERWISE>",
         rendered=(
             "condition",
             "then",
@@ -192,7 +192,7 @@ PROCESS_SURFACES = (
     _surface(
         "step-assert",
         Assert,
-        "ASSERT <CONDITION>\nMESSAGE <MESSAGE>",
+        "ASSERT <CONDITION>\n  MESSAGE <MESSAGE>",
         rendered=(
             "condition",
             "message",

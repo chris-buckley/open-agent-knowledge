@@ -1,5 +1,5 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
 RECEIVES accepts one complete instance of its schema.
@@ -8,7 +8,7 @@ EMITS publishes one complete instance of its schema.
 EMIT without bindings fills the target schema from same-named visible process bindings.
 Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
-Each trigger is one fact group: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
+Each trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 </instructions>
 
@@ -110,23 +110,41 @@ WHERE:
 </schemas>
 
 <triggers>
-trigger.repository-task-requested.event := "A repository task is requested."
-trigger.repository-task-requested.source := interface.task-request
-trigger.repository-task-requested.process := process.perform-repository-task
-
-trigger.branch-merged.event := "A repository branch is merged."
-trigger.branch-merged.process := process.clean-merged-branch
+repository-task-requested(
+  event="A repository task is requested.",
+  source=interface.task-request,
+  process=process.perform-repository-task,
+)
+branch-merged(event="A repository branch is merged.", process=process.clean-merged-branch)
 </triggers>
 
 <processes>
 <process id="perform-repository-task" name="Perform task" input="schema.repository-task" output="schema.repository-result">
-ACT Use <ROUTER> to select and read every scoped AGENTS document that applies to <PATHS> before changing implementation. (ROUTER=$constant.agent-router, PATHS=$PATHS)
-ACT Apply <PART_PRIORITY> to represent <TASK>; add authored instructions only after no structured OAK part can carry the meaning. (PART_PRIORITY=$constant.part-authoring-priority, TASK=$TASK)
-ACT Apply <RULES> and <CONSTRAINTS> to choose one owner for each concern and implement the smallest complete change for <TASK>. (RULES=$constant.repository-rules, CONSTRAINTS=$CONSTRAINTS, TASK=$TASK)
-ACT Use <SKILLS> to read matching specialist material before work on formats used by <PATHS>. (SKILLS=$constant.skill-router, PATHS=$PATHS)
-ACT Update every affected source, example, output, and scoped AGENTS document for <TASK>, then remove obsolete paths and contracts. (TASK=$TASK)
+ACT Use <ROUTER> to select and read every scoped AGENTS document that applies to <PATHS> before changing implementation. (
+  ROUTER=$constant.agent-router,
+  PATHS=$PATHS,
+)
+ACT Apply <PART_PRIORITY> to represent <TASK>; add authored instructions only after no structured OAK part can carry the meaning. (
+  PART_PRIORITY=$constant.part-authoring-priority,
+  TASK=$TASK,
+)
+ACT Apply <RULES> and <CONSTRAINTS> to choose one owner for each concern and implement the smallest complete change for <TASK>. (
+  RULES=$constant.repository-rules,
+  CONSTRAINTS=$CONSTRAINTS,
+  TASK=$TASK,
+)
+ACT Use <SKILLS> to read matching specialist material before work on formats used by <PATHS>. (
+  SKILLS=$constant.skill-router,
+  PATHS=$PATHS,
+)
+ACT Update every affected source, example, output, and scoped AGENTS document for <TASK>, then remove obsolete paths and contracts. (
+  TASK=$TASK,
+)
 ACT Run the complete verification process owned by build/AGENTS.md, inspect the final diff, and search for every replaced identifier, path, format, and contract. ()
-ACT output="schema.repository-result": Produce <OUTCOME>, <EVIDENCE>, and <CHANGED_PATHS> for <TASK> under <COMMUNICATION>. (TASK=$TASK, COMMUNICATION=$constant.communication-contract) -> OUTCOME, EVIDENCE, CHANGED_PATHS
+ACT output="schema.repository-result": Produce <OUTCOME>, <EVIDENCE>, and <CHANGED_PATHS> for <TASK> under <COMMUNICATION>. (
+  TASK=$TASK,
+  COMMUNICATION=$constant.communication-contract,
+) -> OUTCOME, EVIDENCE, CHANGED_PATHS
 EMIT interface.task-result
 </process>
 

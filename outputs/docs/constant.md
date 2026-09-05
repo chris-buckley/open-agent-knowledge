@@ -24,6 +24,8 @@ example-4: "service-table: CSV<<\nservice,enabled\nbilling,true\n>>"
 
 example-5: "deployment-config: YAML<<\nregion: ap-southeast-2\nreplicas: 2\n>>"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_constant_inline = ? <ID> AS <SCHEMA_ID>.<PLACEHOLDER>: <VALUE> ? ;
 surface_constant_text = ? <ID> AS <SCHEMA_ID>.<PLACEHOLDER>: TEXT<<

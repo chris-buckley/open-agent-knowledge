@@ -16,24 +16,18 @@ Select only a local RECEIVES interface as a trigger source.
 </instructions>
 
 <constants>
-example-1: "trigger.write-oak-trigger.event := \"Source material arrives to write OAK.\"\ntrigger.write-oak-trigger.process := process.write-oak"
+example-1: "write-oak-trigger(event=\"Source material arrives to write OAK.\", process=process.write-oak)"
+
+syntax-reference: "outputs/oak.ebnf"
 
 grammar: TEXT<<
-surface_trigger = ? trigger.<ID>.event := <EVENT>
-trigger.<ID>.source := <SOURCE>
-trigger.<ID>.guard := <GUARD>
-trigger.<ID>.process := <PROCESS>
-trigger.<ID>.seed.<SEED> ? ;
+surface_trigger = trigger_declaration ;
 >>
 </constants>
 
 <schemas>
 <schema id="trigger" name="Trigger" purpose="One outside event routed to one process.">
-trigger.<ID>.event := <EVENT>
-trigger.<ID>.source := <SOURCE>
-trigger.<ID>.guard := <GUARD>
-trigger.<ID>.process := <PROCESS>
-trigger.<ID>.seed.<SEED>
+<ID>(event=<EVENT>, source=<SOURCE>, guard=<GUARD>, process=<PROCESS>, seed=(<SEED>))
 
 WHERE:
 - <ID> is string; is non-empty; The entry id, unique in its OAK document..

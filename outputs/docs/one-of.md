@@ -8,6 +8,8 @@ OneOf: The bound value is one of the listed values.
 <constants>
 example-1: "is one of `draft`, `final`"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_constraint_one_of = ? is one of <VALUES> ? ;
 >>

@@ -27,8 +27,8 @@ RULE_OWNERS = (
     ("map-constants",),
     ("map-state", "separate-lifetimes", "keep-local-values"),
     ("map-interfaces", "emit-complete"),
-    ("map-triggers", "route-receive"),
-    ("map-processes", "name-process", "contract-work", "compose-work", "use-native-act", "use-exact-tool", "parallelize-tools", "delegate-document"),
+    ("map-triggers", "route-receive", "declare-triggers"),
+    ("map-processes", "name-process", "contract-work", "compose-work", "use-native-act", "use-exact-tool", "parallelize-tools", "delegate-document", "compose-conditions", "separate-layout"),
     ("map-instructions",),
     ("write-document",),
     ("validate-draft", "emit-document"),
@@ -93,7 +93,7 @@ def knowledge_nodes(script: str, version: str, revision: str) -> dict[str, Node]
     constants[3] += [owned_constant("oak/node/AGENTS.md", "value-lifetimes"),
                      Constant(id="omission", value="A draft or pipeline intermediate is not state. Omit state unless a later arrival must observe a changed value.")]
     constants[4].append(Constant(id="boundaries", value="Reuse an existing schema at a boundary; do not redefine its shape inside the interface. Interface instances are not ambient mutable storage."))
-    constants[5].append(Constant(id="routing", value="An event describes an outside occurrence. An optional source identifies one receiving interface; its schema must resolve identically to process input, with no seeds. A guard reads state only. Internal work uses CALL, never triggers."))
+    constants[5].append(Constant(id="routing", value="An event describes an outside occurrence. An optional source identifies one receiving interface; its schema must resolve identically to process input, with no seeds. A guard requires a state read and may compare literals or fixed constants; it cannot read process bindings. Internal work uses CALL, never triggers."))
     constants[6].append(Constant(id="scopes", form="text", value=(
         "A process binding is immutable within its frame. CALL promotes declared outputs; child branches "
         "and iterations have local scope. IF does not promote branch-local outputs to its parent. "

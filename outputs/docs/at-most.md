@@ -8,6 +8,8 @@ AtMost: The bound value is at most a number or another placeholder value.
 <constants>
 example-1: "is at most 160"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_constraint_at_most = ? is at most <VALUE> ? ;
 >>

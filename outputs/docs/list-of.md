@@ -8,6 +8,8 @@ ListOf: The bound value is items of one datatype joined by one separator.
 <constants>
 example-1: "is a list of integer joined by `, `"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_constraint_list_of = ? is a list of <ITEM> joined by `<SEPARATOR>` ? ;
 >>

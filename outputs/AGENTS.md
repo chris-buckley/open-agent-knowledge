@@ -1,5 +1,5 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Constants hold values that do not change while the knowledge runs.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 </instructions>

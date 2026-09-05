@@ -7,21 +7,18 @@ Remove a process branch that cannot run.
 </instructions>
 
 <constants>
-example-1: "IF $state.status equals \"ready\":\n  THEN:\n    SET state.status = \"complete\"\n  ELSE:\n    FAIL \"The state is not ready.\""
+example-1: "IF $state.status equals \"ready\":\n  SET state.status = \"complete\"\nELSE:\n  FAIL \"The state is not ready.\""
+
+syntax-reference: "outputs/oak.ebnf"
 
 grammar: TEXT<<
-surface_step_if = ? IF <CONDITION>:
-THEN:
-  <THEN>
-ELSE:
-  <OTHERWISE> ? ;
+surface_step_if = if_statement ;
 >>
 </constants>
 
 <schemas>
 <schema id="step-if" name="If" purpose="One recursive condition with a then branch and optional else branch.">
 IF <CONDITION>:
-THEN:
   <THEN>
 ELSE:
   <OTHERWISE>

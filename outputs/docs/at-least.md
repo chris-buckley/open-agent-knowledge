@@ -8,6 +8,8 @@ AtLeast: The bound value is at least a number or another placeholder value.
 <constants>
 example-1: "is at least 1"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_constraint_at_least = ? is at least <VALUE> ? ;
 >>

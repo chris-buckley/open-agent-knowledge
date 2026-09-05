@@ -52,6 +52,7 @@ from oak.parse.conditions import parse_condition
 from oak.parse.cursor import Cursor
 from oak.parse.data import parse_constants, parse_state
 from oak.parse.document import parse
+from oak.parse.errors import fail
 from oak.parse.grouping import GroupingName
 from oak.parse.interfaces import parse_interfaces
 from oak.parse.processes import parse_processes
@@ -146,10 +147,10 @@ def parse_fragment(
         )[0]
 
     if model is Trigger:
-        return parse_triggers(
-            lines,
-            line,
-        )[0]
+        entries = parse_triggers(lines, line)
+        if len(entries) != 1:
+            fail("fragment_count", path, line, "expected exactly one trigger fragment")
+        return entries[0]
 
     if model is Process:
         return parse_processes(
@@ -199,24 +200,18 @@ def parse_fragment(
         )
 
     if model in _CONDITION_MODELS:
-        return parse_condition(
-            Cursor(
-                lines,
-                path,
-                line,
-            ),
-            0,
-        )
+        cursor = Cursor(lines, path, line)
+        condition = parse_condition(cursor, 0)
+        if any(part.strip() for part in lines[cursor.index:]):
+            cursor.fail("expression_trailing", "unexpected text after the condition")
+        return condition
 
     if model in _STEP_MODELS:
-        return parse_steps(
-            Cursor(
-                lines,
-                path,
-                line,
-            ),
-            0,
-        )[0]
+        cursor = Cursor(lines, path, line)
+        steps = parse_steps(cursor, 0)
+        if len(steps) != 1 or not cursor.at_end:
+            cursor.fail("fragment_count", "expected exactly one step fragment")
+        return steps[0]
 
     raise TypeError(model.__name__)
 

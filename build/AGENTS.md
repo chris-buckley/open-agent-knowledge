@@ -1,5 +1,5 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Constants hold values that do not change while the knowledge runs.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 </instructions>
@@ -34,9 +34,19 @@ freshness-rules: YAML<<
 
 <processes>
 <process id="verify-repository" name="Verify repository">
-ACT Use <GENERATORS> to regenerate every affected product from its source. (GENERATORS=$constant.generator-map)
-ACT Enforce <PRODUCT_LIMITS> and <AGENT_CHECKS> while validating generated and scoped knowledge products. (PRODUCT_LIMITS=$constant.authoring-product-byte-limits, AGENT_CHECKS=$constant.agent-graph-checks)
-ACT Run <MODULE_CHECK> and <DIRECT_CHECK> after compilation and generation. (MODULE_CHECK=$constant.full-verification-command, DIRECT_CHECK=$constant.direct-verification-command)
-ACT Apply <FRESHNESS> and require repeated generation to leave no diff. (FRESHNESS=$constant.freshness-rules)
+ACT Use <GENERATORS> to regenerate every affected product from its source. (
+  GENERATORS=$constant.generator-map,
+)
+ACT Enforce <PRODUCT_LIMITS> and <AGENT_CHECKS> while validating generated and scoped knowledge products. (
+  PRODUCT_LIMITS=$constant.authoring-product-byte-limits,
+  AGENT_CHECKS=$constant.agent-graph-checks,
+)
+ACT Run <MODULE_CHECK> and <DIRECT_CHECK> after compilation and generation. (
+  MODULE_CHECK=$constant.full-verification-command,
+  DIRECT_CHECK=$constant.direct-verification-command,
+)
+ACT Apply <FRESHNESS> and require repeated generation to leave no diff. (
+  FRESHNESS=$constant.freshness-rules,
+)
 </process>
 </processes>

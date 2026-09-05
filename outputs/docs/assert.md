@@ -10,16 +10,17 @@ Remove an assertion that is statically true.
 <constants>
 example-1: "ASSERT $RESULT does not equal \"\"\n  MESSAGE \"The result must not be empty.\""
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
-surface_step_assert = ? ASSERT <CONDITION>
-MESSAGE <MESSAGE> ? ;
+surface_step_assert = assert_statement ;
 >>
 </constants>
 
 <schemas>
 <schema id="step-assert" name="Assert" purpose="One required condition that aborts the transaction when false.">
 ASSERT <CONDITION>
-MESSAGE <MESSAGE>
+  MESSAGE <MESSAGE>
 
 WHERE:
 - <CONDITION> is string; is non-empty; The required recursive condition..

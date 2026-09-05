@@ -8,8 +8,10 @@ ValueBinding: One placeholder bound to one process value.
 <constants>
 example-1: "REQUEST=$REQUEST"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
-surface_value_binding_line = ? <PLACEHOLDER>=<VALUE> ? ;
+surface_value_binding_line = value_binding ;
 >>
 </constants>
 

@@ -5,14 +5,14 @@ from oak.node.parts.interfaces import INTERFACE_FLOWS
 REFERENCE_INSTRUCTION = (
     "$ reads a value; local targets start with their part; relative targets "
     "start with a document path; a bare $NAME is local to the running process; "
-    "SET, CALL, EMIT, and trigger facts omit $."
+    "Targets of SET, CALL, EMIT, and trigger source or process fields omit $."
 )
 
 PART_INSTRUCTIONS = (
     ("constants", "Constants hold values that do not change while the knowledge runs."),
     ("schemas", "Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot."),
     ("state", "State holds values that persist and can change while processes run."),
-    ("triggers", "Each trigger is one fact group: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work."),
+    ("triggers", "Each trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work."),
     ("processes", "Each process is the exact ordered way to do one task; follow its typed steps from top to bottom."),
 )
 

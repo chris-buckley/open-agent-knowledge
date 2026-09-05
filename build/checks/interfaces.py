@@ -916,11 +916,11 @@ def validate_interface_rejections() -> None:
         (Call, "CALL process.p (X=$interface.i.X)"),
         (Assert, "ASSERT $interface.i.X equals 1"),
         (Foreach, 'FOREACH ITEM IN $interface.i.X:\n  FAIL "stop"'),
-        (If, 'IF $interface.i.X equals 1:\nTHEN:\n  FAIL "stop"'),
+        (If, 'IF $interface.i.X equals 1:\n  FAIL "stop"'),
         (While, 'WHILE $interface.i.X equals 1 LIMIT 1:\n  FAIL "stop"'),
         (
             Par,
-            'PAR:\n  ACT TOOL "tool" Read <X>. (X=$interface.i.X)',
+            'PAR:\n  ACT TOOL "tool": Read <X>. (X=$interface.i.X)',
         ),
     )
     for model, text in fragments:

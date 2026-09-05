@@ -8,6 +8,8 @@ ConstantValue: One value read from a local or relative constant entry.
 <constants>
 example-1: "$constant.policy"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_value_constant = ? $<CONSTANT> ? ;
 >>

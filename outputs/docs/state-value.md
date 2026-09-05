@@ -9,6 +9,8 @@ Read and write state only in the active OAK document.
 <constants>
 example-1: "$state.status"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_value_state = ? $<STATE> ? ;
 >>

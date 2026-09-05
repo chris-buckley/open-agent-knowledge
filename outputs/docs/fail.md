@@ -8,8 +8,10 @@ Fail: One explicit process failure.
 <constants>
 example-1: "FAIL \"The result is empty.\""
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
-surface_step_fail = ? FAIL <MESSAGE> ? ;
+surface_step_fail = fail_statement ;
 >>
 </constants>
 

@@ -8,6 +8,8 @@ LiteralValue: One authored JSON value.
 <constants>
 example-1: "\"critical\""
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_value_literal = ? <VALUE> ? ;
 >>

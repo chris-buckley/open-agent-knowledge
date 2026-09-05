@@ -10,6 +10,8 @@ Put no step between PAR and JOIN.
 <constants>
 example-1: "JOIN"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_step_join = ? JOIN ? ;
 >>

@@ -306,7 +306,8 @@ def validate_while() -> None:
     )
     rendered = render(recursive)
     if (
-        "WHILE LIMIT 3:" not in rendered
+        "WHILE ALL(" not in rendered
+        or ") LIMIT 3:" not in rendered
         or render(parse(rendered)) != rendered
     ):
         raise RuntimeError(

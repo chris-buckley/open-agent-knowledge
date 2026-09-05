@@ -11,6 +11,8 @@ Reference only another placeholder in the same schema.
 <constants>
 example-1: "<schema id=\"outline\" name=\"Hierarchical Outline\" purpose=\"Generate a numbered outline.\">\n## <OUTLINE_TITLE>\n\n\nWHERE:\n- <OUTLINE_TITLE> is string.\n</schema>"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_schema = ? <schema id="<ID>" name="<NAME>" purpose="<PURPOSE>">
 <TEMPLATE>

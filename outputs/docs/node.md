@@ -11,6 +11,8 @@ Target the part required by the typed reference field.
 <constants>
 example-1: "<instructions>\nUse the supplied schema.\n</instructions>"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_node = ? <instructions>
 <INSTRUCTIONS>

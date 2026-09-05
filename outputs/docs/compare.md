@@ -9,8 +9,10 @@ Order only two numbers or two strings without coercion.
 <constants>
 example-1: "$state.status equals \"ready\""
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
-surface_condition_compare = ? <LEFT> <OPERATOR> <RIGHT> ? ;
+surface_condition_compare = comparison ;
 >>
 </constants>
 

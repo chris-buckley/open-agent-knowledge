@@ -1,5 +1,5 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Constants hold values that do not change while the knowledge runs.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 </instructions>
@@ -35,7 +35,8 @@ node-invariants: YAML<<
 - A source-backed trigger has no seeds and shares one resolved schema with its selected
   process input.
 - An event-backed trigger can seed process input from literals, constants, and state.
-- Trigger guards read state only.
+- Trigger guards require state as a mutable dependency; literals and fixed constants
+  are allowed, but process bindings are not.
 - Interface instances never become ambient process storage.
 - State and interface operations remain local to the active document.
 >>
@@ -51,9 +52,17 @@ executor,supplied and produced runtime values
 
 <processes>
 <process id="change-node" name="Change node">
-ACT Use <PARTS> and <LIFETIMES> to place each new fact in one semantic owner before considering instructions. (PARTS=$constant.part-responsibilities, LIFETIMES=$constant.value-lifetimes)
-ACT Preserve <ORDER> and <INVARIANTS> across models, validation, authoring, parsing, rendering, and examples. (ORDER=$constant.part-order, INVARIANTS=$constant.node-invariants)
-ACT Use <VALIDATION> to place each check at the earliest boundary with all required information. (VALIDATION=$constant.validation-ownership)
+ACT Use <PARTS> and <LIFETIMES> to place each new fact in one semantic owner before considering instructions. (
+  PARTS=$constant.part-responsibilities,
+  LIFETIMES=$constant.value-lifetimes,
+)
+ACT Preserve <ORDER> and <INVARIANTS> across models, validation, authoring, parsing, rendering, and examples. (
+  ORDER=$constant.part-order,
+  INVARIANTS=$constant.node-invariants,
+)
+ACT Use <VALIDATION> to place each check at the earliest boundary with all required information. (
+  VALIDATION=$constant.validation-ownership,
+)
 ACT Keep exact field, constraint, and error details in implementation and generated reference instead of restating them here. ()
 </process>
 </processes>

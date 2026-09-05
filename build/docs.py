@@ -57,6 +57,7 @@ def document(model: type) -> str:
                 Constant(id=f"example-{index}", value=surface_example(surface))
                 for index, surface in enumerate(surfaces, 1)
             ],
+            Constant(id="syntax-reference", value="outputs/oak.ebnf"),
             Constant(
                 id="grammar",
                 form="text",

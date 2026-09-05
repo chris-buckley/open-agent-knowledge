@@ -62,6 +62,7 @@ from oak.render.oak.processes import (
 )
 from oak.render.oak.triggers import trigger_body
 from oak.surface import SURFACES, Surface
+from oak.surface.syntax import EXPRESSION_SURFACES
 
 AUTHORABLE_MODELS = (
     Type,
@@ -352,6 +353,9 @@ def surface_grammar(
     surface: Surface,
 ) -> str:
     """Return one generated EBNF surface production."""
+    production = EXPRESSION_SURFACES.get(surface.id)
+    if production is not None:
+        return f"surface_{surface.id.replace('-', '_')} = {production} ;"
     escaped = surface.shape.replace(
         "?",
         "??",

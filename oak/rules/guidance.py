@@ -44,6 +44,18 @@ AUTHORING_GUIDANCE = (
         "Map outside events, receive sources, state guards, and selected work to triggers.",
     ),
     GuidanceRule(
+        "declare-triggers",
+        "Declare each trigger once with named fields; omit unused fields and keep source payloads separate from event seeds.",
+    ),
+    GuidanceRule(
+        "compose-conditions",
+        "Use the same explicit recursive condition structure for branches, loop conditions, assertions, and guards; preserve child order and bounded-loop failures.",
+    ),
+    GuidanceRule(
+        "separate-layout",
+        "Use delimiter continuation for long expressions and indentation for ordered action suites; follow the shared grammar instead of inventing another layout dialect.",
+    ),
+    GuidanceRule(
         "map-processes",
         "Map ordered local work to processes.",
     ),

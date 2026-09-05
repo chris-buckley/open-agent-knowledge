@@ -10,6 +10,8 @@ Do not give examples to a WHERE entry with placeholder-valued bounds.
 <constants>
 example-1: "- <OUTLINE_TITLE> is string; title for the outline."
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_where = ? - <PLACEHOLDER> <CONSTRAINTS> <EXAMPLES> <DESCRIPTION>. ? ;
 >>

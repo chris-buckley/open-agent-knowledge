@@ -13,6 +13,8 @@ Use a tool in PAR only when its supplied registry confirms parallel use.
 <constants>
 example-1: "PAR:\n  ACT TOOL \"tool-a\": Produce <A>. () -> A\n  ACT TOOL \"tool-b\": Produce <B>. () -> B"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_step_par = ? PAR:
   <STEPS> ? ;

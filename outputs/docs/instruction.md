@@ -8,6 +8,8 @@ Instruction: One rule the interpreter must follow.
 <constants>
 example-1: "Read the architecture overview before work."
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_instruction = ? <BODY> ? ;
 >>

@@ -16,9 +16,11 @@ example-1: "EMIT interface.result"
 
 example-2: "EMIT interface.result (RESULT=$FINAL_RESULT)"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
-surface_step_emit_inferred = ? EMIT <INTERFACE> ? ;
-surface_step_emit_explicit = ? EMIT <INTERFACE> (<BINDINGS>) ? ;
+surface_step_emit_inferred = "EMIT", local_interface_target, logical_nl ;
+surface_step_emit_explicit = "EMIT", local_interface_target, binding_list, logical_nl ;
 >>
 </constants>
 

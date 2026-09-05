@@ -1,5 +1,5 @@
 <instructions>
-$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; SET, CALL, EMIT, and trigger facts omit $.
+$ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Constants hold values that do not change while the knowledge runs.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 </instructions>
@@ -35,10 +35,18 @@ example-contract: ["render", "parse", "resolve when required", "round-trip", "wr
 <processes>
 <process id="author-example" name="Author example">
 ACT Follow <METHOD> and omit every unjustified part or entry. (METHOD=$constant.authoring-method)
-ACT Apply <NAMES> while decomposing multi-stage work into typed local processes. (NAMES=$constant.naming-rules)
-ACT Apply <PYTHON> so the source remains flat, typed, readable, and reusable. (PYTHON=$constant.python-authoring-rules)
-ACT Apply <SCHEMAS> when designing reusable information shapes and their populated examples. (SCHEMAS=$constant.schema-authoring-rules)
-ACT Apply <EVIDENCE> to examples that verify and accept work. (EVIDENCE=$constant.evidence-authoring-rules)
+ACT Apply <NAMES> while decomposing multi-stage work into typed local processes. (
+  NAMES=$constant.naming-rules,
+)
+ACT Apply <PYTHON> so the source remains flat, typed, readable, and reusable. (
+  PYTHON=$constant.python-authoring-rules,
+)
+ACT Apply <SCHEMAS> when designing reusable information shapes and their populated examples. (
+  SCHEMAS=$constant.schema-authoring-rules,
+)
+ACT Apply <EVIDENCE> to examples that verify and accept work. (
+  EVIDENCE=$constant.evidence-authoring-rules,
+)
 ACT Complete <CONTRACT> before accepting the example. (CONTRACT=$constant.example-contract)
 ACT Use outputs/oak.ebnf and outputs/docs only when exact syntax or model fields are required. ()
 </process>

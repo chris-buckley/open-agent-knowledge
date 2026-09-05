@@ -8,6 +8,8 @@ Regex: The bound value matches one anchored portable rust-regex pattern.
 <constants>
 example-1: "matches `^[0-9]+$`"
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
 surface_constraint_regex = ? matches `<PATTERN>` ? ;
 >>

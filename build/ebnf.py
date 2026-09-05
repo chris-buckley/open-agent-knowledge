@@ -10,6 +10,8 @@ if str(ROOT) not in sys.path:
 from build.surfaces import surface_grammar
 from oak.node.structure import PART_ORDER
 from oak.surface import SURFACES
+from oak.surface.syntax import EXPRESSION_CONVENTIONS, EXPRESSION_GRAMMAR
+from oak.node.parts.processes.operators import OPERATOR_TEXT
 from oak.vocabulary.text.dotted_path import DOTTED_PATH_EBNF
 from oak.vocabulary.text.non_blank_line import NON_BLANK_LINE_SYNTAX
 from oak.vocabulary.text.placeholder import PLACEHOLDER_SYNTAX
@@ -65,9 +67,15 @@ def grammar(groupings: tuple[str, ...] = ("xml", "markdown")) -> str:
         *[line for grouping in groupings for line in (*_document(grouping), *_parts(grouping))],
         *[_BODY_ENTRIES[grouping] for grouping in groupings],
         'entry_tag = "schema" | "process" ;',
-        'trigger_fact = "trigger.", slug_id, ".", trigger_field, " := ", trigger_value ;',
-        'trigger_field = "event" | "source" | "guard" | "process" | ( "seed.", placeholder ) ;',
-        "trigger_value = ? one field-typed value; a composite guard continues on indented condition lines ? ;",
+        *EXPRESSION_GRAMMAR,
+        'comparison_operator = ' + ' | '.join('"' + text + '"' for text in OPERATOR_TEXT.values()) + ' ;',
+        "(* Expression productions describe tokens, not a host-language expression evaluator.",
+        "Spaces separate words; punctuation is recognized only outside strings at its delimiter depth.",
+        "The $ token is adjacent to its value target. JSON owns its internal whitespace and delimiters.",
+        *EXPRESSION_CONVENTIONS,
+        "Empty explicit EMIT bindings, empty seeds, and source-backed seeds are invalid.",
+        "Trigger events are non-blank single-line strings after decoding; guards must read state.",
+        "*)",
         "constant = inline_constant | text_constant | json_constant | csv_constant | yaml_constant ;",
         'inline_constant = slug_id, [ as_clause ], ": ", json_value ;',
         'text_constant = slug_id, [ as_clause ], ": TEXT<<", lf, text_body, ">>" ;',

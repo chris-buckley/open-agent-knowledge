@@ -9,8 +9,10 @@ Read and write state only in the active OAK document.
 <constants>
 example-1: "SET state.status = \"complete\""
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
-surface_step_set = ? SET <STATE> = <VALUE> ? ;
+surface_step_set = set_statement ;
 >>
 </constants>
 

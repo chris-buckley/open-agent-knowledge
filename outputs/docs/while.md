@@ -9,9 +9,10 @@ Remove a process branch that cannot run.
 <constants>
 example-1: "WHILE $state.status does not equal \"complete\" LIMIT 10:\n  SET state.status = \"complete\""
 
+syntax-reference: "outputs/oak.ebnf"
+
 grammar: TEXT<<
-surface_step_while = ? WHILE <CONDITION> LIMIT <LIMIT>:
-  <STEPS> ? ;
+surface_step_while = while_statement ;
 >>
 </constants>
 
