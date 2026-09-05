@@ -123,7 +123,7 @@ Transition trigger: Selection-closed raw measurements and honest separate verdic
 ### Phase 11: Verify compression delivery
 Objective: Publish the tested experiment and consolidate every supported finding on the same branch.
 - [x] Key task: P11.01 Verify isolated exports, actual OAK execution, old-study preservation, and a complete replay with zero new assistant decisions.
-- [ ] Key task: P11.02 Run full repository and all experiment verification, publish the exact tested tree, inspect CI results, and link final evidence from the learning index and report.
+- [x] Key task: P11.02 Run full repository and all experiment verification, publish the exact tested tree, inspect CI results, and link final evidence from the learning index and report.
 Success criteria: The source, representative numerical OAK documents, evidence, learning index, and observed verification are delivered without modifying main or claiming agent superiority.
 Transition trigger: Compression delivery passes; broader independent-agent and matched total-cost work remains open.
 
@@ -165,7 +165,7 @@ Rollback: Do not modify main. During later learning, retain the accepted network
 | Task state | This SMEAC plan | Record authorisation and checkboxes | On observed task transitions |
 | Evidence | Report and immutable run records | Record actual checks and outcomes | At each delivered milestone or run |
 
-Reporting: The first-run and attention reports record measured learning and export; the delivery report distinguishes local execution from CI. Both [repository verification](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33970792414) and [experiment tests and replay](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33970792397) passed for `16c70c2e91b49727a33c6fd575d7bd6d63ec8395`. This final task-state update does not change the tested implementation or evidence. PR 14 remains the review vehicle; no merge is authorised.
+Reporting: The three scientific reports record measured learning, attention, compression, and export separately from repository delivery. Both [repository verification](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33999351173) and [all experiment tests and replays](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/33999351078) passed for `ff3e9bbb2fdee1963ef0a734823adf34c76c1eec`. [Pinned CI evidence](evidence/ci.json) records those observations. This task-state update changes no frozen source or scientific evidence. PR 14 remains a draft; no merge is authorised.
 
 | Decision | Authority | Escalation |
 | --- | --- | --- |
