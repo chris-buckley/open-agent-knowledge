@@ -1,0 +1,30 @@
+name: Experiment source snapshot
+on:
+  pull_request:
+    paths:
+      - 'experiments/agent-guided-network/**'
+      - '.github/workflows/experiment-source.yml'
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    if: github.head_ref == 'experiment/agent-guided-network'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Package exact source without Git metadata or credentials
+        run: |
+          mkdir -p /tmp/oak-experiment-source
+          git rev-parse HEAD > /tmp/oak-experiment-source/REVISION
+          git archive --format=tar HEAD > /tmp/oak-experiment-source/source.tar
+          cd /tmp/oak-experiment-source
+          sha256sum source.tar > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oak-experiment-source
+          path: /tmp/oak-experiment-source/
+          if-no-files-found: error
+          retention-days: 7
