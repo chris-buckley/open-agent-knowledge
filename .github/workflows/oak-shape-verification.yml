@@ -1,0 +1,16 @@
+name: OAK shape transfer check
+on:
+  push:
+    branches: [feat/shape-first-schemas]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oak-shape-transfer
+          path: .agents/shape-changes.patch.gz.b64
+          include-hidden-files: true
