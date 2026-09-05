@@ -5,7 +5,7 @@ description: Author, review, or revise Open Agent Knowledge (OAK) documents from
   when writing OAK; no installation is needed. Programmatic validation is optional
   and installation requires separate permission.
 metadata:
-  version: 2.0.0
+  version: 2.1.0
   oak-revision: dac756b5424f7b1e19fc6f87ffc0400e90319b96
   validator-sha256: 06b44c4d4f2cb29e986952d734fcee984bdea5c055152071758790595b7eeafe
 ---
@@ -136,10 +136,11 @@ ACT Apply <GUIDANCE> to <DESIGN_6> and <SOURCE> to decide instructions; omit unj
   DESIGN_6=$DESIGN_6,
   SOURCE=$SOURCE,
 ) -> DESIGN_7
-ACT Review <DESIGN_7> against <REVIEW>, <GRAMMAR>, and the supplied teaching examples. Produce <CANDIDATE> as one OAK node in canonical section order, without claiming a programmatic check. (
+ACT Review <DESIGN_7> against <REVIEW>, <GRAMMAR>, and the complete scenarios in <TEACHING>. Produce <CANDIDATE> as one OAK node in canonical section order, without claiming a programmatic check. (
   DESIGN_7=$DESIGN_7,
   REVIEW=$references/08-review.oak.md#constant.review,
   GRAMMAR=$references/08-review.oak.md#constant.oak-ebnf,
+  TEACHING=$references/08-review.oak.md#constant.teaching,
 ) -> CANDIDATE
 IF $VALIDATE equals true:
   CALL process.validate-and-deliver (CANDIDATE=$CANDIDATE)

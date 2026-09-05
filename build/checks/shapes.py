@@ -9,7 +9,7 @@ from pydantic import JsonValue
 from collections.abc import Mapping
 
 from oak import Act, Arrival, ExecutionError, Node, Schema, SchemaBindingError, execute, parse, render
-from examples.agents import shape_writer
+from examples.shape_writer import example as shape_writer
 from examples.schemas import process_execution_table
 from examples.schemas.shape_gallery import (
     EXPECTED_INSTANCES, SAMPLE_BINDINGS, SHAPES, comparison_schema,

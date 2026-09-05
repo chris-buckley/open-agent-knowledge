@@ -35,6 +35,6 @@ host,"model selection, credentials, transport, tool implementations, scheduling,
 >>
 
 reading: TEXT<<
-Read these numbered guides in authoring order, not rendered section order. Read only the guides needed for the current work. The skill entry routes the work; supporting files define fixed knowledge and reusable shapes. Empty parts are omitted. The assembled agent contains the same material with local targets. No Python, package, network access, or validator is needed to author or interpret either form.
+Read these numbered guides in authoring order, not rendered section order. Read only the guides needed for the current work. The skill entry routes the work; supporting files define fixed knowledge and reusable shapes. Empty parts are omitted. Use references/examples/catalog.oak.md to select a complete teaching scenario. The assembled agent contains the same material with local targets. No Python, package, network access, or validator is needed to author or interpret either form.
 >>
 ~~~~

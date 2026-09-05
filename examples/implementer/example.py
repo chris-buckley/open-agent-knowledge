@@ -6,11 +6,13 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT) not in sys.path:
+if (ROOT / "oak").is_dir() and str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from examples.agents.bindings import local_bindings
-from examples.schemas.verification import VERIFICATION_FIELDS, verification_node, verification_schema
+if __package__:
+    from examples.bindings import local_bindings
+else:
+    from bindings import local_bindings
 
 from oak import (
     ACT,
@@ -40,10 +42,18 @@ from oak import (
     where,
 )
 
+if __package__:
+    from examples.schemas.verification import VERIFICATION_FIELDS, verification_node, verification_schema
+else:
+    # Detached demonstration: consume the bundled contract, not repository sources.
+    verification_node = parse(Path(__file__).with_name("verification.oak.md").read_text(encoding="utf-8"))
+    verification_schema = verification_node.schemas[0]
+    VERIFICATION_FIELDS = tuple(clause.placeholder for clause in verification_schema.where)
+
 SCHEMA_TASK_REQUEST = "schema.task-request"
 SCHEMA_IMPLEMENTATION_PLAN = "schema.implementation-plan"
 SCHEMA_CHANGESET = "schema.changeset"
-SCHEMA_VERIFICATION = "../schemas/verification.oak.md#schema.verification"
+SCHEMA_VERIFICATION = "verification.oak.md#schema.verification"
 SCHEMA_CANDIDATE = "schema.candidate"
 CONSTANT_REQUIRED_CHECK = "constant.required-check"
 PROCESS_SNAPSHOT_CHANGESET = "process.snapshot-changeset"
@@ -497,14 +507,14 @@ TARGET = Path(__file__).with_suffix(".oak.md")
 
 def load_document(path: str) -> Node | None:
     """Supply only the explicitly shared verification document."""
-    return verification_node if path == "examples/schemas/verification.oak.md" else None
+    return verification_node if path == "examples/implementer/verification.oak.md" else None
 
 
 def build() -> str:
     """Render, parse, resolve, and round-trip the authored implementer node."""
     rendered = render(implementer_node)
     parsed = parse(rendered)
-    resolve(parsed, source="examples/agents/implementer.oak.md", load=load_document)
+    resolve(parsed, source="examples/implementer/example.oak.md", load=load_document)
     if render(parsed) != rendered:
         raise RuntimeError("implementer example changed during render and parse")
     return rendered

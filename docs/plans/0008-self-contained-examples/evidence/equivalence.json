@@ -1,0 +1,343 @@
+{
+  "source_revision": "c396b6e771efd7236b6a0f47edfef65ca731d545",
+  "relocated_documents": [
+    {
+      "before": "examples/agents/compound_growth.oak.md",
+      "after": "examples/compound_growth/example.oak.md",
+      "canonical_meaning_equal": true
+    },
+    {
+      "before": "examples/agents/delegation.oak.md",
+      "after": "examples/delegation/example.oak.md",
+      "canonical_meaning_equal": true
+    },
+    {
+      "before": "examples/agents/task_reviewer.oak.md",
+      "after": "examples/delegation/task_reviewer.oak.md",
+      "canonical_meaning_equal": true
+    },
+    {
+      "before": "examples/agents/implementer.oak.md",
+      "after": "examples/implementer/example.oak.md",
+      "canonical_meaning_equal": true
+    },
+    {
+      "before": "examples/agents/interpreter_context.oak.md",
+      "after": "examples/interpreter_context/example.oak.md",
+      "canonical_meaning_equal": true
+    },
+    {
+      "before": "examples/agents/shape_writer.oak.md",
+      "after": "examples/shape_writer/example.oak.md",
+      "canonical_meaning_equal": true
+    },
+    {
+      "before": "examples/agents/successor.oak.md",
+      "after": "examples/successor/example.oak.md",
+      "canonical_meaning_equal": true
+    },
+    {
+      "before": "examples/agents/amendment_reviewer.oak.md",
+      "after": "examples/successor/amendment_reviewer.oak.md",
+      "canonical_meaning_equal": true
+    },
+    {
+      "before": "examples/agents/successor_verifier.oak.md",
+      "after": "examples/successor/successor_verifier.oak.md",
+      "canonical_meaning_equal": true
+    }
+  ],
+  "typed_schema_target_rebases": [
+    [
+      "Constant",
+      "schema_id",
+      "../schemas/verification.oak.md#schema.verification",
+      "verification.oak.md#schema.verification"
+    ],
+    [
+      "Act",
+      "output",
+      "../schemas/verification.oak.md#schema.verification",
+      "verification.oak.md#schema.verification"
+    ],
+    [
+      "Process",
+      "output",
+      "../schemas/verification.oak.md#schema.verification",
+      "verification.oak.md#schema.verification"
+    ],
+    [
+      "Act",
+      "output",
+      "../schemas/shape_gallery.oak.md#schema.option-comparison",
+      "shape_gallery.oak.md#schema.option-comparison"
+    ],
+    [
+      "Process",
+      "output",
+      "../schemas/shape_gallery.oak.md#schema.option-comparison",
+      "shape_gallery.oak.md#schema.option-comparison"
+    ],
+    [
+      "Act",
+      "input",
+      "../schemas/shape_gallery.oak.md#schema.option-comparison",
+      "shape_gallery.oak.md#schema.option-comparison"
+    ],
+    [
+      "Act",
+      "output",
+      "../schemas/shape_gallery.oak.md#schema.decision-brief",
+      "shape_gallery.oak.md#schema.decision-brief"
+    ],
+    [
+      "Process",
+      "input",
+      "../schemas/shape_gallery.oak.md#schema.option-comparison",
+      "shape_gallery.oak.md#schema.option-comparison"
+    ],
+    [
+      "Process",
+      "output",
+      "../schemas/shape_gallery.oak.md#schema.decision-brief",
+      "shape_gallery.oak.md#schema.decision-brief"
+    ],
+    [
+      "Act",
+      "input",
+      "../schemas/shape_gallery.oak.md#schema.decision-brief",
+      "shape_gallery.oak.md#schema.decision-brief"
+    ],
+    [
+      "Act",
+      "output",
+      "../schemas/shape_gallery.oak.md#schema.work-outline",
+      "shape_gallery.oak.md#schema.work-outline"
+    ],
+    [
+      "Process",
+      "input",
+      "../schemas/shape_gallery.oak.md#schema.decision-brief",
+      "shape_gallery.oak.md#schema.decision-brief"
+    ],
+    [
+      "Process",
+      "output",
+      "../schemas/shape_gallery.oak.md#schema.work-outline",
+      "shape_gallery.oak.md#schema.work-outline"
+    ],
+    [
+      "Act",
+      "input",
+      "../schemas/shape_gallery.oak.md#schema.work-outline",
+      "shape_gallery.oak.md#schema.work-outline"
+    ],
+    [
+      "Act",
+      "output",
+      "../schemas/shape_gallery.oak.md#schema.code-file",
+      "shape_gallery.oak.md#schema.code-file"
+    ],
+    [
+      "Process",
+      "input",
+      "../schemas/shape_gallery.oak.md#schema.work-outline",
+      "shape_gallery.oak.md#schema.work-outline"
+    ],
+    [
+      "Process",
+      "output",
+      "../schemas/shape_gallery.oak.md#schema.code-file",
+      "shape_gallery.oak.md#schema.code-file"
+    ],
+    [
+      "Interface",
+      "schema_id",
+      "../schemas/shape_gallery.oak.md#schema.option-comparison",
+      "shape_gallery.oak.md#schema.option-comparison"
+    ],
+    [
+      "Interface",
+      "schema_id",
+      "../schemas/shape_gallery.oak.md#schema.decision-brief",
+      "shape_gallery.oak.md#schema.decision-brief"
+    ],
+    [
+      "Interface",
+      "schema_id",
+      "../schemas/shape_gallery.oak.md#schema.work-outline",
+      "shape_gallery.oak.md#schema.work-outline"
+    ],
+    [
+      "Interface",
+      "schema_id",
+      "../schemas/shape_gallery.oak.md#schema.code-file",
+      "shape_gallery.oak.md#schema.code-file"
+    ]
+  ],
+  "unchanged_paths": [
+    "examples/schemas/__init__.py",
+    "examples/schemas/api_coverage_table.oak.md",
+    "examples/schemas/api_coverage_table.py",
+    "examples/schemas/code_changes.oak.md",
+    "examples/schemas/code_changes.py",
+    "examples/schemas/code_map.oak.md",
+    "examples/schemas/code_map.py",
+    "examples/schemas/docs_index.oak.md",
+    "examples/schemas/docs_index.py",
+    "examples/schemas/error.oak.md",
+    "examples/schemas/error.py",
+    "examples/schemas/hierarchical_outline.oak.md",
+    "examples/schemas/hierarchical_outline.py",
+    "examples/schemas/ideation_list.oak.md",
+    "examples/schemas/ideation_list.py",
+    "examples/schemas/link_manifest.oak.md",
+    "examples/schemas/link_manifest.py",
+    "examples/schemas/process_execution_table.oak.md",
+    "examples/schemas/process_execution_table.py",
+    "examples/schemas/repeat_marker.py",
+    "examples/schemas/shape_gallery.oak.md",
+    "examples/schemas/shape_gallery.py",
+    "examples/schemas/smeac_plan.oak.md",
+    "examples/schemas/smeac_plan.py",
+    "examples/schemas/verification.oak.md",
+    "examples/schemas/verification.py",
+    "oak/AGENTS.md",
+    "oak/__init__.py",
+    "oak/authoring.py",
+    "oak/base.py",
+    "oak/context.py",
+    "oak/defaults.py",
+    "oak/execute/AGENTS.md",
+    "oak/execute/__init__.py",
+    "oak/execute/actions.py",
+    "oak/execute/context.py",
+    "oak/execute/executor.py",
+    "oak/execute/models.py",
+    "oak/execute/steps.py",
+    "oak/execute/values.py",
+    "oak/node/AGENTS.md",
+    "oak/node/__init__.py",
+    "oak/node/dump.py",
+    "oak/node/index.py",
+    "oak/node/interpretation.py",
+    "oak/node/model.py",
+    "oak/node/parts/__init__.py",
+    "oak/node/parts/constants.py",
+    "oak/node/parts/entry.py",
+    "oak/node/parts/instructions.py",
+    "oak/node/parts/interfaces.py",
+    "oak/node/parts/part.py",
+    "oak/node/parts/processes/__init__.py",
+    "oak/node/parts/processes/conditions.py",
+    "oak/node/parts/processes/model.py",
+    "oak/node/parts/processes/operators.py",
+    "oak/node/parts/processes/steps.py",
+    "oak/node/parts/processes/targets.py",
+    "oak/node/parts/processes/values.py",
+    "oak/node/parts/schemas/__init__.py",
+    "oak/node/parts/schemas/binding.py",
+    "oak/node/parts/schemas/constraints.py",
+    "oak/node/parts/schemas/model.py",
+    "oak/node/parts/state.py",
+    "oak/node/parts/triggers.py",
+    "oak/node/structure.py",
+    "oak/node/validation/__init__.py",
+    "oak/node/validation/conditions.py",
+    "oak/node/validation/contracts.py",
+    "oak/node/validation/flow.py",
+    "oak/node/validation/node.py",
+    "oak/node/validation/processes.py",
+    "oak/node/validation/tools.py",
+    "oak/node/validation/triggers.py",
+    "oak/node/validation/values.py",
+    "oak/parse/__init__.py",
+    "oak/parse/conditions.py",
+    "oak/parse/cursor.py",
+    "oak/parse/data.py",
+    "oak/parse/document.py",
+    "oak/parse/errors.py",
+    "oak/parse/expressions.py",
+    "oak/parse/fragments.py",
+    "oak/parse/grouping.py",
+    "oak/parse/interfaces.py",
+    "oak/parse/processes.py",
+    "oak/parse/schemas.py",
+    "oak/parse/steps.py",
+    "oak/parse/triggers.py",
+    "oak/parse/values.py",
+    "oak/render/__init__.py",
+    "oak/render/json_ld/__init__.py",
+    "oak/render/json_ld/context.py",
+    "oak/render/json_ld/document.py",
+    "oak/render/json_ld/entries.py",
+    "oak/render/json_ld/identifiers.py",
+    "oak/render/json_ld/values.py",
+    "oak/render/oak/__init__.py",
+    "oak/render/oak/arrangement.py",
+    "oak/render/oak/data.py",
+    "oak/render/oak/expressions.py",
+    "oak/render/oak/groupings.py",
+    "oak/render/oak/instructions.py",
+    "oak/render/oak/interfaces.py",
+    "oak/render/oak/processes.py",
+    "oak/render/oak/styles.py",
+    "oak/render/oak/triggers.py",
+    "oak/render/selection.py",
+    "oak/resolve/AGENTS.md",
+    "oak/resolve/__init__.py",
+    "oak/resolve/contracts.py",
+    "oak/resolve/errors.py",
+    "oak/resolve/graph.py",
+    "oak/resolve/paths.py",
+    "oak/resolve/references.py",
+    "oak/resolve/resolver.py",
+    "oak/rules/__init__.py",
+    "oak/rules/guidance.py",
+    "oak/rules/model.py",
+    "oak/rules/validation.py",
+    "oak/surface/__init__.py",
+    "oak/surface/constraints.py",
+    "oak/surface/entries.py",
+    "oak/surface/model.py",
+    "oak/surface/processes.py",
+    "oak/surface/registry.py",
+    "oak/surface/syntax.py",
+    "oak/vocabulary/__init__.py",
+    "oak/vocabulary/datatypes/__init__.py",
+    "oak/vocabulary/datatypes/datetime.py",
+    "oak/vocabulary/datatypes/names.py",
+    "oak/vocabulary/datatypes/quantity.py",
+    "oak/vocabulary/display/__init__.py",
+    "oak/vocabulary/display/datetime.py",
+    "oak/vocabulary/display/number.py",
+    "oak/vocabulary/display/quantity.py",
+    "oak/vocabulary/syntax.py",
+    "oak/vocabulary/text/__init__.py",
+    "oak/vocabulary/text/dotted_path.py",
+    "oak/vocabulary/text/non_blank_line.py",
+    "oak/vocabulary/text/placeholder.py",
+    "oak/vocabulary/text/process_name.py",
+    "oak/vocabulary/text/regex_pattern.py",
+    "oak/vocabulary/text/slug_id.py",
+    "oak/vocabulary/text/target_path.py",
+    "oak/vocabulary/text/value_reference.py",
+    "oak/vocabulary/units.py",
+    "outputs/oak.ebnf",
+    "pyproject.toml"
+  ],
+  "inert_literal_preserved": "examples/agents/compound_growth.py: +12 -2",
+  "stateful_fixture": {
+    "states": [
+      {
+        "state.current-balance": 815.04,
+        "state.reflection-target": 6400
+      },
+      {
+        "state.current-balance": 6642.28,
+        "state.reflection-target": 51200
+      }
+    ],
+    "failing_reflection": "act_failed; caller unchanged; retry equals first cycle"
+  }
+}

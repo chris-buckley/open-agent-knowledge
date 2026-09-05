@@ -12,19 +12,23 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT) not in sys.path:
+if (ROOT / "oak").is_dir() and str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from pydantic import JsonValue
-from oak import ACT, Act, Arrival, Call, Emit, Instruction, Interface, Node, NonEmpty, Process, Schema, Trigger, Type, execute, parse, render, resolve, where
-from examples.agents.bindings import local_bindings
+from oak import ACT, Act, Arrival, Call, Constant, Emit, Instruction, Interface, Node, NonEmpty, Process, Schema, Trigger, Type, execute, parse, render, resolve, where
+if __package__:
+    from examples.bindings import local_bindings
+else:
+    from bindings import local_bindings
+from examples.shape_writer.run import fixture_host as fixture_action
 from examples.schemas.shape_gallery import EXPECTED_INSTANCES, SAMPLE_BINDINGS, SHAPES, populate_example, shape_gallery_node
 
 SCHEMA_REQUEST = "schema.change-request"
-SCHEMA_COMPARISON = "../schemas/shape_gallery.oak.md#schema.option-comparison"
-SCHEMA_DECISION = "../schemas/shape_gallery.oak.md#schema.decision-brief"
-SCHEMA_OUTLINE = "../schemas/shape_gallery.oak.md#schema.work-outline"
-SCHEMA_FILE = "../schemas/shape_gallery.oak.md#schema.code-file"
+SCHEMA_COMPARISON = "shape_gallery.oak.md#schema.option-comparison"
+SCHEMA_DECISION = "shape_gallery.oak.md#schema.decision-brief"
+SCHEMA_OUTLINE = "shape_gallery.oak.md#schema.work-outline"
+SCHEMA_FILE = "shape_gallery.oak.md#schema.code-file"
 PROCESS_COMPARE_OPTIONS = "process.compare-options"
 PROCESS_DECIDE_CHANGE = "process.decide-change"
 PROCESS_PLAN_CHANGE = "process.plan-change"
@@ -40,7 +44,7 @@ PLACEHOLDERS_COMPARISON = ["CRITERION", "CURRENT", "PROPOSED"]
 PLACEHOLDERS_DECISION = ["DECISION", "RATIONALE"]
 PLACEHOLDERS_OUTLINE = ["GOAL", "STEP", "CHECK"]
 PLACEHOLDERS_FILE = ["FILE_PATH", "CODE"]
-SOURCE = "examples/agents/shape_writer.oak.md"
+SOURCE = "examples/shape_writer/example.oak.md"
 TARGET = Path(__file__).with_suffix(".oak.md")
 SAMPLE_REQUEST = "Reject blank task titles with one Python predicate."
 
@@ -114,18 +118,26 @@ shape_writer_node = Node(
 
 def documents() -> dict[str, str]:
     """Supply only the exact authored document dependency, without scanning."""
-    return {"examples/schemas/shape_gallery.oak.md": render(shape_gallery_node)}
+    return {"examples/shape_writer/shape_gallery.oak.md": render(shape_gallery_node)}
+
+
+def sample() -> Node:
+    """Pair every typed step with its full input, output, and populated layout."""
+    inputs = ({PLACEHOLDER_REQUEST: SAMPLE_REQUEST}, *[SAMPLE_BINDINGS[schema.id] for schema in SHAPES[:-1]])
+    interfaces = (INTERFACE_COMPARISON, INTERFACE_DECISION, INTERFACE_OUTLINE, INTERFACE_FILE)
+    return Node(constants=[
+        Constant(id="request", value={PLACEHOLDER_REQUEST: SAMPLE_REQUEST}),
+        Constant(id="steps", value=[
+            {"schema": f"shape_gallery.oak.md#schema.{schema.id}", "interface": interface,
+             "input": dict(values), "output": dict(SAMPLE_BINDINGS[schema.id])}
+            for schema, values, interface in zip(SHAPES, inputs, interfaces, strict=True)
+        ]),
+        Constant(id="host", value="A deterministic adapter supports only this fixture, not arbitrary requests or live inference."),
+    ])
 
 
 def fixture_host(action: Act, values: Mapping[str, JsonValue]) -> Mapping[str, JsonValue]:
-    """Return the next shape only for this explicitly supported fixture."""
-    inputs = ({PLACEHOLDER_REQUEST: SAMPLE_REQUEST}, *[SAMPLE_BINDINGS[schema.id] for schema in SHAPES[:-1]])
-    for schema, expected in zip(SHAPES, inputs, strict=True):
-        if action.output == f"../schemas/shape_gallery.oak.md#schema.{schema.id}":
-            if dict(values) != expected:
-                raise ValueError("this demonstration host only implements the declared sample")
-            return dict(SAMPLE_BINDINGS[schema.id])
-    raise ValueError("unexpected demonstration action")
+    return fixture_action(action, values, {c.id: c.value for c in sample().constants})
 
 
 def run() -> tuple[str, ...]:

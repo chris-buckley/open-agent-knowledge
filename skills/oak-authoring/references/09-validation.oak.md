@@ -10,7 +10,7 @@ guidance: YAML<<
   result outside the authored document.
 >>
 
-identity: {"version": "2.0.0", "validator-revision": "dac756b5424f7b1e19fc6f87ffc0400e90319b96"}
+identity: {"version": "2.1.0", "validator-revision": "dac756b5424f7b1e19fc6f87ffc0400e90319b96"}
 
 validation-policy: YAML<<
 - Run programmatic validation only when the user requests it. Authoring and interpretation
@@ -65,7 +65,7 @@ from urllib.request import urlopen
 import venv
 from zipfile import BadZipFile, ZipFile
 
-SKILL_VERSION = "2.0.0"
+SKILL_VERSION = "2.1.0"
 REPOSITORY = "chris-buckley/open-agent-knowledge"
 REVISION = "dac756b5424f7b1e19fc6f87ffc0400e90319b96"
 SOURCE_SHA256 = "06b44c4d4f2cb29e986952d734fcee984bdea5c055152071758790595b7eeafe"

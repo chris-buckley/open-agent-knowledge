@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT) not in sys.path:
+if (ROOT / "oak").is_dir() and str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from oak import (
@@ -25,19 +25,36 @@ from oak import (
     render,
     resolve,
 )
-from examples.agents.bindings import local_bindings
-from examples.agents.task_reviewer import (
-    INTERFACE_REVIEW_REQUEST_INPUT as WORKER_REVIEW_REQUEST_INPUT,
-    PLACEHOLDER_ASSESSMENT,
-    PLACEHOLDER_DIFF,
-    PLACEHOLDER_EVIDENCE,
-    PLACEHOLDER_IMPLEMENTATION_REPORT,
-    PLACEHOLDER_ISSUES,
-    PLACEHOLDER_SPEC_COMPLIANCE,
-    PLACEHOLDER_STRENGTHS,
-    PLACEHOLDER_TASK_BRIEF,
-    task_reviewer_node,
-)
+if __package__:
+    from examples.bindings import local_bindings
+else:
+    from bindings import local_bindings
+if __package__:
+    from .task_reviewer import (
+        INTERFACE_REVIEW_REQUEST_INPUT as WORKER_REVIEW_REQUEST_INPUT,
+        PLACEHOLDER_ASSESSMENT,
+        PLACEHOLDER_DIFF,
+        PLACEHOLDER_EVIDENCE,
+        PLACEHOLDER_IMPLEMENTATION_REPORT,
+        PLACEHOLDER_ISSUES,
+        PLACEHOLDER_SPEC_COMPLIANCE,
+        PLACEHOLDER_STRENGTHS,
+        PLACEHOLDER_TASK_BRIEF,
+        task_reviewer_node,
+    )
+else:
+    from task_reviewer import (
+        INTERFACE_REVIEW_REQUEST_INPUT as WORKER_REVIEW_REQUEST_INPUT,
+        PLACEHOLDER_ASSESSMENT,
+        PLACEHOLDER_DIFF,
+        PLACEHOLDER_EVIDENCE,
+        PLACEHOLDER_IMPLEMENTATION_REPORT,
+        PLACEHOLDER_ISSUES,
+        PLACEHOLDER_SPEC_COMPLIANCE,
+        PLACEHOLDER_STRENGTHS,
+        PLACEHOLDER_TASK_BRIEF,
+        task_reviewer_node,
+    )
 
 SCHEMA_WORKER_REQUEST = "task_reviewer.oak.md#schema.review-request"
 SCHEMA_WORKER_RESULT = "task_reviewer.oak.md#schema.task-review"
@@ -47,10 +64,10 @@ INTERFACE_REVIEW_REQUEST_INPUT = "interface.review-request"
 INTERFACE_TASK_REVIEW_OUTPUT = "interface.task-review"
 
 TOOL_AGENT_REVIEWER = "agent.reviewer"
-WORKER_DOCUMENT = "examples/agents/task_reviewer.oak.md"
+WORKER_DOCUMENT = "examples/delegation/task_reviewer.oak.md"
 EVENT_DELEGATION_REQUESTED = "Delegate the task review."
 
-SOURCE = "examples/agents/delegation.oak.md"
+SOURCE = "examples/delegation/example.oak.md"
 
 REQUEST_PLACEHOLDERS = (PLACEHOLDER_TASK_BRIEF, PLACEHOLDER_IMPLEMENTATION_REPORT, PLACEHOLDER_DIFF)
 RESULT_PLACEHOLDERS = (
