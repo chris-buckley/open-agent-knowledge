@@ -6,94 +6,94 @@ Classification: PUBLIC
 ## 1. Situation
 
 ### Operating Environment
-OAK stores repository knowledge in scoped OAK documents. This change belongs to the existing improve/python-code-conventions branch and concerns the user's general Python standard, not the Pydantic reference.
+OAK stores repository knowledge in scoped OAK documents. This change belongs to improve/python-code-conventions and concerns the user's general Python standard, not the Pydantic reference.
 
 ### Current State
-Main at 21c2dc5b9366068875709e1cefab3a942f51836c adds .agents/rules/coding-standards.md, a 1,393-line standard covering 18 numbered sections. Earlier conversational suggestions relied on four OAK-specific example-authoring rules and therefore mischaracterised the general standard.
+Main at 21c2dc5b9366068875709e1cefab3a942f51836c adds .agents/rules/coding-standards.md, a 1,393-line standard with 18 numbered sections. Earlier suggestions relied on four OAK-specific example-authoring rules and mischaracterised the general standard.
 
 ### Challenges
-- Preservation: Splitting the source must retain every requirement, exception, checklist item, and teaching example.
+- Preservation: Retain every requirement, exception, checklist item, and teaching example.
 - Scope: General defaults must not override established OAK contracts or introduce a repository-wide cosmetic refactor.
-- Verification: Local GitHub networking is unavailable; a read-only branch workflow supplied a pinned baseline archive whose Git tree matches main.
+- Verification: A read-only branch workflow supplied a pinned archive; its reconstructed Git tree matches the baseline exactly.
 
 ### Supporting Factors
-- Higher intent: Make the user's actual preferences portable, inspectable, and enforceable without duplicating policy.
-- Adjacent efforts: Existing scoped AGENTS ownership, example catalogue, and complete repository verification remain authoritative.
+- Higher intent: Make the actual preferences portable and inspectable without a parallel prose owner.
+- Adjacent efforts: Preserve scoped AGENTS ownership, the example catalogue, and complete verification.
 - Supporting resources: Canonical OAK models, parser, renderer, resolver, source archive, and GitHub CI.
 
 ### Assumptions
-- The user authorises implementation and modularisation in this branch; no merge is authorised.
-- The newly tracked document supersedes the earlier inference about the user's general style.
+- The user authorises implementation and modularisation; no merge is authorised.
+- The newly tracked standard supersedes the earlier inference about general Python style.
 
 ### Constraints and Limitations
-- Constraint: Preserve precedence, supported public behaviour, 120-character fallback width, small horizontal signatures, private-name conventions, and rare terse comments.
-- Constraint: Author the resulting standards as pure OAK, with no Markdown rule bodies, Python knowledge generator, or duplicated monolith.
+- Constraint: Preserve precedence, supported public behaviour, the 120-character fallback width, horizontal signatures, private-name conventions, and rare terse comments.
+- Constraint: Maintain the standards directly as pure OAK, not a Python knowledge generator or duplicated monolith.
 - Constraint: Keep the Pydantic skill and unrelated runtime architecture unchanged.
-- Limitation: Passing structural checks does not prove subjective style compliance or execution of illustrative code snippets.
+- Limitation: Structural checks do not prove subjective style compliance or execution of illustrative snippets.
 
 ## 2. Mission
 
 The assistant replaces the monolithic Python standard with modular OAK knowledge and verifies the completed branch during this task.
 
-Task: Reassess the accepted suggestions against the actual standard, migrate the complete knowledge, connect repository routing and verification, and open a reviewable pull request.
-Purpose: Preserve the user's compact, fully typed, data-oriented style while making ownership and review clearer.
-End state: One OAK entry document routes to focused OAK modules; coverage evidence accounts for the original standard; verification passes; the branch is ready for review.
+Task: Reassess the accepted suggestions, migrate the complete knowledge, connect routing and verification, and open a pull request.
+Purpose: Preserve compact, fully typed, data-oriented Python while clarifying ownership and review.
+End state: One OAK entry routes to focused modules; coverage evidence accounts for the original; the verified branch is ready for review.
 
 ## 3. Execution
 
-Intent: Preserve meaning before improving presentation. Retain existing preferences and add only refinements that survive comparison with the full standard.
-Concept of operations: Inventory the authoritative source, migrate its knowledge into concern-specific OAK owners, then verify coverage, rendering, routing, and repository behaviour. Keep operational history separate from current policy.
+Intent: Preserve meaning before improving presentation. Add only refinements that survive comparison with the full standard.
+Concept of operations: Inventory the source, migrate concern-specific knowledge, and verify coverage, rendering, routing, and repository behaviour. Keep history separate from current policy.
 
 ### Phase 1: Establish the corrected baseline
 Objective: Replace the earlier inferred standard with the complete tracked source.
-- [ ] Key task: P01.01 Read the root and applicable scoped instructions plus the complete coding standard.
-- [ ] Key task: P01.02 Fast-forward the conventions branch to the tracked-standard commit and verify the baseline archive tree.
-- [ ] Key task: P01.03 Inventory every source section, code example, table, and checklist item; record retained, refined, and withdrawn suggestions.
-Success criteria: Baseline revision and complete source coverage are recorded without treating OAK example rules as the general Python standard.
+- [x] Key task: P01.01 Read the root and applicable scoped instructions plus the complete coding standard.
+- [x] Key task: P01.02 Fast-forward the branch to the tracked-standard commit and verify the archive tree.
+- [x] Key task: P01.03 Inventory all source sections, examples, tables, and checklist items; reassess earlier suggestions.
+Success criteria: The baseline and complete coverage are recorded without conflating OAK authoring with general Python preferences.
 Transition trigger: The inventory and corrected interpretation are ready.
 
 ### Phase 2: Migrate the knowledge and integrations
 Objective: Deliver one concern per OAK module with explicit routing and no parallel prose owner.
-- [ ] Key task: P02.01 Replace coding-standards.md with a pure OAK entry and move its policy and teaching into focused OAK documents.
-- [ ] Key task: P02.02 Preserve all original requirements and examples in structured OAK values; record exact source-to-destination coverage.
-- [ ] Key task: P02.03 Add focused refinements for literal whitespace, operation snapshots, diagnostic separation, and independent expectations; retain small horizontal signatures.
-- [ ] Key task: P02.04 Route Python work from root AGENTS and reconcile OAK-specific authoring rules without applying a blanket Pydantic or compatibility policy.
-- [ ] Key task: P02.05 Integrate canonical, graph, routing, coverage, and rejection checks into the existing complete verification entry point.
-Success criteria: The standards are maintained directly as OAK; examples and general Python rules remain distinct; no unrelated runtime change is present.
+- [x] Key task: P02.01 Replace coding-standards.md with a pure OAK entry and focused topic documents.
+- [x] Key task: P02.02 Preserve all original requirements and examples; record source-to-destination coverage.
+- [x] Key task: P02.03 Add exact-whitespace, operation-snapshot, diagnostic, typing, and independent-expectation refinements.
+- [x] Key task: P02.04 Route Python work from root AGENTS and reconcile OAK-specific authoring rules.
+- [x] Key task: P02.05 Add canonical, graph, routing, coverage, and rejection checks to the existing entry point.
+Success criteria: OAK is the maintained source; general and OAK-specific rules remain distinct; runtime behaviour is unchanged.
 Transition trigger: The complete candidate is ready for verification.
 
 ### Phase 3: Verify and deliver
 Objective: Demonstrate preservation and report only observed checks.
-- [ ] Key task: P03.01 Validate every OAK document, both groupings, explicit dependency closure, examples, and negative cases.
-- [ ] Key task: P03.02 Run compilation, both complete verification commands, regeneration, and repeated freshness checks; distinguish unavailable checks.
-- [ ] Key task: P03.03 Inspect the complete diff and source coverage; remove the temporary snapshot workflow and any obsolete or duplicate policy.
-- [ ] Key task: P03.04 Commit the completed candidate, open a pull request, inspect CI, and record the final result and any limitations.
-Success criteria: Every applicable check is supported by observed evidence and the branch is ready for user review without merging main.
+- [x] Key task: P03.01 Validate every OAK document, both groupings, dependency closure, teaching shapes, and rejected cases.
+- [x] Key task: P03.02 Run compilation, both complete commands, regeneration, and repeated freshness checks.
+- [ ] Key task: P03.03 Inspect the diff and source coverage; remove the temporary workflow and obsolete policy.
+- [ ] Key task: P03.04 Commit the candidate, open a pull request, inspect CI, and record the result and limitations.
+Success criteria: Each applicable check has observed evidence; the branch is reviewable without merging main.
 Transition trigger: The completion report and pull request are delivered.
 
 ### Coordinating Instructions
 - Timeline: Complete the accepted change in this task.
-- Boundaries: .agents/rules, routing owners, relevant verification, and this plan's records.
-- Operating guidelines: Use existing OAK forms and existing dependencies; preserve unsupported illustrative snippets as labelled teaching rather than claiming they ran.
-- Risk mitigation: Compare migrated source units and code literals against the pinned original; test rejected missing, duplicated, and escaping references.
+- Boundaries: .agents/rules, routing owners, verification, and this plan's records.
+- Operating guidelines: Reuse existing dependencies and OAK forms; label excerpts honestly.
+- Risk mitigation: Compare source units and code literals with the pinned original, and reject missing, duplicated, or escaping references.
 
 ### Contingencies
-- If a proposed refinement conflicts with the full standard then preserve the standard and record the withdrawn suggestion.
-- If local verification is constrained then record the exact limitation and use branch CI for independent evidence.
+- If a proposal conflicts with the full standard then preserve the standard and record the withdrawn proposal.
+- If a verification command cannot run then record the limitation instead of claiming it passed.
 
 ## 4. Admin and Logistics
 
 | Resource | Quantity | Source | Status |
 | --- | --- | --- | --- |
 | Canonical standard | 1 | Main commit 21c2dc5 | AVAILABLE |
-| Pinned source archive | 1 | Read-only GitHub Actions artifact | AVAILABLE |
-| OAK validation runtime | 1 | Verified baseline source and installed dependencies | AVAILABLE |
-| Branch CI | 1 | Existing verification workflow | AVAILABLE |
+| Verified baseline archive | 1 | GitHub Actions artifact | AVAILABLE |
+| OAK runtime and checks | 1 | Verified source | AVAILABLE |
+| Pull-request CI | 1 | Existing workflow | AVAILABLE |
 
-Supply: Use existing dependencies. Do not add a formatter, type checker, or test framework just for this migration.
-Transportation: Commit changes through the GitHub connector to the conventions branch.
-Sustainment: Keep future edits in the owning OAK modules and verify them through the existing repository check registry.
-Rollback: Revert the task commits on the branch. The original standard remains available at its pinned Git revision.
+Supply: Use installed repository dependencies; add no new checker or formatter package.
+Transportation: Commit through the GitHub connector to the conventions branch.
+Sustainment: Edit owning OAK modules and verify through the existing check registry.
+Rollback: Revert task commits. The original remains available at the pinned Git revision.
 
 ## 5. Command and Signal
 
@@ -103,15 +103,15 @@ Rollback: Revert the task commits on the branch. The original standard remains a
 | Channel | Medium | Purpose | Cadence |
 | --- | --- | --- | --- |
 | Conversation | Chat | Corrections and completion | Material milestones |
-| Review | Pull request | Diff and CI evidence | Final candidate |
+| Review | Pull request | Diff and CI | Final candidate |
 
-Reporting: Record source coverage, accepted refinements, withdrawn suggestions, verification results, and final review status in report.md and evidence.
+Reporting: Record coverage, retained and withdrawn suggestions, observed checks, and limitations in report.md and evidence.
 
 | Decision | Authority | Escalation |
 | --- | --- | --- |
-| Preserve the actual standard | User instruction | User |
-| Implement the modular migration | Assistant | User on a genuine conflict |
-| Merge to main | User | User |
+| Preserve actual preferences | User instruction | User |
+| Implement the migration | Assistant | User on genuine conflict |
+| Merge main | User | User |
 
 ### Acknowledgement
-The user authorised the branch work and identified the canonical source. The assistant has read the source and accepts the preservation and verification gates.
+The user authorised the work and identified the source. The assistant has read it and accepts the preservation and verification gates.

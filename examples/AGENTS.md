@@ -18,11 +18,21 @@ naming-rules: YAML<<
 >>
 
 python-authoring-rules: YAML<<
-- Author through package Pydantic models.
-- Hoist reused targets and placeholders into part-prefixed upper-snake constants.
-- Define each multiline entry as one module value whose variable name ends with its
-  part.
-- List entry variables in each node so the node reads as a table of contents.
+- Use package Pydantic models for OAK authoring; this does not prescribe Pydantic
+  for unrelated Python code.
+- Name meaningful OAK entries as module values ending in their part. Keep small single-use
+  details inline when extraction adds only navigation.
+- Use part-prefixed upper-snake constants for semantically reused targets and placeholders,
+  not for every literal.
+- Define reusable schemas before consumers. Derive reused local targets from their
+  owning entry ids when dependency order permits; keep external and necessary forward
+  targets explicit.
+- Assemble named entries directly in each Node so it reads as a table of contents;
+  omit single-use collection aliases that add no concept.
+- Permit small typed helpers such as local_bindings when they remove construction
+  ceremony without hiding schemas, bindings, scope, or effects.
+- Distinguish Python dependency order from canonical OAK part order; keep rendered
+  documents canonical.
 >>
 
 evidence-authoring-rules: ["apply findings before freezing and verifying the final candidate", "have host tools compute immutable snapshot revisions and record observed check results", "gate acceptance on matching subject, revision, required check, and successful result", "require the effect-producing host to reject drift before the effect", "do not present schema-valid evidence as proof that a check ran", "label deterministic demonstration adapters and simulated effects honestly"]
