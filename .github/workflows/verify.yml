@@ -23,6 +23,7 @@ jobs:
       - name: Verify all products and repeat generation
         run: |
           python -m compileall -q oak build examples skills/oak-authoring/scripts
+          python -m examples.catalog
           python -m build.ebnf
           python -m build.docs
           python -m build.authoring
