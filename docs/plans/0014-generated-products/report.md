@@ -1,6 +1,6 @@
 # Generated product consolidation report
 
-Status: Implementation verified locally; remote delivery and pull request pending.
+Status: Complete. Delivered in PR #22; implementation CI passed. Not merged.
 Baseline: `main` at `2a3ba6c27b6110de4ace334e51d2f195a7ded522`.
 Plan: [Consolidate generated OAK products](plan.md).
 Branch: `docs/plan-generated-products`.
@@ -100,4 +100,12 @@ Both isolated test programs now block socket audit events without replacing the 
 
 ## Remote delivery
 
-Pending remote candidate verification and pull request creation.
+Implementation commit: `46d141ed5d3052cee77c2b119d70d8b7b4113fb8`.
+Verified implementation tree: `8759292b5c0e52fbe094c6c94a0366bd7e9a4f92`.
+Pull request: [#22 into main](https://github.com/chris-buckley/open-agent-knowledge/pull/22).
+
+The [corrected candidate run 34034557254](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34034557254) passed both complete verification entry points, the frozen-baseline audit, repeated generation, and exact Git-tree checks. Its final push was rejected because the Actions token could not update `verify.yml`. The repository connector then fast-forwarded the work branch to the same verified commit, preserving its identity and every original ancestor. No verification failure is concealed by that transport recovery.
+
+The normal [Verify OAK run 34034731684](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34034731684) passed for the implementation in PR #22. This includes compilation, both complete entry points, fresh generation without a diff, and the approved detached validator bootstrap: refusal without consent, pinned download and isolated installation with consent, and retained cache reuse without the permission flag.
+
+All 24 plan tasks are checked, and E01 through E05 are supported by the recorded evidence. The closeout changes only the plan and this report; product and implementation bytes remain those of the verified tree. Temporary transport files and workflows are absent from the delivered product change. Final verification verdict: Approved. This verdict does not authorise merging; that remains a separate repository-owner decision.

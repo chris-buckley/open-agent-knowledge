@@ -3,8 +3,8 @@
 Prepared: 2026-09-06T21:54:55+10:00
 Classification: PUBLIC
 
-Plan status: Executing approved delivery.
-Implementation status: Locally verified; remote candidate and PR delivery pending.
+Plan status: Complete.
+Implementation status: Complete; delivered in PR #22 with passing implementation CI. Not merged.
 Authorisation: On 2026-09-06T22:09:47+10:00 the user approved implementation and a pull request into main, with definitions/*.oak.md and the oak-authoring.skill directory. Merging is not authorised.
 Repository: `chris-buckley/open-agent-knowledge`
 Baseline: `main` at `2a3ba6c27b6110de4ace334e51d2f195a7ded522`.
@@ -202,8 +202,8 @@ Transition trigger: Final-candidate evidence is complete and all review findings
 ### Phase 6: Record and deliver the implementation
 Objective: Deliver the completed change without overstating verification or altering history.
 - [x] Key task: P06.01 Add `report.md` with the baseline and delivered revision, source/destination map, observations for E01 through E05, check evidence, limitations, changed paths, and final review verdict.
-- [ ] Key task: P06.02 Tick each task only after its success criteria are met, commit implementation and evidence with compliant subjects, preserve every original commit, and verify the remote branch contains the reviewed candidate.
-- [ ] Key task: P06.03 After user-authorised delivery, create the pull request into `main` with the final layout and verification summary; do not merge without a separate explicit merge request.
+- [x] Key task: P06.02 Tick each task only after its success criteria are met, commit implementation and evidence with compliant subjects, preserve every original commit, and verify the remote branch contains the reviewed candidate.
+- [x] Key task: P06.03 After user-authorised delivery, create the pull request into `main` with the final layout and verification summary; do not merge without a separate explicit merge request.
 Success criteria: The report and pull request identify the verified E01 through E05 result, every applicable execution checkbox is supported by evidence, and repository history is preserved.
 Transition trigger: The completed implementation is available for review; merging remains a separate user decision.
 
@@ -234,7 +234,7 @@ Transition trigger: The completed implementation is available for review; mergin
 | Verification evidence | One final-candidate evidence set | This plan's `evidence/` and `report.md` | AVAILABLE |
 
 Supply: Use the repository's declared dependencies and existing generators. No live model service, extra dependency, or automatic optional-validator installation is required by this layout change.
-Transportation: Deliver the grammar, reference, standalone agent, and skill through their new Git-tracked paths. Preserve relative skill paths so copying the skill directory does not require copying its repository parents.
+Transportation: Deliver the grammar, definitions, standalone agent, and skill through their new Git-tracked paths. Preserve relative skill paths so copying the skill directory does not require copying its repository parents.
 Sustainment: Keep generator ownership and source routing in source-owned guidance, enforce freshness and file-set checks, and retain the plan directory as the record of this accepted change.
 Rollback: Make corrective or revert commits if implementation fails. Do not amend, squash, rebase, force-push, or remove original commits; perform deletion-based regeneration checks only in disposable snapshots.
 
