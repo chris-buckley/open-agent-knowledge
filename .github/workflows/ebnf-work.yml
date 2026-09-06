@@ -1,0 +1,51 @@
+name: EBNF baseline workbench
+on:
+  push:
+    branches: [docs/plan-ebnf-layout]
+    paths: [.github/workflows/ebnf-work.yml]
+permissions:
+  contents: read
+jobs:
+  baseline:
+    if: github.ref == 'refs/heads/docs/plan-ebnf-layout'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Export immutable checkout
+        run: |
+          mkdir -p "$RUNNER_TEMP/ebnf-baseline"
+          git bundle create "$RUNNER_TEMP/ebnf-baseline/oak.bundle" HEAD refs/remotes/origin/main
+          sha256sum "$RUNNER_TEMP/ebnf-baseline/oak.bundle"
+          git checkout --detach 7e002d5e8a3632f9f48026c22a5ad0bbec68e77d
+          git rev-parse HEAD
+      - name: Install existing dependencies
+        run: |
+          python - <<'PY'
+          import pathlib, subprocess, sys, tomllib
+          dependencies = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['dependencies']
+          subprocess.run([sys.executable, '-m', 'pip', 'install', *dependencies], check=True)
+          PY
+      - name: Verify untouched baseline
+        run: |
+          set -o pipefail
+          {
+            python --version
+            python -m pip freeze
+            python -m build.examples
+            python build/examples.py
+            git diff --exit-code
+          } 2>&1 | tee "$RUNNER_TEMP/ebnf-baseline/verification.log"
+      - name: Publish checkout and observed log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ebnf-baseline
+          path: ${{ runner.temp }}/ebnf-baseline
+          retention-days: 7
