@@ -74,7 +74,7 @@ All paths below are relative to `examples/`.
 
 The complete suite includes detached runs with repository imports and network blocked, source/guard routing, state isolation, evidence rejection, native context scope, exact tool dispatch, PAR/JOIN restrictions, skill fusion, optional-validator consent/identity/cache cases, plans, and scoped AGENTS checks. The fixtures are not evidence of live model quality.
 
-[Verification record](evidence/verification.json) and [baseline fingerprints](evidence/preservation.json) record the independent evidence. [Comparison script](evidence/compare.py) reproduces structural comparisons without rewriting literal keys. [Changed paths](evidence/changed-paths.txt) records source and generated changes at the verified implementation.
+[Verification record](evidence/verification.json) and [baseline fingerprints](evidence/preservation.json) record the independent evidence. [Comparison script](evidence/compare.py) reproduces structural comparisons without rewriting literal keys. [Classified obsolete-name scan](evidence/obsolete-scan.json) identifies retained negative-test, migration-note, literal, domain, and diagnostic occurrences. [Changed paths](evidence/changed-paths.txt) records source and generated changes at the verified implementation.
 
 ## Review findings and resolution
 
