@@ -1,0 +1,687 @@
+{
+  "baseline_commit": "7e002d5e8a3632f9f48026c22a5ad0bbec68e77d",
+  "product_baseline": "bf0975dd7959320fd6727cee926370eca1808e07",
+  "checkout_commit": "cd648d224510a902acac46c85753ec6e97854195",
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "platform": "Linux-6.18.35-x86_64-with-glibc2.41",
+  "ci": {
+    "run_id": 34020468020,
+    "job_id": 101451979662,
+    "conclusion": "success",
+    "commands": [
+      "python -m build.examples",
+      "python build/examples.py",
+      "git diff --exit-code"
+    ]
+  },
+  "local": [
+    {
+      "command": "python -m build.examples",
+      "exit_code": 0,
+      "seconds": 24.049,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python build/examples.py",
+      "exit_code": 0,
+      "seconds": 23.817,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "local_limitations": [
+    "The initial combined command timed out during the second entry point; its isolated rerun passed.",
+    "Installed pydantic-settings 2.14.1 is older than the declared >=2.15; GitHub verification installed the declared dependencies and passed."
+  ],
+  "variants": [
+    {
+      "groupings": [
+        "xml",
+        "markdown"
+      ],
+      "bytes": 13284,
+      "sha256": "4c38aea9580f453b3564a1f52a24f5c479c7127e324fde35361ee04b0dc76e59",
+      "production_count": 141,
+      "production_fingerprint": "95cd111380f3b76686d4e9737e318891e0c07f4cf86e05dabde285aa6e97680f"
+    },
+    {
+      "groupings": [
+        "xml"
+      ],
+      "bytes": 11722,
+      "sha256": "c451591b4b33a17c842708a789dedce45aec1410998637a360b8c4dffefa662c",
+      "production_count": 124,
+      "production_fingerprint": "b0839de6fbeed43c5ea4d7e017dd549b212367df9adc854795c865aea513ba69"
+    },
+    {
+      "groupings": [
+        "markdown"
+      ],
+      "bytes": 11874,
+      "sha256": "1ed0b38cbb066751b3edc60715e82511f700ac6f61809ee3660c8b8db027cec0",
+      "production_count": 124,
+      "production_fingerprint": "ceb59ffc62ef5fc628e043f696a170ace84ec6f221863d56e72c99e61e718c99"
+    },
+    {
+      "groupings": [
+        "markdown",
+        "xml"
+      ],
+      "bytes": 13284,
+      "sha256": "5d7de09a15b1060e2bfd22bd5d914da79e05cf55137f6f0a6953fb510a99b2a5",
+      "production_count": 141,
+      "production_fingerprint": "7d32c9e3c3faecb803197f991fc4b1d7e88947d27856ee8d23a0dd3a388560e5"
+    }
+  ],
+  "deliveries": {
+    "outputs/oak.ebnf": {
+      "bytes": 13284,
+      "sha256": "4c38aea9580f453b3564a1f52a24f5c479c7127e324fde35361ee04b0dc76e59"
+    },
+    "skills/oak-authoring/references/oak.ebnf": {
+      "bytes": 13284,
+      "sha256": "4c38aea9580f453b3564a1f52a24f5c479c7127e324fde35361ee04b0dc76e59"
+    },
+    "skills/oak-authoring/references/00-structure.oak.md": {
+      "bytes": 14720,
+      "sha256": "12b74dae2996019e6416a2c4b5aea1543dd4fade704a3f43fe728ef9364aa34c"
+    },
+    "outputs/oak-authoring.oak.md": {
+      "bytes": 63974,
+      "sha256": "2dd5f387f16371001c9eaafa40d7abe3c8e8ca5ce4bcef0e1c414111d44adcd8"
+    },
+    "skills/oak-authoring/SKILL.md": {
+      "bytes": 8022,
+      "sha256": "c6642e50a3f8de3b5be852eaff8351878d82140826a9eded127d0a035d59d80d"
+    }
+  },
+  "productions": [
+    {
+      "source": "expression:condition",
+      "index": 34
+    },
+    {
+      "source": "expression:comparison",
+      "index": 35
+    },
+    {
+      "source": "expression:all_condition",
+      "index": 36
+    },
+    {
+      "source": "expression:any_condition",
+      "index": 37
+    },
+    {
+      "source": "expression:not_condition",
+      "index": 38
+    },
+    {
+      "source": "expression:process_value",
+      "index": 39
+    },
+    {
+      "source": "expression:value_target",
+      "index": 40
+    },
+    {
+      "source": "expression:constant_target",
+      "index": 41
+    },
+    {
+      "source": "expression:process_target",
+      "index": 42
+    },
+    {
+      "source": "expression:local_state_target",
+      "index": 43
+    },
+    {
+      "source": "expression:local_interface_target",
+      "index": 44
+    },
+    {
+      "source": "expression:value_binding",
+      "index": 45
+    },
+    {
+      "source": "expression:binding_list",
+      "index": 46
+    },
+    {
+      "source": "expression:output_bindings",
+      "index": 47
+    },
+    {
+      "source": "expression:trigger_declaration",
+      "index": 48
+    },
+    {
+      "source": "expression:trigger_field",
+      "index": 49
+    },
+    {
+      "source": "expression:if_statement",
+      "index": 50
+    },
+    {
+      "source": "expression:while_statement",
+      "index": 51
+    },
+    {
+      "source": "expression:assert_statement",
+      "index": 52
+    },
+    {
+      "source": "expression:call_statement",
+      "index": 53
+    },
+    {
+      "source": "expression:emit_statement",
+      "index": 54
+    },
+    {
+      "source": "expression:set_statement",
+      "index": 55
+    },
+    {
+      "source": "expression:fail_statement",
+      "index": 56
+    },
+    {
+      "source": "expression:suite",
+      "index": 57
+    },
+    {
+      "source": "expression:process_statement",
+      "index": 58
+    },
+    {
+      "source": "expression:positive_integer",
+      "index": 59
+    },
+    {
+      "source": "expression:json_string",
+      "index": 60
+    },
+    {
+      "source": "expression:logical_nl",
+      "index": 61
+    },
+    {
+      "source": "expression:indent",
+      "index": 62
+    },
+    {
+      "source": "expression:dedent",
+      "index": 63
+    },
+    {
+      "source": "vocabulary.SLUG_ID_SYNTAX:slug_id",
+      "index": 83
+    },
+    {
+      "source": "vocabulary.NON_BLANK_LINE_SYNTAX:non_blank_line",
+      "index": 84
+    },
+    {
+      "source": "vocabulary.PROCESS_NAME_SYNTAX:process_name",
+      "index": 85
+    },
+    {
+      "source": "vocabulary.PLACEHOLDER_SYNTAX:placeholder",
+      "index": 86
+    },
+    {
+      "source": "vocabulary.REGEX_PATTERN_SYNTAX:regex_pattern",
+      "index": 95
+    },
+    {
+      "source": "vocabulary.DOTTED_PATH_EBNF:dotted_path",
+      "index": 87
+    },
+    {
+      "source": "vocabulary.VALUE_REFERENCE_EBNF:value_reference",
+      "index": 88
+    },
+    {
+      "source": "vocabulary.VALUE_REFERENCE_EBNF:constant_target",
+      "index": 89
+    },
+    {
+      "source": "vocabulary.VALUE_REFERENCE_EBNF:state_target",
+      "index": 90
+    },
+    {
+      "source": "vocabulary.ENTRY_PART_EBNF:entry_part",
+      "index": 91
+    },
+    {
+      "source": "vocabulary.ENTRY_PATH_EBNF:entry_path",
+      "index": 92
+    },
+    {
+      "source": "vocabulary.RELATIVE_DOCUMENT_PATH_EBNF:relative_document_path",
+      "index": 93
+    },
+    {
+      "source": "vocabulary.TARGET_PATH_EBNF:target_path",
+      "index": 94
+    },
+    {
+      "source": "surface.constraint-type:surface_constraint_type",
+      "index": 96
+    },
+    {
+      "source": "surface.constraint-one-of:surface_constraint_one_of",
+      "index": 97
+    },
+    {
+      "source": "surface.constraint-regex:surface_constraint_regex",
+      "index": 98
+    },
+    {
+      "source": "surface.constraint-non-empty:surface_constraint_non_empty",
+      "index": 99
+    },
+    {
+      "source": "surface.constraint-max-chars:surface_constraint_max_chars",
+      "index": 100
+    },
+    {
+      "source": "surface.constraint-lines:surface_constraint_lines",
+      "index": 101
+    },
+    {
+      "source": "surface.constraint-list-of:surface_constraint_list_of",
+      "index": 102
+    },
+    {
+      "source": "surface.constraint-at-least:surface_constraint_at_least",
+      "index": 103
+    },
+    {
+      "source": "surface.constraint-at-most:surface_constraint_at_most",
+      "index": 104
+    },
+    {
+      "source": "surface.where:surface_where",
+      "index": 105
+    },
+    {
+      "source": "surface.instruction:surface_instruction",
+      "index": 106
+    },
+    {
+      "source": "surface.constant-inline:surface_constant_inline",
+      "index": 107
+    },
+    {
+      "source": "surface.constant-text:surface_constant_text",
+      "index": 108
+    },
+    {
+      "source": "surface.constant-json:surface_constant_json",
+      "index": 109
+    },
+    {
+      "source": "surface.constant-csv:surface_constant_csv",
+      "index": 110
+    },
+    {
+      "source": "surface.constant-yaml:surface_constant_yaml",
+      "index": 111
+    },
+    {
+      "source": "surface.schema:surface_schema",
+      "index": 112
+    },
+    {
+      "source": "surface.state:surface_state",
+      "index": 113
+    },
+    {
+      "source": "surface.value-literal:surface_value_literal",
+      "index": 114
+    },
+    {
+      "source": "surface.value-constant:surface_value_constant",
+      "index": 115
+    },
+    {
+      "source": "surface.value-state:surface_value_state",
+      "index": 116
+    },
+    {
+      "source": "surface.value-binding:surface_value_binding",
+      "index": 117
+    },
+    {
+      "source": "surface.value-binding-line:surface_value_binding_line",
+      "index": 118
+    },
+    {
+      "source": "surface.condition-compare:surface_condition_compare",
+      "index": 119
+    },
+    {
+      "source": "surface.condition-all:surface_condition_all",
+      "index": 120
+    },
+    {
+      "source": "surface.condition-any:surface_condition_any",
+      "index": 121
+    },
+    {
+      "source": "surface.condition-not:surface_condition_not",
+      "index": 122
+    },
+    {
+      "source": "surface.act-native:surface_act_native",
+      "index": 123
+    },
+    {
+      "source": "surface.act-tool:surface_act_tool",
+      "index": 124
+    },
+    {
+      "source": "surface.statement-set:surface_statement_set",
+      "index": 125
+    },
+    {
+      "source": "surface.statement-emit-inferred:surface_statement_emit_inferred",
+      "index": 126
+    },
+    {
+      "source": "surface.statement-emit-explicit:surface_statement_emit_explicit",
+      "index": 127
+    },
+    {
+      "source": "surface.statement-if:surface_statement_if",
+      "index": 128
+    },
+    {
+      "source": "surface.statement-call:surface_statement_call",
+      "index": 129
+    },
+    {
+      "source": "surface.statement-fail:surface_statement_fail",
+      "index": 130
+    },
+    {
+      "source": "surface.statement-assert:surface_statement_assert",
+      "index": 131
+    },
+    {
+      "source": "surface.statement-foreach:surface_statement_foreach",
+      "index": 132
+    },
+    {
+      "source": "surface.statement-while:surface_statement_while",
+      "index": 133
+    },
+    {
+      "source": "surface.statement-par:surface_statement_par",
+      "index": 134
+    },
+    {
+      "source": "surface.statement-join:surface_statement_join",
+      "index": 135
+    },
+    {
+      "source": "surface.process:surface_process",
+      "index": 136
+    },
+    {
+      "source": "surface.trigger:surface_trigger",
+      "index": 137
+    },
+    {
+      "source": "surface.interface-receives:surface_interface_receives",
+      "index": 138
+    },
+    {
+      "source": "surface.interface-emits:surface_interface_emits",
+      "index": 139
+    },
+    {
+      "source": "surface.node:surface_node",
+      "index": 140
+    },
+    {
+      "source": "scaffold:oak_document",
+      "index": 0
+    },
+    {
+      "source": "scaffold:xml_document",
+      "index": 1
+    },
+    {
+      "source": "scaffold:xml_parts_from_instructions",
+      "index": 2
+    },
+    {
+      "source": "scaffold:xml_parts_from_constants",
+      "index": 3
+    },
+    {
+      "source": "scaffold:xml_parts_from_schemas",
+      "index": 4
+    },
+    {
+      "source": "scaffold:xml_parts_from_state",
+      "index": 5
+    },
+    {
+      "source": "scaffold:xml_parts_from_triggers",
+      "index": 6
+    },
+    {
+      "source": "scaffold:xml_parts_from_processes",
+      "index": 7
+    },
+    {
+      "source": "scaffold:xml_parts_from_interfaces",
+      "index": 8
+    },
+    {
+      "source": "scaffold:xml_instructions_part",
+      "index": 9
+    },
+    {
+      "source": "scaffold:xml_constants_part",
+      "index": 10
+    },
+    {
+      "source": "scaffold:xml_schemas_part",
+      "index": 11
+    },
+    {
+      "source": "scaffold:xml_state_part",
+      "index": 12
+    },
+    {
+      "source": "scaffold:xml_triggers_part",
+      "index": 13
+    },
+    {
+      "source": "scaffold:xml_processes_part",
+      "index": 14
+    },
+    {
+      "source": "scaffold:xml_interfaces_part",
+      "index": 15
+    },
+    {
+      "source": "scaffold:markdown_document",
+      "index": 16
+    },
+    {
+      "source": "scaffold:markdown_parts_from_instructions",
+      "index": 17
+    },
+    {
+      "source": "scaffold:markdown_parts_from_constants",
+      "index": 18
+    },
+    {
+      "source": "scaffold:markdown_parts_from_schemas",
+      "index": 19
+    },
+    {
+      "source": "scaffold:markdown_parts_from_state",
+      "index": 20
+    },
+    {
+      "source": "scaffold:markdown_parts_from_triggers",
+      "index": 21
+    },
+    {
+      "source": "scaffold:markdown_parts_from_processes",
+      "index": 22
+    },
+    {
+      "source": "scaffold:markdown_parts_from_interfaces",
+      "index": 23
+    },
+    {
+      "source": "scaffold:markdown_instructions_part",
+      "index": 24
+    },
+    {
+      "source": "scaffold:markdown_constants_part",
+      "index": 25
+    },
+    {
+      "source": "scaffold:markdown_schemas_part",
+      "index": 26
+    },
+    {
+      "source": "scaffold:markdown_state_part",
+      "index": 27
+    },
+    {
+      "source": "scaffold:markdown_triggers_part",
+      "index": 28
+    },
+    {
+      "source": "scaffold:markdown_processes_part",
+      "index": 29
+    },
+    {
+      "source": "scaffold:markdown_interfaces_part",
+      "index": 30
+    },
+    {
+      "source": "scaffold:xml_body_entry",
+      "index": 31
+    },
+    {
+      "source": "scaffold:markdown_body_entry",
+      "index": 32
+    },
+    {
+      "source": "scaffold:entry_tag",
+      "index": 33
+    },
+    {
+      "source": "scaffold:comparison_operator",
+      "index": 64
+    },
+    {
+      "source": "scaffold:constant",
+      "index": 65
+    },
+    {
+      "source": "scaffold:inline_constant",
+      "index": 66
+    },
+    {
+      "source": "scaffold:text_constant",
+      "index": 67
+    },
+    {
+      "source": "scaffold:json_constant",
+      "index": 68
+    },
+    {
+      "source": "scaffold:csv_constant",
+      "index": 69
+    },
+    {
+      "source": "scaffold:yaml_constant",
+      "index": 70
+    },
+    {
+      "source": "scaffold:state_entry",
+      "index": 71
+    },
+    {
+      "source": "scaffold:as_clause",
+      "index": 72
+    },
+    {
+      "source": "scaffold:schema_placeholder_path",
+      "index": 73
+    },
+    {
+      "source": "scaffold:json_value",
+      "index": 74
+    },
+    {
+      "source": "scaffold:csv_body",
+      "index": 75
+    },
+    {
+      "source": "scaffold:yaml_body",
+      "index": 76
+    },
+    {
+      "source": "scaffold:attributes",
+      "index": 77
+    },
+    {
+      "source": "scaffold:markdown_attributes",
+      "index": 78
+    },
+    {
+      "source": "scaffold:text_body",
+      "index": 79
+    },
+    {
+      "source": "scaffold:text_line",
+      "index": 80
+    },
+    {
+      "source": "scaffold:blank_line",
+      "index": 81
+    },
+    {
+      "source": "scaffold:lf",
+      "index": 82
+    }
+  ],
+  "expression_comments": [
+    "One condition grammar serves IF, WHILE, ASSERT, and trigger guards.",
+    "ALL and ANY require at least two conditions; NOT requires exactly one.",
+    "Condition operators preserve the authored tree and left-to-right short-circuit order.",
+    "IF and WHILE headers end with a colon; their non-empty action suites indent two spaces.",
+    "ELSE aligns with its IF and immediately follows its suite, allowing blank lines.",
+    "WHILE requires LIMIT and one positive decimal integer literal; exhaustion while true fails.",
+    "ASSERT has a condition and optional indented MESSAGE metadata, not an action suite.",
+    "Balanced parentheses continue one logical statement across physical lines without action scopes.",
+    "OAK lists accept a trailing comma; JSON values retain their separate JSON grammar.",
+    "Trigger fields are named, unique, and may be authored in any order; event and process are required.",
+    "Canonical trigger field order is event, source, guard, process, seed; absent optionals are omitted.",
+    "Do not author guard=true or an empty seed; a source-backed trigger has no seed field.",
+    "A seed is an ordered named-binding list using the same value grammar as process inputs.",
+    "Strings, JSON literals, and typed targets are consumed as whole tokens before separators or operators.",
+    "Structural tabs, positional fields, truthiness, general calls, comments, infix aliases, and chained comparisons are invalid.",
+    "Canonical expression width is 100 Unicode code points, including indentation, prefixes, and suffixes.",
+    "Flat lists have no trailing comma; expanded lists put one item per line with a trailing comma and two-space indentation.",
+    "Closing delimiters align with their owning line; nested lists apply the same width rule recursively.",
+    "Indivisible values and prose may exceed the soft width; formatting never rewrites their contents."
+  ],
+  "record_format": "Each source-qualified key maps to a zero-based production occurrence in baseline.ebnf. Literal-aware tokenisation preserves exact terminal and special-sequence bytes."
+}

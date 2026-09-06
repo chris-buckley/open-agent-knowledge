@@ -23,6 +23,7 @@ from build.checks.compact_runtime import (
 )
 from build.checks.coding_standards import validate_coding_standards
 from build.checks.context import validate_interpreter_context
+from build.checks.ebnf import validate_ebnf
 from build.checks.evidence import validate_evidence
 from build.checks.execution import (
     validate_execution,
@@ -50,6 +51,7 @@ from build.checks.validation import validate_contract_rules
 Check = Callable[[], None]
 
 CHECKS: tuple[Check, ...] = (
+    validate_ebnf,
     validate_statement_bodies,
     validate_compact_specimens,
     validate_compact_lexing,
