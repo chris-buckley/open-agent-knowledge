@@ -2,8 +2,8 @@
 
 Prepared: 2026-09-06T02:46:56Z
 Classification: INTERNAL
-Readiness: Execution authorised by the user on 2026-09-06.
-Execution: In progress.
+Readiness: Complete and verified for review. Execution authorised by the user on 2026-09-06.
+Execution: Complete. All ten key tasks passed; see [report.md](report.md).
 
 ## 1. Situation
 
@@ -170,26 +170,26 @@ Concept of operations: Update the owning contracts and generated knowledge organ
 
 ### Phase 1: Reorganise the generated knowledge
 Objective: Establish the source mapping and delivery locations required by the new layout.
-- [ ] Key task: P01.01 Update `skills/AGENTS.md` with the accepted directory ownership, generic scaffold requirement, and purposeful empty template directories.
-- [ ] Key task: P01.02 Update `build/authoring_guides.py` and `build/authoring.py` so references own language knowledge and `guides` owns practical authoring, review, and validation guidance, with one owner per claim.
-- [ ] Key task: P01.03 Update `examples/catalog.py` and every current consumer for the teaching delivery beneath `assets/examples`; preserve complete scenario content and local dependencies.
+- [x] Key task: P01.01 Update `skills/AGENTS.md` with the accepted directory ownership, generic scaffold requirement, and purposeful empty template directories.
+- [x] Key task: P01.02 Update `build/authoring_guides.py` and `build/authoring.py` so references own language knowledge and `guides` owns practical authoring, review, and validation guidance, with one owner per claim.
+- [x] Key task: P01.03 Update `examples/catalog.py` and every current consumer for the teaching delivery beneath `assets/examples`; preserve complete scenario content and local dependencies.
 Success criteria: Source mappings account for E01, every changed document reference resolves, and the shared rule inventory has no missing or duplicated claims.
 Transition trigger: The new generated document graph and exact delivery inventory are ready for the template addition.
 
 ### Phase 2: Deliver the generic template
 Objective: Generate the reusable skeleton and its compact layout description.
-- [ ] Key task: P02.01 Author the template from the existing build owners, including its metadata placeholders, OAK body scaffold, and intentional `.gitkeep` entries.
-- [ ] Key task: P02.02 Recover space from redundant wording or representation, then include the template's exact inert knowledge in the guides shared by the skill and standalone agent; keep template and teaching operational documents outside the fusion input graph.
-- [ ] Key task: P02.03 Route template use from the authoring entry, preserve conditional validation, and update the skill product version consistently while retaining the validator identity unless its runtime actually changes.
+- [x] Key task: P02.01 Author the template from the existing build owners, including its metadata placeholders, OAK body scaffold, and intentional `.gitkeep` entries.
+- [x] Key task: P02.02 Recover space from redundant wording or representation, then include the template's exact inert knowledge in the guides shared by the skill and standalone agent; keep template and teaching operational documents outside the fusion input graph.
+- [x] Key task: P02.03 Route template use from the authoring entry, preserve conditional validation, and update the skill product version consistently while retaining the validator identity unless its runtime actually changes.
 Success criteria: The template meets E02 and E03, its files occupy the E01 locations, and both delivered forms carry identical template knowledge without acquiring extra operational scope.
 Transition trigger: The complete candidate can be generated from its source owners.
 
 ### Phase 3: Verify and close the change
 Objective: Prove the delivered package matches the accepted comparisons and repository contracts.
-- [ ] Key task: P03.01 Extend `build/checks/authoring.py` to validate the complete new file set, deliberate scaffold placeholders, exact tree notation, template population, and skill-agent knowledge parity.
-- [ ] Key task: P03.02 Update generation cleanup for all owned delivery locations; remove stale outputs and current references to replaced paths, preserving historical plan records.
-- [ ] Key task: P03.03 Regenerate all affected products, compile the changed Python, and run both complete verification entry points using the existing Python 3.11 environment.
-- [ ] Key task: P03.04 Confirm repeated generation changes no files, inspect the final diff, and write `report.md` with observed results for each required comparison.
+- [x] Key task: P03.01 Extend `build/checks/authoring.py` to validate the complete new file set, deliberate scaffold placeholders, exact tree notation, template population, and skill-agent knowledge parity.
+- [x] Key task: P03.02 Update generation cleanup for all owned delivery locations; remove stale outputs and current references to replaced paths, preserving historical plan records.
+- [x] Key task: P03.03 Regenerate all affected products, compile the changed Python, and run both complete verification entry points using the existing Python 3.11 environment.
+- [x] Key task: P03.04 Confirm repeated generation changes no files, inspect the final diff, and write `report.md` with observed results for each required comparison.
 Success criteria: E01, E02, and E03 pass their stated checks. Complete verification, detached examples, fusion scope, validator consent and identity, output size limits, and freshness pass. The tested copy matches the delivered working files.
 Transition trigger: All tasks pass and the completion report records the verified outcome.
 
