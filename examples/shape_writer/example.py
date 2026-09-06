@@ -52,49 +52,122 @@ change_request_schema = Schema(
     id="change-request", template="<REQUEST>",
     where=[where(PLACEHOLDER_REQUEST, Type(of="string"), NonEmpty())],
 )
+compare_options_text = (
+    'Compare current and proposed behaviour for <REQUEST>; produce <CRITERION>, <CURRENT>, and '
+    '<PROPOSED>.'
+)
+
+compare_options_action = ACT(
+    compare_options_text,
+    input=SCHEMA_REQUEST,
+    output=SCHEMA_COMPARISON,
+    inputs=local_bindings([PLACEHOLDER_REQUEST]),
+    outputs=PLACEHOLDERS_COMPARISON,
+)
+
 compare_options_process = Process(
-    id="compare-options", name="Compare options", input=SCHEMA_REQUEST, output=SCHEMA_COMPARISON,
-    steps=[ACT(
-        "Compare current and proposed behaviour for <REQUEST>; produce <CRITERION>, <CURRENT>, and <PROPOSED>.",
-        input=SCHEMA_REQUEST, output=SCHEMA_COMPARISON,
-        inputs=local_bindings([PLACEHOLDER_REQUEST]), outputs=PLACEHOLDERS_COMPARISON,
-    )],
+    id="compare-options",
+    name="Compare options",
+    input=SCHEMA_REQUEST,
+    output=SCHEMA_COMPARISON,
+    body=[compare_options_action],
 )
+decide_change_text = "Assess <CURRENT> and <PROPOSED> against <CRITERION>; produce <DECISION> and <RATIONALE>."
+
+decide_change_action = ACT(
+    decide_change_text,
+    input=SCHEMA_COMPARISON,
+    output=SCHEMA_DECISION,
+    inputs=local_bindings(PLACEHOLDERS_COMPARISON),
+    outputs=PLACEHOLDERS_DECISION,
+)
+
 decide_change_process = Process(
-    id="decide-change", name="Decide change", input=SCHEMA_COMPARISON, output=SCHEMA_DECISION,
-    steps=[ACT(
-        "Assess <CURRENT> and <PROPOSED> against <CRITERION>; produce <DECISION> and <RATIONALE>.",
-        input=SCHEMA_COMPARISON, output=SCHEMA_DECISION,
-        inputs=local_bindings(PLACEHOLDERS_COMPARISON), outputs=PLACEHOLDERS_DECISION,
-    )],
+    id="decide-change",
+    name="Decide change",
+    input=SCHEMA_COMPARISON,
+    output=SCHEMA_DECISION,
+    body=[decide_change_action],
 )
+plan_change_text = "Plan <DECISION> under <RATIONALE>; produce one <GOAL>, implementation <STEP>, and nested <CHECK>."
+
+plan_change_action = ACT(
+    plan_change_text,
+    input=SCHEMA_DECISION,
+    output=SCHEMA_OUTLINE,
+    inputs=local_bindings(PLACEHOLDERS_DECISION),
+    outputs=PLACEHOLDERS_OUTLINE,
+)
+
 plan_change_process = Process(
-    id="plan-change", name="Plan change", input=SCHEMA_DECISION, output=SCHEMA_OUTLINE,
-    steps=[ACT(
-        "Plan <DECISION> under <RATIONALE>; produce one <GOAL>, implementation <STEP>, and nested <CHECK>.",
-        input=SCHEMA_DECISION, output=SCHEMA_OUTLINE,
-        inputs=local_bindings(PLACEHOLDERS_DECISION), outputs=PLACEHOLDERS_OUTLINE,
-    )],
+    id="plan-change",
+    name="Plan change",
+    input=SCHEMA_DECISION,
+    output=SCHEMA_OUTLINE,
+    body=[plan_change_action],
 )
+write_file_text = "Implement <STEP> for <GOAL> and <CHECK>; produce <FILE_PATH> and complete Python <CODE>."
+
+write_file_action = ACT(
+    write_file_text,
+    input=SCHEMA_OUTLINE,
+    output=SCHEMA_FILE,
+    inputs=local_bindings(PLACEHOLDERS_OUTLINE),
+    outputs=PLACEHOLDERS_FILE,
+)
+
 write_file_process = Process(
-    id="write-file", name="Write file", input=SCHEMA_OUTLINE, output=SCHEMA_FILE,
-    steps=[ACT(
-        "Implement <STEP> for <GOAL> and <CHECK>; produce <FILE_PATH> and complete Python <CODE>.",
-        input=SCHEMA_OUTLINE, output=SCHEMA_FILE,
-        inputs=local_bindings(PLACEHOLDERS_OUTLINE), outputs=PLACEHOLDERS_FILE,
-    )],
+    id="write-file",
+    name="Write file",
+    input=SCHEMA_OUTLINE,
+    output=SCHEMA_FILE,
+    body=[write_file_action],
 )
+compare_options_call = Call(
+    process=PROCESS_COMPARE_OPTIONS,
+    inputs=local_bindings([PLACEHOLDER_REQUEST]),
+    outputs=PLACEHOLDERS_COMPARISON,
+)
+
+emit_comparison = Emit(interface=INTERFACE_COMPARISON)
+
+decide_change_call = Call(
+    process=PROCESS_DECIDE_CHANGE,
+    inputs=local_bindings(PLACEHOLDERS_COMPARISON),
+    outputs=PLACEHOLDERS_DECISION,
+)
+
+emit_decision = Emit(interface=INTERFACE_DECISION)
+
+plan_change_call = Call(
+    process=PROCESS_PLAN_CHANGE,
+    inputs=local_bindings(PLACEHOLDERS_DECISION),
+    outputs=PLACEHOLDERS_OUTLINE,
+)
+
+emit_outline = Emit(interface=INTERFACE_OUTLINE)
+
+write_file_call = Call(
+    process=PROCESS_WRITE_FILE,
+    inputs=local_bindings(PLACEHOLDERS_OUTLINE),
+    outputs=PLACEHOLDERS_FILE,
+)
+
+emit_file = Emit(interface=INTERFACE_FILE)
+
 prepare_change_process = Process(
-    id="prepare-change", name="Prepare change", input=SCHEMA_REQUEST,
-    steps=[
-        Call(process=PROCESS_COMPARE_OPTIONS, inputs=local_bindings([PLACEHOLDER_REQUEST]), outputs=PLACEHOLDERS_COMPARISON),
-        Emit(interface=INTERFACE_COMPARISON),
-        Call(process=PROCESS_DECIDE_CHANGE, inputs=local_bindings(PLACEHOLDERS_COMPARISON), outputs=PLACEHOLDERS_DECISION),
-        Emit(interface=INTERFACE_DECISION),
-        Call(process=PROCESS_PLAN_CHANGE, inputs=local_bindings(PLACEHOLDERS_DECISION), outputs=PLACEHOLDERS_OUTLINE),
-        Emit(interface=INTERFACE_OUTLINE),
-        Call(process=PROCESS_WRITE_FILE, inputs=local_bindings(PLACEHOLDERS_OUTLINE), outputs=PLACEHOLDERS_FILE),
-        Emit(interface=INTERFACE_FILE),
+    id="prepare-change",
+    name="Prepare change",
+    input=SCHEMA_REQUEST,
+    body=[
+        compare_options_call,
+        emit_comparison,
+        decide_change_call,
+        emit_decision,
+        plan_change_call,
+        emit_outline,
+        write_file_call,
+        emit_file,
     ],
 )
 change_requested_trigger = Trigger(
@@ -107,8 +180,10 @@ decision_interface = Interface(id="decision", flow="emits", schema=SCHEMA_DECISI
 outline_interface = Interface(id="outline", flow="emits", schema=SCHEMA_OUTLINE)
 file_interface = Interface(id="file", flow="emits", schema=SCHEMA_FILE)
 
+keep_scope_instruction = Instruction(id="keep-scope", body="Keep the proposed change limited to the supplied request.")
+
 shape_writer_node = Node(
-    instructions=[Instruction(id="keep-scope", body="Keep the proposed change limited to the supplied request.")],
+    instructions=[keep_scope_instruction],
     schemas=[change_request_schema],
     triggers=[change_requested_trigger],
     processes=[compare_options_process, decide_change_process, plan_change_process, write_file_process, prepare_change_process],

@@ -166,7 +166,7 @@ def validate_shapes() -> None:
 
 def _decision_statement() -> None:
     """Validate roles and boundary failures, not the truth of a judgment."""
-    action = shape_writer.decide_change_process.steps[0]
+    action = shape_writer.decide_change_process.body[0]
     expected_inputs = SAMPLE_BINDINGS[comparison_schema.id]
     expected_outputs = SAMPLE_BINDINGS[decision_schema.id]
     if (action.input != shape_writer.SCHEMA_COMPARISON
@@ -217,7 +217,7 @@ def _decision_statement() -> None:
     decision_schema.bind(contrary)
     if populate_example(decision_schema, contrary) == EXPECTED_INSTANCES[decision_schema.id]:
         raise RuntimeError("contrary judgment unexpectedly matches the expected fixture")
-    _rejects(lambda: shape_writer.fixture_host(shape_writer.plan_change_process.steps[0], contrary), ValueError)
+    _rejects(lambda: shape_writer.fixture_host(shape_writer.plan_change_process.body[0], contrary), ValueError)
 
     # Advisory wording is not parser policy. Check a different well-formed
     # sentence in both groupings without a new opcode, type, or scenario.
@@ -229,12 +229,12 @@ def _decision_statement() -> None:
     for instruction in alternatives:
         candidate = deepcopy(data)
         process = next(p for p in candidate["processes"] if p["id"] == "decide-change")
-        process["steps"][0]["instruction"] = instruction
+        process["body"][0]["instruction"] = instruction
         node = Node.model_validate(candidate)
         for grouping in ("xml", "markdown"):
             text = render(node, grouping=grouping)
             recovered = parse(text)
-            step = next(p for p in recovered.processes if p.id == "decide-change").steps[0]
+            step = next(p for p in recovered.processes if p.id == "decide-change").body[0]
             if step.instruction != instruction or render(recovered, grouping=grouping) != text:
                 raise RuntimeError("alternative statement wording was restricted or rewritten")
             result = execute(recovered, Arrival(interface=shape_writer.INTERFACE_REQUEST,

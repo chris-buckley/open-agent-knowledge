@@ -45,6 +45,9 @@ example-checks: YAML<<
 - Use build/checks/authoring.py to verify detached teaching closure, literal preservation,
   refused operational fusion, and skill-agent execution parity; retain the existing
   consent, identity, and byte limits.
+- Use build/checks/statements.py for statement-body migration, obsolete-API rejection,
+  literal preservation, independent JSON-LD ordering, and flat authoring assembly
+  checks. Keep historical before-and-after evidence distinct from current contracts.
 >>
 
 coding-standard-checks: ["validate the pure OAK entry and every routed Python topic in both groupings", "require exact bounded document closure, unique source sections, and complete inert example references", "exercise rejected missing, duplicate, escaping, noncanonical, and malformed knowledge plus symbolic-link inputs", "keep migration evidence historical and general style judgement distinct from structural validation"]

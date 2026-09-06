@@ -99,13 +99,12 @@ def json_ld_context(
             "where",
             "constraints",
             "examples",
-            "steps",
             "inputs",
             "outputs",
             "bindings",
             "seed",
             "conditions",
-            "thenSteps",
+            "then",
             "otherwise",
         )
     }

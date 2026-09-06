@@ -13,12 +13,12 @@ example-1: "ASSERT $RESULT does not equal \"\"\n  MESSAGE \"The result must not 
 syntax-reference: "outputs/oak.ebnf"
 
 grammar: TEXT<<
-surface_step_assert = assert_statement ;
+surface_statement_assert = assert_statement ;
 >>
 </constants>
 
 <schemas>
-<schema id="step-assert" name="Assert" purpose="One required condition that aborts the transaction when false.">
+<schema id="statement-assert" name="Assert" purpose="One required condition that aborts the transaction when false.">
 ASSERT <CONDITION>
   MESSAGE <MESSAGE>
 

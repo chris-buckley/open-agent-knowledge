@@ -1,0 +1,201 @@
+{
+  "baseline_revision": "41308c59cf483903c5f856c6d52aa6d786829e94",
+  "reviewed_main": "eca953bd81f78f005fdc1b3d17ed060620f6c97d",
+  "capture": "Observed before implementation; baseline full module and direct verification both exited 0.",
+  "hash": "SHA-256; JSON uses sorted keys, UTF-8, ensure_ascii=False, compact separators.",
+  "comparison": "Current models and JSON-LD are translated back only along typed process/block/IF fields; all literal data remains untouched.",
+  "documents": {
+    "examples/schemas/api_coverage_table.oak.md": {
+      "xml": "fc5cfa532de160f790047a38c3aecb64609f3e1ec217667e8ffe34ed56d6e7ff",
+      "markdown": "452236349ab5f40eec73fd599b343de6e3a3f85a3c635c9c37a4f7ff3f066caf",
+      "model": "bc6fe6a324cc62cc5952eade0f74f60f1ecef03ddfcdcba06c0b07435157bd98",
+      "json_ld": "ddc9b7bc25acb794e39eb0b2746c86837528e3c7689a6c780dbc2b5d0cad78b3"
+    },
+    "examples/schemas/code_changes.oak.md": {
+      "xml": "46f78f1ecf8bffe34aa61d6777966da3e03550398910fd902eea823b2d665815",
+      "markdown": "d05d63c8bb2b2bf58fbb8afaecefaf430364c1bb5b4efebdf96a4b4e34482acd",
+      "model": "a4cb43d88e9485b1d60ef20e13ec1cdc6e88a0cbdcf2c42eff43afba55cbcf67",
+      "json_ld": "bfb1d3b4185380a713780466eaa6cd92701667b3ce186a5b3951183953e3d9fb"
+    },
+    "examples/schemas/code_map.oak.md": {
+      "xml": "429ead0e2d4a9336da870628f33575e125570e4b04bed6532811e500ba4e36cf",
+      "markdown": "5f9f6176e41be842a065ba6abc2341ae9b63271f8aae4433443ebfe60688a49a",
+      "model": "2dcaef33ee10b7383e240f7ded3136f6aaa730331ff812fa96cfb7a85e9250bd",
+      "json_ld": "64a867a5ce0614705d5b51819c786d041d551c3980d2e33096f13f6d9add5932"
+    },
+    "examples/schemas/docs_index.oak.md": {
+      "xml": "64283806f54d44b9a82437b6258217886c8c39c10900469005d9bf55c58a6174",
+      "markdown": "cf6800be5470cce7d0602868b240c20eb8fdeea2dcd4261b455bb15cb2b05e49",
+      "model": "801f9c030bde240a039702cd14b9c63f6e29340f95f55ff4de4510e66c367ee5",
+      "json_ld": "afeabaad6da7e0c472037831e2b495a9281603e16038148a1c81d0b3785f25ac"
+    },
+    "examples/schemas/error.oak.md": {
+      "xml": "e69e704051bbfbbbfec63c09d2d3a7de7ca772f32c50cb3462f53736c99e928f",
+      "markdown": "14938a9f3cc971fc7fcf2886266aa1957387d9671dd8f77471a11025280cb795",
+      "model": "1f09cf4ff66cbb2c3e1e2bd631c49b3a04b35b3a335fe23763b95f03c576edab",
+      "json_ld": "233076cc5c5f93d28da9d39e97f9b717a2165b6ebe99e90240db1d20d6a26088"
+    },
+    "examples/schemas/hierarchical_outline.oak.md": {
+      "xml": "3b72ed951a412598b229758913e451dad810982ed16e769cca9e1cd854a64377",
+      "markdown": "c091fc28da12e16dfb7b2065c3672a1fdf6efa29202481fa1004d6ad87965baf",
+      "model": "ddb0fedb1bcbcdab9e87a87b6dec2efa4c975316aeaa830bf7bc680e28c12241",
+      "json_ld": "8ebc63f9fd75e8ed2c575599f53bf2542b9510c7a0b336eb58b9ca300c785d96"
+    },
+    "examples/schemas/ideation_list.oak.md": {
+      "xml": "e081dc19bc26ac2beb6c99a2b27a3a20c8ca9464b79d0862a5118a2e6942d7c4",
+      "markdown": "2fd15720af32d960f482878b36d72ba48d5b8ebb4d05394a2ee10c8be6a66148",
+      "model": "843bb54e8039b12ed246085d54442be08b25a45b435ee62a65224223d3caee7a",
+      "json_ld": "8a98a5fe24b2d51c77486dbf84ce6b25cffaf5e4003731b2b2171e38a14a8e11"
+    },
+    "examples/schemas/link_manifest.oak.md": {
+      "xml": "3b6cc5d0349929960a3735c9aef6be5cd3a4af38cdbfbf2adeaa893c69e7d6d1",
+      "markdown": "530654f313491af173a6f129b1db50d36b00888456c72853e5463de9662a1eac",
+      "model": "770cff8d04fee83a765f5699b4bbb97a9c24c32b194ad945a5d1e4ed5a79e58a",
+      "json_ld": "f1097107cb9877687e582f98699b6848d882f20db44f825bbc5aef711f976d22"
+    },
+    "examples/schemas/process_execution_table.oak.md": {
+      "xml": "dbf07c116ed6146c9fb011149376a3925475d1ebc6d3bbbf60e738fd43033a36",
+      "markdown": "56fc32500619463f72e783df236837db04e7702360a9bfa436dcb81cca6d3f48",
+      "model": "d8de0b0ca649a06b2deebac4b3fb238312f27fd4da701392d68202719afe8951",
+      "json_ld": "fab0fe23edc600fc1ba447354c2d4c64cc8cb0a01eea9f9e4539809c6d067d76"
+    },
+    "examples/schemas/smeac_plan.oak.md": {
+      "xml": "e14b5a656b3ad03ecb4c8bfc2584a3dd8a9493ab3dffd8181746dd5871e0e8aa",
+      "markdown": "aa3503412a2fb7ef2fc745b17aa2f6354bdc262f79de51dd099ff379ef92acb1",
+      "model": "d3d7d073e29b4fcdd2c13b22a5a135486bf8447a370d4cecac16b2796b115b39",
+      "json_ld": "aa66db10b6905ca735d07b7989c2560670a6fb2fea6b52888cb7bc400e82dee9"
+    },
+    "examples/schemas/shape_gallery.oak.md": {
+      "xml": "f8b549a2c1c8f891e43bc976789d514d7f5f147167cded03edb824d53afbbd03",
+      "markdown": "0f233e8c317453dbe7feb39b4b42535f998431b9c0088fc7e8111789b5c7713a",
+      "model": "f95fd58ef1139ecfd8360ac246021278b59741b025670f6a674f57168879a234",
+      "json_ld": "8da1f4c6e3e928b7b1b7f746ef4ab0ea3a4177d61779daa15493b94c443355ec"
+    },
+    "examples/schemas/verification.oak.md": {
+      "xml": "cc4cfa3c782fec11f4151066962f3fec042a45a1c8efb061ede2f94734f3dc75",
+      "markdown": "ed6f58f5cc21d07e8e8b6da8d69cb6266e6752a4c6d482536059924b23e951d4",
+      "model": "db5a7875de22771f1299ce69ab9efad518b1441b78be9d28cab111f05f09b18b",
+      "json_ld": "ee90eab5ba61ab9ea396197370e3099bc5d3248df74bf409aff88e6ad82f5cc3"
+    },
+    "examples/fixed_knowledge/example.oak.md": {
+      "xml": "9c4b8ca07a8d2dcc8c18d808402517ca9d11e905d18c6e99532f194427f2c337",
+      "markdown": "f905302d98fe631916f10040e834b7d7586af2f31914ba6d0fde102843e2d31e",
+      "model": "04c0da2ac91bf6ebe340b46cbc7a3054c4852223b0c1d3b2750da3d3276d40e5",
+      "json_ld": "6c4e28feacd684fb5c5860d49e0c1e6bed0fba9f100883e527fcd8c78ec3afaa"
+    },
+    "examples/shape_gallery/example.oak.md": {
+      "xml": "f8b549a2c1c8f891e43bc976789d514d7f5f147167cded03edb824d53afbbd03",
+      "markdown": "0f233e8c317453dbe7feb39b4b42535f998431b9c0088fc7e8111789b5c7713a",
+      "model": "f95fd58ef1139ecfd8360ac246021278b59741b025670f6a674f57168879a234",
+      "json_ld": "7502ef2f2fd7fc56d246d56dbdf8ea19522ad940ceacfd92844c474dce950ab7"
+    },
+    "examples/shape_writer/example.oak.md": {
+      "xml": "aa325263cbf957cc4f7547a4e364c209a870b21d6d0990ec4911b7ce14b817ef",
+      "markdown": "a58444e017b35bd6f5014eecafba2a8973b7332258e1b85f8b88048406241b99",
+      "model": "4594cceca2141c0c8703fa366c28d3d94e535517ba5b7f50a7150ef4b8e38901",
+      "json_ld": "55ea3d28da39e5aef979543992a76f22f643c5e4062422ffb56e6f03b2dbcaff"
+    },
+    "examples/shape_writer/shape_gallery.oak.md": {
+      "xml": "f8b549a2c1c8f891e43bc976789d514d7f5f147167cded03edb824d53afbbd03",
+      "markdown": "0f233e8c317453dbe7feb39b4b42535f998431b9c0088fc7e8111789b5c7713a",
+      "model": "f95fd58ef1139ecfd8360ac246021278b59741b025670f6a674f57168879a234",
+      "json_ld": "0718cdfd7b3295f9780402bf8544091a5e04e237e20f2d6f77aad2bee93e1476"
+    },
+    "examples/shape_writer/sample.oak.md": {
+      "xml": "659c5588b290e02ab44477bc0bfa831c9967d576d44251f4a522efdbe47acd32",
+      "markdown": "4d409a8bd4cea836f31f9d54247f5440ef7fb76e24340d2d9bd3ab7a0988e5c8",
+      "model": "9611466b9d5b4a0a8487b0578995f020062ea64b89feadf2e20df30b34cff6fa",
+      "json_ld": "f17dcf49797c1a2a2d0742ee203bb984b707aad371b67a954e0292ca5972e982"
+    },
+    "examples/compound_growth/example.oak.md": {
+      "xml": "0b0ca898c0ee875b712b674670f09ddb762ce66ee068c823524d79381353809a",
+      "markdown": "fb7cfef5fc0f0775857f861a860ccb52794fdfdb44c8ce13f93345108baf382b",
+      "model": "647774e34f2d9208e61da475ec67ee96ace67c4cbb358f07e6581c72038a119a",
+      "json_ld": "2d31d0159d5abc8a324cc161216973caf68eadefcfab1a6972dd1cfa1dceb031"
+    },
+    "examples/compound_growth/sample.oak.md": {
+      "xml": "ad5fd8853028db0e7bb8e2343dd8c620b996a884c86fb2e903a9c800a5e0010b",
+      "markdown": "4083f0eb04a3482b8de1eb46f3aa62aef2709aa8ccd5d51f06ffbbf00cbd3c3d",
+      "model": "b827f66bdbcae93e2092929fb9a7e5a3cbd3cdd559d2faea25a531258d43d47f",
+      "json_ld": "1a2e50c47d7d2c5ef3e3ef9c2a420b26745276c614586e73d07db4b0786226bf"
+    },
+    "examples/interpreter_context/example.oak.md": {
+      "xml": "c1dea9109e767fe3b6e447b3d068dc31e88958123d19bd3fbf35cfd3b332da8f",
+      "markdown": "ab3c0305f4a13a8105a42957de4aae05ff3fd6ca6d399aeaefdbe9e4d9a8731a",
+      "model": "44b5e2458bf5e4bcadfdeef03cad5be03c45ce46b62fa1f17181b5f97cf4e212",
+      "json_ld": "9069ba31e6b6665190849c36fca2450ab7bbe81524bfe0405dd79615e23d1b04"
+    },
+    "examples/implementer/example.oak.md": {
+      "xml": "48dee3443a1f3613705a47372b3b0ea8c0e1c93441ad618231d86fcbd2a6fb15",
+      "markdown": "1071fa3a6d5d19348b3280a756f079390f3ab8e85d2c4b8fc02ce9553342f035",
+      "model": "d7ac2976797fc648504ee6534e934bbdc99b62cd55856bc00c002babe7a0c0a9",
+      "json_ld": "5e5b9ef7d12f3c37b388e383930c8a3b733d6570010d8ad54e6e18a55e43a768"
+    },
+    "examples/implementer/verification.oak.md": {
+      "xml": "cc4cfa3c782fec11f4151066962f3fec042a45a1c8efb061ede2f94734f3dc75",
+      "markdown": "ed6f58f5cc21d07e8e8b6da8d69cb6266e6752a4c6d482536059924b23e951d4",
+      "model": "db5a7875de22771f1299ce69ab9efad518b1441b78be9d28cab111f05f09b18b",
+      "json_ld": "4eed3fcea1bdb74cad4248b2b4a0e8610eda473bb80cc3d98a66c29095962d7c"
+    },
+    "examples/delegation/example.oak.md": {
+      "xml": "00dd20f2b75dbd550b85609fa340b22c472f03d27b883ae727e9c8fc042b41c6",
+      "markdown": "512853b627a6c6773f9332e163c02f6b8798d98c61988ab363fa8e6174952716",
+      "model": "13463540d375d589d9c73c88adb594eb8e95bc771e111669fd3cae3f587c9e86",
+      "json_ld": "88f0fece36b8dbc9d3e854b1754e86e584103a54de0823ec220904cd30e95dd4"
+    },
+    "examples/delegation/task_reviewer.oak.md": {
+      "xml": "94b9b691712ea4af32a143a309af13895999939176ef73f088dc677c9b5c8358",
+      "markdown": "b192899fd8d2ca3dd6fe658782bb2a398db2b22ec94d224dbb96f3ad0f72f8f5",
+      "model": "d28d85af1f9f0c0dfb129b56caa6d85c7dd7c3357d5eb0fd1848169cc1937b9a",
+      "json_ld": "e8c2c0c36cc6d33d4c67bd1650354025de95156e02734a24c8c5f4e8b36df162"
+    },
+    "examples/successor/example.oak.md": {
+      "xml": "571c7c2c0d64907b15bc208cb18a85bfc8b5f143e295b0d2ee1e5c4d674e14c4",
+      "markdown": "fe24fcc7fbb59bf3b0f328d3c949554679d88de9e44762c3f7706674b3d9d389",
+      "model": "1d68036da225816f211e5931ee7c9a152ab877fb46a91f1b2319efa7b76639f9",
+      "json_ld": "ebe40aa78b22d730146fa22aa9f4b65690694ffea5efd8eed0bbab029168c516"
+    },
+    "examples/successor/amendment_reviewer.oak.md": {
+      "xml": "14151147a25324382b093cfba5cc5a8109099c26cc7bcf5721507e419a41fd0f",
+      "markdown": "ce0fca223faf425b55ac09404fe2fbbc5c8a74d524d95761e07fd1ac55463ebf",
+      "model": "8653002349079c7fde7c3dfd2911ed44d1db5349e087fa7e4bc38f4383e71377",
+      "json_ld": "6beb8af400d25caf8d802bdfdc45c194b4266d7d5ea944319acbb0502bfd1d92"
+    },
+    "examples/successor/successor_verifier.oak.md": {
+      "xml": "efb71aba437e500926cfb4c211d2e85e46cfd6ff22dc9a480a4d0ca844958c70",
+      "markdown": "f9429fcb02a9545e57583303e92110631267ea6bc06176c073c7208d53e0e0db",
+      "model": "a75167bded3c3873814ef15d481c8df291521541291b1852fa29f898c0b77b0b",
+      "json_ld": "0a6bd01fc60bd63778c9c7c0769c63ad1001bf69bfe8d33af9b552078bdf2a45"
+    },
+    "examples/catalog.oak.md": {
+      "xml": "1169420bd70b40103f3b279bb18c6b389def3038e8aa7aa1cd84b5b621d31be2",
+      "markdown": "7d05c63020da642e8595c8574076f9d52fda3e308b579b5814154d43c8e205cb",
+      "model": "7563c6041702c6875f4c42cf945999b813fd35e8f2f826948216483fe25ae575",
+      "json_ld": "024ff210ffb0dd1ab45f21b988eac613b140641f50ddd29dcf4fc1fc6f54cdc2"
+    }
+  },
+  "scenarios": [
+    "fixed_knowledge",
+    "shape_gallery",
+    "shape_writer",
+    "compound_growth",
+    "interpreter_context",
+    "implementer",
+    "delegation",
+    "successor"
+  ],
+  "schema_modules": [
+    "examples.schemas.api_coverage_table",
+    "examples.schemas.code_changes",
+    "examples.schemas.code_map",
+    "examples.schemas.docs_index",
+    "examples.schemas.error",
+    "examples.schemas.hierarchical_outline",
+    "examples.schemas.ideation_list",
+    "examples.schemas.link_manifest",
+    "examples.schemas.process_execution_table",
+    "examples.schemas.smeac_plan",
+    "examples.schemas.shape_gallery",
+    "examples.schemas.verification"
+  ]
+}

@@ -12,18 +12,18 @@ example-1: "WHILE $state.status does not equal \"complete\" LIMIT 10:\n  SET sta
 syntax-reference: "outputs/oak.ebnf"
 
 grammar: TEXT<<
-surface_step_while = while_statement ;
+surface_statement_while = while_statement ;
 >>
 </constants>
 
 <schemas>
-<schema id="step-while" name="While" purpose="One bounded pre-test loop over a recursive condition.">
+<schema id="statement-while" name="While" purpose="One bounded pre-test loop over a recursive condition.">
 WHILE <CONDITION> LIMIT <LIMIT>:
-  <STEPS>
+  <BODY>
 
 WHERE:
 - <CONDITION> is string; is non-empty; The recursive condition tested before every iteration..
 - <LIMIT> is string; is non-empty; The hard maximum number of iterations..
-- <STEPS> is string; is non-empty; The steps run in one fresh child binding scope per iteration..
+- <BODY> is string; is non-empty; The statements run in one fresh child binding scope per iteration..
 </schema>
 </schemas>

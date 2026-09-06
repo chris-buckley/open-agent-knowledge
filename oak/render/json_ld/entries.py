@@ -7,7 +7,7 @@ from oak.node.parts.entry import Entry
 from oak.node.parts.instructions import Instruction
 from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Assert,
     Call,
@@ -18,7 +18,7 @@ from oak.node.parts.processes.steps import (
     Join,
     Par,
     Set,
-    Step,
+    Statement,
     While,
 )
 from oak.node.parts.schemas.model import Schema, Where
@@ -35,7 +35,7 @@ from oak.render.json_ld.values import (
 
 Fields = dict[str, object]
 
-_STEP_TYPES = {
+_STATEMENT_TYPES = {
     "act": "Act",
     "set": "Set",
     "emit": "Emit",
@@ -114,11 +114,11 @@ def _act_fields(document: str, step: Act) -> Fields:
 def _if_fields(document: str, step: If) -> Fields:
     fields: Fields = {
         "condition": condition_node(document, step.condition),
-        "thenSteps": [step_node(document, child) for child in step.then],
+        "then": [statement_node(document, child) for child in step.then],
     }
 
     if step.otherwise is not None:
-        fields["otherwise"] = [step_node(document, child) for child in step.otherwise]
+        fields["otherwise"] = [statement_node(document, child) for child in step.otherwise]
 
     return fields
 
@@ -132,7 +132,7 @@ def _assert_fields(document: str, step: Assert) -> Fields:
     return fields
 
 
-def _step_fields(document: str, step: Step) -> Fields:
+def _statement_fields(document: str, step: Statement) -> Fields:
     match step:
         case Act():
             return _act_fields(document, step)
@@ -174,18 +174,18 @@ def _step_fields(document: str, step: Step) -> Fields:
             return {
                 "loopBinding": step.binding,
                 "value": value_node(document, step.value),
-                "steps": [step_node(document, child) for child in step.steps],
+                "body": {"@list": [statement_node(document, child) for child in step.body]},
             }
 
         case While():
             return {
                 "condition": condition_node(document, step.condition),
                 "limit": step.limit,
-                "steps": [step_node(document, child) for child in step.steps],
+                "body": {"@list": [statement_node(document, child) for child in step.body]},
             }
 
         case Par():
-            return {"steps": [step_node(document, child) for child in step.steps]}
+            return {"body": {"@list": [statement_node(document, child) for child in step.body]}}
 
         case Join():
             return {}
@@ -193,11 +193,11 @@ def _step_fields(document: str, step: Step) -> Fields:
     raise TypeError(type(step).__name__)
 
 
-def step_node(document: str, step: Step) -> Fields:
+def statement_node(document: str, step: Statement) -> Fields:
     """Return one typed process step node."""
     return {
-        "@type": "oak:" + _STEP_TYPES[step.kind],
-        **_step_fields(document, step),
+        "@type": "oak:" + _STATEMENT_TYPES[step.kind],
+        **_statement_fields(document, step),
     }
 
 
@@ -264,7 +264,7 @@ def _process_node(document: str, entry: Process) -> Fields:
         "@id": entry_id(document, "process", entry.id),
         "@type": "oak:Process",
         "name": entry.name,
-        "steps": [step_node(document, step) for step in entry.steps],
+        "body": {"@list": [statement_node(document, step) for step in entry.body]},
     }
 
     if entry.input is not None:
@@ -320,6 +320,6 @@ def entry_node(document: str, entry: Entry) -> Fields:
 __all__ = [
     "entry_node",
     "schema_node",
-    "step_node",
+    "statement_node",
     "where_node",
 ]

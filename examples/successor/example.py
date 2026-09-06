@@ -436,16 +436,34 @@ amendment_proposed_trigger = Trigger(
     process=PROCESS_START_SUCCESSION,
 )
 
+review_status_value = StateValue(state=STATE_REVIEW_STATUS)
+
+awaiting_evidence_value = LiteralValue(value=STATUS_NEEDS_EVIDENCE)
+
+awaiting_evidence = Compare(left=review_status_value, operator="equals", right=awaiting_evidence_value)
+
 evidence_supplied_trigger = Trigger(
     id="evidence-supplied",
     event=EVENT_EVIDENCE_SUPPLIED,
     source=INTERFACE_EVIDENCE_INPUT,
-    guard=Compare(
-        left=StateValue(state=STATE_REVIEW_STATUS),
-        operator="equals",
-        right=LiteralValue(value=STATUS_NEEDS_EVIDENCE),
-    ),
+    guard=awaiting_evidence,
     process=PROCESS_RESUME_SUCCESSION,
+)
+
+agent_amendment_reviewer_text = (
+    "For <AMENDMENT_ID>, challenge <AMENDMENT> with <RATIONALE> and "
+    "<EVIDENCE> against <CURRENT_OAK> and "
+    "<PROTECTED_INVARIANTS>, then produce "
+    "<DECISION>, <REVIEW_FINDINGS>, and <EVIDENCE_REQUEST>."
+)
+
+agent_amendment_reviewer_action = ACT.tool(
+    TOOL_AGENT_AMENDMENT_REVIEWER,
+    agent_amendment_reviewer_text,
+    input=SCHEMA_REVIEWER_REQUEST,
+    output=SCHEMA_REVIEWER_RESULT,
+    inputs=local_bindings(REVIEW_REQUEST_PLACEHOLDERS),
+    outputs=list(REVIEW_PLACEHOLDERS),
 )
 
 dispatch_review_process = Process(
@@ -453,21 +471,23 @@ dispatch_review_process = Process(
     name="Dispatch review",
     input=SCHEMA_REVIEWER_REQUEST,
     output=SCHEMA_REVIEWER_RESULT,
-    steps=[
-        ACT.tool(
-            TOOL_AGENT_AMENDMENT_REVIEWER,
-            (
-                "For <AMENDMENT_ID>, challenge <AMENDMENT> with <RATIONALE> and "
-                "<EVIDENCE> against <CURRENT_OAK> and "
-                "<PROTECTED_INVARIANTS>, then produce "
-                "<DECISION>, <REVIEW_FINDINGS>, and <EVIDENCE_REQUEST>."
-            ),
-            input=SCHEMA_REVIEWER_REQUEST,
-            output=SCHEMA_REVIEWER_RESULT,
-            inputs=local_bindings(REVIEW_REQUEST_PLACEHOLDERS),
-            outputs=list(REVIEW_PLACEHOLDERS),
-        )
-    ],
+    body=[agent_amendment_reviewer_action],
+)
+
+agent_successor_verifier_text = (
+    "Verify <CANDIDATE_OAK> against <CURRENT_OAK>, <AMENDMENT>, "
+    "and <PROTECTED_INVARIANTS>, then produce <VALID>, <PARSES>, "
+    "<RESOLVES>, <CANONICAL>, <INVARIANTS_PRESERVED>, "
+    "<SCOPE_EXACT>, and <PROOF>."
+)
+
+agent_successor_verifier_action = ACT.tool(
+    TOOL_AGENT_SUCCESSOR_VERIFIER,
+    agent_successor_verifier_text,
+    input=SCHEMA_VERIFIER_REQUEST,
+    output=SCHEMA_VERIFIER_RESULT,
+    inputs=local_bindings(VERIFICATION_REQUEST_PLACEHOLDERS),
+    outputs=list(PROOF_PLACEHOLDERS),
 )
 
 dispatch_verification_process = Process(
@@ -475,38 +495,53 @@ dispatch_verification_process = Process(
     name="Dispatch verification",
     input=SCHEMA_VERIFIER_REQUEST,
     output=SCHEMA_VERIFIER_RESULT,
-    steps=[
-        ACT.tool(
-            TOOL_AGENT_SUCCESSOR_VERIFIER,
-            (
-                "Verify <CANDIDATE_OAK> against <CURRENT_OAK>, <AMENDMENT>, "
-                "and <PROTECTED_INVARIANTS>, then produce <VALID>, <PARSES>, "
-                "<RESOLVES>, <CANONICAL>, <INVARIANTS_PRESERVED>, "
-                "<SCOPE_EXACT>, and <PROOF>."
-            ),
-            input=SCHEMA_VERIFIER_REQUEST,
-            output=SCHEMA_VERIFIER_RESULT,
-            inputs=local_bindings(VERIFICATION_REQUEST_PLACEHOLDERS),
-            outputs=list(PROOF_PLACEHOLDERS),
-        )
-    ],
+    body=[agent_successor_verifier_action],
+)
+
+new_cycle_value = LiteralValue(value=False)
+
+new_cycle_binding = ValueBinding(placeholder=PLACEHOLDER_RESUME, value=new_cycle_value)
+
+start_governance_call = Call(
+    process=PROCESS_GOVERN_SUCCESSION,
+    inputs=[*local_bindings(AMENDMENT_PROPOSAL_PLACEHOLDERS), new_cycle_binding],
 )
 
 start_succession_process = Process(
     id="start-succession",
     name="Start succession",
     input=SCHEMA_AMENDMENT_PROPOSAL,
-    steps=[
-        Call(
-            process=PROCESS_GOVERN_SUCCESSION,
-            inputs=[
-                *local_bindings(AMENDMENT_PROPOSAL_PLACEHOLDERS),
-                ValueBinding(
-                    placeholder=PLACEHOLDER_RESUME,
-                    value=LiteralValue(value=False),
-                ),
-            ],
-        )
+    body=[start_governance_call],
+)
+
+amendment_id_value = BindingValue(binding=PLACEHOLDER_AMENDMENT_ID)
+
+amendment_id_binding = ValueBinding(placeholder=PLACEHOLDER_AMENDMENT_ID, value=amendment_id_value)
+
+pending_amendment_value = StateValue(state=STATE_PENDING_AMENDMENT)
+
+pending_amendment_binding = ValueBinding(placeholder=PLACEHOLDER_AMENDMENT, value=pending_amendment_value)
+
+pending_rationale_value = StateValue(state=STATE_PENDING_RATIONALE)
+
+pending_rationale_binding = ValueBinding(placeholder=PLACEHOLDER_RATIONALE, value=pending_rationale_value)
+
+evidence_value = BindingValue(binding=PLACEHOLDER_EVIDENCE)
+
+evidence_binding = ValueBinding(placeholder=PLACEHOLDER_EVIDENCE, value=evidence_value)
+
+resumed_cycle_value = LiteralValue(value=True)
+
+resumed_cycle_binding = ValueBinding(placeholder=PLACEHOLDER_RESUME, value=resumed_cycle_value)
+
+resume_governance_call = Call(
+    process=PROCESS_GOVERN_SUCCESSION,
+    inputs=[
+        amendment_id_binding,
+        pending_amendment_binding,
+        pending_rationale_binding,
+        evidence_binding,
+        resumed_cycle_binding,
     ],
 )
 
@@ -514,221 +549,246 @@ resume_succession_process = Process(
     id="resume-succession",
     name="Resume succession",
     input=SCHEMA_EVIDENCE_SUPPLEMENT,
-    steps=[
-        Call(
-            process=PROCESS_GOVERN_SUCCESSION,
-            inputs=[
-                ValueBinding(
-                    placeholder=PLACEHOLDER_AMENDMENT_ID,
-                    value=BindingValue(binding=PLACEHOLDER_AMENDMENT_ID),
-                ),
-                ValueBinding(
-                    placeholder=PLACEHOLDER_AMENDMENT,
-                    value=StateValue(state=STATE_PENDING_AMENDMENT),
-                ),
-                ValueBinding(
-                    placeholder=PLACEHOLDER_RATIONALE,
-                    value=StateValue(state=STATE_PENDING_RATIONALE),
-                ),
-                ValueBinding(
-                    placeholder=PLACEHOLDER_EVIDENCE,
-                    value=BindingValue(binding=PLACEHOLDER_EVIDENCE),
-                ),
-                ValueBinding(
-                    placeholder=PLACEHOLDER_RESUME,
-                    value=LiteralValue(value=True),
-                ),
-            ],
-        )
+    body=[resume_governance_call],
+)
+
+resume_value = BindingValue(binding=PLACEHOLDER_RESUME)
+
+route_resumption_condition = Compare(left=resume_value, operator="equals", right=resumed_cycle_value)
+
+pending_amendment_id_value = StateValue(state=STATE_PENDING_AMENDMENT_ID)
+
+amendment_id_condition = Compare(left=amendment_id_value, operator="equals", right=pending_amendment_id_value)
+
+assert_amendment_id = Assert(
+    condition=amendment_id_condition,
+    message="The evidence does not match the pending amendment.",
+)
+
+route_resumption = If(
+    condition=route_resumption_condition,
+    then=[assert_amendment_id],
+)
+
+update_pending_amendment_id = Set(state=STATE_PENDING_AMENDMENT_ID, value=amendment_id_value)
+
+amendment_value = BindingValue(binding=PLACEHOLDER_AMENDMENT)
+
+update_pending_amendment = Set(state=STATE_PENDING_AMENDMENT, value=amendment_value)
+
+rationale_value = BindingValue(binding=PLACEHOLDER_RATIONALE)
+
+update_pending_rationale = Set(state=STATE_PENDING_RATIONALE, value=rationale_value)
+
+reviewing_status_value = LiteralValue(value=STATUS_REVIEWING)
+
+update_reviewing_review_status = Set(state=STATE_REVIEW_STATUS, value=reviewing_status_value)
+
+current_oak_value = ConstantValue(constant=CONSTANT_CURRENT_OAK)
+
+current_oak_binding = ValueBinding(placeholder=PLACEHOLDER_CURRENT_OAK, value=current_oak_value)
+
+amendment_binding = ValueBinding(placeholder=PLACEHOLDER_AMENDMENT, value=amendment_value)
+
+rationale_binding = ValueBinding(placeholder=PLACEHOLDER_RATIONALE, value=rationale_value)
+
+protected_invariants_value = ConstantValue(constant=CONSTANT_PROTECTED_INVARIANTS)
+
+protected_invariants_binding = ValueBinding(
+    placeholder=PLACEHOLDER_PROTECTED_INVARIANTS,
+    value=protected_invariants_value,
+)
+
+dispatch_review_call = Call(
+    process=PROCESS_DISPATCH_REVIEW,
+    inputs=[
+        current_oak_binding,
+        amendment_id_binding,
+        amendment_binding,
+        rationale_binding,
+        evidence_binding,
+        protected_invariants_binding,
     ],
+    outputs=list(REVIEW_PLACEHOLDERS),
+)
+
+decision_value = BindingValue(binding=PLACEHOLDER_DECISION)
+
+accepted_decision_value = LiteralValue(value=DECISION_ACCEPT)
+
+review_accepted = Compare(left=decision_value, operator="equals", right=accepted_decision_value)
+
+current_revision_value = StateValue(state=STATE_CURRENT_REVISION)
+
+current_revision_binding = ValueBinding(placeholder=PLACEHOLDER_CURRENT_REVISION, value=current_revision_value)
+
+review_findings_value = BindingValue(binding=PLACEHOLDER_REVIEW_FINDINGS)
+
+review_findings_binding = ValueBinding(placeholder=PLACEHOLDER_REVIEW_FINDINGS, value=review_findings_value)
+
+oak_compile_successor_text = (
+    "Apply <AMENDMENT_ID>: <AMENDMENT> with <RATIONALE> and "
+    "<REVIEW_FINDINGS> to <CURRENT_OAK> at <CURRENT_REVISION> "
+    "while preserving <PROTECTED_INVARIANTS>, then produce "
+    "<CANDIDATE_OAK>."
+)
+
+oak_compile_successor_action = ACT.tool(
+    TOOL_OAK_COMPILE_SUCCESSOR,
+    oak_compile_successor_text,
+    input=SCHEMA_ACCEPTED_AMENDMENT,
+    output=SCHEMA_CANDIDATE_SUCCESSOR,
+    inputs=[
+        current_oak_binding,
+        current_revision_binding,
+        amendment_id_binding,
+        amendment_binding,
+        rationale_binding,
+        review_findings_binding,
+        protected_invariants_binding,
+    ],
+    outputs=[PLACEHOLDER_CANDIDATE_OAK],
+)
+
+candidate_oak_value = BindingValue(binding=PLACEHOLDER_CANDIDATE_OAK)
+
+candidate_oak_binding = ValueBinding(placeholder=PLACEHOLDER_CANDIDATE_OAK, value=candidate_oak_value)
+
+dispatch_verification_call = Call(
+    process=PROCESS_DISPATCH_VERIFICATION,
+    inputs=[current_oak_binding, candidate_oak_binding, amendment_binding, protected_invariants_binding],
+    outputs=list(PROOF_PLACEHOLDERS),
+)
+
+proof_passed_value = LiteralValue(value=True)
+
+valid_value = BindingValue(binding=PLACEHOLDER_VALID)
+
+valid_required = Compare(left=valid_value, operator="equals", right=proof_passed_value)
+
+assert_valid = Assert(condition=valid_required, message="The successor proof is not valid.")
+
+parses_value = BindingValue(binding=PLACEHOLDER_PARSES)
+
+parses_required = Compare(left=parses_value, operator="equals", right=proof_passed_value)
+
+assert_parses = Assert(condition=parses_required, message="The successor does not parse.")
+
+resolves_value = BindingValue(binding=PLACEHOLDER_RESOLVES)
+
+resolves_required = Compare(left=resolves_value, operator="equals", right=proof_passed_value)
+
+assert_resolves = Assert(condition=resolves_required, message="The successor does not resolve.")
+
+canonical_value = BindingValue(binding=PLACEHOLDER_CANONICAL)
+
+canonical_required = Compare(left=canonical_value, operator="equals", right=proof_passed_value)
+
+assert_canonical = Assert(condition=canonical_required, message="The successor is not canonical.")
+
+invariants_preserved_value = BindingValue(binding=PLACEHOLDER_INVARIANTS_PRESERVED)
+
+invariants_preserved_required = Compare(
+    left=invariants_preserved_value,
+    operator="equals",
+    right=proof_passed_value,
+)
+
+assert_invariants_preserved = Assert(
+    condition=invariants_preserved_required,
+    message="The successor breaks a protected invariant.",
+)
+
+scope_exact_value = BindingValue(binding=PLACEHOLDER_SCOPE_EXACT)
+
+scope_exact_required = Compare(left=scope_exact_value, operator="equals", right=proof_passed_value)
+
+assert_scope_exact = Assert(
+    condition=scope_exact_required,
+    message="The successor contains an unexplained change.",
+)
+
+advance_revision_text = "Advance <CURRENT_REVISION> and produce <PRIOR_REVISION> and <NEXT_REVISION>."
+
+advance_revision_action = ACT(
+    advance_revision_text,
+    inputs=[current_revision_binding],
+    outputs=[PLACEHOLDER_PRIOR_REVISION, PLACEHOLDER_NEXT_REVISION],
+)
+
+next_revision_value = BindingValue(binding=PLACEHOLDER_NEXT_REVISION)
+
+update_current_revision = Set(state=STATE_CURRENT_REVISION, value=next_revision_value)
+
+ratified_status_value = LiteralValue(value=STATUS_RATIFIED)
+
+update_ratified_review_status = Set(state=STATE_REVIEW_STATUS, value=ratified_status_value)
+
+decision_binding = ValueBinding(placeholder=PLACEHOLDER_DECISION, value=decision_value)
+
+emit_successor = Emit(
+    interface=INTERFACE_SUCCESSOR_OUTPUT,
+    bindings=[
+        decision_binding,
+        amendment_id_binding,
+        amendment_binding,
+        rationale_binding,
+        *local_bindings((PLACEHOLDER_PRIOR_REVISION, PLACEHOLDER_NEXT_REVISION, PLACEHOLDER_CANDIDATE_OAK, *PROOF_PLACEHOLDERS)),
+    ],
+)
+
+needs_evidence_decision_value = LiteralValue(value=DECISION_NEEDS_EVIDENCE)
+
+review_needs_evidence = Compare(left=decision_value, operator="equals", right=needs_evidence_decision_value)
+
+update_needs_evidence_review_status = Set(state=STATE_REVIEW_STATUS, value=awaiting_evidence_value)
+
+rejected_status_value = LiteralValue(value=STATUS_REJECTED)
+
+update_rejected_review_status = Set(state=STATE_REVIEW_STATUS, value=rejected_status_value)
+
+route_evidence = If(
+    condition=review_needs_evidence,
+    then=[update_needs_evidence_review_status],
+    otherwise=[update_rejected_review_status],
+)
+
+emit_review_outcome = Emit(
+    interface=INTERFACE_REVIEW_OUTCOME_OUTPUT,
+    bindings=local_bindings(REVIEW_PLACEHOLDERS),
+)
+
+route_review = If(
+    condition=review_accepted,
+    then=[
+        oak_compile_successor_action,
+        dispatch_verification_call,
+        assert_valid,
+        assert_parses,
+        assert_resolves,
+        assert_canonical,
+        assert_invariants_preserved,
+        assert_scope_exact,
+        advance_revision_action,
+        update_current_revision,
+        update_ratified_review_status,
+        emit_successor,
+    ],
+    otherwise=[route_evidence, emit_review_outcome],
 )
 
 govern_succession_process = Process(
     id="govern-succession",
     name="Govern succession",
     input=SCHEMA_AMENDMENT_CYCLE,
-    steps=[
-        If(
-            condition=Compare(
-                left=BindingValue(binding=PLACEHOLDER_RESUME),
-                operator="equals",
-                right=LiteralValue(value=True),
-            ),
-            then=[
-                Assert(
-                    condition=Compare(
-                        left=BindingValue(binding=PLACEHOLDER_AMENDMENT_ID),
-                        operator="equals",
-                        right=StateValue(state=STATE_PENDING_AMENDMENT_ID),
-                    ),
-                    message="The evidence does not match the pending amendment.",
-                )
-            ],
-        ),
-        Set(state=STATE_PENDING_AMENDMENT_ID, value=BindingValue(binding=PLACEHOLDER_AMENDMENT_ID)),
-        Set(state=STATE_PENDING_AMENDMENT, value=BindingValue(binding=PLACEHOLDER_AMENDMENT)),
-        Set(state=STATE_PENDING_RATIONALE, value=BindingValue(binding=PLACEHOLDER_RATIONALE)),
-        Set(state=STATE_REVIEW_STATUS, value=LiteralValue(value=STATUS_REVIEWING)),
-        Call(
-            process=PROCESS_DISPATCH_REVIEW,
-            inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_CURRENT_OAK, value=ConstantValue(constant=CONSTANT_CURRENT_OAK)),
-                ValueBinding(placeholder=PLACEHOLDER_AMENDMENT_ID, value=BindingValue(binding=PLACEHOLDER_AMENDMENT_ID)),
-                ValueBinding(placeholder=PLACEHOLDER_AMENDMENT, value=BindingValue(binding=PLACEHOLDER_AMENDMENT)),
-                ValueBinding(placeholder=PLACEHOLDER_RATIONALE, value=BindingValue(binding=PLACEHOLDER_RATIONALE)),
-                ValueBinding(placeholder=PLACEHOLDER_EVIDENCE, value=BindingValue(binding=PLACEHOLDER_EVIDENCE)),
-                ValueBinding(
-                    placeholder=PLACEHOLDER_PROTECTED_INVARIANTS,
-                    value=ConstantValue(constant=CONSTANT_PROTECTED_INVARIANTS),
-                ),
-            ],
-            outputs=list(REVIEW_PLACEHOLDERS),
-        ),
-        If(
-            condition=Compare(
-                left=BindingValue(binding=PLACEHOLDER_DECISION),
-                operator="equals",
-                right=LiteralValue(value=DECISION_ACCEPT),
-            ),
-            then=[
-                ACT.tool(
-                    TOOL_OAK_COMPILE_SUCCESSOR,
-                    (
-                        "Apply <AMENDMENT_ID>: <AMENDMENT> with <RATIONALE> and "
-                        "<REVIEW_FINDINGS> to <CURRENT_OAK> at <CURRENT_REVISION> "
-                        "while preserving <PROTECTED_INVARIANTS>, then produce "
-                        "<CANDIDATE_OAK>."
-                    ),
-                    input=SCHEMA_ACCEPTED_AMENDMENT,
-                    output=SCHEMA_CANDIDATE_SUCCESSOR,
-                    inputs=[
-                        ValueBinding(
-                            placeholder=PLACEHOLDER_CURRENT_OAK,
-                            value=ConstantValue(constant=CONSTANT_CURRENT_OAK),
-                        ),
-                        ValueBinding(
-                            placeholder=PLACEHOLDER_CURRENT_REVISION,
-                            value=StateValue(state=STATE_CURRENT_REVISION),
-                        ),
-                        ValueBinding(
-                            placeholder=PLACEHOLDER_AMENDMENT_ID,
-                            value=BindingValue(binding=PLACEHOLDER_AMENDMENT_ID),
-                        ),
-                        ValueBinding(
-                            placeholder=PLACEHOLDER_AMENDMENT,
-                            value=BindingValue(binding=PLACEHOLDER_AMENDMENT),
-                        ),
-                        ValueBinding(
-                            placeholder=PLACEHOLDER_RATIONALE,
-                            value=BindingValue(binding=PLACEHOLDER_RATIONALE),
-                        ),
-                        ValueBinding(
-                            placeholder=PLACEHOLDER_REVIEW_FINDINGS,
-                            value=BindingValue(binding=PLACEHOLDER_REVIEW_FINDINGS),
-                        ),
-                        ValueBinding(
-                            placeholder=PLACEHOLDER_PROTECTED_INVARIANTS,
-                            value=ConstantValue(constant=CONSTANT_PROTECTED_INVARIANTS),
-                        ),
-                    ],
-                    outputs=[PLACEHOLDER_CANDIDATE_OAK],
-                ),
-                Call(
-                    process=PROCESS_DISPATCH_VERIFICATION,
-                    inputs=[
-                        ValueBinding(
-                            placeholder=PLACEHOLDER_CURRENT_OAK,
-                            value=ConstantValue(constant=CONSTANT_CURRENT_OAK),
-                        ),
-                        ValueBinding(
-                            placeholder=PLACEHOLDER_CANDIDATE_OAK,
-                            value=BindingValue(binding=PLACEHOLDER_CANDIDATE_OAK),
-                        ),
-                        ValueBinding(
-                            placeholder=PLACEHOLDER_AMENDMENT,
-                            value=BindingValue(binding=PLACEHOLDER_AMENDMENT),
-                        ),
-                        ValueBinding(
-                            placeholder=PLACEHOLDER_PROTECTED_INVARIANTS,
-                            value=ConstantValue(constant=CONSTANT_PROTECTED_INVARIANTS),
-                        ),
-                    ],
-                    outputs=list(PROOF_PLACEHOLDERS),
-                ),
-                *[
-                    Assert(
-                        condition=Compare(
-                            left=BindingValue(binding=placeholder),
-                            operator="equals",
-                            right=LiteralValue(value=True),
-                        ),
-                        message=message,
-                    )
-                    for placeholder, message in (
-                        (PLACEHOLDER_VALID, "The successor proof is not valid."),
-                        (PLACEHOLDER_PARSES, "The successor does not parse."),
-                        (PLACEHOLDER_RESOLVES, "The successor does not resolve."),
-                        (PLACEHOLDER_CANONICAL, "The successor is not canonical."),
-                        (PLACEHOLDER_INVARIANTS_PRESERVED, "The successor breaks a protected invariant."),
-                        (PLACEHOLDER_SCOPE_EXACT, "The successor contains an unexplained change."),
-                    )
-                ],
-                ACT(
-                    "Advance <CURRENT_REVISION> and produce <PRIOR_REVISION> and <NEXT_REVISION>.",
-                    inputs=[
-                        ValueBinding(
-                            placeholder=PLACEHOLDER_CURRENT_REVISION,
-                            value=StateValue(state=STATE_CURRENT_REVISION),
-                        )
-                    ],
-                    outputs=[PLACEHOLDER_PRIOR_REVISION, PLACEHOLDER_NEXT_REVISION],
-                ),
-                Set(state=STATE_CURRENT_REVISION, value=BindingValue(binding=PLACEHOLDER_NEXT_REVISION)),
-                Set(state=STATE_REVIEW_STATUS, value=LiteralValue(value=STATUS_RATIFIED)),
-                Emit(
-                    interface=INTERFACE_SUCCESSOR_OUTPUT,
-                    bindings=[
-                        ValueBinding(placeholder=PLACEHOLDER_DECISION, value=BindingValue(binding=PLACEHOLDER_DECISION)),
-                        ValueBinding(placeholder=PLACEHOLDER_AMENDMENT_ID, value=BindingValue(binding=PLACEHOLDER_AMENDMENT_ID)),
-                        ValueBinding(placeholder=PLACEHOLDER_AMENDMENT, value=BindingValue(binding=PLACEHOLDER_AMENDMENT)),
-                        ValueBinding(placeholder=PLACEHOLDER_RATIONALE, value=BindingValue(binding=PLACEHOLDER_RATIONALE)),
-                        *local_bindings(
-                            (
-                                PLACEHOLDER_PRIOR_REVISION,
-                                PLACEHOLDER_NEXT_REVISION,
-                                PLACEHOLDER_CANDIDATE_OAK,
-                                *PROOF_PLACEHOLDERS,
-                            )
-                        ),
-                    ],
-                ),
-            ],
-            otherwise=[
-                If(
-                    condition=Compare(
-                        left=BindingValue(binding=PLACEHOLDER_DECISION),
-                        operator="equals",
-                        right=LiteralValue(value=DECISION_NEEDS_EVIDENCE),
-                    ),
-                    then=[
-                        Set(
-                            state=STATE_REVIEW_STATUS,
-                            value=LiteralValue(value=STATUS_NEEDS_EVIDENCE),
-                        )
-                    ],
-                    otherwise=[
-                        Set(
-                            state=STATE_REVIEW_STATUS,
-                            value=LiteralValue(value=STATUS_REJECTED),
-                        )
-                    ],
-                ),
-                Emit(
-                    interface=INTERFACE_REVIEW_OUTCOME_OUTPUT,
-                    bindings=local_bindings(REVIEW_PLACEHOLDERS),
-                ),
-            ],
-        ),
+    body=[
+        route_resumption,
+        update_pending_amendment_id,
+        update_pending_amendment,
+        update_pending_rationale,
+        update_reviewing_review_status,
+        dispatch_review_call,
+        route_review,
     ],
 )
 

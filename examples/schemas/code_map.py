@@ -21,6 +21,34 @@ PLACEHOLDER_LINE_TO = "LINE_TO"
 PLACEHOLDER_LANG = "LANG"
 PLACEHOLDER_SNIPPET = "SNIPPET"
 
+relative_path_clause = where(
+    PLACEHOLDER_REL_PATH,
+    Type(of='path'),
+    Regex(pattern='^[A-Za-z0-9._\\-][A-Za-z0-9._/\\-]*$'),
+    description='the repository-relative file path without parent traversal',
+)
+
+line_from_clause = where(
+    PLACEHOLDER_LINE_FROM,
+    Type(of='integer'),
+    AtLeast(value=1),
+    description='the first snippet line number',
+)
+
+line_to_clause = where(
+    PLACEHOLDER_LINE_TO,
+    Type(of='integer'),
+    AtLeast(value=PLACEHOLDER_LINE_FROM),
+    description='the last snippet line number',
+)
+
+snippet_clause = where(
+    PLACEHOLDER_SNIPPET,
+    Type(of='string'),
+    NonEmpty(),
+    description='the code lines from LINE_FROM to LINE_TO, each prefixed with its source line number',
+)
+
 code_map_schema = Schema(
     id="code-map",
     name="Code Map",
@@ -38,11 +66,11 @@ code_map_schema = Schema(
         where(PLACEHOLDER_AREA_TITLE, Type(of="string"), NonEmpty(), description="the title of the area being described"),
         where(PLACEHOLDER_SHORT_DESC, Type(of="string"), NonEmpty(), description="one short description of the code snippet"),
         where(PLACEHOLDER_REPO_NAME, Type(of="string"), Regex(pattern="^[A-Za-z0-9._\\-]+$"), description="one path segment naming the repository"),
-        where(PLACEHOLDER_REL_PATH, Type(of="path"), Regex(pattern="^[A-Za-z0-9._\\-][A-Za-z0-9._/\\-]*$"), description="the repository-relative file path without parent traversal"),
-        where(PLACEHOLDER_LINE_FROM, Type(of="integer"), AtLeast(value=1), description="the first snippet line number"),
-        where(PLACEHOLDER_LINE_TO, Type(of="integer"), AtLeast(value=PLACEHOLDER_LINE_FROM), description="the last snippet line number"),
+        relative_path_clause,
+        line_from_clause,
+        line_to_clause,
         where(PLACEHOLDER_LANG, Type(of="string"), NonEmpty(), description="one code language name for GitHub-flavored Markdown"),
-        where(PLACEHOLDER_SNIPPET, Type(of="string"), NonEmpty(), description="the code lines from LINE_FROM to LINE_TO, each prefixed with its source line number"),
+        snippet_clause,
     ],
 )
 

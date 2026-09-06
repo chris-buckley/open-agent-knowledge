@@ -12,12 +12,12 @@ example-1: "SET state.status = \"complete\""
 syntax-reference: "outputs/oak.ebnf"
 
 grammar: TEXT<<
-surface_step_set = set_statement ;
+surface_statement_set = set_statement ;
 >>
 </constants>
 
 <schemas>
-<schema id="step-set" name="Set" purpose="One local state write.">
+<schema id="statement-set" name="Set" purpose="One local state write.">
 SET <STATE> = <VALUE>
 
 WHERE:

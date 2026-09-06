@@ -177,7 +177,7 @@ def finish_validation(approved: bool) -> Call:
 
 def entry_node() -> Node:
     """One operational scope for progressive loading and standalone assembly."""
-    steps = [ACT(
+    body = [ACT(
         "Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> to define <SCOPE>. For a new skill, use <TEMPLATE> under <TEMPLATE_USE>; otherwise do not add scaffolding. Consult each guide's remaining knowledge as needed.",
         inputs=[knowledge("AUTHORING", 10), knowledge("STRUCTURE", 0), local("SOURCE"),
                 knowledge("TEMPLATE", 10, "skill-template"), knowledge("TEMPLATE_USE", 10, "template-use")], outputs=["SCOPE"],
@@ -190,9 +190,9 @@ def entry_node() -> Node:
         if guide == 1:
             text += " Preserve the requested shape using the guide schemas and <POPULATED> instances."
             bindings.append(knowledge("POPULATED", 1, "populated-shapes"))
-        steps.append(ACT(text, inputs=bindings, outputs=[result]))
+        body.append(ACT(text, inputs=bindings, outputs=[result]))
         previous = result
-    steps += [
+    body += [
         ACT("Review <DESIGN_7> against <REVIEW>, <GRAMMAR>, and complete <TEACHING> scenarios. Produce canonical <CANDIDATE>; do not claim a programmatic check.",
             inputs=[local("DESIGN_7"), knowledge("REVIEW", 8, "review"), knowledge("GRAMMAR", 0, "oak-ebnf"), knowledge("TEACHING", 8, "teaching")], outputs=["CANDIDATE"]),
         If(condition=Compare(left=BindingValue(binding="VALIDATE"), operator="equals", right=LiteralValue(value=True)),
@@ -213,13 +213,13 @@ def entry_node() -> Node:
             Trigger(id="request-received", event="A complete OAK authoring request is received.", source="interface.authoring-input", process="process.author-document"),
         ],
         processes=[
-            Process(id="capture-request", name="Capture request", steps=[
+            Process(id="capture-request", name="Capture request", body=[
                 ACT("Capture all supplied <SOURCE>; set <VALIDATE> true only for requested programmatic validation, otherwise false.",
                     output="schema.authoring-request", outputs=["SOURCE", "VALIDATE"]),
                 Call(process="process.author-document", inputs=[local("SOURCE"), local("VALIDATE")]),
             ]),
-            Process(id="author-document", name="Author document", input="schema.authoring-request", steps=steps),
-            Process(id="validate-and-deliver", name="Check validator", input="schema.oak-candidate", steps=[
+            Process(id="author-document", name="Author document", input="schema.authoring-request", body=body),
+            Process(id="validate-and-deliver", name="Check validator", input="schema.oak-candidate", body=[
                 ACT("Apply <POLICY> with exact <HELPER> to <CANDIDATE> without --allow-install. Return actual <REPORT>; <INSTALL_REQUIRED> is true only for permission-required, not invalid OAK or unavailable execution.",
                     output="schema.validator-check", inputs=[knowledge("POLICY", 9, "validation-policy"), knowledge("HELPER", 9, "validator-script"), local("CANDIDATE")], outputs=["INSTALL_REQUIRED", "REPORT"]),
                 If(condition=Compare(left=BindingValue(binding="INSTALL_REQUIRED"), operator="equals", right=LiteralValue(value=True)),
@@ -234,7 +234,7 @@ def entry_node() -> Node:
                           ])]),
                    ], otherwise=[finish_validation(False)]),
             ]),
-            Process(id="finalize-validation", name="Report validation", input="schema.validation-context", steps=[
+            Process(id="finalize-validation", name="Report validation", input="schema.validation-context", body=[
                 ACT("Finalize <CANDIDATE> from <REPORT> under <POLICY>. Run exact <HELPER> with --allow-install only when <ALLOW_INSTALL> is true; otherwise never install or download. Repair errors and recheck changes under the same permission, not unchanged successes. Produce <OAK> and truthful <VALIDATION>.",
                     output="schema.authoring-result", inputs=[local("REPORT"), local("CANDIDATE"), local("ALLOW_INSTALL"), knowledge("POLICY", 9, "validation-policy"), knowledge("HELPER", 9, "validator-script")], outputs=["OAK", "VALIDATION"]),
                 Emit(interface="interface.authored-document"),

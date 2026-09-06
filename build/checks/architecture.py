@@ -82,7 +82,7 @@ _EXPECTED_ROOT_EXPORTS = (
     "SlugId",
     "State",
     "StateValue",
-    "Step",
+    "Statement",
     "StyleName",
     "Surface",
     "SurfaceField",

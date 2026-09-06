@@ -15,7 +15,7 @@ from oak.node.parts.constants import Constant
 from oak.node.parts.instructions import Instruction
 from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import Act, Call, Emit, Foreach, Set
+from oak.node.parts.processes.statements import Act, Call, Emit, Foreach, Set
 from oak.node.parts.processes.values import BindingValue, LiteralValue, ValueBinding
 from oak.node.parts.schemas.binding import SchemaBindingError
 from oak.node.parts.state import State
@@ -49,32 +49,32 @@ def _fixture() -> tuple[Node, dict[str, Node]]:
         state=[State(id="status", schema=contract + "raw-name", placeholder="RAW_NAME", value="idle")],
         processes=[Process(
             id="normalise", name="Normalise name", input=contract + "raw-name", output=contract + "normal-name",
-            steps=[
+            body=[
                 Set(state="state.status", value=LiteralValue(value="working")),
                 Act(instruction="Normalise <RAW_NAME> into <NORMAL_NAME>.",
                     input=contract + "raw-name", output=contract + "normal-name",
                     inputs=[ValueBinding(placeholder="RAW_NAME", value=BindingValue(binding="RAW_NAME"))],
                     outputs=["NORMAL_NAME"]),
-                Foreach(binding="ITEM", value=LiteralValue(value=[1, 2]), steps=[
+                Foreach(binding="ITEM", value=LiteralValue(value=[1, 2]), body=[
                     Act(instruction="Observe <ITEM>.", inputs=[ValueBinding(
                         placeholder="ITEM", value=BindingValue(binding="ITEM"))]),
                 ]),
             ],
         )],
     )
-    archive = Node(processes=[Process(id="archive", name="Archive task", steps=[Act(instruction="Archive.")])])
+    archive = Node(processes=[Process(id="archive", name="Archive task", body=[Act(instruction="Archive.")])])
     root_contract = "schemas/contracts.oak.md#schema."
     root = Node(
         instructions=[Instruction(id="root-policy", body="Preserve the full task scope.")],
         triggers=[Trigger(id="requested", event="A name arrives.", source="interface.request", process="process.handle")],
         processes=[
-            Process(id="handle", name="Handle request", input=root_contract + "raw-name", steps=[
+            Process(id="handle", name="Handle request", input=root_contract + "raw-name", body=[
                 Call(process="workers/worker.oak.md#process.normalise",
                      inputs=[ValueBinding(placeholder="RAW_NAME", value=BindingValue(binding="RAW_NAME"))],
                      outputs=["NORMAL_NAME"]),
                 Emit(interface="interface.result"),
             ]),
-            Process(id="archive-task", name="Archive request", steps=[Call(process="archive.oak.md#process.archive")]),
+            Process(id="archive-task", name="Archive request", body=[Call(process="archive.oak.md#process.archive")]),
         ],
         interfaces=[
             Interface(id="request", flow="receives", schema=root_contract + "raw-name"),
@@ -111,7 +111,7 @@ def validate_interpreter_context() -> None:
         _require(worker.state[0].value == "working", "context used stale authored state")
         _require(worker.instructions[0].body == documents[context.source].instructions[0].body,
                  "source policy changed")
-        action = request.processes[0].steps[0]
+        action = request.processes[0].body[0]
         _require(isinstance(action, Act), "invocation is not an ACT")
         _require(all(isinstance(binding.value, LiteralValue) for binding in action.inputs),
                  "invocation still depends on ambient bindings")
@@ -147,7 +147,7 @@ def validate_interpreter_context() -> None:
     _require(set(retained) == set(documents), "explicit retention lost transitive dependencies")
     _fails(lambda: task_context(graph, retain=["missing.oak.md"]), ValueError)
     _fails(lambda: task_context(graph, "schema.handle"), ValueError)
-    step = documents["workers/worker.oak.md"].processes[0].steps[1]
+    step = documents["workers/worker.oak.md"].processes[0].body[1]
     target = "workers/worker.oak.md#process.normalise"
     _fails(lambda: build_interpreter_context(graph, target, step, {}), ValueError)
     _fails(lambda: build_interpreter_context(graph, target, step, {"RAW_NAME": "ok"}, state={}), ValueError)
@@ -181,11 +181,11 @@ def _validate_identity_and_cycles() -> None:
         inputs=[ValueBinding(placeholder="RAW_NAME", value=LiteralValue(value=" OAK "))],
         outputs=["NORMAL_NAME"],
     )
-    root = Node(processes=[Process(id="normalise", name="Normalise name", steps=[action])])
+    root = Node(processes=[Process(id="normalise", name="Normalise name", body=[action])])
     documents = {
         "root.oak.md": root,
         "__invocation__.oak.md": Node(schemas=[raw], processes=[Process(
-            id="consult", name="Consult root", steps=[Call(process="root.oak.md#process.normalise")],
+            id="consult", name="Consult root", body=[Call(process="root.oak.md#process.normalise")],
         )]),
         "result.oak.md": Node(schemas=[normal]),
     }
@@ -196,7 +196,7 @@ def _validate_identity_and_cycles() -> None:
     _require(context.invocation == "__invocation_1__.oak.md", "generated invocation overwrote a source document")
     request = parse(context.documents[context.invocation])
     resolved = resolve(request, source=context.invocation, load=context.documents.get)
-    bound = request.processes[0].steps[0]
+    bound = request.processes[0].body[0]
     _require(resolved.target_document(context.invocation, bound.input) == "__invocation__.oak.md", "input identity changed")
     _require(resolved.target_document(context.invocation, bound.output) == "result.oak.md", "output identity changed")
     repeated = build_interpreter_context(graph, "process.normalise", action, {"RAW_NAME": " OAK "})

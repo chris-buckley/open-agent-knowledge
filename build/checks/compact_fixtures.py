@@ -9,7 +9,7 @@ from oak import (
     If, Interface, LiteralValue, Node, NonEmpty, Not, Process, Schema, Set,
     State, StateValue, Trigger, Type, ValueBinding, While, render, where,
 )
-from oak.node.parts.processes.steps import Step
+from oak.node.parts.processes.statements import Statement
 
 
 def read(name: str) -> StateValue:
@@ -40,7 +40,7 @@ def below_target() -> Compare:
     return Compare(left=read("balance"), operator="less_than", right=BindingValue(binding="TARGET"))
 
 
-def specimen_node(steps: list[Step], trigger: Trigger | None = None, *, growth: bool = False) -> Node:
+def specimen_node(body: list[Statement], trigger: Trigger | None = None, *, growth: bool = False) -> Node:
     """Every specimen has real local schemas, targets, state, and process inputs."""
     return Node(
         constants=[Constant(id="approval", value=True)],
@@ -64,21 +64,21 @@ def specimen_node(steps: list[Step], trigger: Trigger | None = None, *, growth: 
             seed=[binding("TARGET", read("reflection-target"))] if growth else [],
         )],
         processes=[
-            Process(id="run", name="Run specimen", input="schema.growth-request" if growth else None, steps=steps),
-            Process(id="publish", name="Publish document", steps=[put("result", "published")]),
-            Process(id="review", name="Review document", steps=[put("result", "reviewed")]),
-            Process(id="author-document", name="Author document", input="schema.authoring-request", steps=[
+            Process(id="run", name="Run specimen", input="schema.growth-request" if growth else None, body=body),
+            Process(id="publish", name="Publish document", body=[put("result", "published")]),
+            Process(id="review", name="Review document", body=[put("result", "reviewed")]),
+            Process(id="author-document", name="Author document", input="schema.authoring-request", body=[
                 Emit(interface="interface.authored-output"),
             ]),
-            Process(id="grow-once", name="Grow balance", steps=[
+            Process(id="grow-once", name="Grow balance", body=[
                 ACT("Grow <BALANCE> into <NEXT>.", inputs=[binding("BALANCE", read("balance"))], outputs=["NEXT"]),
                 Set(state="state.balance", value=BindingValue(binding="NEXT")),
                 Emit(interface="interface.progress-output"),
             ]),
-            Process(id="grow-balance", name="Grow balance", input="schema.growth-request", steps=[
-                While(condition=below_target(), limit=10, steps=[call("grow-once")]),
+            Process(id="grow-balance", name="Grow balance", input="schema.growth-request", body=[
+                While(condition=below_target(), limit=10, body=[call("grow-once")]),
             ]),
-            Process(id="inspect", name="Inspect message", input="schema.message", steps=[
+            Process(id="inspect", name="Inspect message", input="schema.message", body=[
                 Emit(interface="interface.message-output"),
             ]),
         ],
@@ -94,14 +94,14 @@ def specimen_node(steps: list[Step], trigger: Trigger | None = None, *, growth: 
 @dataclass(frozen=True)
 class Specimen:
     identifier: str
-    steps: tuple[Step, ...]
+    body: tuple[Statement, ...]
     process_text: str | None = None
     trigger: Trigger | None = None
     trigger_text: str | None = None
     growth: bool = False
 
     def node(self) -> Node:
-        return specimen_node(list(self.steps), self.trigger, growth=self.growth)
+        return specimen_node(list(self.body), self.trigger, growth=self.growth)
 
     def text(self) -> str:
         """Inject the reviewed spelling into an otherwise contracted XML document."""
@@ -151,8 +151,8 @@ SPECIMENS = (
     ], otherwise=[Fail(message="The state is not ready.")]),),
         'IF $state.ready equals true:\n  IF $state.approved equals true:\n    CALL process.publish ()\n  ELSE:\n    CALL process.review ()\nELSE:\n  FAIL "The state is not ready."'),
     Specimen("S07", (
-        While(condition=below_target(), limit=10, steps=[call("grow-once")]),
-        While(condition=All(conditions=[below_target(), Not(condition=compare("blocked"))]), limit=10, steps=[call("grow-once")]),
+        While(condition=below_target(), limit=10, body=[call("grow-once")]),
+        While(condition=All(conditions=[below_target(), Not(condition=compare("blocked"))]), limit=10, body=[call("grow-once")]),
     ), 'WHILE $state.balance is less than $TARGET LIMIT 10:\n  CALL process.grow-once ()\n\nWHILE ALL($state.balance is less than $TARGET, NOT($state.blocked equals true)) LIMIT 10:\n  CALL process.grow-once ()', growth=True),
     Specimen("S08", (put("result", "unused"),), trigger=_SOURCE_TRIGGER,
         trigger_text='request-received(event="A complete OAK authoring request is received.", source=interface.authoring-input, process=process.author-document)'),

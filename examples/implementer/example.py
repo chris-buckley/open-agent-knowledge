@@ -295,29 +295,56 @@ implementation_requested_trigger = Trigger(
     process=PROCESS_IMPLEMENT_TASK,
 )
 
+task_brief_value = BindingValue(binding=PLACEHOLDER_TASK_BRIEF)
+
+task_brief_binding = ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=task_brief_value)
+
+context_value = BindingValue(binding=PLACEHOLDER_CONTEXT)
+
+context_binding = ValueBinding(placeholder=PLACEHOLDER_CONTEXT, value=context_value)
+
+draft_plan_text = "Read <TASK_BRIEF> with <CONTEXT> and produce <DRAFT_PLAN> and <QUESTIONS>."
+
+draft_plan_action = ACT(
+    draft_plan_text,
+    inputs=[task_brief_binding, context_binding],
+    outputs=[PLACEHOLDER_DRAFT_PLAN, PLACEHOLDER_QUESTIONS],
+)
+
+questions_value = BindingValue(binding=PLACEHOLDER_QUESTIONS)
+
+questions_binding = ValueBinding(placeholder=PLACEHOLDER_QUESTIONS, value=questions_value)
+
+draft_plan_value = BindingValue(binding=PLACEHOLDER_DRAFT_PLAN)
+
+draft_plan_binding = ValueBinding(placeholder=PLACEHOLDER_DRAFT_PLAN, value=draft_plan_value)
+
+resolve_plan_text = "Resolve <QUESTIONS> into <DRAFT_PLAN> and produce <PLAN>."
+
+resolve_plan_action = ACT(
+    resolve_plan_text,
+    inputs=[questions_binding, draft_plan_binding],
+    outputs=[PLACEHOLDER_PLAN],
+)
+
 plan_task_process = Process(
     id="plan-task",
     name="Plan task",
     input=SCHEMA_TASK_REQUEST,
     output=SCHEMA_IMPLEMENTATION_PLAN,
-    steps=[
-        ACT(
-            "Read <TASK_BRIEF> with <CONTEXT> and produce <DRAFT_PLAN> and <QUESTIONS>.",
-            inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=BindingValue(binding=PLACEHOLDER_TASK_BRIEF)),
-                ValueBinding(placeholder=PLACEHOLDER_CONTEXT, value=BindingValue(binding=PLACEHOLDER_CONTEXT)),
-            ],
-            outputs=[PLACEHOLDER_DRAFT_PLAN, PLACEHOLDER_QUESTIONS],
-        ),
-        ACT(
-            "Resolve <QUESTIONS> into <DRAFT_PLAN> and produce <PLAN>.",
-            inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_QUESTIONS, value=BindingValue(binding=PLACEHOLDER_QUESTIONS)),
-                ValueBinding(placeholder=PLACEHOLDER_DRAFT_PLAN, value=BindingValue(binding=PLACEHOLDER_DRAFT_PLAN)),
-            ],
-            outputs=[PLACEHOLDER_PLAN],
-        ),
-    ],
+    body=[draft_plan_action, resolve_plan_action],
+)
+
+plan_value = BindingValue(binding=PLACEHOLDER_PLAN)
+
+plan_binding = ValueBinding(placeholder=PLACEHOLDER_PLAN, value=plan_value)
+
+implement_plan_text = "Implement <PLAN> exactly and produce <CHANGESET>."
+
+implement_plan_action = ACT(
+    implement_plan_text,
+    inputs=[plan_binding],
+    outputs=[PLACEHOLDER_CHANGESET],
 )
 
 implement_plan_process = Process(
@@ -325,35 +352,63 @@ implement_plan_process = Process(
     name="Implement plan",
     input=SCHEMA_IMPLEMENTATION_PLAN,
     output=SCHEMA_CHANGESET,
-    steps=[
-        ACT(
-            "Implement <PLAN> exactly and produce <CHANGESET>.",
-            inputs=[ValueBinding(placeholder=PLACEHOLDER_PLAN, value=BindingValue(binding=PLACEHOLDER_PLAN))],
-            outputs=[PLACEHOLDER_CHANGESET],
-        ),
-    ],
+    body=[implement_plan_action],
+)
+
+snapshot_text = (
+    'Freeze <CHANGESET>, including all verification-relevant inputs, as immutable <CANDIDATE> and compute '
+    'its SHA-256 <REVISION>.'
+)
+
+snapshot_action = ACT.tool(
+    "changes.snapshot",
+    snapshot_text,
+    input=SCHEMA_CHANGESET,
+    output=SCHEMA_CANDIDATE,
+    inputs=local_bindings([PLACEHOLDER_CHANGESET]),
+    outputs=[PLACEHOLDER_CANDIDATE, PLACEHOLDER_REVISION],
 )
 
 snapshot_changeset_process = Process(
-    id="snapshot-changeset", name="Snapshot changeset", input=SCHEMA_CHANGESET, output=SCHEMA_CANDIDATE,
-    steps=[ACT.tool(
-        "changes.snapshot",
-        "Freeze <CHANGESET>, including all verification-relevant inputs, as immutable <CANDIDATE> and compute its SHA-256 <REVISION>.",
-        input=SCHEMA_CHANGESET, output=SCHEMA_CANDIDATE,
-        inputs=local_bindings([PLACEHOLDER_CHANGESET]),
-        outputs=[PLACEHOLDER_CANDIDATE, PLACEHOLDER_REVISION],
-    )],
+    id="snapshot-changeset",
+    name="Snapshot changeset",
+    input=SCHEMA_CHANGESET,
+    output=SCHEMA_CANDIDATE,
+    body=[snapshot_action],
+)
+
+verify_changeset_text = (
+    'Inspect immutable <CANDIDATE> requested at <REVISION>; run the versioned implementation checks and '
+    'record actual <VERIFIED_SUBJECT>, <VERIFIED_REVISION>, <CHECK>, <PASSED>, and <EVIDENCE>.'
+)
+
+verify_changeset_action = ACT.tool(
+    "checks.verify-changeset",
+    verify_changeset_text,
+    input=SCHEMA_CANDIDATE,
+    output=SCHEMA_VERIFICATION,
+    inputs=local_bindings([PLACEHOLDER_CANDIDATE, PLACEHOLDER_REVISION]),
+    outputs=list(VERIFICATION_FIELDS),
 )
 
 test_changeset_process = Process(
-    id="test-changeset", name="Test changeset", input=SCHEMA_CANDIDATE, output=SCHEMA_VERIFICATION,
-    steps=[ACT.tool(
-        "checks.verify-changeset",
-        "Inspect immutable <CANDIDATE> requested at <REVISION>; run the versioned implementation checks and record actual <VERIFIED_SUBJECT>, <VERIFIED_REVISION>, <CHECK>, <PASSED>, and <EVIDENCE>.",
-        input=SCHEMA_CANDIDATE, output=SCHEMA_VERIFICATION,
-        inputs=local_bindings([PLACEHOLDER_CANDIDATE, PLACEHOLDER_REVISION]),
-        outputs=list(VERIFICATION_FIELDS),
-    )],
+    id="test-changeset",
+    name="Test changeset",
+    input=SCHEMA_CANDIDATE,
+    output=SCHEMA_VERIFICATION,
+    body=[verify_changeset_action],
+)
+
+changeset_value = BindingValue(binding=PLACEHOLDER_CHANGESET)
+
+changeset_binding = ValueBinding(placeholder=PLACEHOLDER_CHANGESET, value=changeset_value)
+
+review_changeset_text = "Review <CHANGESET> against <PLAN> and produce <FINDINGS>."
+
+review_changeset_action = ACT(
+    review_changeset_text,
+    inputs=[changeset_binding, plan_binding],
+    outputs=[PLACEHOLDER_FINDINGS],
 )
 
 review_changeset_process = Process(
@@ -361,93 +416,197 @@ review_changeset_process = Process(
     name="Review changeset",
     input=SCHEMA_PLANNED_CHANGESET,
     output=SCHEMA_REVIEW_FINDINGS,
-    steps=[
-        ACT(
-            "Review <CHANGESET> against <PLAN> and produce <FINDINGS>.",
-            inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_CHANGESET, value=BindingValue(binding=PLACEHOLDER_CHANGESET)),
-                ValueBinding(placeholder=PLACEHOLDER_PLAN, value=BindingValue(binding=PLACEHOLDER_PLAN)),
-            ],
-            outputs=[PLACEHOLDER_FINDINGS],
-        ),
-    ],
+    body=[review_changeset_action],
+)
+
+apply_findings_text = "Apply <FINDINGS> to <CHANGESET> and produce <REVISED_CHANGESET>, <SUMMARY>, and <STATUS>."
+
+apply_findings_action = ACT(
+    apply_findings_text,
+    inputs=local_bindings([PLACEHOLDER_FINDINGS, PLACEHOLDER_CHANGESET]),
+    outputs=[PLACEHOLDER_REVISED_CHANGESET, PLACEHOLDER_SUMMARY, PLACEHOLDER_STATUS],
 )
 
 apply_findings_process = Process(
-    id="apply-findings", name="Apply findings", input=SCHEMA_REVIEWED_CHANGESET, output=SCHEMA_COMPLETION,
-    steps=[ACT(
-        "Apply <FINDINGS> to <CHANGESET> and produce <REVISED_CHANGESET>, <SUMMARY>, and <STATUS>.",
-        inputs=local_bindings([PLACEHOLDER_FINDINGS, PLACEHOLDER_CHANGESET]),
-        outputs=[PLACEHOLDER_REVISED_CHANGESET, PLACEHOLDER_SUMMARY, PLACEHOLDER_STATUS],
-    )],
+    id="apply-findings",
+    name="Apply findings",
+    input=SCHEMA_REVIEWED_CHANGESET,
+    output=SCHEMA_COMPLETION,
+    body=[apply_findings_action],
+)
+
+verified_subject_value = BindingValue(binding="VERIFIED_SUBJECT")
+
+candidate_value = BindingValue(binding=PLACEHOLDER_CANDIDATE)
+
+verified_subject_condition = Compare(left=verified_subject_value, operator="equals", right=candidate_value)
+
+assert_verified_subject = Assert(
+    condition=verified_subject_condition,
+    message="The evidence belongs to another candidate.",
+)
+
+verified_revision_value = BindingValue(binding="VERIFIED_REVISION")
+
+revision_value = BindingValue(binding=PLACEHOLDER_REVISION)
+
+verified_revision_condition = Compare(left=verified_revision_value, operator="equals", right=revision_value)
+
+assert_verified_revision = Assert(
+    condition=verified_revision_condition,
+    message="The evidence belongs to another revision.",
+)
+
+check_value = BindingValue(binding="CHECK")
+
+required_check_value = ConstantValue(constant=CONSTANT_REQUIRED_CHECK)
+
+check_condition = Compare(left=check_value, operator="equals", right=required_check_value)
+
+assert_check = Assert(condition=check_condition, message="The evidence does not cover the required checks.")
+
+passed_value = BindingValue(binding="PASSED")
+
+required_pass_value = LiteralValue(value=True)
+
+passed_condition = Compare(left=passed_value, operator="equals", right=required_pass_value)
+
+assert_passed = Assert(condition=passed_condition, message="The required checks failed.")
+
+commit_verified_text = (
+    'Reject drift before any side effect; commit exactly immutable <CANDIDATE> at <REVISION> with '
+    '<COMMIT_CONVENTION> using <VERIFIED_SUBJECT>, <VERIFIED_REVISION>, <CHECK>, <PASSED>, and '
+    '<EVIDENCE>, then return <COMMIT> and <COMMITTED_REVISION>.'
+)
+
+commit_verified_action = ACT.tool(
+    "changes.commit-verified",
+    commit_verified_text,
+    input=SCHEMA_VERIFIED_CHANGESET,
+    output=SCHEMA_COMMIT,
+    inputs=local_bindings(
+        [PLACEHOLDER_CANDIDATE, PLACEHOLDER_REVISION, *VERIFICATION_FIELDS, PLACEHOLDER_COMMIT_CONVENTION],
+    ),
+    outputs=[PLACEHOLDER_COMMIT, PLACEHOLDER_COMMITTED_REVISION],
+)
+
+committed_revision_value = BindingValue(binding=PLACEHOLDER_COMMITTED_REVISION)
+
+committed_revision_condition = Compare(left=committed_revision_value, operator="equals", right=revision_value)
+
+assert_committed_revision = Assert(
+    condition=committed_revision_condition,
+    message="The host committed a different revision; external effects cannot be rolled back by OAK.",
 )
 
 commit_changeset_process = Process(
-    id="commit-changeset", name="Commit changeset", input=SCHEMA_VERIFIED_CHANGESET, output=SCHEMA_COMMIT,
-    steps=[
-        Assert(condition=Compare(left=BindingValue(binding="VERIFIED_SUBJECT"), operator="equals",
-                                 right=BindingValue(binding=PLACEHOLDER_CANDIDATE)),
-               message="The evidence belongs to another candidate."),
-        Assert(condition=Compare(left=BindingValue(binding="VERIFIED_REVISION"), operator="equals",
-                                 right=BindingValue(binding=PLACEHOLDER_REVISION)),
-               message="The evidence belongs to another revision."),
-        Assert(condition=Compare(left=BindingValue(binding="CHECK"), operator="equals",
-                                 right=ConstantValue(constant=CONSTANT_REQUIRED_CHECK)),
-               message="The evidence does not cover the required checks."),
-        Assert(condition=Compare(left=BindingValue(binding="PASSED"), operator="equals",
-                                 right=LiteralValue(value=True)),
-               message="The required checks failed."),
-        ACT.tool(
-            "changes.commit-verified",
-            "Reject drift before any side effect; commit exactly immutable <CANDIDATE> at <REVISION> with <COMMIT_CONVENTION> using <VERIFIED_SUBJECT>, <VERIFIED_REVISION>, <CHECK>, <PASSED>, and <EVIDENCE>, then return <COMMIT> and <COMMITTED_REVISION>.",
-            input=SCHEMA_VERIFIED_CHANGESET, output=SCHEMA_COMMIT,
-            inputs=local_bindings([PLACEHOLDER_CANDIDATE, PLACEHOLDER_REVISION,
-                                   *VERIFICATION_FIELDS, PLACEHOLDER_COMMIT_CONVENTION]),
-            outputs=[PLACEHOLDER_COMMIT, PLACEHOLDER_COMMITTED_REVISION],
-        ),
-        Assert(condition=Compare(left=BindingValue(binding=PLACEHOLDER_COMMITTED_REVISION), operator="equals",
-                                 right=BindingValue(binding=PLACEHOLDER_REVISION)),
-               message="The host committed a different revision; external effects cannot be rolled back by OAK."),
+    id="commit-changeset",
+    name="Commit changeset",
+    input=SCHEMA_VERIFIED_CHANGESET,
+    output=SCHEMA_COMMIT,
+    body=[
+        assert_verified_subject,
+        assert_verified_revision,
+        assert_check,
+        assert_passed,
+        commit_verified_action,
+        assert_committed_revision,
     ],
 )
 
-implement_task_process = Process(
-    id="implement-task", name="Implement task", input=SCHEMA_TASK_REQUEST,
-    steps=[
-        Call(process=PROCESS_PLAN_TASK,
-             inputs=local_bindings([PLACEHOLDER_TASK_BRIEF, PLACEHOLDER_CONTEXT]), outputs=[PLACEHOLDER_PLAN]),
-        Call(process=PROCESS_IMPLEMENT_PLAN,
-             inputs=local_bindings([PLACEHOLDER_PLAN]), outputs=[PLACEHOLDER_CHANGESET]),
-        Call(process=PROCESS_REVIEW_CHANGESET,
-             inputs=local_bindings([PLACEHOLDER_PLAN, PLACEHOLDER_CHANGESET]), outputs=[PLACEHOLDER_FINDINGS]),
-        Call(process=PROCESS_APPLY_FINDINGS,
-             inputs=local_bindings([PLACEHOLDER_CHANGESET, PLACEHOLDER_FINDINGS]),
-             outputs=[PLACEHOLDER_REVISED_CHANGESET, PLACEHOLDER_SUMMARY, PLACEHOLDER_STATUS]),
-        If(
-            condition=Compare(left=BindingValue(binding=PLACEHOLDER_STATUS), operator="equals",
-                              right=LiteralValue(value=STATUS_BLOCKED)),
-            then=[Emit(interface=INTERFACE_ESCALATION_OUTPUT,
-                       bindings=local_bindings([PLACEHOLDER_STATUS, PLACEHOLDER_SUMMARY, PLACEHOLDER_FINDINGS]))],
-            otherwise=[
-                Call(process=PROCESS_SNAPSHOT_CHANGESET,
-                     inputs=[ValueBinding(placeholder=PLACEHOLDER_CHANGESET,
-                                          value=BindingValue(binding=PLACEHOLDER_REVISED_CHANGESET))],
-                     outputs=[PLACEHOLDER_CANDIDATE, PLACEHOLDER_REVISION]),
-                Call(process=PROCESS_TEST_CHANGESET,
-                     inputs=local_bindings([PLACEHOLDER_CANDIDATE, PLACEHOLDER_REVISION]),
-                     outputs=list(VERIFICATION_FIELDS)),
-                Call(process=PROCESS_COMMIT_CHANGESET,
-                     inputs=[*local_bindings([PLACEHOLDER_CANDIDATE, PLACEHOLDER_REVISION, *VERIFICATION_FIELDS]),
-                             ValueBinding(placeholder=PLACEHOLDER_COMMIT_CONVENTION,
-                                          value=ConstantValue(constant=CONSTANT_COMMIT_CONVENTION))],
-                     outputs=[PLACEHOLDER_COMMIT, PLACEHOLDER_COMMITTED_REVISION]),
-                Emit(interface=INTERFACE_IMPLEMENTATION_REPORT_OUTPUT,
-                     bindings=local_bindings([PLACEHOLDER_STATUS, PLACEHOLDER_SUMMARY,
-                                              PLACEHOLDER_CANDIDATE, PLACEHOLDER_REVISION,
-                                              *VERIFICATION_FIELDS, PLACEHOLDER_COMMIT, PLACEHOLDER_FINDINGS])),
-            ],
-        ),
+plan_task_call = Call(
+    process=PROCESS_PLAN_TASK,
+    inputs=local_bindings([PLACEHOLDER_TASK_BRIEF, PLACEHOLDER_CONTEXT]),
+    outputs=[PLACEHOLDER_PLAN],
+)
+
+implement_plan_call = Call(
+    process=PROCESS_IMPLEMENT_PLAN,
+    inputs=local_bindings([PLACEHOLDER_PLAN]),
+    outputs=[PLACEHOLDER_CHANGESET],
+)
+
+review_changeset_call = Call(
+    process=PROCESS_REVIEW_CHANGESET,
+    inputs=local_bindings([PLACEHOLDER_PLAN, PLACEHOLDER_CHANGESET]),
+    outputs=[PLACEHOLDER_FINDINGS],
+)
+
+apply_findings_call = Call(
+    process=PROCESS_APPLY_FINDINGS,
+    inputs=local_bindings([PLACEHOLDER_CHANGESET, PLACEHOLDER_FINDINGS]),
+    outputs=[PLACEHOLDER_REVISED_CHANGESET, PLACEHOLDER_SUMMARY, PLACEHOLDER_STATUS],
+)
+
+status_value = BindingValue(binding=PLACEHOLDER_STATUS)
+
+blocked_status_value = LiteralValue(value=STATUS_BLOCKED)
+
+implementation_blocked = Compare(left=status_value, operator="equals", right=blocked_status_value)
+
+emit_escalation = Emit(
+    interface=INTERFACE_ESCALATION_OUTPUT,
+    bindings=local_bindings([PLACEHOLDER_STATUS, PLACEHOLDER_SUMMARY, PLACEHOLDER_FINDINGS]),
+)
+
+revised_changeset_value = BindingValue(binding=PLACEHOLDER_REVISED_CHANGESET)
+
+revised_changeset_binding = ValueBinding(placeholder=PLACEHOLDER_CHANGESET, value=revised_changeset_value)
+
+snapshot_changeset_call = Call(
+    process=PROCESS_SNAPSHOT_CHANGESET,
+    inputs=[revised_changeset_binding],
+    outputs=[PLACEHOLDER_CANDIDATE, PLACEHOLDER_REVISION],
+)
+
+test_changeset_call = Call(
+    process=PROCESS_TEST_CHANGESET,
+    inputs=local_bindings([PLACEHOLDER_CANDIDATE, PLACEHOLDER_REVISION]),
+    outputs=list(VERIFICATION_FIELDS),
+)
+
+commit_convention_value = ConstantValue(constant=CONSTANT_COMMIT_CONVENTION)
+
+commit_convention_binding = ValueBinding(
+    placeholder=PLACEHOLDER_COMMIT_CONVENTION,
+    value=commit_convention_value,
+)
+
+commit_changeset_call = Call(
+    process=PROCESS_COMMIT_CHANGESET,
+    inputs=[
+        *local_bindings([PLACEHOLDER_CANDIDATE, PLACEHOLDER_REVISION, *VERIFICATION_FIELDS]),
+        commit_convention_binding,
     ],
+    outputs=[PLACEHOLDER_COMMIT, PLACEHOLDER_COMMITTED_REVISION],
+)
+
+emit_implementation_report = Emit(
+    interface=INTERFACE_IMPLEMENTATION_REPORT_OUTPUT,
+    bindings=local_bindings(
+        [
+            PLACEHOLDER_STATUS,
+            PLACEHOLDER_SUMMARY,
+            PLACEHOLDER_CANDIDATE,
+            PLACEHOLDER_REVISION,
+            *VERIFICATION_FIELDS,
+            PLACEHOLDER_COMMIT,
+            PLACEHOLDER_FINDINGS,
+        ],
+    ),
+)
+
+route_implementation = If(
+    condition=implementation_blocked,
+    then=[emit_escalation],
+    otherwise=[snapshot_changeset_call, test_changeset_call, commit_changeset_call, emit_implementation_report],
+)
+
+implement_task_process = Process(
+    id="implement-task",
+    name="Implement task",
+    input=SCHEMA_TASK_REQUEST,
+    body=[plan_task_call, implement_plan_call, review_changeset_call, apply_findings_call, route_implementation],
 )
 
 task_request_input_interface = Interface(

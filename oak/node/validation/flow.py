@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from pydantic_core import PydanticCustomError
 
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Call,
     Fail,
@@ -16,16 +16,16 @@ from oak.node.parts.processes.steps import (
     If,
     Join,
     Par,
-    Step,
+    Statement,
     While,
-    step_values,
+    statement_values,
 )
 from oak.node.parts.processes.values import BindingValue, LiteralValue, Value
 
 if TYPE_CHECKING:
     from oak.node.parts.processes.model import Process
 
-StepVisitor = Callable[[Step, AbstractSet[str]], None]
+StatementVisitor = Callable[[Statement, AbstractSet[str]], None]
 
 
 def _check_binding_visible(value: Value, visible: AbstractSet[str]) -> None:
@@ -75,7 +75,7 @@ def _check_foreach(step: Foreach, visible: AbstractSet[str]) -> None:
 def _parallel_outputs(step: Par, visible: AbstractSet[str]) -> set[str]:
     outputs = {
         output
-        for child in step.steps
+        for child in step.body
         if isinstance(child, Act)
         for output in child.outputs
     }
@@ -84,23 +84,23 @@ def _parallel_outputs(step: Par, visible: AbstractSet[str]) -> set[str]:
 
 
 def visible_bindings(
-    steps: Sequence[Step],
+    body: Sequence[Statement],
     initial: AbstractSet[str],
     *,
-    visit: StepVisitor | None = None,
+    visit: StatementVisitor | None = None,
 ) -> set[str]:
     """Return bindings visible after one successful step sequence."""
     visible = set(initial)
     pending: set[str] | None = None
 
-    for step in steps:
+    for step in body:
         if pending is not None and not isinstance(step, Join):
             raise PydanticCustomError(
                 "parallel_join_not_adjacent",
                 "a step occurs between PAR and JOIN",
             )
 
-        for value in step_values(step):
+        for value in statement_values(step):
             _check_binding_visible(value, visible)
 
         if visit is not None:
@@ -119,13 +119,13 @@ def visible_bindings(
             case Foreach():
                 _check_foreach(step, visible)
                 visible_bindings(
-                    step.steps,
+                    step.body,
                     visible | {step.binding},
                     visit=visit,
                 )
 
             case While():
-                visible_bindings(step.steps, visible, visit=visit)
+                visible_bindings(step.body, visible, visit=visit)
 
             case Par():
                 pending = _parallel_outputs(step, visible)
@@ -149,9 +149,9 @@ def visible_bindings(
     return visible
 
 
-def sequence_always_fails(steps: Sequence[Step]) -> bool:
+def sequence_always_fails(body: Sequence[Statement]) -> bool:
     """Return whether one step sequence always ends in explicit failure."""
-    for index, step in enumerate(steps):
+    for index, step in enumerate(body):
         always_fails = isinstance(step, Fail)
 
         if isinstance(step, If):
@@ -162,10 +162,10 @@ def sequence_always_fails(steps: Sequence[Step]) -> bool:
             )
 
         elif isinstance(step, While):
-            sequence_always_fails(step.steps)
+            sequence_always_fails(step.body)
 
         if always_fails:
-            if index + 1 < len(steps):
+            if index + 1 < len(body):
                 raise PydanticCustomError(
                     "unreachable_process_step",
                     "a process step follows a path that always fails",
@@ -179,23 +179,23 @@ def sequence_always_fails(steps: Sequence[Step]) -> bool:
 def validate_process_flow(process: Process) -> None:
     """Validate one process's local binding and failure flow."""
     if process.input is None:
-        visible_bindings(process.steps, set())
+        visible_bindings(process.body, set())
 
-    sequence_always_fails(process.steps)
+    sequence_always_fails(process.body)
 
 
 def process_visible_bindings(
     process: Process,
     inputs: AbstractSet[str],
     *,
-    visit: StepVisitor | None = None,
+    visit: StatementVisitor | None = None,
 ) -> set[str]:
     """Return bindings visible after successful process completion."""
-    return visible_bindings(process.steps, inputs, visit=visit)
+    return visible_bindings(process.body, inputs, visit=visit)
 
 
 __all__ = [
-    "StepVisitor",
+    "StatementVisitor",
     "process_visible_bindings",
     "sequence_always_fails",
     "validate_process_flow",

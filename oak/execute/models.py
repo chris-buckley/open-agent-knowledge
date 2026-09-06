@@ -18,7 +18,7 @@ from pydantic_core import PydanticCustomError
 
 from oak.base import OakModel
 from oak.context import InterpreterContext
-from oak.node.parts.processes.steps import Act
+from oak.node.parts.processes.statements import Act
 from oak.vocabulary.text.non_blank_line import NonBlankLine
 from oak.vocabulary.text.placeholder import Placeholder
 from oak.vocabulary.text.target_path import TargetPath, local_target

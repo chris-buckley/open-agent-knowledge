@@ -24,6 +24,25 @@ PLACEHOLDER_ERRORS = "ERRORS"
 
 STATUS_OK = "OK"
 
+execution_status_clause = where(
+    PLACEHOLDER_STATUS,
+    Type(of='string'),
+    OneOf(values=['PENDING', 'RUNNING', STATUS_OK, 'WARN', 'ERROR']),
+    description='the execution status',
+)
+
+started_at_clause = where(
+    PLACEHOLDER_STARTED_AT,
+    Type(of='datetime'),
+    description='when the process started',
+)
+
+ended_at_clause = where(
+    PLACEHOLDER_ENDED_AT,
+    Type(of='datetime'),
+    description='when the process ended',
+)
+
 process_execution_table_schema = Schema(
     id="process-execution-table",
     name="Process Execution Table",
@@ -36,9 +55,9 @@ process_execution_table_schema = Schema(
     where=[
         where(PLACEHOLDER_PROCESS_ID, Type(of="string"), NonEmpty(), description="the process identifier"),
         where(PLACEHOLDER_PROCESS_NAME, Type(of="string"), NonEmpty(), description="the process display name"),
-        where(PLACEHOLDER_STATUS, Type(of="string"), OneOf(values=["PENDING", "RUNNING", STATUS_OK, "WARN", "ERROR"]), description="the execution status"),
-        where(PLACEHOLDER_STARTED_AT, Type(of="datetime"), description="when the process started"),
-        where(PLACEHOLDER_ENDED_AT, Type(of="datetime"), description="when the process ended"),
+        execution_status_clause,
+        started_at_clause,
+        ended_at_clause,
         where(PLACEHOLDER_DURATION_MS, Type(of="integer"), description="the run duration in milliseconds"),
         where(PLACEHOLDER_OUTCOME, Type(of="string"), NonEmpty(), description="the result in one clause"),
         where(PLACEHOLDER_ARTIFACTS, Type(of="string"), description="the produced artifacts, empty when none"),

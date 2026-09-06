@@ -13,12 +13,12 @@ example-1: "JOIN"
 syntax-reference: "outputs/oak.ebnf"
 
 grammar: TEXT<<
-surface_step_join = ? JOIN ? ;
+surface_statement_join = ? JOIN ? ;
 >>
 </constants>
 
 <schemas>
-<schema id="step-join" name="Join" purpose="The barrier immediately after one parallel group.">
+<schema id="statement-join" name="Join" purpose="The barrier immediately after one parallel group.">
 JOIN
 
 WHERE:

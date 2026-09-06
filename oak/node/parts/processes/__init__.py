@@ -25,7 +25,7 @@ from oak.node.parts.processes.conditions import (
     Not,
     condition_values,
 )
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Assert,
     Call,
@@ -36,10 +36,10 @@ from oak.node.parts.processes.steps import (
     Join,
     Par,
     Set,
-    Step,
-    StepModel,
+    Statement,
+    StatementModel,
     While,
-    step_values,
+    statement_values,
 )
 from oak.node.parts.processes.model import Process
 
@@ -70,12 +70,12 @@ __all__ = [
     "Set",
     "StateTarget",
     "StateValue",
-    "Step",
-    "StepModel",
+    "Statement",
+    "StatementModel",
     "Value",
     "ValueBinding",
     "ValueModel",
     "While",
     "condition_values",
-    "step_values",
+    "statement_values",
 ]

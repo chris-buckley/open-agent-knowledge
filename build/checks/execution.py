@@ -19,7 +19,7 @@ from oak.node.model import Node
 from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes.conditions import All, Compare
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Assert,
     Call,
@@ -64,9 +64,9 @@ def validate_execution() -> None:
             Process(
                 id="run",
                 name="Run tools",
-                steps=[
+                body=[
                     Par(
-                        steps=[
+                        body=[
                             Act(
                                 tool="tool-a",
                                 instruction="Produce <A>.",
@@ -99,7 +99,7 @@ def validate_execution() -> None:
                     Foreach(
                         binding="ITEM",
                         value=LiteralValue(value=[1, 2]),
-                        steps=[
+                        body=[
                             Act(
                                 instruction="Record <ITEM>.",
                                 inputs=[
@@ -164,7 +164,7 @@ def validate_execution() -> None:
                 id="handle",
                 name="Handle request",
                 input="schema.raw-name",
-                steps=[
+                body=[
                     Call(
                         process="process.normalise",
                         inputs=[
@@ -268,7 +268,7 @@ def validate_while() -> None:
             Process(
                 id="wait-job",
                 name="Wait job",
-                steps=[
+                body=[
                     While(
                         condition=All(
                             conditions=[
@@ -291,7 +291,7 @@ def validate_while() -> None:
                             ]
                         ),
                         limit=3,
-                        steps=[
+                        body=[
                             Set(
                                 state="state.status",
                                 value=LiteralValue(
@@ -325,12 +325,12 @@ def validate_while() -> None:
             vocabulary="https://example.org/oak#",
         )
     )
-    while_step = linked["processes"][0]["steps"][0]
+    while_step = linked["processes"][0]["body"]["@list"][0]
     if not (
         while_step["@type"] == "oak:While"
         and while_step["limit"] == 3
         and while_step["condition"]["@type"] == "oak:All"
-        and len(while_step["steps"]) == 1
+        and len(while_step["body"]["@list"]) == 1
     ):
         raise RuntimeError("WHILE JSON-LD is wrong")
 
@@ -364,7 +364,7 @@ def validate_while() -> None:
             Process(
                 id="advance-count",
                 name="Advance count",
-                steps=[
+                body=[
                     While(
                         condition=Compare(
                             left=StateValue(
@@ -374,7 +374,7 @@ def validate_while() -> None:
                             right=LiteralValue(value=2),
                         ),
                         limit=3,
-                        steps=[
+                        body=[
                             ACT.tool(
                                 "counter.next",
                                 (
@@ -502,7 +502,7 @@ def validate_while() -> None:
             Process(
                 id="poll-job",
                 name="Poll job",
-                steps=[
+                body=[
                     While(
                         condition=Compare(
                             left=StateValue(
@@ -514,7 +514,7 @@ def validate_while() -> None:
                             ),
                         ),
                         limit=2,
-                        steps=[
+                        body=[
                             ACT(
                                 "Wait for the next status."
                             )
@@ -573,7 +573,7 @@ def validate_source_routing() -> None:
             Process(
                 id="mark-event",
                 name="Mark event",
-                steps=[
+                body=[
                     Set(
                         state="state.route",
                         value=LiteralValue(
@@ -586,7 +586,7 @@ def validate_source_routing() -> None:
                 id="mark-source",
                 name="Mark source",
                 input="schema.raw-name",
-                steps=[
+                body=[
                     Set(
                         state="state.route",
                         value=LiteralValue(

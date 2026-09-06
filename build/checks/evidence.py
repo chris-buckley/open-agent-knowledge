@@ -16,7 +16,7 @@ from examples.schemas.verification import VERIFICATION_FIELDS
 from oak.context import InterpreterContext
 from oak.execute.executor import execute
 from oak.execute.models import Arrival, ExecutionError, ExecutionResult, ToolContract
-from oak.node.parts.processes.steps import Act
+from oak.node.parts.processes.statements import Act
 from oak.parse.document import parse
 
 DRAFT = "def validate_title(value):\n    return value\n"
@@ -47,7 +47,7 @@ class VerificationHost:
         self.drift = False
 
     def interpret(self, context: InterpreterContext) -> Mapping[str, JsonValue]:
-        action = parse(context.documents[context.invocation]).processes[0].steps[0]
+        action = parse(context.documents[context.invocation]).processes[0].body[0]
         if not isinstance(action, Act):
             raise RuntimeError("expected one native action")
         self.trace.append(context.process)

@@ -89,8 +89,8 @@ def fuse(documents: Mapping[str, str], *, entry: str) -> Node:
     # Host prose cannot secretly serve as a second reference syntax.
     root = nodes[entry]
     prose = [instruction.body for instruction in root.instructions]
-    from oak.node.parts.processes.steps import iter_steps
-    prose.extend(step.instruction for process in root.processes for step in iter_steps(process.steps) if isinstance(step, Act))
+    from oak.node.parts.processes.statements import iter_statements
+    prose.extend(step.instruction for process in root.processes for step in iter_statements(process.body) if isinstance(step, Act))
     if any(re.search(r"\.oak\.md#(?:schema|constant|process)\.", text) for text in prose):
         raise ValueError("fusion dependencies in prose must be expressed as typed target bindings")
 

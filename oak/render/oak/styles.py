@@ -8,14 +8,14 @@ from dataclasses import dataclass
 from typing import Literal
 
 from oak.node.model import Node
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Assert,
     Fail,
     Foreach,
     If,
     Par,
-    Step,
+    Statement,
     While,
 )
 
@@ -100,14 +100,14 @@ def _styled_text(text: str, path: str, failures: list[StyleFailure]) -> str:
     return rewritten
 
 
-def _styled_steps(
-    steps: Sequence[Step],
+def _styled_statements(
+    body: Sequence[Statement],
     path: str,
     failures: list[StyleFailure],
-) -> list[Step]:
-    styled: list[Step] = []
+) -> list[Statement]:
+    styled: list[Statement] = []
 
-    for index, step in enumerate(steps):
+    for index, step in enumerate(body):
         step_path = f"{path}.{index}"
 
         match step:
@@ -124,17 +124,17 @@ def _styled_steps(
                 styled.append(step.model_copy(update={"message": message}))
 
             case If():
-                then = _styled_steps(step.then, f"{step_path}.then", failures)
+                then = _styled_statements(step.then, f"{step_path}.then", failures)
                 otherwise = (
                     None
                     if step.otherwise is None
-                    else _styled_steps(step.otherwise, f"{step_path}.otherwise", failures)
+                    else _styled_statements(step.otherwise, f"{step_path}.otherwise", failures)
                 )
                 styled.append(step.model_copy(update={"then": then, "otherwise": otherwise}))
 
             case Foreach() | While() | Par():
-                children = _styled_steps(step.steps, f"{step_path}.steps", failures)
-                styled.append(step.model_copy(update={"steps": children}))
+                children = _styled_statements(step.body, f"{step_path}.body", failures)
+                styled.append(step.model_copy(update={"body": children}))
 
             case _:
                 styled.append(step)
@@ -163,7 +163,7 @@ def styled_node(node: Node, style: StyleName = "authored") -> Node:
     ]
     processes = [
         process.model_copy(
-            update={"steps": _styled_steps(process.steps, f"processes.{index}.steps", failures)}
+            update={"body": _styled_statements(process.body, f"processes.{index}.body", failures)}
         )
         for index, process in enumerate(node.processes)
     ]
