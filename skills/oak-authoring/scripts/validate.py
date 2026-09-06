@@ -23,7 +23,7 @@ from urllib.request import urlopen
 import venv
 from zipfile import BadZipFile, ZipFile
 
-SKILL_VERSION = "2.2.0"
+SKILL_VERSION = "2.3.0"
 REPOSITORY = "chris-buckley/open-agent-knowledge"
 REVISION = "2b542c613c5d1a7e64b597884fae4f444ac34916"
 SOURCE_SHA256 = "e9c301a254ec8897698816091bac99cc117d8e0fa052192e728d356d19c27bd1"

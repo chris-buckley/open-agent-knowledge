@@ -48,7 +48,7 @@ def fuse(documents: Mapping[str, str], *, entry: str) -> Node:
     if set(graph.documents) != set(nodes):
         raise ValueError(f"unreferenced fusion knowledge: {sorted(set(nodes) - set(graph.documents))}")
 
-    # Stable path ordering follows the numbered guides, independent of graph traversal.
+    # Stable path ordering is independent of graph traversal and delivery directories.
     order = [entry, *sorted(path for path in nodes if path != entry)]
     identities: dict[tuple[str, str], str] = {}
     used: set[str] = set()

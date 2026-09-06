@@ -2,8 +2,8 @@
 
 Prepared: 2026-09-06T02:46:56Z
 Classification: INTERNAL
-Readiness: Ready for implementation after the user instructs execution.
-Execution: Not started.
+Readiness: Execution authorised by the user on 2026-09-06.
+Execution: In progress.
 
 ## 1. Situation
 
@@ -237,4 +237,4 @@ Reporting: Keep execution checkboxes accurate. The completion report records the
 | Change the accepted layout or formatting | User | Present the concrete proposed change before applying it |
 
 ### Acknowledgement
-The user's accepted directory, scaffold, and formatting decisions are recorded above. Implementation has not started. The executing assistant must read this plan and the applicable owning AGENTS documents before making the product change.
+The user's accepted directory, scaffold, and formatting decisions are recorded above. The user instructed execution and PR delivery on 2026-09-06. The executing assistant has read this plan and the applicable owning AGENTS documents.

@@ -47,7 +47,7 @@ def valid_title(title: str) -> bool:
 >>
 
 shape-notes: TEXT<<
-populated-shapes shows filled instances of these four reusable schemas without WHERE or schema wrappers. The one-row table is fixed-cardinality. Extend templates explicitly when justified; apply the schema guidance above.
+populated-shapes fills these four schemas without wrappers or WHERE. The one-row table has fixed cardinality; extend its template explicitly when justified.
 >>
 ~~~~
 

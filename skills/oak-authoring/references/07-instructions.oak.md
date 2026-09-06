@@ -8,5 +8,5 @@ guidance: YAML<<
   triggers, and processes cannot express.
 >>
 
-last-decision: "After the other six responsibilities are represented, ask what meaning remains. Keep only that irreducible policy in instructions. Generated interpretation guidance is derived from the node; do not author copies of it."
+last-decision: "Do not author copies of the node-derived interpretation guidance."
 ~~~~
