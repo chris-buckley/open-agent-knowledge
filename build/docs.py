@@ -17,7 +17,7 @@ from build.surfaces import (
     surface_grammar,
     surface_schema,
 )
-from oak import Constant, Instruction, Node, render
+from oak import Constant, Instruction, Node, Process, render
 from oak.rules import RULES
 from oak.surface.registry import surfaces_for_model
 
@@ -53,6 +53,7 @@ def document(model: type) -> str:
             ],
         ],
         constants=[
+            *([migration_note()] if model is Process else []),
             *[
                 Constant(id=f"example-{index}", value=surface_example(surface))
                 for index, surface in enumerate(surfaces, 1)
@@ -67,6 +68,19 @@ def document(model: type) -> str:
         schemas=[surface_schema(surface) for surface in surfaces],
     )
     return render(node, grouping="xml") + "\n"
+
+
+def migration_note() -> Constant:
+    """Keep the breaking Python and interchange migration in one generated owner."""
+    return Constant(
+        id="statement-body-migration",
+        value={
+            "python": "Import Statement instead of Step. Process, Foreach, While, and Par take body instead of steps. If keeps then and otherwise. StatementModel, iter_statements, statement_values, and statements modules replace the corresponding step names without forwarding aliases.",
+            "models": "Model dumps and JSON Schema use ordinary body arrays. Old steps fields, including mixed steps/body input, are rejected.",
+            "json-ld": "Process, Foreach, While, and Par encode body as an explicit @list object. Instruction.body remains a string with no global list container. The ordered then term replaces thenSteps; otherwise is unchanged.",
+            "unchanged": "OAK keywords, grouping delimiters, literal JSON keys, operation kinds, schema identities, execution scope, and stable diagnostic codes are unchanged. This is not Python or JSON-LD wire compatibility.",
+        },
+    )
 
 
 def documents() -> dict[str, str]:

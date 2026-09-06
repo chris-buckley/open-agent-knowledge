@@ -8,7 +8,7 @@ from oak.node.index import NodeIndex
 from oak.node.validation.processes import (
     validate_local_call_cycles,
     validate_process_schema_contract,
-    validate_process_steps,
+    validate_process_statements,
 )
 from oak.node.validation.triggers import validate_triggers
 from oak.node.validation.values import (
@@ -47,10 +47,10 @@ def validate_node(node: Node) -> None:
     )
 
     for process in node.processes:
-        validate_process_steps(
+        validate_process_statements(
             index,
             process,
-            process.steps,
+            process.body,
         )
 
     validate_local_call_cycles(node.processes)

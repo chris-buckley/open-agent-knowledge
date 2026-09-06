@@ -193,27 +193,30 @@ successor_verification_requested_trigger = Trigger(
     process=PROCESS_VERIFY_SUCCESSOR,
 )
 
+oak_verify_successor_text = (
+    "Verify <CANDIDATE_OAK> against <CURRENT_OAK>, <AMENDMENT>, "
+    "and <PROTECTED_INVARIANTS>, then produce <VALID>, <PARSES>, "
+    "<RESOLVES>, <CANONICAL>, <INVARIANTS_PRESERVED>, "
+    "<SCOPE_EXACT>, and <PROOF>."
+)
+
+oak_verify_successor_action = ACT.tool(
+    TOOL_OAK_VERIFY_SUCCESSOR,
+    oak_verify_successor_text,
+    input=SCHEMA_SUCCESSOR_VERIFICATION_REQUEST,
+    output=SCHEMA_SUCCESSOR_PROOF,
+    inputs=local_bindings(REQUEST_PLACEHOLDERS),
+    outputs=list(PROOF_PLACEHOLDERS),
+)
+
+emit_proof = Emit(interface=INTERFACE_PROOF_OUTPUT)
+
 verify_successor_process = Process(
     id="verify-successor",
     name="Verify successor",
     input=SCHEMA_SUCCESSOR_VERIFICATION_REQUEST,
     output=SCHEMA_SUCCESSOR_PROOF,
-    steps=[
-        ACT.tool(
-            TOOL_OAK_VERIFY_SUCCESSOR,
-            (
-                "Verify <CANDIDATE_OAK> against <CURRENT_OAK>, <AMENDMENT>, "
-                "and <PROTECTED_INVARIANTS>, then produce <VALID>, <PARSES>, "
-                "<RESOLVES>, <CANONICAL>, <INVARIANTS_PRESERVED>, "
-                "<SCOPE_EXACT>, and <PROOF>."
-            ),
-            input=SCHEMA_SUCCESSOR_VERIFICATION_REQUEST,
-            output=SCHEMA_SUCCESSOR_PROOF,
-            inputs=local_bindings(REQUEST_PLACEHOLDERS),
-            outputs=list(PROOF_PLACEHOLDERS),
-        ),
-        Emit(interface=INTERFACE_PROOF_OUTPUT),
-    ],
+    body=[oak_verify_successor_action, emit_proof],
 )
 
 verification_request_input_interface = Interface(

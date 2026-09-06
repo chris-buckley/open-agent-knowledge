@@ -126,10 +126,25 @@ def prompt_examples() -> str:
     return "Fixed-cardinality examples; choose or combine shapes as needed.\n\n" + "\n\n".join(pairs)
 
 
+comparison_instance_constant = Constant(
+    id=comparison_schema.id + "-instance", form="text", value=EXPECTED_INSTANCES[comparison_schema.id],
+)
+decision_instance_constant = Constant(
+    id=decision_schema.id + "-instance", form="text", value=EXPECTED_INSTANCES[decision_schema.id],
+)
+outline_instance_constant = Constant(
+    id=outline_schema.id + "-instance", form="text", value=EXPECTED_INSTANCES[outline_schema.id],
+)
+file_instance_constant = Constant(
+    id=file_schema.id + "-instance", form="text", value=EXPECTED_INSTANCES[file_schema.id],
+)
+
 shape_gallery_node = Node(
     constants=[
-        Constant(id=schema.id + "-instance", form="text", value=EXPECTED_INSTANCES[schema.id])
-        for schema in SHAPES
+        comparison_instance_constant,
+        decision_instance_constant,
+        outline_instance_constant,
+        file_instance_constant,
     ],
     schemas=[comparison_schema, decision_schema, outline_schema, file_schema],
 )

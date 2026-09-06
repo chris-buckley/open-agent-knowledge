@@ -14,7 +14,7 @@ from oak.node.parts.processes.conditions import (
 )
 from oak.node.parts.processes.model import Process
 from oak.node.parts.processes.operators import ConditionOperator
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Assert,
     Call,
@@ -25,9 +25,9 @@ from oak.node.parts.processes.steps import (
     Join,
     Par,
     Set,
-    Step,
+    Statement,
     While,
-    step_values,
+    statement_values,
 )
 from oak.node.parts.processes.targets import (
     ConstantTarget,
@@ -113,7 +113,7 @@ __all__ = [
     "State",
     "StateTarget",
     "StateValue",
-    "Step",
+    "Statement",
     "Trigger",
     "Type",
     "Value",
@@ -121,6 +121,6 @@ __all__ = [
     "Where",
     "While",
     "condition_values",
-    "step_values",
+    "statement_values",
     "where",
 ]

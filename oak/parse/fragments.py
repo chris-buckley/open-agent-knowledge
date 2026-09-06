@@ -14,7 +14,7 @@ from oak.node.parts.processes.conditions import (
     Not,
 )
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Assert,
     Call,
@@ -61,7 +61,7 @@ from oak.parse.schemas import (
     parse_schemas,
     parse_where,
 )
-from oak.parse.steps import parse_steps
+from oak.parse.statements import parse_statements
 from oak.parse.triggers import parse_triggers
 from oak.parse.values import parse_binding, parse_value
 
@@ -88,7 +88,7 @@ _CONDITION_MODELS = (
     Any,
     Not,
 )
-_STEP_MODELS = (
+_STATEMENT_MODELS = (
     Act,
     Set,
     Emit,
@@ -206,12 +206,12 @@ def parse_fragment(
             cursor.fail("expression_trailing", "unexpected text after the condition")
         return condition
 
-    if model in _STEP_MODELS:
+    if model in _STATEMENT_MODELS:
         cursor = Cursor(lines, path, line)
-        steps = parse_steps(cursor, 0)
-        if len(steps) != 1 or not cursor.at_end:
+        body = parse_statements(cursor, 0)
+        if len(body) != 1 or not cursor.at_end:
             cursor.fail("fragment_count", "expected exactly one step fragment")
-        return steps[0]
+        return body[0]
 
     raise TypeError(model.__name__)
 

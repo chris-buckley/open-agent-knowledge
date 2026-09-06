@@ -18,7 +18,7 @@ from oak.execute.models import (
     ToolContract,
     _STATE_ADAPTER,
 )
-from oak.execute.steps import run_process
+from oak.execute.statements import run_process
 from oak.execute.values import evaluate_condition, resolve_value, validate_state_value
 from oak.node.model import Node
 from oak.node.parts.interfaces import Interface

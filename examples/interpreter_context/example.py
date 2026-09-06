@@ -32,9 +32,11 @@ PLACEHOLDER_TITLE = "TITLE"
 PLACEHOLDER_VERDICT = "VERDICT"
 PLACEHOLDER_REASON = "REASON"
 
-review_instructions = [Instruction(
-    id="review-policy", body="Reject empty or whitespace-only titles; accept other titles without rewriting them.",
-)]
+review_policy_instruction = Instruction(
+    id="review-policy",
+    body="Reject empty or whitespace-only titles; accept other titles without rewriting them.",
+)
+review_instructions = [review_policy_instruction]
 title_schema = Schema(
     id="title", name="Title", purpose="Carry a title that may need rejection.", template="Title: <TITLE>",
     where=[where(PLACEHOLDER_TITLE, Type(of="string"), description="the unmodified title to assess")],
@@ -48,15 +50,28 @@ review_schema = Schema(
         where(PLACEHOLDER_REASON, Type(of="string"), NonEmpty(), description="the reason for the decision"),
     ],
 )
+title_value = BindingValue(binding=PLACEHOLDER_TITLE)
+
+title_binding = ValueBinding(placeholder=PLACEHOLDER_TITLE, value=title_value)
+
+review_title_text = "Assess <TITLE> under the title policy and produce <VERDICT> and <REASON>."
+
+review_title_action = ACT(
+    review_title_text,
+    input=SCHEMA_TITLE,
+    output=SCHEMA_REVIEW,
+    inputs=[title_binding],
+    outputs=[PLACEHOLDER_VERDICT, PLACEHOLDER_REASON],
+)
+
+emit_review = Emit(interface=INTERFACE_REVIEW_OUTPUT)
+
 review_title_process = Process(
-    id="review-title", name="Review title", input=SCHEMA_TITLE, output=SCHEMA_REVIEW,
-    steps=[
-        ACT("Assess <TITLE> under the title policy and produce <VERDICT> and <REASON>.",
-            input=SCHEMA_TITLE, output=SCHEMA_REVIEW,
-            inputs=[ValueBinding(placeholder=PLACEHOLDER_TITLE, value=BindingValue(binding=PLACEHOLDER_TITLE))],
-            outputs=[PLACEHOLDER_VERDICT, PLACEHOLDER_REASON]),
-        Emit(interface=INTERFACE_REVIEW_OUTPUT),
-    ],
+    id="review-title",
+    name="Review title",
+    input=SCHEMA_TITLE,
+    output=SCHEMA_REVIEW,
+    body=[review_title_action, emit_review],
 )
 title_requested_trigger = Trigger(
     id="title-requested", event="A title needs review.", source=INTERFACE_TITLE_INPUT, process=PROCESS_REVIEW_TITLE,
@@ -93,7 +108,7 @@ def context_host(context: InterpreterContext) -> Mapping[str, JsonValue]:
         raise ValueError("this demonstration host only implements the supplied title policy")
     invocation = parse(context.documents[context.invocation])
     resolve(invocation, source=context.invocation, load=context.documents.get)
-    action = invocation.processes[0].steps[0]
+    action = invocation.processes[0].body[0]
     if not isinstance(action, Act) or any(not isinstance(item.value, LiteralValue) for item in action.inputs):
         raise ValueError("expected one fully bound native ACT")
     return direct_host(action, {item.placeholder: item.value.value for item in action.inputs})

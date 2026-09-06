@@ -19,7 +19,7 @@ from oak.execute.values import (
 )
 from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Assert,
     Call,
@@ -30,7 +30,7 @@ from oak.node.parts.processes.steps import (
     Join,
     Par,
     Set,
-    Step,
+    Statement,
     While,
 )
 from oak.node.parts.processes.values import ValueBinding
@@ -70,7 +70,7 @@ def run_process(
         document, deepcopy(dict(inputs)),
         context.graph.display_target(document, "process", process.id),
     )
-    run_steps(context, frame, process.steps)
+    run_statements(context, frame, process.body)
     output_schema = resolved_schema(context, document, process.output)
 
     if output_schema is None:
@@ -189,7 +189,7 @@ def _run_if(context: ExecutionContext, frame: ProcessFrame, step: If) -> None:
     )
 
     if selected is not None:
-        run_steps(context, frame.child(), selected)
+        run_statements(context, frame.child(), selected)
 
 
 def _run_call(context: ExecutionContext, frame: ProcessFrame, step: Call) -> None:
@@ -225,7 +225,7 @@ def _run_foreach(context: ExecutionContext, frame: ProcessFrame, step: Foreach) 
     for element in elements:
         child = frame.child()
         child.bindings[step.binding] = deepcopy(element)
-        run_steps(context, child, step.steps)
+        run_statements(context, child, step.body)
 
 
 def _run_while(context: ExecutionContext, frame: ProcessFrame, step: While) -> None:
@@ -233,7 +233,7 @@ def _run_while(context: ExecutionContext, frame: ProcessFrame, step: While) -> N
         if not evaluate_condition(context, frame, step.condition):
             return
 
-        run_steps(context, frame.child(), step.steps)
+        run_statements(context, frame.child(), step.body)
 
     if evaluate_condition(context, frame, step.condition):
         raise ExecutionError(
@@ -250,15 +250,15 @@ def _join(frame: ProcessFrame, pending: Sequence[Mapping[str, JsonValue]] | None
         frame.bindings.update(outputs)
 
 
-def run_steps(
+def run_statements(
     context: ExecutionContext,
     frame: ProcessFrame,
-    steps: Sequence[Step],
+    body: Sequence[Statement],
 ) -> None:
     """Run one process step sequence in authored order."""
     pending: list[dict[str, JsonValue]] | None = None
 
-    for step in steps:
+    for step in body:
         match step:
             case Act():
                 _run_act(context, frame, step)
@@ -316,5 +316,5 @@ def context_emission(
 
 __all__ = [
     "run_process",
-    "run_steps",
+    "run_statements",
 ]

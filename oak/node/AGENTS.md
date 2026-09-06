@@ -39,6 +39,9 @@ node-invariants: YAML<<
   are allowed, but process bindings are not.
 - Interface instances never become ambient process storage.
 - State and interface operations remain local to the active document.
+- Statement is the tagged recursive process union. Process, Foreach, While, and Par
+  use nonempty body fields; If keeps then and otherwise. Construction layout does
+  not change binding scope or execution order.
 >>
 
 validation-ownership: CSV<<

@@ -6,7 +6,7 @@ from build.checks.fixtures import contract_schemas, normalise_process
 from oak.node.model import Node
 from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import Act, Call, Emit
+from oak.node.parts.processes.statements import Act, Call, Emit
 from oak.node.parts.processes.values import BindingValue, LiteralValue, ValueBinding
 from oak.node.parts.schemas.constraints import Type
 from oak.node.parts.schemas.model import Schema, where
@@ -40,7 +40,7 @@ def validate_resolution() -> None:
                 id="read-shared",
                 name="Read shared",
                 input="shared.oak.md#schema.shared",
-                steps=[
+                body=[
                     Act(
                         instruction="Read <VALUE>.",
                         inputs=[
@@ -56,7 +56,7 @@ def validate_resolution() -> None:
                 id="emit-shared",
                 name="Emit shared",
                 input="shared.oak.md#schema.shared",
-                steps=[Emit(interface="interface.shared-output")],
+                body=[Emit(interface="interface.shared-output")],
             ),
         ],
         interfaces=[
@@ -95,7 +95,7 @@ def validate_resolution() -> None:
             Process(
                 id="handle",
                 name="Handle request",
-                steps=[
+                body=[
                     Call(
                         process="target.oak.md#process.normalise",
                         inputs=[
@@ -124,7 +124,7 @@ def validate_resolution() -> None:
                     Process(
                         id="handle",
                         name="Handle request",
-                        steps=[
+                        body=[
                             Call(process="target.oak.md#process.normalise")
                         ],
                     )
@@ -166,7 +166,7 @@ def validate_resolution() -> None:
                         id="read-normal",
                         name="Read normal",
                         input="target.oak.md#schema.normal-name",
-                        steps=[
+                        body=[
                             Act(
                                 instruction="Read <NORMAL_NAME>.",
                                 inputs=[
@@ -197,7 +197,7 @@ def validate_resolution() -> None:
                     Process(
                         id="emit-result",
                         name="Emit result",
-                        steps=[
+                        body=[
                             Act(
                                 instruction="Produce <WRONG>.",
                                 outputs=["WRONG"],
@@ -230,7 +230,7 @@ def validate_resolution() -> None:
                     Process(
                         id="emit-blank",
                         name="Emit blank",
-                        steps=[
+                        body=[
                             Emit(
                                 interface="interface.result",
                                 bindings=[
@@ -265,7 +265,7 @@ def validate_resolution() -> None:
                 name="Build result",
                 input="target.oak.md#schema.raw-name",
                 output="target.oak.md#schema.normal-name",
-                steps=[
+                body=[
                     Act(
                         instruction="Read <RAW_NAME>.",
                         inputs=[

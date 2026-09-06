@@ -70,7 +70,7 @@ def validate_compact_loop_bounds() -> None:
     for compound in (False, True):
         condition = All(conditions=[below_target(), Not(condition=compare('blocked'))]) if compound else below_target()
         for start, target, limit, expected in ((2, 2, 2, []), (0, 2, 3, [1, 2]), (0, 2, 2, [1, 2]), (0, 3, 2, None)):
-            node = round_trip(specimen_node([While(condition=condition, limit=limit, steps=[call('grow-once')])], growth=True))
+            node = round_trip(specimen_node([While(condition=condition, limit=limit, body=[call('grow-once')])], growth=True))
             state = initial_state(node, balance=start, reflection_target=target)
             untouched = deepcopy(state)
             effects: list[int] = []
@@ -151,14 +151,14 @@ def validate_compact_frames() -> None:
     """Typed calls, exact tool identity, child scopes, staged writes and emissions."""
     # Construct the child output contract before validating its caller.
     raw = specimen_node([put('result', 'unused')]).model_dump(by_alias=True)
-    raw['processes'][0]['steps'] = [step.model_dump() for step in (
+    raw['processes'][0]['body'] = [step.model_dump() for step in (
         Call(process='process.grow-once', outputs=['NEXT']),
         Set(state='state.result', value=BindingValue(binding='NEXT')),
         Emit(interface='interface.progress-output'),
     )]
     raw['processes'][4]['output'] = 'schema.progress'
-    raw['processes'][5]['steps'][0]['steps'][0]['outputs'] = ['NEXT']
-    raw['processes'][4]['steps'][0]['tool'] = 'counter,(next)=exact'
+    raw['processes'][5]['body'][0]['body'][0]['outputs'] = ['NEXT']
+    raw['processes'][4]['body'][0]['tool'] = 'counter,(next)=exact'
     node = round_trip(Node.model_validate(raw))
     effects = []
     def tool(step, values):
@@ -192,12 +192,12 @@ def validate_compact_relative_targets() -> None:
         Schema(id='value', template='<VALUE>', where=[where('VALUE', Type(of='string'))]),
     ])
     worker = Node(processes=[Process(id='run', name='Run worker',
-        input='../shared.oak.md#schema.value', output='../shared.oak.md#schema.value', steps=[
+        input='../shared.oak.md#schema.value', output='../shared.oak.md#schema.value', body=[
             ACT('Inspect <VALUE>.', inputs=[binding('VALUE', BindingValue(binding='VALUE'))]),
         ])])
     seed = binding('VALUE', ConstantValue(constant='shared.oak.md#constant.request'))
     root = Node(triggers=[Trigger(id='requested', event='Run.', process='process.dispatch')],
-        processes=[Process(id='dispatch', name='Dispatch worker', steps=[
+        processes=[Process(id='dispatch', name='Dispatch worker', body=[
             Call(process='workers/run.oak.md#process.run', inputs=[seed], outputs=['VALUE']),
             Emit(interface='interface.out'),
         ])], interfaces=[Interface(id='out', flow='emits', schema='shared.oak.md#schema.value')])

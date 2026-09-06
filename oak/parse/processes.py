@@ -8,7 +8,7 @@ from oak.node.parts.processes.model import Process
 from oak.parse.cursor import Cursor
 from oak.parse.errors import fail
 from oak.parse.grouping import GroupingName, parse_entries
-from oak.parse.steps import parse_steps
+from oak.parse.statements import parse_statements
 
 
 def parse_processes(
@@ -47,7 +47,7 @@ def parse_processes(
             path,
             number + 1,
         )
-        steps = parse_steps(
+        body = parse_statements(
             cursor,
             0,
         )
@@ -66,7 +66,7 @@ def parse_processes(
                 name=attributes["name"],
                 input=attributes.get("input"),
                 output=attributes.get("output"),
-                steps=steps,
+                body=body,
             )
         )
 

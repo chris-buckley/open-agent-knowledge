@@ -81,7 +81,6 @@ preserve_result_instruction = Instruction(
     id="preserve-result",
     body="Return the worker task review unchanged.",
 )
-delegation_instructions = [preserve_result_instruction]
 
 delegation_requested_trigger = Trigger(
     id="delegation-requested",
@@ -90,35 +89,41 @@ delegation_requested_trigger = Trigger(
     process=PROCESS_DELEGATE_REVIEW,
 )
 
+agent_reviewer_text = (
+    'Review <TASK_BRIEF>, <IMPLEMENTATION_REPORT>, and <DIFF> in one worker agent and produce '
+    '<SPEC_COMPLIANCE>, <STRENGTHS>, <ISSUES>, and <ASSESSMENT>.'
+)
+
+agent_reviewer_action = ACT.tool(
+    TOOL_AGENT_REVIEWER,
+    agent_reviewer_text,
+    input=SCHEMA_WORKER_REQUEST,
+    output=SCHEMA_WORKER_RESULT,
+    inputs=local_bindings(REQUEST_PLACEHOLDERS),
+    outputs=list(RESULT_PLACEHOLDERS),
+)
+
 dispatch_review_process = Process(
     id="dispatch-review",
     name="Dispatch review",
     input=SCHEMA_WORKER_REQUEST,
     output=SCHEMA_WORKER_RESULT,
-    steps=[
-        ACT.tool(
-            TOOL_AGENT_REVIEWER,
-            "Review <TASK_BRIEF>, <IMPLEMENTATION_REPORT>, and <DIFF> in one worker agent and produce <SPEC_COMPLIANCE>, <STRENGTHS>, <ISSUES>, and <ASSESSMENT>.",
-            input=SCHEMA_WORKER_REQUEST,
-            output=SCHEMA_WORKER_RESULT,
-            inputs=local_bindings(REQUEST_PLACEHOLDERS),
-            outputs=list(RESULT_PLACEHOLDERS),
-        ),
-    ],
+    body=[agent_reviewer_action],
 )
+
+dispatch_review_call = Call(
+    process=PROCESS_DISPATCH_REVIEW,
+    inputs=local_bindings(REQUEST_PLACEHOLDERS),
+    outputs=list(RESULT_PLACEHOLDERS),
+)
+
+emit_task_review = Emit(interface=INTERFACE_TASK_REVIEW_OUTPUT)
 
 delegate_review_process = Process(
     id="delegate-review",
     name="Delegate review",
     input=SCHEMA_WORKER_REQUEST,
-    steps=[
-        Call(
-            process=PROCESS_DISPATCH_REVIEW,
-            inputs=local_bindings(REQUEST_PLACEHOLDERS),
-            outputs=list(RESULT_PLACEHOLDERS),
-        ),
-        Emit(interface=INTERFACE_TASK_REVIEW_OUTPUT),
-    ],
+    body=[dispatch_review_call, emit_task_review],
 )
 
 review_request_input_interface = Interface(
@@ -136,7 +141,7 @@ task_review_output_interface = Interface(
 )
 
 delegation_node = Node(
-    instructions=delegation_instructions,
+    instructions=[preserve_result_instruction],
     triggers=[delegation_requested_trigger],
     processes=[dispatch_review_process, delegate_review_process],
     interfaces=[review_request_input_interface, task_review_output_interface],

@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 from oak.node.parts.interfaces import SchemaTarget
-from oak.node.parts.processes.steps import Act
+from oak.node.parts.processes.statements import Act
 from oak.node.parts.processes.values import ValueBinding
 from oak.vocabulary.text.non_blank_line import NonBlankLine
 from oak.vocabulary.text.placeholder import Placeholder

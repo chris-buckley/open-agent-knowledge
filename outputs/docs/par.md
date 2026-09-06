@@ -16,17 +16,17 @@ example-1: "PAR:\n  ACT TOOL \"tool-a\": Produce <A>. () -> A\n  ACT TOOL \"tool
 syntax-reference: "outputs/oak.ebnf"
 
 grammar: TEXT<<
-surface_step_par = ? PAR:
-  <STEPS> ? ;
+surface_statement_par = ? PAR:
+  <BODY> ? ;
 >>
 </constants>
 
 <schemas>
-<schema id="step-par" name="Par" purpose="One deterministic group of exact named-tool acts.">
+<schema id="statement-par" name="Par" purpose="One deterministic group of exact named-tool acts.">
 PAR:
-  <STEPS>
+  <BODY>
 
 WHERE:
-- <STEPS> is string; is non-empty; The exact named-tool acts launched in authored order..
+- <BODY> is string; is non-empty; The exact named-tool acts launched in authored order..
 </schema>
 </schemas>

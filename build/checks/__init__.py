@@ -42,6 +42,7 @@ from build.checks.rendering import (
 )
 from build.checks.resolution import validate_resolution
 from build.checks.shapes import validate_shapes
+from build.checks.statements import validate_statement_bodies
 from build.checks.surfaces import validate_surfaces
 from build.checks.text import validate_text_examples
 from build.checks.validation import validate_contract_rules
@@ -49,6 +50,7 @@ from build.checks.validation import validate_contract_rules
 Check = Callable[[], None]
 
 CHECKS: tuple[Check, ...] = (
+    validate_statement_bodies,
     validate_compact_specimens,
     validate_compact_lexing,
     validate_compact_control,

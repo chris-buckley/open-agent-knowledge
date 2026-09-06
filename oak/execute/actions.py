@@ -20,7 +20,7 @@ from oak.execute.values import (
     resolve_value,
     validate_schema_values,
 )
-from oak.node.parts.processes.steps import Act, Par
+from oak.node.parts.processes.statements import Act, Par
 
 
 def invoke_action(
@@ -116,7 +116,7 @@ def run_parallel(
     """Run one parallel group and return outputs in authored order."""
     acts = [
         child
-        for child in step.steps
+        for child in step.body
         if isinstance(child, Act)
     ]
     prepared = [

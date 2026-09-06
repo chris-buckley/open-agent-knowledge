@@ -137,22 +137,47 @@ review_requested_trigger = Trigger(
     process=PROCESS_REVIEW_TASK,
 )
 
+task_brief_value = BindingValue(binding=PLACEHOLDER_TASK_BRIEF)
+
+task_brief_binding = ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=task_brief_value)
+
+implementation_report_value = BindingValue(binding=PLACEHOLDER_IMPLEMENTATION_REPORT)
+
+implementation_report_binding = ValueBinding(
+    placeholder=PLACEHOLDER_IMPLEMENTATION_REPORT,
+    value=implementation_report_value,
+)
+
+diff_value = BindingValue(binding=PLACEHOLDER_DIFF)
+
+diff_binding = ValueBinding(placeholder=PLACEHOLDER_DIFF, value=diff_value)
+
+read_evidence_text = "Inspect <TASK_BRIEF>, <IMPLEMENTATION_REPORT>, and <DIFF> once and produce <EVIDENCE>."
+
+read_evidence_action = ACT(
+    read_evidence_text,
+    inputs=[task_brief_binding, implementation_report_binding, diff_binding],
+    outputs=[PLACEHOLDER_EVIDENCE],
+)
+
 read_evidence_process = Process(
     id="read-evidence",
     name="Read evidence",
     input=SCHEMA_REVIEW_REQUEST,
     output=SCHEMA_REVIEW_EVIDENCE,
-    steps=[
-        ACT(
-            "Inspect <TASK_BRIEF>, <IMPLEMENTATION_REPORT>, and <DIFF> once and produce <EVIDENCE>.",
-            inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=BindingValue(binding=PLACEHOLDER_TASK_BRIEF)),
-                ValueBinding(placeholder=PLACEHOLDER_IMPLEMENTATION_REPORT, value=BindingValue(binding=PLACEHOLDER_IMPLEMENTATION_REPORT)),
-                ValueBinding(placeholder=PLACEHOLDER_DIFF, value=BindingValue(binding=PLACEHOLDER_DIFF)),
-            ],
-            outputs=[PLACEHOLDER_EVIDENCE],
-        ),
-    ],
+    body=[read_evidence_action],
+)
+
+evidence_value = BindingValue(binding=PLACEHOLDER_EVIDENCE)
+
+evidence_binding = ValueBinding(placeholder=PLACEHOLDER_EVIDENCE, value=evidence_value)
+
+validate_compliance_text = "Compare <EVIDENCE> with <TASK_BRIEF> and produce <SPEC_COMPLIANCE>."
+
+validate_compliance_action = ACT(
+    validate_compliance_text,
+    inputs=[evidence_binding, task_brief_binding],
+    outputs=[PLACEHOLDER_SPEC_COMPLIANCE],
 )
 
 validate_compliance_process = Process(
@@ -160,16 +185,15 @@ validate_compliance_process = Process(
     name="Validate compliance",
     input=SCHEMA_COMPLIANCE_REQUEST,
     output=SCHEMA_COMPLIANCE,
-    steps=[
-        ACT(
-            "Compare <EVIDENCE> with <TASK_BRIEF> and produce <SPEC_COMPLIANCE>.",
-            inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_EVIDENCE, value=BindingValue(binding=PLACEHOLDER_EVIDENCE)),
-                ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=BindingValue(binding=PLACEHOLDER_TASK_BRIEF)),
-            ],
-            outputs=[PLACEHOLDER_SPEC_COMPLIANCE],
-        ),
-    ],
+    body=[validate_compliance_action],
+)
+
+assess_evidence_text = "Assess <EVIDENCE> and produce <STRENGTHS>, <ISSUES>, and <ASSESSMENT>."
+
+assess_evidence_action = ACT(
+    assess_evidence_text,
+    inputs=[evidence_binding],
+    outputs=[PLACEHOLDER_STRENGTHS, PLACEHOLDER_ISSUES, PLACEHOLDER_ASSESSMENT],
 )
 
 assess_evidence_process = Process(
@@ -177,44 +201,34 @@ assess_evidence_process = Process(
     name="Assess evidence",
     input=SCHEMA_REVIEW_EVIDENCE,
     output=SCHEMA_ASSESSMENT,
-    steps=[
-        ACT(
-            "Assess <EVIDENCE> and produce <STRENGTHS>, <ISSUES>, and <ASSESSMENT>.",
-            inputs=[ValueBinding(placeholder=PLACEHOLDER_EVIDENCE, value=BindingValue(binding=PLACEHOLDER_EVIDENCE))],
-            outputs=[PLACEHOLDER_STRENGTHS, PLACEHOLDER_ISSUES, PLACEHOLDER_ASSESSMENT],
-        ),
-    ],
+    body=[assess_evidence_action],
 )
+
+read_evidence_call = Call(
+    process=PROCESS_READ_EVIDENCE,
+    inputs=[task_brief_binding, implementation_report_binding, diff_binding],
+    outputs=[PLACEHOLDER_EVIDENCE],
+)
+
+validate_compliance_call = Call(
+    process=PROCESS_VALIDATE_COMPLIANCE,
+    inputs=[evidence_binding, task_brief_binding],
+    outputs=[PLACEHOLDER_SPEC_COMPLIANCE],
+)
+
+assess_evidence_call = Call(
+    process=PROCESS_ASSESS_EVIDENCE,
+    inputs=[evidence_binding],
+    outputs=[PLACEHOLDER_STRENGTHS, PLACEHOLDER_ISSUES, PLACEHOLDER_ASSESSMENT],
+)
+
+emit_task_review = Emit(interface=INTERFACE_TASK_REVIEW_OUTPUT)
 
 review_task_process = Process(
     id="review-task",
     name="Review task",
     input=SCHEMA_REVIEW_REQUEST,
-    steps=[
-        Call(
-            process=PROCESS_READ_EVIDENCE,
-            inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=BindingValue(binding=PLACEHOLDER_TASK_BRIEF)),
-                ValueBinding(placeholder=PLACEHOLDER_IMPLEMENTATION_REPORT, value=BindingValue(binding=PLACEHOLDER_IMPLEMENTATION_REPORT)),
-                ValueBinding(placeholder=PLACEHOLDER_DIFF, value=BindingValue(binding=PLACEHOLDER_DIFF)),
-            ],
-            outputs=[PLACEHOLDER_EVIDENCE],
-        ),
-        Call(
-            process=PROCESS_VALIDATE_COMPLIANCE,
-            inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_EVIDENCE, value=BindingValue(binding=PLACEHOLDER_EVIDENCE)),
-                ValueBinding(placeholder=PLACEHOLDER_TASK_BRIEF, value=BindingValue(binding=PLACEHOLDER_TASK_BRIEF)),
-            ],
-            outputs=[PLACEHOLDER_SPEC_COMPLIANCE],
-        ),
-        Call(
-            process=PROCESS_ASSESS_EVIDENCE,
-            inputs=[ValueBinding(placeholder=PLACEHOLDER_EVIDENCE, value=BindingValue(binding=PLACEHOLDER_EVIDENCE))],
-            outputs=[PLACEHOLDER_STRENGTHS, PLACEHOLDER_ISSUES, PLACEHOLDER_ASSESSMENT],
-        ),
-        Emit(interface=INTERFACE_TASK_REVIEW_OUTPUT),
-    ],
+    body=[read_evidence_call, validate_compliance_call, assess_evidence_call, emit_task_review],
 )
 
 review_request_input_interface = Interface(

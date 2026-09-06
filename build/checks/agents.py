@@ -10,7 +10,7 @@ from build.checks.fixtures import ROOT
 from oak import OneOf, SchemaBindingError
 from oak.node.model import Node
 from oak.node.parts.constants import Constant
-from oak.node.parts.processes.steps import Act, Assert, Fail, iter_steps
+from oak.node.parts.processes.statements import Act, Assert, Fail, iter_statements
 from oak.parse import OakParseError, parse
 from oak.render import render
 
@@ -167,7 +167,7 @@ def _claims(node: Node) -> tuple[tuple[str, str], ...]:
         add("trigger-event", trigger.event)
 
     for process in node.processes:
-        for step in iter_steps(process.steps):
+        for step in iter_statements(process.body):
             if isinstance(step, Act):
                 add("act", step.instruction)
             elif isinstance(step, (Assert, Fail)):

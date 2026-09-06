@@ -179,26 +179,29 @@ amendment_review_requested_trigger = Trigger(
     process=PROCESS_REVIEW_AMENDMENT,
 )
 
+review_amendment_text = (
+    "For <AMENDMENT_ID>, challenge <AMENDMENT> with <RATIONALE> and "
+    "<EVIDENCE> against <CURRENT_OAK> and "
+    "<PROTECTED_INVARIANTS>, then produce "
+    "<DECISION>, <REVIEW_FINDINGS>, and <EVIDENCE_REQUEST>."
+)
+
+review_amendment_action = ACT(
+    review_amendment_text,
+    input=SCHEMA_AMENDMENT_REVIEW_REQUEST,
+    output=SCHEMA_AMENDMENT_REVIEW,
+    inputs=local_bindings(REQUEST_PLACEHOLDERS),
+    outputs=list(REVIEW_PLACEHOLDERS),
+)
+
+emit_review = Emit(interface=INTERFACE_REVIEW_OUTPUT)
+
 review_amendment_process = Process(
     id="review-amendment",
     name="Review amendment",
     input=SCHEMA_AMENDMENT_REVIEW_REQUEST,
     output=SCHEMA_AMENDMENT_REVIEW,
-    steps=[
-        ACT(
-            (
-                "For <AMENDMENT_ID>, challenge <AMENDMENT> with <RATIONALE> and "
-                "<EVIDENCE> against <CURRENT_OAK> and "
-                "<PROTECTED_INVARIANTS>, then produce "
-                "<DECISION>, <REVIEW_FINDINGS>, and <EVIDENCE_REQUEST>."
-            ),
-            input=SCHEMA_AMENDMENT_REVIEW_REQUEST,
-            output=SCHEMA_AMENDMENT_REVIEW,
-            inputs=local_bindings(REQUEST_PLACEHOLDERS),
-            outputs=list(REVIEW_PLACEHOLDERS),
-        ),
-        Emit(interface=INTERFACE_REVIEW_OUTPUT),
-    ],
+    body=[review_amendment_action, emit_review],
 )
 
 review_request_input_interface = Interface(

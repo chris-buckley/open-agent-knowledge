@@ -19,20 +19,20 @@ example-2: "EMIT interface.result (RESULT=$FINAL_RESULT)"
 syntax-reference: "outputs/oak.ebnf"
 
 grammar: TEXT<<
-surface_step_emit_inferred = "EMIT", local_interface_target, logical_nl ;
-surface_step_emit_explicit = "EMIT", local_interface_target, binding_list, logical_nl ;
+surface_statement_emit_inferred = "EMIT", local_interface_target, logical_nl ;
+surface_statement_emit_explicit = "EMIT", local_interface_target, binding_list, logical_nl ;
 >>
 </constants>
 
 <schemas>
-<schema id="step-emit-inferred" name="Emit step-emit-inferred" purpose="One schema instance emitted through one local output interface.">
+<schema id="statement-emit-inferred" name="Emit statement-emit-inferred" purpose="One schema instance emitted through one local output interface.">
 EMIT <INTERFACE>
 
 WHERE:
 - <INTERFACE> is string; is non-empty; The local output interface target..
 </schema>
 
-<schema id="step-emit-explicit" name="Emit step-emit-explicit" purpose="One schema instance emitted through one local output interface.">
+<schema id="statement-emit-explicit" name="Emit statement-emit-explicit" purpose="One schema instance emitted through one local output interface.">
 EMIT <INTERFACE> (<BINDINGS>)
 
 WHERE:

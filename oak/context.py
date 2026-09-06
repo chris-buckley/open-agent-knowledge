@@ -12,7 +12,7 @@ from pydantic import JsonValue
 
 from oak.node.model import Node
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import Act, iter_steps
+from oak.node.parts.processes.statements import Act, iter_statements
 from oak.node.parts.processes.values import LiteralValue, ValueBinding
 from oak.node.parts.schemas.model import Schema
 from oak.render.selection import render
@@ -135,7 +135,7 @@ def build_interpreter_context(
     source, owner = graph.entry(graph.root, process, Process)
     if step.tool is not None:
         raise ValueError("interpreter context requires a native ACT")
-    if not any(candidate == step for candidate in iter_steps(owner.steps)):
+    if not any(candidate == step for candidate in iter_statements(owner.body)):
         raise ValueError("the action does not belong to the selected process")
     if set(values) != {binding.placeholder for binding in step.inputs}:
         raise ValueError("context values must match the action inputs exactly")
@@ -176,7 +176,7 @@ def build_interpreter_context(
             id="invoke-action",
             name="Invoke action",
             output=action.output,
-            steps=[action],
+            body=[action],
         )],
     )
     return InterpreterContext(

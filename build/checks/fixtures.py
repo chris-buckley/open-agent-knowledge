@@ -8,7 +8,7 @@ from oak.base import OakModel
 from oak.node.model import Node
 from oak.node.parts.instructions import Instruction
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import Act
+from oak.node.parts.processes.statements import Act
 from oak.node.parts.processes.values import BindingValue, ValueBinding
 from oak.node.parts.schemas.constraints import NonEmpty, Type
 from oak.node.parts.schemas.model import Schema, where
@@ -68,7 +68,7 @@ def normalise_process() -> Process:
         name="Normalise name",
         input="schema.raw-name",
         output="schema.normal-name",
-        steps=[
+        body=[
             Act(
                 instruction="Normalise <RAW_NAME> into <NORMAL_NAME>.",
                 inputs=[

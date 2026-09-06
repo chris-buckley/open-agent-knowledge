@@ -1,0 +1,32 @@
+{
+  "pull_request": "https://github.com/chris-buckley/open-agent-knowledge/pull/18",
+  "head_branch": "refactor/flatten-python-authoring",
+  "base_branch": "main",
+  "base_revision": "eca953bd81f78f005fdc1b3d17ed060620f6c97d",
+  "verified_closeout_commit": "f01d629bf98255e0d1cad3a174678c9e3fc8bc2a",
+  "verified_closeout_tree": "27102a5ba1fbd90784de55d196bd11fc9c221060",
+  "closeout_run": "https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34015653932",
+  "closeout_job": 101438819953,
+  "closeout_conclusion": "success",
+  "checks": [
+    "exact documentation blob hashes",
+    "documentation-only diff",
+    "compileall",
+    "python -m build.examples",
+    "python build/examples.py",
+    "28-document preservation comparison",
+    "four generators and clean working tree",
+    "history-preserving work-branch push"
+  ],
+  "prior_pr_ci": {
+    "head": "df91c0325387802ef1d43b7efbe25de32bc77d10",
+    "run": 34015349711,
+    "conclusion": "success",
+    "live_validator_bootstrap_and_cache_reuse": "passed"
+  },
+  "plan_tasks_completed": 30,
+  "temporary_transfer_and_closeout_files_present": false,
+  "original_commit_identities_preserved": true,
+  "merged": false,
+  "record_scope": "Observed evidence for the prior closeout commit. The commit adding this record changes only this evidence file; its final CI is linked in the PR conversation after observation."
+}

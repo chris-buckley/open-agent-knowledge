@@ -1,0 +1,86 @@
+{
+  "tested_revision": "6be73d22fc1e97c3616502c57949ed798d4abfb6",
+  "validator_revision": "dc71e5ec140e1b94351ceabab3a55b9ab8aa9dce",
+  "python": "Python 3.13.5",
+  "checks": {
+    "compileall": {
+      "exit_code": 0
+    },
+    "python -m build.examples": {
+      "exit_code": 0,
+      "registered_checks": 34
+    },
+    "python build/examples.py": {
+      "exit_code": 0,
+      "registered_checks": 34
+    },
+    "evidence/compare.py": {
+      "exit_code": 0,
+      "documents": 28,
+      "text_groupings": 2,
+      "structural_comparisons": 2
+    },
+    "regeneration": {
+      "unchanged_paths": 100
+    },
+    "git diff --check": {
+      "exit_code": 0
+    }
+  },
+  "baseline_revision": "41308c59cf483903c5f856c6d52aa6d786829e94",
+  "baseline_commands": {
+    "python -m build.examples": 0,
+    "python build/examples.py": 0
+  },
+  "product_sha256": "ca9252b1a8fb47ec860a6b4b9fdc4c78e1ae654c1fa2cd5624dcad06bf101c96",
+  "product_scope": "Sorted UTF-8 POSIX paths and bytes separated by NUL: oak, build, examples, skills, outputs excluding __pycache__; AGENTS.md and pyproject.toml. Documentation-only completion records are excluded.",
+  "skill_version": "3.0.0",
+  "agent_bytes": 63974,
+  "agent_budget": 64000,
+  "live_bootstrap": {
+    "status": "passed",
+    "run_id": 34015349711,
+    "job_id": 101438034669,
+    "head_sha": "df91c0325387802ef1d43b7efbe25de32bc77d10",
+    "validator_revision": "dc71e5ec140e1b94351ceabab3a55b9ab8aa9dce",
+    "observed_steps": [
+      "approved pinned download",
+      "isolated installation",
+      "standalone validation",
+      "cache reuse"
+    ],
+    "live_model_calls": false
+  },
+  "review": "A separate contract-led review by the implementing agent used the pre-change baseline and independent expected encodings. No second reviewer agent or human approval is claimed.",
+  "hosted_integration": {
+    "run_id": 34015267995,
+    "job_id": 101437822853,
+    "conclusion": "success",
+    "candidate": "0de10cf10e9728e833fa1ee34bce91a978cfaf22",
+    "tree": "273758612a5411a2d0c2195e2a88aebf4e26ee75",
+    "integration_commit": "df91c0325387802ef1d43b7efbe25de32bc77d10",
+    "exact_hashes_verified": true,
+    "original_commits_preserved": true,
+    "temporary_files_removed": true,
+    "checks": [
+      "compileall",
+      "python -m build.examples",
+      "python build/examples.py",
+      "evidence/compare.py",
+      "repeated generation",
+      "git diff --check",
+      "clean working tree"
+    ]
+  },
+  "pr": {
+    "number": 18,
+    "url": "https://github.com/chris-buckley/open-agent-knowledge/pull/18",
+    "head_sha": "df91c0325387802ef1d43b7efbe25de32bc77d10",
+    "base_sha": "eca953bd81f78f005fdc1b3d17ed060620f6c97d",
+    "run_id": 34015349711,
+    "job_id": 101438034669,
+    "conclusion": "success",
+    "merged": false,
+    "final_documentation_commit": "Changes only plan/report/verification evidence. Its exact commit and observed hosted verification are recorded in the PR conversation."
+  }
+}

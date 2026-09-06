@@ -1,0 +1,158 @@
+{
+  "scope": "Active source and generated products, excluding __pycache__. Historical plans, legacy APS, and generic Python convention teaching retain their original text. No active code imports an obsolete statement API.",
+  "matches": [
+    {
+      "path": "oak/execute/AGENTS.md",
+      "line": 23,
+      "matches": [
+        "step-"
+      ],
+      "classification": "Natural-language explanation or embedded unmodified example data."
+    },
+    {
+      "path": "oak/execute/AGENTS.md",
+      "line": 58,
+      "matches": [
+        "step-"
+      ],
+      "classification": "Natural-language explanation or embedded unmodified example data."
+    },
+    {
+      "path": "build/checks/statements.py",
+      "line": 29,
+      "matches": [
+        "\"steps\"",
+        "\"steps\"",
+        "thenSteps"
+      ],
+      "classification": "Negative obsolete-API tests or inert literal-preservation fixture."
+    },
+    {
+      "path": "build/checks/statements.py",
+      "line": 121,
+      "matches": [
+        "\"steps\""
+      ],
+      "classification": "Negative obsolete-API tests or inert literal-preservation fixture."
+    },
+    {
+      "path": "build/checks/statements.py",
+      "line": 124,
+      "matches": [
+        "\"steps\"",
+        "\"steps\"",
+        "\"steps\""
+      ],
+      "classification": "Negative obsolete-API tests or inert literal-preservation fixture."
+    },
+    {
+      "path": "build/checks/statements.py",
+      "line": 132,
+      "matches": [
+        "\"steps\""
+      ],
+      "classification": "Negative obsolete-API tests or inert literal-preservation fixture."
+    },
+    {
+      "path": "build/checks/statements.py",
+      "line": 134,
+      "matches": [
+        "\"steps\""
+      ],
+      "classification": "Negative obsolete-API tests or inert literal-preservation fixture."
+    },
+    {
+      "path": "build/checks/statements.py",
+      "line": 146,
+      "matches": [
+        "Step",
+        "StepModel"
+      ],
+      "classification": "Negative obsolete-API tests or inert literal-preservation fixture."
+    },
+    {
+      "path": "build/checks/statements.py",
+      "line": 148,
+      "matches": [
+        ".steps",
+        ".steps",
+        ".steps"
+      ],
+      "classification": "Negative obsolete-API tests or inert literal-preservation fixture."
+    },
+    {
+      "path": "build/checks/statements.py",
+      "line": 156,
+      "matches": [
+        "step-"
+      ],
+      "classification": "Negative obsolete-API tests or inert literal-preservation fixture."
+    },
+    {
+      "path": "build/checks/statements.py",
+      "line": 166,
+      "matches": [
+        "\"steps\"",
+        "thenSteps"
+      ],
+      "classification": "Negative obsolete-API tests or inert literal-preservation fixture."
+    },
+    {
+      "path": "build/docs.py",
+      "line": 78,
+      "matches": [
+        "Step"
+      ],
+      "classification": "Explicit current migration documentation, not an accepted API."
+    },
+    {
+      "path": "build/docs.py",
+      "line": 80,
+      "matches": [
+        "thenSteps"
+      ],
+      "classification": "Explicit current migration documentation, not an accepted API."
+    },
+    {
+      "path": "examples/shape_writer/example.py",
+      "line": 205,
+      "matches": [
+        "\"steps\""
+      ],
+      "classification": "Inert scenario fixture key or complete embedded teaching data; not a model field."
+    },
+    {
+      "path": "examples/shape_writer/run.py",
+      "line": 13,
+      "matches": [
+        "\"steps\""
+      ],
+      "classification": "Inert scenario fixture key or complete embedded teaching data; not a model field."
+    },
+    {
+      "path": "examples/shape_writer/run.py",
+      "line": 35,
+      "matches": [
+        "\"steps\""
+      ],
+      "classification": "Inert scenario fixture key or complete embedded teaching data; not a model field."
+    },
+    {
+      "path": "examples/shape_writer/run.py",
+      "line": 38,
+      "matches": [
+        "\"steps\""
+      ],
+      "classification": "Inert scenario fixture key or complete embedded teaching data; not a model field."
+    },
+    {
+      "path": "outputs/docs/process.md",
+      "line": 15,
+      "matches": [
+        "Step",
+        "thenSteps"
+      ],
+      "classification": "Explicit current migration documentation, not an accepted API."
+    }
+  ]
+}

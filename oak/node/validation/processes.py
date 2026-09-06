@@ -10,7 +10,7 @@ from pydantic_core import PydanticCustomError
 from oak.node.index import NodeIndex
 from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Assert,
     Call,
@@ -21,16 +21,16 @@ from oak.node.parts.processes.steps import (
     Join,
     Par,
     Set,
-    Step,
+    Statement,
     While,
-    step_values,
+    statement_values,
 )
 from oak.node.parts.schemas.binding import SchemaBindingError
 from oak.node.parts.state import State
 from oak.node.validation.conditions import condition_result, validate_condition
 from oak.node.validation.contracts import find_cycle, inspect_emit_contract
 from oak.node.validation.flow import (
-    StepVisitor,
+    StatementVisitor,
     process_visible_bindings,
     sequence_always_fails,
 )
@@ -50,13 +50,13 @@ def validate_process_contract(
     inputs: AbstractSet[str],
     outputs: AbstractSet[str],
     *,
-    visit: StepVisitor | None = None,
+    visit: StatementVisitor | None = None,
 ) -> None:
     """Validate one process against resolved input and output schemas."""
     visible = process_visible_bindings(process, inputs, visit=visit)
     missing = sorted(outputs - visible)
 
-    if not missing or sequence_always_fails(process.steps):
+    if not missing or sequence_always_fails(process.body):
         return
 
     raise rule_error(
@@ -222,7 +222,7 @@ def validate_inferred_emit(
         )
 
 
-def _validate_emit_step(
+def _validate_emit_statement(
     index: NodeIndex,
     process: Process,
     step: Emit,
@@ -284,7 +284,7 @@ def _validate_emit_step(
         )
 
 
-def _validate_if_step(index: NodeIndex, process: Process, step: If) -> None:
+def _validate_if_statement(index: NodeIndex, process: Process, step: If) -> None:
     validate_condition(index, process, step.condition)
     decision = condition_result(index, process, step.condition)
 
@@ -302,13 +302,13 @@ def _validate_if_step(index: NodeIndex, process: Process, step: If) -> None:
             {"process": process.id},
         )
 
-    validate_process_steps(index, process, step.then)
+    validate_process_statements(index, process, step.then)
 
     if step.otherwise is not None:
-        validate_process_steps(index, process, step.otherwise)
+        validate_process_statements(index, process, step.otherwise)
 
 
-def _validate_assert_step(index: NodeIndex, process: Process, step: Assert) -> None:
+def _validate_assert_statement(index: NodeIndex, process: Process, step: Assert) -> None:
     validate_condition(index, process, step.condition)
     decision = condition_result(index, process, step.condition)
 
@@ -327,7 +327,7 @@ def _validate_assert_step(index: NodeIndex, process: Process, step: Assert) -> N
         )
 
 
-def _validate_while_step(index: NodeIndex, process: Process, step: While) -> None:
+def _validate_while_statement(index: NodeIndex, process: Process, step: While) -> None:
     validate_condition(index, process, step.condition)
 
     if condition_result(index, process, step.condition) is False:
@@ -337,11 +337,11 @@ def _validate_while_step(index: NodeIndex, process: Process, step: While) -> Non
             {"process": process.id},
         )
 
-    validate_process_steps(index, process, step.steps)
+    validate_process_statements(index, process, step.body)
 
 
-def _validate_par_step(index: NodeIndex, process: Process, step: Par) -> None:
-    for child in step.steps:
+def _validate_par_statement(index: NodeIndex, process: Process, step: Par) -> None:
+    for child in step.body:
         if isinstance(child, Act):
             for binding in child.inputs:
                 validate_value(index, process, binding.value)
@@ -349,21 +349,21 @@ def _validate_par_step(index: NodeIndex, process: Process, step: Par) -> None:
             _validate_act_schema_contract(index, process, child)
 
 
-def _validate_call_step(index: NodeIndex, process: Process, step: Call) -> None:
+def _validate_call_statement(index: NodeIndex, process: Process, step: Call) -> None:
     target = index.require(process, step.process, Process)
 
     if target is not None:
         _validate_call_schema_contract(index, step, target)
 
 
-def validate_process_steps(
+def validate_process_statements(
     index: NodeIndex,
     process: Process,
-    steps: Sequence[Step],
+    body: Sequence[Statement],
 ) -> None:
     """Validate one process step sequence against local entries."""
-    for step in steps:
-        for value in step_values(step):
+    for step in body:
+        for value in statement_values(step):
             validate_value(index, process, value)
 
         match step:
@@ -371,25 +371,25 @@ def validate_process_steps(
                 index.require(process, step.state, State)
 
             case Emit():
-                _validate_emit_step(index, process, step)
+                _validate_emit_statement(index, process, step)
 
             case If():
-                _validate_if_step(index, process, step)
+                _validate_if_statement(index, process, step)
 
             case Assert():
-                _validate_assert_step(index, process, step)
+                _validate_assert_statement(index, process, step)
 
             case While():
-                _validate_while_step(index, process, step)
+                _validate_while_statement(index, process, step)
 
             case Foreach():
-                validate_process_steps(index, process, step.steps)
+                validate_process_statements(index, process, step.body)
 
             case Par():
-                _validate_par_step(index, process, step)
+                _validate_par_statement(index, process, step)
 
             case Call():
-                _validate_call_step(index, process, step)
+                _validate_call_statement(index, process, step)
 
             case Act():
                 _validate_act_schema_contract(index, process, step)
@@ -416,7 +416,7 @@ def validate_process_schema_contract(
 
     inputs = set() if input_schema is None else input_schema.placeholders
 
-    def visit(step: Step, visible: AbstractSet[str]) -> None:
+    def visit(step: Statement, visible: AbstractSet[str]) -> None:
         if not isinstance(step, Emit) or step.bindings:
             return
 
@@ -439,8 +439,8 @@ def validate_process_schema_contract(
         process_visible_bindings(process, inputs, visit=visit)
 
 
-def _local_calls(steps: Sequence[Step]) -> Iterator[str]:
-    for step in steps:
+def _local_calls(body: Sequence[Statement]) -> Iterator[str]:
+    for step in body:
         match step:
             case Call() if not is_relative_target(step.process):
                 yield target_id(step.process)
@@ -452,12 +452,12 @@ def _local_calls(steps: Sequence[Step]) -> Iterator[str]:
                     yield from _local_calls(step.otherwise)
 
             case Foreach() | While():
-                yield from _local_calls(step.steps)
+                yield from _local_calls(step.body)
 
 
 def validate_local_call_cycles(processes: Sequence[Process]) -> None:
     """Reject a cycle formed by local process calls."""
-    graph = {process.id: list(_local_calls(process.steps)) for process in processes}
+    graph = {process.id: list(_local_calls(process.body)) for process in processes}
     cycle = find_cycle(graph)
 
     if cycle is None:
@@ -477,5 +477,5 @@ __all__ = [
     "validate_inferred_emit",
     "validate_process_contract",
     "validate_process_schema_contract",
-    "validate_process_steps",
+    "validate_process_statements",
 ]

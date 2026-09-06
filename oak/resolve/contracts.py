@@ -9,7 +9,7 @@ from pydantic_core import PydanticCustomError
 from oak.node.parts.constants import Constant
 from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import Act, Emit, Step, iter_steps
+from oak.node.parts.processes.statements import Act, Emit, Statement, iter_statements
 from oak.node.parts.processes.values import ConstantValue, LiteralValue
 from oak.node.parts.schemas.binding import SchemaBindingError
 from oak.node.parts.schemas.model import Schema
@@ -24,7 +24,7 @@ from oak.node.validation.triggers import validate_trigger_contract
 from oak.node.validation.values import validate_typed_value
 from oak.resolve.errors import raise_resolution
 from oak.resolve.graph import ResolvedGraph
-from oak.resolve.references import steps_targets_in_process, walk_calls
+from oak.resolve.references import statements_targets_in_process, walk_calls
 from oak.vocabulary.text.target_path import is_relative_target
 
 
@@ -146,7 +146,7 @@ def _validate_process(
     document: str,
     process: Process,
 ) -> None:
-    def visit(step: Step, visible: AbstractSet[str]) -> None:
+    def visit(step: Statement, visible: AbstractSet[str]) -> None:
         if isinstance(step, Emit):
             _validate_resolved_emit(
                 graph,
@@ -250,7 +250,7 @@ def validate_contracts(graph: ResolvedGraph) -> None:
                 contract_error(document, trigger.process, error)
 
         for process in node.processes:
-            for step in iter_steps(process.steps):
+            for step in iter_statements(process.body):
                 if not isinstance(step, Act) or (
                     step.input is None and step.output is None
                 ):
@@ -278,7 +278,7 @@ def validate_contracts(graph: ResolvedGraph) -> None:
                     )
 
         for process in node.processes:
-            for call in walk_calls(process.steps):
+            for call in walk_calls(process.body):
                 target_document, target = graph.entry(
                     document,
                     call.process,
@@ -305,7 +305,7 @@ def call_edges(
             source = (document, process.id)
             targets: list[tuple[str, str]] = []
 
-            for target, expected in steps_targets_in_process(process.steps):
+            for target, expected in statements_targets_in_process(process.body):
                 if expected is not Process:
                     continue
 

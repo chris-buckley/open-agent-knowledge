@@ -74,20 +74,6 @@ run_continuously_instruction = Instruction(
     id="run-continuously",
     body="Run this machine continuously: after each cycle commits, apply the same arrival again.",
 )
-growth_instructions = [run_continuously_instruction]
-
-growth_rate_constant = Constant(
-    id="growth-rate",
-    schema=SCHEMA_SCALING,
-    placeholder=PLACEHOLDER_FACTOR,
-    value=1.05,
-)
-reflection_step_constant = Constant(
-    id="reflection-step",
-    schema=SCHEMA_SCALING,
-    placeholder=PLACEHOLDER_FACTOR,
-    value=8,
-)
 
 scaling_schema = Schema(
     id="scaling",
@@ -127,6 +113,19 @@ reflection_schema = Schema(
     ],
 )
 
+growth_rate_constant = Constant(
+    id="growth-rate",
+    schema=SCHEMA_SCALING,
+    placeholder=PLACEHOLDER_FACTOR,
+    value=1.05,
+)
+reflection_step_constant = Constant(
+    id="reflection-step",
+    schema=SCHEMA_SCALING,
+    placeholder=PLACEHOLDER_FACTOR,
+    value=8,
+)
+
 current_balance_state = State(
     id="current-balance",
     schema=SCHEMA_SCALING,
@@ -140,13 +139,36 @@ reflection_target_state = State(
     value=800,
 )
 
+reflection_target_value = StateValue(state=STATE_REFLECTION_TARGET)
+
+target_seed = ValueBinding(placeholder=PLACEHOLDER_TARGET, value=reflection_target_value)
+
 growth_requested_trigger = Trigger(
     id="growth-requested",
     event=EVENT_GROWTH_REQUESTED,
     process=PROCESS_GROW_BALANCE,
     seed=[
-        ValueBinding(placeholder=PLACEHOLDER_TARGET, value=StateValue(state=STATE_REFLECTION_TARGET)),
+        target_seed,
     ],
+)
+
+balance_value = BindingValue(binding=PLACEHOLDER_BALANCE)
+
+balance_binding = ValueBinding(placeholder=PLACEHOLDER_BALANCE, value=balance_value)
+
+factor_value = BindingValue(binding=PLACEHOLDER_FACTOR)
+
+factor_binding = ValueBinding(placeholder=PLACEHOLDER_FACTOR, value=factor_value)
+
+math_multiply_text = "Multiply <BALANCE> by <FACTOR> and round to 2 decimals to produce <SCALED_BALANCE>."
+
+math_multiply_action = ACT.tool(
+    TOOL_MATH_MULTIPLY,
+    math_multiply_text,
+    input=SCHEMA_SCALING,
+    output=SCHEMA_SCALED_BALANCE,
+    inputs=[balance_binding, factor_binding],
+    outputs=[PLACEHOLDER_SCALED_BALANCE],
 )
 
 scale_balance_process = Process(
@@ -154,69 +176,80 @@ scale_balance_process = Process(
     name="Scale balance",
     input=SCHEMA_SCALING,
     output=SCHEMA_SCALED_BALANCE,
-    steps=[
-        ACT.tool(
-            TOOL_MATH_MULTIPLY,
-            "Multiply <BALANCE> by <FACTOR> and round to 2 decimals to produce <SCALED_BALANCE>.",
-            input=SCHEMA_SCALING,
-            output=SCHEMA_SCALED_BALANCE,
-            inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_BALANCE, value=BindingValue(binding=PLACEHOLDER_BALANCE)),
-                ValueBinding(placeholder=PLACEHOLDER_FACTOR, value=BindingValue(binding=PLACEHOLDER_FACTOR)),
-            ],
-            outputs=[PLACEHOLDER_SCALED_BALANCE],
-        ),
-    ],
+    body=[math_multiply_action],
+)
+
+current_balance_value = StateValue(state=STATE_CURRENT_BALANCE)
+
+target_value = BindingValue(binding=PLACEHOLDER_TARGET)
+
+balance_below_target = Compare(left=current_balance_value, operator="less_than", right=target_value)
+
+current_balance_binding = ValueBinding(placeholder=PLACEHOLDER_BALANCE, value=current_balance_value)
+
+growth_rate_value = ConstantValue(constant=CONSTANT_GROWTH_RATE)
+
+growth_rate_binding = ValueBinding(placeholder=PLACEHOLDER_FACTOR, value=growth_rate_value)
+
+scale_current_balance_call = Call(
+    process=PROCESS_SCALE_BALANCE,
+    inputs=[current_balance_binding, growth_rate_binding],
+    outputs=[PLACEHOLDER_SCALED_BALANCE],
+)
+
+scaled_balance_value = BindingValue(binding=PLACEHOLDER_SCALED_BALANCE)
+
+update_current_balance = Set(state=STATE_CURRENT_BALANCE, value=scaled_balance_value)
+
+growth_loop = While(
+    condition=balance_below_target,
+    limit=60,
+    body=[scale_current_balance_call, update_current_balance],
+)
+
+target_binding = ValueBinding(placeholder=PLACEHOLDER_TARGET, value=target_value)
+
+reflect_growth_text = "Reflect on <BALANCE> reaching <TARGET> and produce <REFLECTION>."
+
+reflect_growth_action = ACT(
+    reflect_growth_text,
+    inputs=[current_balance_binding, target_binding],
+    outputs=[PLACEHOLDER_REFLECTION],
+)
+
+reflection_target_binding = ValueBinding(placeholder=PLACEHOLDER_BALANCE, value=reflection_target_value)
+
+reflection_step_value = ConstantValue(constant=CONSTANT_REFLECTION_STEP)
+
+reflection_step_binding = ValueBinding(placeholder=PLACEHOLDER_FACTOR, value=reflection_step_value)
+
+scale_reflection_target_call = Call(
+    process=PROCESS_SCALE_BALANCE,
+    inputs=[reflection_target_binding, reflection_step_binding],
+    outputs=[PLACEHOLDER_SCALED_BALANCE],
+)
+
+update_reflection_target = Set(state=STATE_REFLECTION_TARGET, value=scaled_balance_value)
+
+reflection_value = BindingValue(binding=PLACEHOLDER_REFLECTION)
+
+reflection_binding = ValueBinding(placeholder=PLACEHOLDER_REFLECTION, value=reflection_value)
+
+emit_reflection = Emit(
+    interface=INTERFACE_REFLECTION_OUTPUT,
+    bindings=[current_balance_binding, reflection_binding],
 )
 
 grow_balance_process = Process(
     id="grow-balance",
     name="Grow balance",
     input=SCHEMA_GROWTH_TARGET,
-    steps=[
-        While(
-            condition=Compare(
-                left=StateValue(state=STATE_CURRENT_BALANCE),
-                operator="less_than",
-                right=BindingValue(binding=PLACEHOLDER_TARGET),
-            ),
-            limit=60,
-            steps=[
-                Call(
-                    process=PROCESS_SCALE_BALANCE,
-                    inputs=[
-                        ValueBinding(placeholder=PLACEHOLDER_BALANCE, value=StateValue(state=STATE_CURRENT_BALANCE)),
-                        ValueBinding(placeholder=PLACEHOLDER_FACTOR, value=ConstantValue(constant=CONSTANT_GROWTH_RATE)),
-                    ],
-                    outputs=[PLACEHOLDER_SCALED_BALANCE],
-                ),
-                Set(state=STATE_CURRENT_BALANCE, value=BindingValue(binding=PLACEHOLDER_SCALED_BALANCE)),
-            ],
-        ),
-        ACT(
-            "Reflect on <BALANCE> reaching <TARGET> and produce <REFLECTION>.",
-            inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_BALANCE, value=StateValue(state=STATE_CURRENT_BALANCE)),
-                ValueBinding(placeholder=PLACEHOLDER_TARGET, value=BindingValue(binding=PLACEHOLDER_TARGET)),
-            ],
-            outputs=[PLACEHOLDER_REFLECTION],
-        ),
-        Call(
-            process=PROCESS_SCALE_BALANCE,
-            inputs=[
-                ValueBinding(placeholder=PLACEHOLDER_BALANCE, value=StateValue(state=STATE_REFLECTION_TARGET)),
-                ValueBinding(placeholder=PLACEHOLDER_FACTOR, value=ConstantValue(constant=CONSTANT_REFLECTION_STEP)),
-            ],
-            outputs=[PLACEHOLDER_SCALED_BALANCE],
-        ),
-        Set(state=STATE_REFLECTION_TARGET, value=BindingValue(binding=PLACEHOLDER_SCALED_BALANCE)),
-        Emit(
-            interface=INTERFACE_REFLECTION_OUTPUT,
-            bindings=[
-                ValueBinding(placeholder=PLACEHOLDER_BALANCE, value=StateValue(state=STATE_CURRENT_BALANCE)),
-                ValueBinding(placeholder=PLACEHOLDER_REFLECTION, value=BindingValue(binding=PLACEHOLDER_REFLECTION)),
-            ],
-        ),
+    body=[
+        growth_loop,
+        reflect_growth_action,
+        scale_reflection_target_call,
+        update_reflection_target,
+        emit_reflection,
     ],
 )
 
@@ -228,7 +261,7 @@ reflection_output_interface = Interface(
 )
 
 growth_node = Node(
-    instructions=growth_instructions,
+    instructions=[run_continuously_instruction],
     constants=[growth_rate_constant, reflection_step_constant],
     schemas=[scaling_schema, scaled_balance_schema, growth_target_schema, reflection_schema],
     state=[current_balance_state, reflection_target_state],

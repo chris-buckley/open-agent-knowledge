@@ -9,7 +9,7 @@ from oak.node.parts.processes.conditions import (
     Not,
 )
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Assert,
     Call,
@@ -132,7 +132,7 @@ PROCESS_SURFACES = (
         when=(("tool", _PRESENT),),
     ),
     _surface(
-        "step-set",
+        "statement-set",
         Set,
         "SET <STATE> = <VALUE>",
         rendered=(
@@ -142,7 +142,7 @@ PROCESS_SURFACES = (
         fixed=("kind",),
     ),
     _surface(
-        "step-emit-inferred",
+        "statement-emit-inferred",
         Emit,
         "EMIT <INTERFACE>",
         rendered=("interface",),
@@ -150,7 +150,7 @@ PROCESS_SURFACES = (
         when=(("bindings", []),),
     ),
     _surface(
-        "step-emit-explicit",
+        "statement-emit-explicit",
         Emit,
         "EMIT <INTERFACE> (<BINDINGS>)",
         rendered=(
@@ -161,7 +161,7 @@ PROCESS_SURFACES = (
         when=(("bindings", _NON_EMPTY),),
     ),
     _surface(
-        "step-if",
+        "statement-if",
         If,
         "IF <CONDITION>:\n  <THEN>\nELSE:\n  <OTHERWISE>",
         rendered=(
@@ -172,7 +172,7 @@ PROCESS_SURFACES = (
         fixed=("kind",),
     ),
     _surface(
-        "step-call",
+        "statement-call",
         Call,
         "CALL <PROCESS> (<INPUTS>) -> <OUTPUTS>",
         rendered=(
@@ -183,14 +183,14 @@ PROCESS_SURFACES = (
         fixed=("kind",),
     ),
     _surface(
-        "step-fail",
+        "statement-fail",
         Fail,
         "FAIL <MESSAGE>",
         rendered=("message",),
         fixed=("kind",),
     ),
     _surface(
-        "step-assert",
+        "statement-assert",
         Assert,
         "ASSERT <CONDITION>\n  MESSAGE <MESSAGE>",
         rendered=(
@@ -200,36 +200,36 @@ PROCESS_SURFACES = (
         fixed=("kind",),
     ),
     _surface(
-        "step-foreach",
+        "statement-foreach",
         Foreach,
-        "FOREACH <BINDING> IN <VALUE>:\n  <STEPS>",
+        "FOREACH <BINDING> IN <VALUE>:\n  <BODY>",
         rendered=(
             "binding",
             "value",
-            "steps",
+            "body",
         ),
         fixed=("kind",),
     ),
     _surface(
-        "step-while",
+        "statement-while",
         While,
-        "WHILE <CONDITION> LIMIT <LIMIT>:\n  <STEPS>",
+        "WHILE <CONDITION> LIMIT <LIMIT>:\n  <BODY>",
         rendered=(
             "condition",
             "limit",
-            "steps",
+            "body",
         ),
         fixed=("kind",),
     ),
     _surface(
-        "step-par",
+        "statement-par",
         Par,
-        "PAR:\n  <STEPS>",
-        rendered=("steps",),
+        "PAR:\n  <BODY>",
+        rendered=("body",),
         fixed=("kind",),
     ),
     _surface(
-        "step-join",
+        "statement-join",
         Join,
         "JOIN",
         fixed=("kind",),
@@ -237,13 +237,13 @@ PROCESS_SURFACES = (
     _surface(
         "process",
         Process,
-        '<process id="<ID>" name="<NAME>" input="<INPUT>" output="<OUTPUT>">\n<STEPS>\n</process>',
+        '<process id="<ID>" name="<NAME>" input="<INPUT>" output="<OUTPUT>">\n<BODY>\n</process>',
         rendered=(
             "id",
             "name",
             "input",
             "output",
-            "steps",
+            "body",
         ),
         fixed=("part",),
         part="processes",

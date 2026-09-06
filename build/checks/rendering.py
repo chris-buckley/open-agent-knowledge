@@ -10,7 +10,7 @@ from oak.authoring import ACT
 from oak.node.model import Node
 from oak.node.parts.instructions import Instruction
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import Act, Call, Emit
+from oak.node.parts.processes.statements import Act, Call, Emit
 from oak.node.parts.processes.values import (
     BindingValue,
     LiteralValue,
@@ -19,7 +19,7 @@ from oak.node.parts.processes.values import (
 )
 from oak.parse.fragments import parse_fragment
 from oak.render import render
-from oak.render.oak.processes import step_lines
+from oak.render.oak.processes import statement_lines
 
 
 def validate_act_authoring() -> None:
@@ -73,7 +73,7 @@ def validate_act_authoring() -> None:
         )
 
     if "\n".join(
-        step_lines(native)
+        statement_lines(native)
     ) != (
         "ACT Classify <REPORT> and produce <SEVERITY>. "
         "(REPORT=$REPORT) -> SEVERITY"
@@ -83,7 +83,7 @@ def validate_act_authoring() -> None:
         )
 
     if "\n".join(
-        step_lines(exact)
+        statement_lines(exact)
     ) != (
         'ACT TOOL "jobs.status": '
         "Read <JOB_ID> and produce <STATUS>. "
@@ -179,7 +179,7 @@ def validate_act_authoring() -> None:
 
     for step, expected in combinations:
         line = "\n".join(
-            step_lines(step)
+            statement_lines(step)
         )
 
         if line != expected:
@@ -215,7 +215,7 @@ def validate_json_ld_style_display() -> None:
             Process(
                 id="handle",
                 name="Handle request",
-                steps=[
+                body=[
                     Call(
                         process="process.normalise",
                         inputs=[
@@ -244,7 +244,7 @@ def validate_json_ld_style_display() -> None:
         )
     )
     normalise, handle = linked["processes"]
-    call = handle["steps"][0]
+    call = handle["body"]["@list"][0]
 
     if not (
         linked.get("@id")

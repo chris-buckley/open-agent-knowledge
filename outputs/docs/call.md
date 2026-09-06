@@ -14,12 +14,12 @@ example-1: "CALL process.normalise (RAW_NAME=\" ada \") -> NORMAL_NAME"
 syntax-reference: "outputs/oak.ebnf"
 
 grammar: TEXT<<
-surface_step_call = call_statement ;
+surface_statement_call = call_statement ;
 >>
 </constants>
 
 <schemas>
-<schema id="step-call" name="Call" purpose="One synchronous process invocation with schema-bound inputs and outputs.">
+<schema id="statement-call" name="Call" purpose="One synchronous process invocation with schema-bound inputs and outputs.">
 CALL <PROCESS> (<INPUTS>) -> <OUTPUTS>
 
 WHERE:
