@@ -17,15 +17,24 @@ build/authoring.py and build/fusion.py,"standard skill metadata, generated knowl
 >>
 
 delivery-contract: YAML<<
-- Distribute skills/oak-authoring as a normal Git-versioned product directory with
-  SKILL.md, numbered OAK references, teaching examples, and the optional script. Do
-  not add provider-specific metadata or unused assets.
+- 'Distribute skills/oak-authoring as a normal Git-versioned product: SKILL.md routes
+  work, numbered references own language knowledge, references/oak.ebnf supplies grammar,
+  and guides owns authoring, review, and validation practice. Keep scripts/validate.py
+  optional. Do not add provider-specific metadata or directory README indexes.'
 - Treat generated knowledge guides as the identical input documents for the skill
   and agent, not independently maintained prompts. Keep grammar material in EBNF.
-- Deliver the registered core under references/examples with its generated catalogue.
+- Deliver the registered core under assets/examples with its generated catalogue.
   Embed the identical complete document mapping as literal JSON knowledge in the review
   guide and assembled agent; Python demonstration hosts stay in repository scenario
   bundles.
+- Generate _template/SKILL.md as generic inert OAK scaffolding with metadata placeholders,
+  purpose, optional parts, and a literal SKILL_TREE block. Retain the deliberately
+  empty references, assets/constants, assets/schemas, guides, processes, and scripts
+  folders with empty .gitkeep files. Explain population and omission of unused resources
+  without shipping a completed domain skill.
+- Share the exact template entry as literal knowledge in guides/authoring.oak.md and
+  the assembled agent. Keep template and teaching documents outside the operational
+  fusion graph; displayed paths are not imports.
 - Keep the skill entry as the only operational scope. Supporting fusion documents
   may define constants and schemas only. Refuse authored policy, state, arrivals,
   processes, or interfaces in supporting documents instead of widening their scope.

@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import hashlib
+import json
+from contextlib import redirect_stdout
+from io import StringIO
 import re
 from pathlib import Path, PurePosixPath
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 import yaml
 from oak import (ACT, Act, Arrival, Constant, ConstantValue, Emit, Instruction,
@@ -55,10 +59,9 @@ def validate_authoring_skill() -> None:
     expected = artifacts()
     actual_files = {path for path in PACKAGE.rglob("*") if path.is_file() and "__pycache__" not in path.parts}
     require(actual_files == {path for path in expected if path.is_relative_to(PACKAGE)} | {SCRIPT}, "skill layout contains missing or unowned files")
-    require(not (PACKAGE / "assets").exists(), "unused skill assets")
+    _layout_inventory(PACKAGE)
     actual = {ENTRY: validator.oak_body(entry_text, PACKAGE / "SKILL.md").rstrip("\n")}
-    for name in GUIDES:
-        path = f"references/{name}.oak.md"
+    for path in GUIDES:
         actual[path] = (PACKAGE / path).read_text(encoding="utf-8").rstrip("\n")
     require(actual == skill_documents(), "skill knowledge differs from its source")
     fused = tree(actual)
@@ -83,6 +86,8 @@ def validate_authoring_skill() -> None:
     for path, example in teaching.items():
         require((PACKAGE / path).read_text() == example + "\n", "teaching example is stale")
         resolve(parse(example), source=path, root=str(PurePosixPath(path).parent), load=teaching.get)
+    _template_delivery(actual, fused)
+    _generation_cleanup()
     _guidance_delivery(actual, fused)
     _teaching_scope(actual, fused, teaching)
     _execution_parity(actual, fused)
@@ -90,15 +95,165 @@ def validate_authoring_skill() -> None:
 
 
 
+# Accepted E01 and E03 specimens, independent of the generation owners.
+EXPECTED_SKILL_FILES = {
+    "SKILL.md", "scripts/validate.py", "references/oak.ebnf",
+    "references/00-structure.oak.md", "references/01-schemas.oak.md",
+    "references/02-constants.oak.md", "references/03-state.oak.md",
+    "references/04-interfaces.oak.md", "references/05-triggers.oak.md",
+    "references/06-processes.oak.md", "references/07-instructions.oak.md",
+    "guides/authoring.oak.md", "guides/review.oak.md", "guides/validation.oak.md",
+    "assets/examples/catalog.oak.md", "assets/examples/fixed_knowledge/example.oak.md",
+    "assets/examples/shape_gallery/example.oak.md", "assets/examples/shape_writer/example.oak.md",
+    "assets/examples/shape_writer/sample.oak.md", "assets/examples/shape_writer/shape_gallery.oak.md",
+    "assets/examples/compound_growth/example.oak.md", "assets/examples/compound_growth/sample.oak.md",
+    "_template/SKILL.md", "_template/references/.gitkeep", "_template/assets/constants/.gitkeep",
+    "_template/assets/schemas/.gitkeep", "_template/guides/.gitkeep", "_template/processes/.gitkeep",
+    "_template/scripts/.gitkeep",
+}
+EXPECTED_SKILL_TREE = """SKILL_TREE:
+  SKILL.md→Skill entry point
+  references/→Supporting knowledge
+  assets/
+    constants/→Reusable fixed values
+    schemas/→Reusable information shapes
+  processes/→OAK workflows
+  guides/→Practical guidance
+  scripts/→Executable helpers"""
+TEMPLATE_MARKERS = {
+    "SKILL_NAME", "SKILL_DESCRIPTION", "PURPOSE_JSON", "CONSTANT_ENTRIES",
+    "INSTRUCTIONS_PART", "SCHEMAS_PART", "STATE_PART", "TRIGGERS_PART", "PROCESSES_PART", "INTERFACES_PART",
+}
+
+
+def _layout_inventory(package: Path) -> None:
+    files = {path.relative_to(package).as_posix() for path in package.rglob("*")
+             if path.is_file() and "__pycache__" not in path.parts}
+    require(files == EXPECTED_SKILL_FILES, "E01: delivered skill file set differs from the accepted layout")
+    directories = {parent.as_posix() for name in EXPECTED_SKILL_FILES for parent in PurePosixPath(name).parents
+                   if parent != PurePosixPath(".")}
+    actual = {path.relative_to(package).as_posix() for path in package.rglob("*")
+              if path.is_dir() and "__pycache__" not in path.parts}
+    require(actual == directories, "E01: missing or extra skill directories")
+    for name in files:
+        if name.endswith("/.gitkeep"):
+            require((package / name).read_bytes() == b"", "E02: template folders must remain empty")
+
+
+def _template_body(text: str) -> str:
+    require(text.startswith("---\n"), "E02: template metadata is missing")
+    _, frontmatter, body = text.split("---\n", 2)
+    require(yaml.safe_load(frontmatter) == {"name": "<SKILL_NAME>", "description": "<SKILL_DESCRIPTION>"},
+            "E02: template inherited a domain or capability identity")
+    markers = re.findall(r"<([A-Z_]+)>", text)
+    require(set(markers) == TEMPLATE_MARKERS and len(markers) == len(TEMPLATE_MARKERS),
+            "E02: missing, duplicated, or unexpected scaffold marker")
+    require(body.count(EXPECTED_SKILL_TREE) == 1 and body.count("SKILL_TREE:") == 1,
+            "E03: literal layout notation changed")
+    return body
+
+
+def _template_delivery(documents: dict[str, str], fused: Node) -> None:
+    """Populate the actual inert scaffold, then parse and resolve its OAK body."""
+    template = (PACKAGE / "_template" / "SKILL.md").read_text(encoding="utf-8")
+    _template_body(template)
+    authoring = parse(documents["guides/authoring.oak.md"])
+    require(next(c.value for c in authoring.constants if c.id == "skill-template") == template,
+            "E02: skill guide lost the exact template")
+    require(next(c.value for c in fused.constants if c.id.endswith("-skill-template")) == template,
+            "E02: assembled agent lost the exact template")
+    require(set(documents) == {ENTRY, *GUIDES}, "E02: scaffold or teaching entered the fusion graph")
+    rejects(lambda: tree({**documents, "_template/SKILL.md": template}), "unfilled template became active fusion input")
+    rejects(lambda: parse(validator_module().oak_body(template, Path("SKILL.md"))), "unfilled scaffold parsed as completed knowledge")
+
+    # This test-only specimen is never delivered as a completed domain skill.
+    replacements = {name: "" for name in TEMPLATE_MARKERS}
+    replacements.update(SKILL_NAME="fixture-knowledge", SKILL_DESCRIPTION="A temporary verification fixture.",
+                        PURPOSE_JSON=json.dumps("Check literal layout preservation."))
+    populated = template
+    for name, value in replacements.items():
+        marker = f"<{name}>\n" if name.endswith("_PART") else f"<{name}>"
+        populated = populated.replace(marker, value)
+    body = validator_module().oak_body(populated, Path("SKILL.md"))
+    node = parse(body)
+    require({c.id for c in node.constants} == {"purpose", "layout"}, "E02: scaffold ships extra implementation")
+    require(next(c.value for c in node.constants if c.id == "layout") == EXPECTED_SKILL_TREE,
+            "E03: layout is not exact literal OAK text")
+    require(not any((node.instructions, node.schemas, node.state, node.triggers, node.processes, node.interfaces)),
+            "E02: minimal population acquired operational scope")
+    require(len(resolve(node).documents) == 1, "E03: displayed paths became imports")
+    with TemporaryDirectory(prefix="oak-populated-template-") as temporary:
+        path = Path(temporary) / "SKILL.md"
+        path.write_text(populated, encoding="utf-8")
+        with redirect_stdout(StringIO()) as captured:
+            status = validator_module().validate([path], None)
+        report = json.loads(captured.getvalue())
+        require(status == 0 and report["status"] == "valid" and report["checks"] == ["parse", "resolve"],
+                "E02: populated fixture failed optional validator parsing and resolution")
+    for grouping in ("xml", "markdown"):
+        canonical = render(node, grouping=grouping)
+        require(parse(canonical) == node, "E02: population changed across canonical groupings")
+    for broken in (
+        template.replace("→", " → ", 1), template.replace("SKILL_TREE:", "Skill tree:"),
+        template.replace("  assets/", " assets/"), template.replace("<PURPOSE_JSON>", '"domain"'),
+        template.replace("<STATE_PART>", "<UNKNOWN_PART>"), template.replace("<STATE_PART>", "<STATE_PART><STATE_PART>"),
+        template.replace('name: "<SKILL_NAME>"', 'name: "oak-authoring"'),
+    ):
+        rejects(lambda: _template_body(broken), "changed template specimen was accepted")
+    rejects(lambda: parse(body.replace('purpose: "Check literal layout preservation."', 'purpose: INVALID_JSON')),
+            "malformed populated purpose was accepted")
+
+
+def _generation_cleanup() -> None:
+    """Exercise all generator-owned roots without mutating the actual product."""
+    from build.authoring import write
+    with TemporaryDirectory(prefix="oak-layout-cleanup-") as temporary:
+        root = Path(temporary)
+        package = root / "skills" / "oak-authoring"
+        expected = {package / path.relative_to(PACKAGE): text for path, text in artifacts().items()
+                    if path.is_relative_to(PACKAGE)}
+        script = package / "scripts" / "validate.py"
+        script.parent.mkdir(parents=True)
+        script.write_bytes(SCRIPT.read_bytes())
+        for directory in ("references", "guides", "assets", "_template"):
+            obsolete = package / directory / "obsolete" / "stale.txt"
+            obsolete.parent.mkdir(parents=True)
+            obsolete.write_text("stale")
+        cache = package / "scripts" / "__pycache__" / "fixture.pyc"
+        cache.parent.mkdir()
+        cache.write_bytes(b"cache")
+        with patch("build.authoring.PACKAGE", package), patch("build.authoring.ROOT", root), patch("build.authoring.artifacts", return_value=expected):
+            write()
+            first = {path: path.read_bytes() for path in package.rglob("*") if path.is_file()}
+            write()
+            require(first == {path: path.read_bytes() for path in package.rglob("*") if path.is_file()},
+                    "generation is not byte-stable")
+        _layout_inventory(package)
+        require(script.read_bytes() == SCRIPT.read_bytes() and cache.read_bytes() == b"cache",
+                "cleanup changed the helper or runtime cache")
+        for name in ("guides/review.oak.md", "_template/assets/constants/.gitkeep"):
+            path = package / name
+            original = path.read_bytes()
+            path.unlink()
+            rejects(lambda: _layout_inventory(package), "missing product file was accepted")
+            path.write_bytes(original)
+        extra = package / "_template" / "processes" / "unexpected.oak.md"
+        extra.write_text("unexpected")
+        rejects(lambda: _layout_inventory(package), "unexpected product file was accepted")
+        extra.unlink()
+        extra.parent.joinpath("empty").mkdir()
+        rejects(lambda: _layout_inventory(package), "unexpected empty directory was accepted")
+
+
 def _guidance_delivery(documents: dict[str, str], fused: Node) -> None:
     """Every rule reaches its sole guide and the assembled capability unchanged."""
     rules = {rule.id: rule.instruction for rule in AUTHORING_GUIDANCE}
     require(len(rules) == len(AUTHORING_GUIDANCE), "duplicate authoring rule id")
     for rule in ("describe-action-roles", "distinguish-action-promises"):
-        require(rule in RULE_OWNERS[GUIDES.index("06-processes")], "statement guidance lost its process guide owner")
+        require(rule in RULE_OWNERS[GUIDES.index("references/06-processes.oak.md")], "statement guidance lost its process guide owner")
     delivered = []
-    for guide, keys in zip(GUIDES, RULE_OWNERS, strict=True):
-        node = parse(documents[f"references/{guide}.oak.md"])
+    for guide, keys in sorted(zip(GUIDES, RULE_OWNERS, strict=True)):
+        node = parse(documents[guide])
         guidance = next(c.value for c in node.constants if c.id == "guidance")
         require(guidance == [rules[key] for key in keys], f"{guide} guidance differs from its source")
         delivered.extend(guidance)
@@ -118,7 +273,7 @@ def _teaching_scope(documents: dict[str, str], fused: Node, teaching: dict[str, 
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_bytes((PACKAGE / path).read_bytes())
         for scenario in core():
-            validate_closed_bundle(root / "references" / "examples" / scenario.name)
+            validate_closed_bundle(root / "assets" / "examples" / scenario.name)
     def unexpected_action(*args):
         raise RuntimeError("an embedded example became active")
     for path, text in teaching.items():
@@ -135,7 +290,7 @@ def _teaching_scope(documents: dict[str, str], fused: Node, teaching: dict[str, 
 
 def _execution_parity(documents: dict[str, str], fused: Node) -> None:
     """Native host fixtures prove dataflow parity, not arbitrary model quality."""
-    candidate = teaching_examples()["references/examples/fixed_knowledge/example.oak.md"]
+    candidate = teaching_examples()["assets/examples/fixed_knowledge/example.oak.md"]
     original = parse(documents[ENTRY])
     scenarios = (
         (False, False, False, "unused"),
@@ -151,6 +306,9 @@ def _execution_parity(documents: dict[str, str], fused: Node) -> None:
             trace = []
             def host(action: Act, values):
                 trace.append((action.instruction, dict(values), tuple(action.outputs)))
+                if "TEMPLATE" in values:
+                    require(values["TEMPLATE"] == (PACKAGE / "_template" / "SKILL.md").read_text(), "template routing changed literal knowledge")
+                    require("Unfilled scaffolding is inert." in values["TEMPLATE_USE"], "template routing lost its inert boundary")
                 if action.outputs == ["SOURCE", "VALIDATE"]:
                     return {"SOURCE": "The service is Task board; the title limit is 120.", "VALIDATE": requested}
                 if action.outputs == ["INSTALL_REQUIRED", "REPORT"]:
@@ -165,6 +323,7 @@ def _execution_parity(documents: dict[str, str], fused: Node) -> None:
                 return {name: "fixture design" for name in action.outputs}
             result = execute(node, Arrival(event="OAK authoring is requested for supplied source material."), {}, act=host, source=source, load=load)
             require(len(result.emissions) == 1 and result.emissions[0].values["OAK"] == candidate, "authoring fixture did not deliver one document")
+            require(sum("TEMPLATE" in values for _, values, _ in trace) == 1, "template use was not routed exactly once")
             require(any("HELPER" in values for _, values, _ in trace) == requested, "unrequested validation work ran")
             require(any(outputs == ("APPROVED",) for _, _, outputs in trace) == (requested and installation_required), "consent was not requested at the right boundary")
             if requested and installation_required and not approved:

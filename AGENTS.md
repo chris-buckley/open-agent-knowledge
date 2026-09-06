@@ -42,6 +42,10 @@ repository-rules: YAML<<
 - Keep repository-development assistance in .agents and distributable skill products
   in skills.
 - Route every persistent repository plan through docs/AGENTS.md before creating it.
+- Use schema.change-description and constant.change-naming-rules when naming work
+  branches, commits, or pull requests.
+- Apply constant.commit-history-rules when committing, updating branches, merging
+  pull requests, or removing branch references.
 - Do not create repository or directory README indexes.
 - Update architecture, implementation, examples, and generated outputs in one pass
   when the concern requires them.
@@ -85,10 +89,64 @@ communication-contract: YAML<<
 - Avoid jargon, filler, praise, and repetition.
 >>
 
+change-type-meanings: CSV<<
+type,meaning
+feat,new capability or behavior
+fix,correction of faulty behavior
+refactor,internal restructuring that preserves behavior
+perf,performance improvement
+docs,"documentation, knowledge, or planning-only change"
+test,verification coverage or test correction
+build,build tooling or dependency change
+ci,continuous integration configuration
+chore,repository housekeeping
+revert,reversal of an earlier change
+>>
+
+change-name-patterns: {"branch": "<TYPE>/<SUMMARY-AS-KEBAB-CASE>", "subject": "<TYPE>(<SCOPE>): <SUMMARY>", "sentence": "<IMPERATIVE_VERB> <OBJECT> [<NECESSARY_QUALIFIER>]"}
+
+change-naming-rules: YAML<<
+- Use only approved change types as branch prefixes, never platform, tool, or agent
+  names.
+- Select the type from schema.change-description using constant.change-type-meanings.
+- Apply constant.change-name-patterns to work branches, authored commit subjects,
+  and pull request titles. Name the actual change at the scope of that artifact.
+- Derive the branch topic from the summary using lowercase words separated by single
+  hyphens; put one slash after the type.
+- Use a lowercase imperative verb, its object, and only a qualifier needed to identify
+  the change. Omit vague summaries and a terminal period.
+- Omit the scope and its parentheses from a subject when no useful scope is needed.
+- Use ! immediately before the subject colon only for a breaking change, and explain
+  the affected contract and migration in the body.
+>>
+
+commit-history-rules: YAML<<
+- Preserve every original commit and its identity in repository history, including
+  after a pull request is merged.
+- Merge pull requests with a merge commit. Do not squash or rebase during merging.
+- Make corrections and reversals as new commits. Do not amend, squash, rebase, or
+  force-push away existing commits.
+- Update a work branch from its destination by merging so both histories retain their
+  original commits.
+- Before deleting merged branch references, verify that the source branch tip is an
+  ancestor of the destination branch. Retain the references if that check fails.
+>>
+
 coding-standard: ".agents/rules/coding-standards.oak.md"
 </constants>
 
 <schemas>
+<schema id="change-description" name="Change Description" purpose="Describe one change for branch names, commit subjects, and pull request titles.">
+Type: <TYPE>
+Scope: <SCOPE>
+Summary: <SUMMARY>
+
+WHERE:
+- <TYPE> is string; is one of `feat`, `fix`, `refactor`, `perf`, `docs`, `test`, `build`, `ci`, `chore`, `revert`; the kind of change.
+- <SCOPE> is string; the affected repository area in lowercase kebab-case, empty when omitted.
+- <SUMMARY> is string; is non-empty; an imperative verb followed by its object and any necessary qualifier.
+</schema>
+
 <schema id="repository-task" name="Repository Task" purpose="Carry one requested repository change and its constraints.">
 Task: <TASK>
 Paths: <PATHS>
@@ -156,7 +214,9 @@ EMIT interface.task-result
 </process>
 
 <process id="clean-merged-branch" name="Clean branch">
-ACT Delete the merged branch on the remote and locally after a successful merge. ()
+ACT Apply <HISTORY> to delete the merged branch on the remote and locally after a successful merge. (
+  HISTORY=$constant.commit-history-rules,
+)
 </process>
 </processes>
 

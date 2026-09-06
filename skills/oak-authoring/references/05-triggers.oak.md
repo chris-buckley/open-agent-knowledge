@@ -11,5 +11,5 @@ guidance: YAML<<
   payloads separate from event seeds.
 >>
 
-routing: "An event describes an outside occurrence. An optional source identifies one receiving interface; its schema must resolve identically to process input, with no seeds. A guard requires a state read and may compare literals or fixed constants; it cannot read process bindings. Internal work uses CALL, never triggers."
+routing: "Sources identify receive interfaces with the same resolved schema as process input and no seeds. Guards require state reads, may compare literals or constants, and never read process bindings. Internal work uses CALL, not triggers."
 ~~~~

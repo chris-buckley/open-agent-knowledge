@@ -14,7 +14,7 @@ import yaml
 from oak import Node, render
 from oak.rules import AUTHORING_GUIDANCE as GUIDANCE_SOURCE
 from oak.surface import SURFACES as SURFACE_SOURCE
-from build.authoring_guides import entry_node, knowledge_nodes, teaching_examples
+from build.authoring_guides import TEMPLATE_DIRECTORIES, TEMPLATE_ENTRY, entry_node, knowledge_nodes, teaching_examples
 from build.ebnf import grammar
 from build.fusion import fuse
 
@@ -64,7 +64,9 @@ def artifacts() -> dict[Path, str]:
         PACKAGE / "SKILL.md": frontmatter + shared[ENTRY] + "\n",
         **{PACKAGE / path: text + "\n" for path, text in shared.items() if path != ENTRY},
         **{PACKAGE / path: text + "\n" for path, text in teaching_examples().items()},
-        PACKAGE / "references" / "10-oak.ebnf": grammar(),
+        PACKAGE / "references" / "oak.ebnf": grammar(),
+        PACKAGE / "_template" / "SKILL.md": TEMPLATE_ENTRY,
+        **{PACKAGE / "_template" / path / ".gitkeep": "" for path in TEMPLATE_DIRECTORIES},
         TARGET: render(tree(shared), grouping="markdown") + "\n",
     }
 
@@ -72,12 +74,14 @@ def artifacts() -> dict[Path, str]:
 def write() -> Path:
     """Generate products and prune only this generator's owned document paths."""
     expected = artifacts()
-    for path in (PACKAGE / "references").rglob("*"):
-        if path.is_file() and path.suffix in {".md", ".ebnf"} and path not in expected:
-            path.unlink()
-    for path in sorted((PACKAGE / "references").rglob("*"), reverse=True):
-        if path.is_dir() and not any(path.iterdir()):
-            path.rmdir()
+    for directory in ("references", "guides", "assets", "_template"):
+        owned = PACKAGE / directory
+        for path in owned.rglob("*"):
+            if path.is_file() and "__pycache__" not in path.parts and path not in expected:
+                path.unlink()
+        for path in sorted(owned.rglob("*"), reverse=True):
+            if path.is_dir() and not any(path.iterdir()):
+                path.rmdir()
     (ROOT / "outputs" / "authoring.md").unlink(missing_ok=True)
     for path, text in expected.items():
         path.parent.mkdir(parents=True, exist_ok=True)

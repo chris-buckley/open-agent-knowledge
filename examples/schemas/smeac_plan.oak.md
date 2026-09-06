@@ -45,6 +45,17 @@ Task: <TASK>
 Purpose: <PURPOSE>
 End state: <END_STATE>
 
+### State Comparisons
+
+#### <COMPARISON_ID>: <COMPARISON_NAME>
+Authority: <COMPARISON_AUTHORITY>
+Current state:
+<COMPARISON_CURRENT>
+Desired state:
+<COMPARISON_DESIRED>
+Acceptance: <COMPARISON_ACCEPTANCE>
+...
+
 ## 3. Execution
 
 Intent: <LEADERS_INTENT>
@@ -120,6 +131,12 @@ WHERE:
 - <TASK> is string; is non-empty; the specific measurable time-bound action.
 - <PURPOSE> is string; is non-empty; why the task matters and its link to higher intent.
 - <END_STATE> is string; is non-empty; the desired conditions when the mission is complete.
+- <COMPARISON_ID> is string; is non-empty; a unique stable example identifier such as E01.
+- <COMPARISON_NAME> is string; is non-empty; the change illustrated by the paired states.
+- <COMPARISON_AUTHORITY> is string; is one of `required`, `illustrative`; required means an accepted completion criterion, illustrative means guidance only.
+- <COMPARISON_CURRENT> is string; is non-empty; the observed starting state, an explicitly absent artifact, or a linked specimen with literal examples preserved in fences.
+- <COMPARISON_DESIRED> is string; is non-empty; the intended result as prose, a fenced specimen, or a linked file with agreed formatting preserved.
+- <COMPARISON_ACCEPTANCE> is string; is non-empty; what must match, what may vary, and how to verify it, or the teaching purpose of an illustrative example.
 - <LEADERS_INTENT> is string; is non-empty; two to four sentences on purpose, key tasks, and end state in the leader's own framing.
 - <CONCEPT_OF_OPERATIONS> is string; is non-empty; two to five sentences on how the phases combine.
 - <PHASE_NUMBER> is integer; is at least 1; the sequential phase number.

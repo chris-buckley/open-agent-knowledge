@@ -7,6 +7,7 @@ from pathlib import Path
 import unicodedata
 
 from build.checks.fixtures import ROOT
+from oak import OneOf, SchemaBindingError
 from oak.node.model import Node
 from oak.node.parts.constants import Constant
 from oak.node.parts.processes.steps import Act, Assert, Fail, iter_steps
@@ -298,10 +299,25 @@ def validate_agents() -> None:
         raise RuntimeError("root AGENTS router repeats a concern")
 
     if [schema.id for schema in root.schemas] != [
+        "change-description",
         "repository-task",
         "repository-result",
     ]:
         raise RuntimeError("root repository schemas are stale")
+    change = root.schemas[0]
+    kinds = next(constraint.values for field in change.where for constraint in field.constraints
+                 if field.placeholder == "TYPE" and isinstance(constraint, OneOf))
+    meanings = _constant(root, "change-type-meanings").value
+    if [row["type"] for row in meanings] != kinds or any(not row["meaning"] for row in meanings):
+        raise RuntimeError("change type meanings must cover the shared enum exactly")
+    for kind in kinds:
+        change.bind({"TYPE": kind, "SCOPE": "plans", "SUMMARY": "add current and desired state examples"})
+    try:
+        change.bind({"TYPE": "platform-name", "SCOPE": "", "SUMMARY": "add state comparisons"})
+    except SchemaBindingError:
+        pass
+    else:
+        raise RuntimeError("an unsupported change type was accepted")
     if [trigger.id for trigger in root.triggers] != [
         "repository-task-requested",
         "branch-merged",

@@ -18,6 +18,4 @@ state,persistent across arrivals
 process binding,immutable in one frame or child scope
 interface instance,one complete boundary occurrence
 >>
-
-omission: "A draft or pipeline intermediate is not state. Omit state unless a later arrival must observe a changed value."
 ~~~~

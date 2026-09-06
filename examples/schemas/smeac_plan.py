@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from enum import StrEnum
 from pathlib import Path
 import sys
 
@@ -11,6 +12,12 @@ if str(ROOT) not in sys.path:
 
 from oak import AtLeast, Lines, Node, NonEmpty, OneOf, Schema, Type, parse, render, resolve, where
 from examples.schemas.repeat_marker import repeat_marker_instruction
+
+
+class ComparisonAuthority(StrEnum):
+    REQUIRED = "required"
+    ILLUSTRATIVE = "illustrative"
+
 
 smeac_plan_schema = Schema(
     id="smeac-plan",
@@ -55,6 +62,17 @@ smeac_plan_schema = Schema(
         "Task: <TASK>\n"
         "Purpose: <PURPOSE>\n"
         "End state: <END_STATE>\n"
+        "\n"
+        "### State Comparisons\n"
+        "\n"
+        "#### <COMPARISON_ID>: <COMPARISON_NAME>\n"
+        "Authority: <COMPARISON_AUTHORITY>\n"
+        "Current state:\n"
+        "<COMPARISON_CURRENT>\n"
+        "Desired state:\n"
+        "<COMPARISON_DESIRED>\n"
+        "Acceptance: <COMPARISON_ACCEPTANCE>\n"
+        "...\n"
         "\n"
         "## 3. Execution\n"
         "\n"
@@ -131,6 +149,12 @@ smeac_plan_schema = Schema(
         where("TASK", Type(of="string"), NonEmpty(), description="the specific measurable time-bound action"),
         where("PURPOSE", Type(of="string"), NonEmpty(), description="why the task matters and its link to higher intent"),
         where("END_STATE", Type(of="string"), NonEmpty(), description="the desired conditions when the mission is complete"),
+        where("COMPARISON_ID", Type(of="string"), NonEmpty(), description="a unique stable example identifier such as E01"),
+        where("COMPARISON_NAME", Type(of="string"), NonEmpty(), description="the change illustrated by the paired states"),
+        where("COMPARISON_AUTHORITY", Type(of="string"), OneOf(values=list(ComparisonAuthority)), description="required means an accepted completion criterion, illustrative means guidance only"),
+        where("COMPARISON_CURRENT", Type(of="string"), NonEmpty(), description="the observed starting state, an explicitly absent artifact, or a linked specimen with literal examples preserved in fences"),
+        where("COMPARISON_DESIRED", Type(of="string"), NonEmpty(), description="the intended result as prose, a fenced specimen, or a linked file with agreed formatting preserved"),
+        where("COMPARISON_ACCEPTANCE", Type(of="string"), NonEmpty(), description="what must match, what may vary, and how to verify it, or the teaching purpose of an illustrative example"),
         where("LEADERS_INTENT", Type(of="string"), NonEmpty(), description="two to four sentences on purpose, key tasks, and end state in the leader's own framing"),
         where("CONCEPT_OF_OPERATIONS", Type(of="string"), NonEmpty(), description="two to five sentences on how the phases combine"),
         where("PHASE_NUMBER", Type(of="integer"), AtLeast(value=1), description="the sequential phase number"),

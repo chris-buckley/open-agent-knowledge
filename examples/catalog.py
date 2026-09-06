@@ -145,9 +145,9 @@ def catalog_node(*, teaching: bool = False) -> Node:
 
 
 def teaching_examples() -> dict[str, str]:
-    files = {"references/examples/catalog.oak.md": render(catalog_node(teaching=True))}
+    files = {"assets/examples/catalog.oak.md": render(catalog_node(teaching=True))}
     for scenario in core():
-        files.update({f"references/examples/{scenario.name}/{name}": text
+        files.update({f"assets/examples/{scenario.name}/{name}": text
                       for name, text in generated(scenario).items() if name.endswith(".oak.md")})
     return files
 

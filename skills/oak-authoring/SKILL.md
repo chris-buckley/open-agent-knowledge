@@ -5,7 +5,7 @@ description: Author, review, or revise Open Agent Knowledge (OAK) documents from
   when writing OAK; no installation is needed. Programmatic validation is optional
   and installation requires separate permission.
 metadata:
-  version: 2.2.0
+  version: 2.3.0
   oak-revision: 2b542c613c5d1a7e64b597884fae4f444ac34916
   validator-sha256: e9c301a254ec8897698816091bac99cc117d8e0fa052192e728d356d19c27bd1
 ---
@@ -91,56 +91,59 @@ request-received(
 
 ~~~~processes
 ~~~process;id="capture-request";name="Capture request"
-ACT output="schema.authoring-request": Capture the complete supplied source as <SOURCE> and set <VALIDATE> true only when programmatic validation was requested; otherwise false. () -> SOURCE, VALIDATE
+ACT output="schema.authoring-request": Capture all supplied <SOURCE>; set <VALIDATE> true only for requested programmatic validation, otherwise false. () -> SOURCE, VALIDATE
 CALL process.author-document (SOURCE=$SOURCE, VALIDATE=$VALIDATE)
 ~~~
 
 ~~~process;id="author-document";name="Author document";input="schema.authoring-request"
-ACT Use <STRUCTURE> and the complete supplied <SOURCE> to establish <SCOPE>; consult the rest of that structure guide only as needed. (
+ACT Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> to define <SCOPE>. For a new skill, use <TEMPLATE> under <TEMPLATE_USE>; otherwise do not add scaffolding. Consult each guide's remaining knowledge as needed. (
+  AUTHORING=$guides/authoring.oak.md#constant.guidance,
   STRUCTURE=$references/00-structure.oak.md#constant.guidance,
   SOURCE=$SOURCE,
+  TEMPLATE=$guides/authoring.oak.md#constant.skill-template,
+  TEMPLATE_USE=$guides/authoring.oak.md#constant.template-use,
 ) -> SCOPE
-ACT Apply <GUIDANCE> to <SCOPE> and <SOURCE> to decide schemas; omit unjustified entries and produce <DESIGN_1>. Use the supplied schema definitions and their <POPULATED> instances to preserve the requested information shape. (
+ACT Apply <GUIDANCE> to <SCOPE> and <SOURCE>; decide justified schemas as <DESIGN_1>. Preserve the requested shape using the guide schemas and <POPULATED> instances. (
   GUIDANCE=$references/01-schemas.oak.md#constant.guidance,
   SCOPE=$SCOPE,
   SOURCE=$SOURCE,
   POPULATED=$references/01-schemas.oak.md#constant.populated-shapes,
 ) -> DESIGN_1
-ACT Apply <GUIDANCE> to <DESIGN_1> and <SOURCE> to decide constants; omit unjustified entries and produce <DESIGN_2>. (
+ACT Apply <GUIDANCE> to <DESIGN_1> and <SOURCE>; decide justified constants as <DESIGN_2>. (
   GUIDANCE=$references/02-constants.oak.md#constant.guidance,
   DESIGN_1=$DESIGN_1,
   SOURCE=$SOURCE,
 ) -> DESIGN_2
-ACT Apply <GUIDANCE> to <DESIGN_2> and <SOURCE> to decide state; omit unjustified entries and produce <DESIGN_3>. (
+ACT Apply <GUIDANCE> to <DESIGN_2> and <SOURCE>; decide justified state as <DESIGN_3>. (
   GUIDANCE=$references/03-state.oak.md#constant.guidance,
   DESIGN_2=$DESIGN_2,
   SOURCE=$SOURCE,
 ) -> DESIGN_3
-ACT Apply <GUIDANCE> to <DESIGN_3> and <SOURCE> to decide interfaces; omit unjustified entries and produce <DESIGN_4>. (
+ACT Apply <GUIDANCE> to <DESIGN_3> and <SOURCE>; decide justified interfaces as <DESIGN_4>. (
   GUIDANCE=$references/04-interfaces.oak.md#constant.guidance,
   DESIGN_3=$DESIGN_3,
   SOURCE=$SOURCE,
 ) -> DESIGN_4
-ACT Apply <GUIDANCE> to <DESIGN_4> and <SOURCE> to decide triggers; omit unjustified entries and produce <DESIGN_5>. (
+ACT Apply <GUIDANCE> to <DESIGN_4> and <SOURCE>; decide justified triggers as <DESIGN_5>. (
   GUIDANCE=$references/05-triggers.oak.md#constant.guidance,
   DESIGN_4=$DESIGN_4,
   SOURCE=$SOURCE,
 ) -> DESIGN_5
-ACT Apply <GUIDANCE> to <DESIGN_5> and <SOURCE> to decide processes; omit unjustified entries and produce <DESIGN_6>. (
+ACT Apply <GUIDANCE> to <DESIGN_5> and <SOURCE>; decide justified processes as <DESIGN_6>. (
   GUIDANCE=$references/06-processes.oak.md#constant.guidance,
   DESIGN_5=$DESIGN_5,
   SOURCE=$SOURCE,
 ) -> DESIGN_6
-ACT Apply <GUIDANCE> to <DESIGN_6> and <SOURCE> to decide instructions; omit unjustified entries and produce <DESIGN_7>. (
+ACT Apply <GUIDANCE> to <DESIGN_6> and <SOURCE>; decide justified instructions as <DESIGN_7>. (
   GUIDANCE=$references/07-instructions.oak.md#constant.guidance,
   DESIGN_6=$DESIGN_6,
   SOURCE=$SOURCE,
 ) -> DESIGN_7
-ACT Review <DESIGN_7> against <REVIEW>, <GRAMMAR>, and the complete scenarios in <TEACHING>. Produce <CANDIDATE> as one OAK node in canonical section order, without claiming a programmatic check. (
+ACT Review <DESIGN_7> against <REVIEW>, <GRAMMAR>, and complete <TEACHING> scenarios. Produce canonical <CANDIDATE>; do not claim a programmatic check. (
   DESIGN_7=$DESIGN_7,
-  REVIEW=$references/08-review.oak.md#constant.review,
-  GRAMMAR=$references/08-review.oak.md#constant.oak-ebnf,
-  TEACHING=$references/08-review.oak.md#constant.teaching,
+  REVIEW=$guides/review.oak.md#constant.review,
+  GRAMMAR=$references/00-structure.oak.md#constant.oak-ebnf,
+  TEACHING=$guides/review.oak.md#constant.teaching,
 ) -> CANDIDATE
 IF $VALIDATE equals true:
   CALL process.validate-and-deliver (CANDIDATE=$CANDIDATE)
@@ -152,14 +155,14 @@ ELSE:
 ~~~
 
 ~~~process;id="validate-and-deliver";name="Check validator";input="schema.oak-candidate"
-ACT output="schema.validator-check": Apply <POLICY> to check <CANDIDATE> with the exact <HELPER> without --allow-install. Reuse matching code when available. Return the actual <REPORT> and set <INSTALL_REQUIRED> true only for permission-required, not for invalid OAK or an unavailable execution tool. (
-  POLICY=$references/09-validation.oak.md#constant.validation-policy,
-  HELPER=$references/09-validation.oak.md#constant.validator-script,
+ACT output="schema.validator-check": Apply <POLICY> with exact <HELPER> to <CANDIDATE> without --allow-install. Return actual <REPORT>; <INSTALL_REQUIRED> is true only for permission-required, not invalid OAK or unavailable execution. (
+  POLICY=$guides/validation.oak.md#constant.validation-policy,
+  HELPER=$guides/validation.oak.md#constant.validator-script,
   CANDIDATE=$CANDIDATE,
 ) -> INSTALL_REQUIRED, REPORT
 IF $INSTALL_REQUIRED equals true:
-  ACT output="schema.installation-consent": Ask the user for permission to download the OAK revision in <IDENTITY> and install its dependencies in an isolated retained environment. Set <APPROVED> true only after explicit approval; a validation request alone is not approval. (
-    IDENTITY=$references/09-validation.oak.md#constant.identity,
+  ACT output="schema.installation-consent": Ask permission to download <IDENTITY> and install its dependencies in an isolated retained environment. Set <APPROVED> true only after explicit installation approval, not merely a validation request. (
+    IDENTITY=$guides/validation.oak.md#constant.identity,
   ) -> APPROVED
   IF $APPROVED equals true:
     CALL process.finalize-validation (CANDIDATE=$CANDIDATE, REPORT=$REPORT, ALLOW_INSTALL=true)
@@ -173,12 +176,12 @@ ELSE:
 ~~~
 
 ~~~process;id="finalize-validation";name="Report validation";input="schema.validation-context"
-ACT output="schema.authoring-result": Use <REPORT> for <CANDIDATE> under <POLICY>. With <ALLOW_INSTALL> true, run the exact <HELPER> with --allow-install; otherwise never download or install. Repair reported authoring errors when possible and recheck changed documents under the same permission. Do not rerun an unchanged successful check. Produce <OAK> and truthful <VALIDATION>, including errors or why a check could not run. (
+ACT output="schema.authoring-result": Finalize <CANDIDATE> from <REPORT> under <POLICY>. Run exact <HELPER> with --allow-install only when <ALLOW_INSTALL> is true; otherwise never install or download. Repair errors and recheck changes under the same permission, not unchanged successes. Produce <OAK> and truthful <VALIDATION>. (
   REPORT=$REPORT,
   CANDIDATE=$CANDIDATE,
   ALLOW_INSTALL=$ALLOW_INSTALL,
-  POLICY=$references/09-validation.oak.md#constant.validation-policy,
-  HELPER=$references/09-validation.oak.md#constant.validator-script,
+  POLICY=$guides/validation.oak.md#constant.validation-policy,
+  HELPER=$guides/validation.oak.md#constant.validator-script,
 ) -> OAK, VALIDATION
 EMIT interface.authored-document
 ~~~

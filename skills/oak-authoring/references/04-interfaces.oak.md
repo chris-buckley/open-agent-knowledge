@@ -9,5 +9,5 @@ guidance: YAML<<
   bindings satisfy it.
 >>
 
-boundaries: "Reuse an existing schema at a boundary; do not redefine its shape inside the interface. Interface instances are not ambient mutable storage."
+boundaries: "Reuse boundary schemas; never redefine their shapes inside interfaces or treat instances as mutable storage."
 ~~~~

@@ -8,6 +8,7 @@ from tempfile import TemporaryDirectory
 from urllib.parse import unquote, urlsplit
 
 from build.checks.fixtures import ROOT
+from examples.schemas.smeac_plan import ComparisonAuthority
 from oak.parse import parse
 
 _DIRECTORY = re.compile(r"([0-9]{4})-[a-z][a-z0-9]*(?:-[a-z0-9]+)*")
@@ -15,13 +16,16 @@ _PHASE = re.compile(r"### Phase ([1-9][0-9]*): \S.*")
 _TASK = re.compile(r"- \[[ xX]\] Key task: ([A-Z][A-Z0-9._-]*[0-9]) \S.*")
 _FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
 _LINK = re.compile(r"\[[^\]\n]*\]\(([^\s)]+)\)")
+_COMPARISON = re.compile(r"#### (E[0-9]{2,}): \S.*")
+_COMPARISON_ID = re.compile(r"\bE[0-9]{2,}\b")
 
 
 def _prose_lines(text: str) -> list[str]:
-    """Keep code examples from satisfying the surrounding plan's structure."""
+    """Mask fenced examples while preserving their original line positions."""
     lines = []
     fence: str | None = None
     for line in text.splitlines():
+        lines.append("")
         marker = _FENCE.fullmatch(line)
         if fence is not None:
             if (marker and marker[1][0] == fence[0]
@@ -30,7 +34,7 @@ def _prose_lines(text: str) -> list[str]:
         elif marker:
             fence = marker[1]
         else:
-            lines.append(line)
+            lines[-1] = line
     if fence is not None:
         raise ValueError("unclosed code fence")
     return lines
@@ -46,8 +50,92 @@ def _format_parts(template: str) -> tuple[list[str], list[str]]:
     return sections, labels
 
 
+def _comparison_format(template: str) -> tuple[str, tuple[str, ...]]:
+    prefix, pattern = template.split("#### <COMPARISON_ID>:", 1)
+    heading = next(line for line in reversed(prefix.splitlines()) if line.startswith("### "))
+    fields = tuple(line.split(":", 1)[0] + ":" for line in pattern.split("\n...\n", 1)[0].splitlines()
+                   if ":" in line)
+    if len(fields) != 4:
+        raise ValueError("SMEAC comparisons must define authority, current state, desired state, and acceptance")
+    return heading, fields
+
+
+def _comparison_content(raw: list[str], field: str) -> str:
+    content = [raw[0][len(field):], *raw[1:]]
+    if not any(line.strip() and not _FENCE.fullmatch(line) for line in content):
+        raise ValueError(f"comparison needs populated {field}")
+    return "\n".join(content).strip()
+
+
+def _comparison_authority(prose: list[str], raw: list[str], fields: tuple[str, ...]) -> ComparisonAuthority:
+    positions = [(index, field) for index, line in enumerate(prose) for field in fields
+                 if line == field or line.startswith(field + " ")]
+    if tuple(field for _, field in positions) != fields:
+        raise ValueError("comparison needs each schema field once, in order")
+    contents: list[str] = []
+    for position, (start, field) in enumerate(positions):
+        end = positions[position + 1][0] if position + 1 < len(positions) else len(raw)
+        contents.append(_comparison_content(raw[start:end], field))
+    try:
+        return ComparisonAuthority(contents[0])
+    except ValueError as error:
+        raise ValueError("comparison authority must be required or illustrative") from error
+
+
+def _comparison_bounds(prose: list[str], heading: str, sections: list[str]) -> tuple[int, int] | None:
+    starts = [index for index, line in enumerate(prose) if line == heading]
+    if not starts:
+        return None
+    mission_start, mission_end = prose.index(sections[1]), prose.index(sections[2])
+    if len(starts) != 1 or not mission_start < starts[0] < mission_end:
+        raise ValueError("state comparisons must occur once within Mission")
+    start = starts[0]
+    end = next((index for index in range(start + 1, mission_end)
+                if prose[index].startswith("### ")), mission_end)
+    return start, end
+
+
+def _comparison_authorities(prose: list[str], raw: list[str], template: str) -> dict[str, ComparisonAuthority]:
+    heading, fields = _comparison_format(template)
+    sections, _ = _format_parts(template)
+    bounds = _comparison_bounds(prose, heading, sections)
+    if bounds is None:
+        return {}
+    start, end = bounds
+    entries = [index for index in range(start + 1, end) if prose[index].startswith("#### ")]
+    if not entries:
+        raise ValueError("state comparisons need at least one named example")
+    authorities: dict[str, ComparisonAuthority] = {}
+    for position, index in enumerate(entries):
+        match = _COMPARISON.fullmatch(prose[index])
+        if match is None:
+            raise ValueError("comparison needs an E01-style identifier and a populated name")
+        identifier = match[1]
+        if identifier in authorities:
+            raise ValueError(f"duplicate comparison identifier {identifier}")
+        stop = entries[position + 1] if position + 1 < len(entries) else end
+        authorities[identifier] = _comparison_authority(prose[index + 1:stop], raw[index + 1:stop], fields)
+    return authorities
+
+
+def _validate_comparisons(text: str, prose: list[str], template: str) -> None:
+    authorities = _comparison_authorities(prose, text.splitlines(), template)
+    if not authorities:
+        return  # Older plans use E-prefixed task identifiers.
+    sections, labels = _format_parts(template)
+    execution = prose[prose.index(sections[2]) + 1:prose.index(sections[3])]
+    referenced = set(_COMPARISON_ID.findall("\n".join(execution)))
+    if unknown := referenced - authorities.keys():
+        raise ValueError(f"execution refers to unknown comparisons: {sorted(unknown)}")
+    criteria = "\n".join(line for line in execution if line.startswith(labels[1] + " "))
+    covered = set(_COMPARISON_ID.findall(criteria))
+    required = {identifier for identifier, authority in authorities.items() if authority == ComparisonAuthority.REQUIRED}
+    if missing := required - covered:
+        raise ValueError(f"success criteria omit required comparisons: {sorted(missing)}")
+
+
 def validate_plan_text(text: str, template: str) -> None:
-    """Check a populated plan's section order and compact execution phases."""
+    """Check a populated plan's structure, execution phases, and paired examples."""
     lines = _prose_lines(text)
     sections, labels = _format_parts(template)
     headings = [(index, line) for index, line in enumerate(lines) if line.startswith("## ")]
@@ -92,6 +180,7 @@ def validate_plan_text(text: str, template: str) -> None:
             identifiers.add(task[1])
     if not phase_count:
         raise ValueError("execution needs at least one phase")
+    _validate_comparisons(text, lines, template)
 
 
 def _validate_navigation(path: Path, root: Path) -> None:
@@ -156,6 +245,7 @@ def _rejection_examples(template: str) -> None:
         for index, heading in enumerate(sections)
     )
     validate_plan_text(valid, template)
+    _comparison_examples(template, valid)
     task = "- [ ] Key task: P01.01 Verify the result."
     invalid = (
         (valid.replace(sections[1], "## Missing mission"), "five SMEAC sections"),
@@ -234,6 +324,58 @@ def _rejection_examples(template: str) -> None:
         (current / "evidence").mkdir()
         (current / "evidence" / "result.txt").write_text("Observed result", encoding="utf-8")
         validate_plan_directory(root, template, historical)
+
+
+def _comparison_examples(template: str, plan: str) -> None:
+    current = "```markdown\n## Skill layout\n- `SKILL.md`: entry point\n```"
+    desired = "```text\nSKILL_TREE:\n  SKILL.md→Skill entry point\n```"
+    comparison = (
+        "### State Comparisons\n\n"
+        "#### E01: Skill tree notation\n"
+        "Authority: required\n"
+        f"Current state:\n{current}\n"
+        f"Desired state:\n{desired}\n"
+        "Acceptance: Preserve the colon, indentation, and arrow without adjacent spaces.\n\n"
+    )
+    paired = plan.replace("## 3. Execution", comparison + "## 3. Execution").replace(
+        "The check passes.", "The E01 comparison matches its acceptance criteria."
+    )
+    validate_plan_text(paired, template)
+    validate_plan_text(paired.replace("Authority: required", "Authority: illustrative").replace(
+        "The E01 comparison", "The example"
+    ), template)
+    second = comparison.split("#### ", 1)[1].replace("E01:", "E02:").replace("required", "illustrative")
+    validate_plan_text(paired.replace("## 3. Execution", "#### " + second + "## 3. Execution"), template)
+    validate_plan_text(paired.replace(desired, "[Desired specimen](evidence/desired.txt)"), template)
+    validate_plan_text(paired.replace("Current state:", "Observed state:"),
+                       template.replace("Current state:", "Observed state:"))
+
+    invalid = (
+        (paired.replace(current, "```text\n\n```"), "populated Current state:"),
+        (paired.replace(desired, ""), "populated Desired state:"),
+        (paired.replace("Authority: required", "Authority: approved"), "required or illustrative"),
+        (paired.replace("E01: Skill", "Skill"), "E01-style identifier"),
+        (paired.replace("Current state:", "Desired state:"), "each schema field once"),
+        (paired.replace("Acceptance: Preserve the colon, indentation, and arrow without adjacent spaces.", ""),
+         "each schema field once"),
+        (paired.replace("## 3. Execution", "#### " + second.replace("E02:", "E01:") + "## 3. Execution"),
+         "duplicate comparison identifier"),
+        (paired.replace("The E01 comparison", "The result"), "omit required comparisons"),
+        (paired.replace("The E01 comparison", "The E99 comparison"), "unknown comparisons"),
+        (paired.replace(comparison, "").replace("## 2. Mission", comparison + "## 2. Mission"),
+         "once within Mission"),
+        (paired.replace(comparison, "### State Comparisons\n~~~~markdown\n" + comparison + "~~~~\n"),
+         "at least one named example"),
+        (paired.replace("#### E01: Skill tree notation", ""), "at least one named example"),
+    )
+    for source, reason in invalid:
+        try:
+            validate_plan_text(source, template)
+        except ValueError as error:
+            if reason not in str(error):
+                raise RuntimeError(f"expected comparison rejection {reason!r}, got {error}") from None
+            continue
+        raise RuntimeError(f"invalid state comparison was accepted: {reason}")
 
 
 def validate_plans() -> None:
