@@ -1,0 +1,22 @@
+name: Verify skill layout candidate
+on:
+  push:
+    branches: [feat/add-smeac-state-comparisons]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Export exact tracked baseline
+        run: |
+          git archive --format=tar --output="${RUNNER_TEMP}/oak-skill-layout-baseline.tar" 80f2712feff87d06f25ac7a170b647f5abafe7b2
+          sha256sum "${RUNNER_TEMP}/oak-skill-layout-baseline.tar"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oak-skill-layout-baseline
+          path: ${{ runner.temp }}/oak-skill-layout-baseline.tar
+          retention-days: 1
