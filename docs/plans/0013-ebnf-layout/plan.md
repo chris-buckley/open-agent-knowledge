@@ -2,7 +2,8 @@
 
 Prepared: 2026-09-06T17:23:33+10:00
 Classification: PUBLIC
-Status: Implemented and verified locally. Independent review and remote delivery remain open.
+Status: Complete. All 29 tasks are evidenced and checked; PR #19 is open for review.
+Delivery: [PR #19](https://github.com/chris-buckley/open-agent-knowledge/pull/19). See [report](report.md) and [independent review](evidence/independent-review.md).
 Authorisation: The user explicitly authorised end-to-end implementation and a review-ready pull request into main on 2026-09-06T17:53:49+10:00. Merge into main is not authorised.
 Repository: chris-buckley/open-agent-knowledge
 Branch: docs/plan-ebnf-layout
@@ -288,17 +289,17 @@ Objective: Demonstrate the change is complete, readable, and behaviour-preservin
 - [x] Key task: P05.01 Run Python compilation for changed modules, focused EBNF checks, SMEAC plan checks, python -m build.examples, and python build/examples.py on the candidate; record actual commands, revisions, outputs, and exit codes.
 - [x] Key task: P05.02 Confirm existing parsing, rendering, round-trip, model, execution, JSON-LD, detached-example, skill-agent, and generated-freshness gates remain covered by the complete checks and pass without weakened assertions.
 - [x] Key task: P05.03 Inspect the entire generated grammar, all required specimens, note placement, both groupings, literal-sensitive fragments, and size results; review every old commentary claim against its new location and wording.
-- [ ] Key task: P05.04 Have an independent review of the candidate diff and evidence check scope, owner boundaries, source coverage, preservation, and readability; record the review method honestly and fix findings before freezing the final candidate.
+- [x] Key task: P05.04 Have an independent review of the candidate diff and evidence check scope, owner boundaries, source coverage, preservation, and readability; record the review method honestly and fix findings before freezing the final candidate.
 - [x] Key task: P05.05 Rerun affected and complete checks after corrections, inspect git diff --check, and verify that no runtime changes, new dependencies, APS syntax, silent duplicate cleanup, changed width contracts, or hand-edited outputs entered the diff.
 Success criteria: Actual verification evidence covers E01 through E07; every applicable check passes on the reviewed final candidate; the final review verdict is Approved with no unresolved in-scope finding.
 Transition trigger: The reviewed revision and its passing evidence agree, and the complete implementation is ready for delivery.
 
 ### Phase 6: Record and deliver the completed change
 Objective: Close the implementation record and submit the verified branch for review without merging it.
-- [ ] Key task: P06.01 Create report.md with the outcome, changed paths, baseline and final revision identities, actual verification evidence, final sizes, E01 through E07 observed results, known out-of-scope grammar limitations, and review verdict.
-- [ ] Key task: P06.02 Mark each implementation checkbox complete only after its acceptance and evidence requirements pass; retain all original commits and keep any corrections as new commits.
-- [ ] Key task: P06.03 Commit and push the complete change on this branch, confirm the remote file set and history, and create a pull request into main using the root change-naming rules; include preservation and size evidence in its description.
-- [ ] Key task: P06.04 Verify the pull request head and final checks, report the exact plan, report, branch, commit, and pull request, and leave main unchanged until separately authorised to merge.
+- [x] Key task: P06.01 Create report.md with the outcome, changed paths, baseline and final revision identities, actual verification evidence, final sizes, E01 through E07 observed results, known out-of-scope grammar limitations, and review verdict.
+- [x] Key task: P06.02 Mark each implementation checkbox complete only after its acceptance and evidence requirements pass; retain all original commits and keep any corrections as new commits.
+- [x] Key task: P06.03 Commit and push the complete change on this branch, confirm the remote file set and history, and create a pull request into main using the root change-naming rules; include preservation and size evidence in its description.
+- [x] Key task: P06.04 Verify the pull request head and final checks, report the exact plan, report, branch, commit, and pull request, and leave main unchanged until separately authorised to merge.
 Success criteria: All applicable tasks are evidenced and checked, the report records E01 through E07 and an Approved verdict, and the verified pull request is available for review with original history preserved.
 Transition trigger: Mission complete; the completed branch is delivered for review, not merged automatically.
 
@@ -326,7 +327,7 @@ Transition trigger: Mission complete; the completed branch is delivered for revi
 | Readability reference | One read-only legacy document | legacy-snapshot-aps/references/05-grammar.md | AVAILABLE |
 | SMEAC format and plan checks | Existing schema and checker | examples/schemas/smeac_plan.oak.md, build/checks/plans.py | AVAILABLE |
 | Executable repository checkout | One isolated working tree | Verified Git bundle from Actions run 34020468020 | AVAILABLE |
-| Final verification and independent review | One final-candidate evidence set | Repository checks and reviewer | PENDING |
+| Final verification and independent review | One final-candidate evidence set | Passing declared-dependency CI and independent Approved audit | AVAILABLE |
 
 Supply: Reuse existing dependencies, descriptors, examples, and repository checks. Create evidence files only for observed baselines, fixed expected specimens, preservation comparisons, and actual verification results that support the final report.
 Transportation: Move work through normal commits on docs/plan-ebnf-layout. Generate every downstream grammar copy from its owner and submit the completed branch through a pull request into main.
@@ -344,11 +345,11 @@ Rollback: Revert the implementation commits with new commits and regenerate affe
 | Plan and report | Git-versioned Markdown | Track task state, specimen acceptance, and observed evidence | At verified phase gates and final delivery |
 | Pull request | GitHub review | Review the complete diff, checks, preservation results, and history | After implementation and verification |
 
-Reporting: Explicit continuation was received on 2026-09-06T17:53:49+10:00; record observed progress toward delivery. During execution, report exact revisions, commands and results, production-preservation coverage, all four delivery identities, byte counts, and E01 through E07 acceptance evidence. State unperformed checks and known limitations directly.
+Reporting: The report records observed results for E01 through E07, the independent Approved audit, preserved product fingerprint, and passing declared-dependency CI for implementation d44ba304 and review-integration head 7e4cfe15. The documentation-only closeout commit has its exact head and subsequent CI recorded in PR #19 before handoff; this document does not claim its own future check result. Local recovery full-suite timeouts are disclosed, not counted as passes.
 
 | Decision | Authority | Escalation |
 | --- | --- | --- |
-| Start implementation | Repository owner | Await explicit continuation |
+| Start implementation | Repository owner | Granted on 2026-09-06T17:53:49+10:00 |
 | Presentation details within required specimens and contracts | Implementation agent | Independent review, then repository owner for conflicts |
 | Change syntax, grammar definitions, package limits, or validation authority | Repository owner | Outside this plan; require explicit authorisation |
 | Approve final review | Independent reviewer using actual candidate evidence | Repository owner for unresolved disagreement |
