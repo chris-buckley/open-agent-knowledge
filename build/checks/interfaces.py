@@ -25,7 +25,7 @@ from oak.node.parts.interfaces import (
 )
 from oak.node.parts.processes.model import Process
 from oak.node.parts.processes.conditions import Compare
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Assert,
     Call,
@@ -110,7 +110,7 @@ def _contract_node(*, description: bool = True) -> Node:
         name="Answer request",
         input="schema.request-shape",
         output="schema.result-shape",
-        steps=[
+        body=[
             Act(
                 instruction="Turn <REQUEST> into <RESULT>.",
                 inputs=[
@@ -276,7 +276,7 @@ def validate_interface_instructions() -> None:
         id="read-request",
         name="Read request",
         input="schema.request-shape",
-        steps=[
+        body=[
             Act(
                 instruction="Read <REQUEST>.",
                 inputs=[
@@ -291,7 +291,7 @@ def validate_interface_instructions() -> None:
     explicit_process = Process(
         id="publish-result",
         name="Publish result",
-        steps=[
+        body=[
             Act(instruction="Produce <RESULT>.", outputs=["RESULT"]),
             Emit(
                 interface="interface.result-output",
@@ -308,8 +308,8 @@ def validate_interface_instructions() -> None:
         update={
             "id": "infer-result",
             "name": "Infer result",
-            "steps": [
-                explicit_process.steps[0],
+            "body": [
+                explicit_process.body[0],
                 Emit(interface="interface.result-output"),
             ],
         }
@@ -426,7 +426,7 @@ def validate_interface_execution() -> None:
                 id="read-event",
                 name="Read event",
                 input="schema.event-request",
-                steps=[
+                body=[
                     Act(
                         instruction="Read <REQUEST>.",
                         inputs=[
@@ -463,7 +463,7 @@ def validate_interface_execution() -> None:
             Process(
                 id="publish-result",
                 name="Publish result",
-                steps=[
+                body=[
                     Act(
                         instruction="Produce <FINAL_RESULT>.",
                         outputs=["FINAL_RESULT"],
@@ -553,7 +553,7 @@ def validate_interface_resolution() -> None:
                 id="answer-request",
                 name="Answer request",
                 input="shared.oak.md#schema.shared-request",
-                steps=[
+                body=[
                     Act(
                         instruction="Read <REQUEST> and produce <RESULT>.",
                         inputs=[
@@ -591,7 +591,7 @@ def validate_interface_resolution() -> None:
                     id="answer-request",
                     name="Answer request",
                     input="shared.oak.md#schema.shared-result",
-                    steps=[
+                    body=[
                         Act(
                             instruction="Read <RESULT>.",
                             inputs=[
@@ -622,7 +622,7 @@ def validate_interface_resolution() -> None:
                 id="read-request",
                 name="Read request",
                 input="schema.shared",
-                steps=[
+                body=[
                     Act(
                         instruction="Read <REQUEST>.",
                         inputs=[
@@ -710,7 +710,7 @@ def validate_interface_rejections() -> None:
                     id="answer-request",
                     name="Answer request",
                     input=process_input,
-                    steps=[Act(instruction="Answer the request.")],
+                    body=[Act(instruction="Answer the request.")],
                 )
             ],
             interfaces=[
@@ -744,7 +744,7 @@ def validate_interface_rejections() -> None:
                     id="emit-request",
                     name="Emit request",
                     input="schema.request-shape",
-                    steps=[Emit(interface="interface.request-input")],
+                    body=[Emit(interface="interface.request-input")],
                 )
             ],
             interfaces=[
@@ -764,7 +764,7 @@ def validate_interface_rejections() -> None:
                 Process(
                     id="emit-result",
                     name="Emit result",
-                    steps=[Emit(interface="interface.result-output")],
+                    body=[Emit(interface="interface.result-output")],
                 )
             ],
             interfaces=[
@@ -784,7 +784,7 @@ def validate_interface_rejections() -> None:
                 Process(
                     id="emit-result",
                     name="Emit result",
-                    steps=[
+                    body=[
                         Act(
                             instruction="Produce <RESULT> and <EXTRA>.",
                             outputs=["RESULT", "EXTRA"],
@@ -821,7 +821,7 @@ def validate_interface_rejections() -> None:
                 Process(
                     id="emit-pair",
                     name="Emit pair",
-                    steps=[
+                    body=[
                         Act(
                             instruction="Produce <FIRST>.",
                             outputs=["FIRST"],
@@ -955,7 +955,7 @@ def validate_interface_scope() -> None:
             Process(
                 id="run-branch",
                 name="Run branch",
-                steps=[
+                body=[
                     If(
                         condition=Compare(
                             left=StateValue(state="state.branch-enabled"),
@@ -998,11 +998,11 @@ def validate_interface_scope() -> None:
             Process(
                 id="run-loop",
                 name="Run loop",
-                steps=[
+                body=[
                     Foreach(
                         binding="ITEM",
                         value=LiteralValue(value=["a", "b"]),
-                        steps=[Emit(interface="interface.scope-item-output")],
+                        body=[Emit(interface="interface.scope-item-output")],
                     )
                 ],
             )
@@ -1036,7 +1036,7 @@ def validate_interface_scope() -> None:
             Process(
                 id="run-while",
                 name="Run while",
-                steps=[
+                body=[
                     Act(
                         instruction="Produce <RESULT>.",
                         outputs=["RESULT"],
@@ -1048,7 +1048,7 @@ def validate_interface_scope() -> None:
                             right=LiteralValue(value=1),
                         ),
                         limit=1,
-                        steps=[
+                        body=[
                             Emit(interface="interface.scope-result-output"),
                             Set(
                                 state="state.iteration",
@@ -1083,9 +1083,9 @@ def validate_interface_scope() -> None:
             Process(
                 id="run-parallel",
                 name="Run parallel",
-                steps=[
+                body=[
                     Par(
-                        steps=[
+                        body=[
                             Act(
                                 tool="result.tool",
                                 instruction="Produce <RESULT>.",
@@ -1132,7 +1132,7 @@ def validate_interface_json_ld() -> None:
         raise RuntimeError("JSON-LD interface flows are wrong")
     if "direction" in linked.get("@context", {}) or "flow" not in linked["@context"]:
         raise RuntimeError("JSON-LD context retains interface direction")
-    emit = linked["processes"][0]["steps"][-1]
+    emit = linked["processes"][0]["body"]["@list"][-1]
     if "bindings" in emit:
         raise RuntimeError("inferred emit JSON-LD contains empty bindings")
 

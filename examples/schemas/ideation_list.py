@@ -19,6 +19,28 @@ PLACEHOLDER_IDEA_TITLE = "IDEA_TITLE"
 PLACEHOLDER_IDEA_SUMMARY = "IDEA_SUMMARY"
 PLACEHOLDER_IDEA_DETAILS = "IDEA_DETAILS"
 
+idea_count_clause = where(
+    PLACEHOLDER_IDEA_COUNT,
+    Type(of='integer'),
+    AtLeast(value=1),
+    description='the total number of ideas, the list holds exactly this many',
+)
+
+idea_number_clause = where(
+    PLACEHOLDER_IDEA_NUMBER,
+    Type(of='integer'),
+    AtLeast(value=1),
+    AtMost(value=PLACEHOLDER_IDEA_COUNT),
+    description='the sequential idea number',
+)
+
+idea_details_clause = where(
+    PLACEHOLDER_IDEA_DETAILS,
+    Type(of='string'),
+    NonEmpty(),
+    description='two to four conceptual sentences without implementation, code, or pseudo-code',
+)
+
 ideation_list_schema = Schema(
     id="ideation-list",
     name="Ideation List",
@@ -38,11 +60,11 @@ ideation_list_schema = Schema(
     ),
     where=[
         where(PLACEHOLDER_TASK_TITLE, Type(of="string"), NonEmpty(), description="the task or topic for ideation"),
-        where(PLACEHOLDER_IDEA_COUNT, Type(of="integer"), AtLeast(value=1), description="the total number of ideas, the list holds exactly this many"),
-        where(PLACEHOLDER_IDEA_NUMBER, Type(of="integer"), AtLeast(value=1), AtMost(value=PLACEHOLDER_IDEA_COUNT), description="the sequential idea number"),
+        idea_count_clause,
+        idea_number_clause,
         where(PLACEHOLDER_IDEA_TITLE, Type(of="string"), NonEmpty(), description="one short present-tense active-voice title"),
         where(PLACEHOLDER_IDEA_SUMMARY, Type(of="string"), Lines(min=1, max=1), description="one present-tense active-voice sentence"),
-        where(PLACEHOLDER_IDEA_DETAILS, Type(of="string"), NonEmpty(), description="two to four conceptual sentences without implementation, code, or pseudo-code"),
+        idea_details_clause,
     ],
 )
 

@@ -343,7 +343,7 @@ def _fusion_rejections() -> None:
         constants=[Constant(id="literal", value="shared.oak.md#constant.rules")],
         state=[State(id="remembered", schema="shared.oak.md#schema.message", placeholder="MSG", value="ready")],
         triggers=[Trigger(id="requested", event="Requested.", process="process.respond")],
-        processes=[Process(id="respond", name="Respond message", output="shared.oak.md#schema.message", steps=[
+        processes=[Process(id="respond", name="Respond message", output="shared.oak.md#schema.message", body=[
             ACT("Use <A> and <B> to produce <MSG>.", output="shared.oak.md#schema.message", inputs=[
                 ValueBinding(placeholder="A", value=ConstantValue(constant="shared.oak.md#constant.rules")),
                 ValueBinding(placeholder="B", value=ConstantValue(constant="other.oak.md#constant.rules")),
@@ -362,7 +362,7 @@ def _fusion_rejections() -> None:
     for field, entries in (
         ("instructions", [Instruction(id="policy", body="Protect this document scope.")]),
         ("state", [State(id="counter", value=0)]),
-        ("processes", [Process(id="act", name="Perform action", steps=[ACT("Act.")])]),
+        ("processes", [Process(id="act", name="Perform action", body=[ACT("Act.")])]),
         ("interfaces", [Interface(id="boundary", flow="emits", schema="schema.message")]),
     ):
         data = shared.model_dump(by_alias=True)

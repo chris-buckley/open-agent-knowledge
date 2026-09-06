@@ -18,6 +18,20 @@ PLACEHOLDER_FILE_PATH = "FILE_PATH"
 PLACEHOLDER_LANG = "LANG"
 PLACEHOLDER_COMPLETE_CODE = "COMPLETE_CODE"
 
+change_description_clause = where(
+    PLACEHOLDER_CHANGE_DESCRIPTION,
+    Type(of='string'),
+    NonEmpty(),
+    description='one terse present-voice description of the change, never changelog style',
+)
+
+file_path_clause = where(
+    PLACEHOLDER_FILE_PATH,
+    Type(of='path'),
+    Regex(pattern='^[A-Za-z0-9._\\-][A-Za-z0-9._/\\-]*$'),
+    description='the repository-relative file path without parent traversal',
+)
+
 code_changes_schema = Schema(
     id="code-changes",
     name="Code Changes",
@@ -37,8 +51,8 @@ code_changes_schema = Schema(
     ),
     where=[
         where(PLACEHOLDER_CHANGE_TITLE, Type(of="string"), NonEmpty(), description="the title for the set of changes"),
-        where(PLACEHOLDER_CHANGE_DESCRIPTION, Type(of="string"), NonEmpty(), description="one terse present-voice description of the change, never changelog style"),
-        where(PLACEHOLDER_FILE_PATH, Type(of="path"), Regex(pattern="^[A-Za-z0-9._\\-][A-Za-z0-9._/\\-]*$"), description="the repository-relative file path without parent traversal"),
+        change_description_clause,
+        file_path_clause,
         where(PLACEHOLDER_LANG, Type(of="string"), NonEmpty(), description="one code language name for GitHub-flavored Markdown"),
         where(PLACEHOLDER_COMPLETE_CODE, Type(of="string"), NonEmpty(), description="the complete file contents with terse present-voice comments"),
     ],

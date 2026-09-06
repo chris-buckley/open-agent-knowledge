@@ -8,7 +8,7 @@ from pydantic import ConfigDict, Field, model_validator
 
 from oak.node.parts.entry import Entry
 from oak.node.parts.interfaces import SchemaTarget
-from oak.node.parts.processes.steps import Step
+from oak.node.parts.processes.statements import Statement
 from oak.node.validation.flow import validate_process_flow
 from oak.vocabulary.text.process_name import ProcessName
 
@@ -25,7 +25,7 @@ class Process(Entry):
                     "name": "Normalise name",
                     "input": "schema.raw-name",
                     "output": "schema.normal-name",
-                    "steps": [
+                    "body": [
                         {
                             "kind": "act",
                             "instruction": "Normalise <RAW_NAME> into <NORMAL_NAME>.",
@@ -46,10 +46,10 @@ class Process(Entry):
                     "part": "processes",
                     "id": "parallel-search",
                     "name": "Search sources",
-                    "steps": [
+                    "body": [
                         {
                             "kind": "par",
-                            "steps": [
+                            "body": [
                                 {
                                     "kind": "act",
                                     "tool": "tool-a",
@@ -91,9 +91,9 @@ class Process(Entry):
         description="The optional schema that defines successful local outputs.",
         examples=["schema.normal-name"],
     )
-    steps: list[Step] = Field(
+    body: list[Statement] = Field(
         min_length=1,
-        description="The typed process steps in authored order.",
+        description="The typed process statement body in authored order.",
         examples=[
             [
                 {

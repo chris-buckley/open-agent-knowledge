@@ -14,7 +14,7 @@ from oak.node.interpretation import (
 )
 from oak.node.model import Node
 from oak.node.parts.interfaces import INTERFACE_FLOWS
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Assert,
     Call,
@@ -23,30 +23,30 @@ from oak.node.parts.processes.steps import (
     Join,
     Par,
     While,
-    iter_steps,
+    iter_statements,
 )
 
 
 def instruction_lines(node: Node) -> list[str]:
     """Return the interpretation preamble, one blank separator, then authored instructions."""
     lines: list[str] = []
-    steps = tuple(
+    body = tuple(
         step
         for process in node.processes
-        for step in iter_steps(process.steps)
+        for step in iter_statements(process.body)
     )
     if node.processes or node.triggers:
         lines.append(REFERENCE_INSTRUCTION)
-    if any(isinstance(step, (Assert, Foreach, While, Par, Join)) for step in steps):
+    if any(isinstance(step, (Assert, Foreach, While, Par, Join)) for step in body):
         lines.append(CONTROL_INSTRUCTION)
     if (
         any(process.input is not None or process.output is not None for process in node.processes)
-        or any(isinstance(step, Call) and (step.inputs or step.outputs) for step in steps)
+        or any(isinstance(step, Call) and (step.inputs or step.outputs) for step in body)
     ):
         lines.append(CONTRACT_INSTRUCTION)
     if any(
         isinstance(step, Act) and (step.input is not None or step.output is not None)
-        for step in steps
+        for step in body
     ):
         lines.append(ACT_SCHEMA_INSTRUCTION)
     if any(trigger.seed for trigger in node.triggers):
@@ -55,7 +55,7 @@ def instruction_lines(node: Node) -> list[str]:
     source_used = any(trigger.source is not None for trigger in node.triggers)
     inferred_emit_used = any(
         isinstance(step, Emit) and not step.bindings
-        for step in steps
+        for step in body
     )
 
     for definition in INTERFACE_FLOWS:

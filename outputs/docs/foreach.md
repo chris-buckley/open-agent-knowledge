@@ -13,19 +13,19 @@ example-1: "FOREACH ITEM IN [\"a\", \"b\"]:\n  ACT Transform <ITEM> into <RESULT
 syntax-reference: "outputs/oak.ebnf"
 
 grammar: TEXT<<
-surface_step_foreach = ? FOREACH <BINDING> IN <VALUE>:
-  <STEPS> ? ;
+surface_statement_foreach = ? FOREACH <BINDING> IN <VALUE>:
+  <BODY> ? ;
 >>
 </constants>
 
 <schemas>
-<schema id="step-foreach" name="Foreach" purpose="One deterministic sequential iteration over a JSON list.">
+<schema id="statement-foreach" name="Foreach" purpose="One deterministic sequential iteration over a JSON list.">
 FOREACH <BINDING> IN <VALUE>:
-  <STEPS>
+  <BODY>
 
 WHERE:
 - <BINDING> is string; is non-empty; The immutable loop binding..
 - <VALUE> is string; is non-empty; The process value that must resolve to a JSON list..
-- <STEPS> is string; is non-empty; The sequential iteration steps..
+- <BODY> is string; is non-empty; The sequential iteration body..
 </schema>
 </schemas>

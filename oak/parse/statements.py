@@ -6,8 +6,8 @@ import json
 import re
 from collections.abc import Set as AbstractSet
 
-from oak.node.parts.processes.steps import (
-    Act, Assert, Call, Emit, Fail, Foreach, If, Join, Par, Set, Step, While,
+from oak.node.parts.processes.statements import (
+    Act, Assert, Call, Emit, Fail, Foreach, If, Join, Par, Set, Statement, While,
 )
 from oak.parse.cursor import Cursor
 from oak.parse.errors import ParseError
@@ -16,7 +16,7 @@ from oak.parse.values import parse_act_attributes
 from oak.surface.syntax import INDENT_WIDTH
 
 
-def _act_step(
+def _act_statement(
     cursor: Cursor,
     tool: str | None,
     act_input: str | None,
@@ -70,14 +70,14 @@ def _parse_act(cursor: Cursor, text: str) -> Act:
         act_input, act_output, body = (
             attributes if attributes is not None else (None, None, text[4:])
         )
-    return _act_step(cursor, tool, act_input, act_output, body)
+    return _act_statement(cursor, tool, act_input, act_output, body)
 
 
-def _suite(cursor: Cursor, indent: int) -> list[Step]:
-    steps = parse_steps(cursor, indent + INDENT_WIDTH)
-    if not steps:
+def _suite(cursor: Cursor, indent: int) -> list[Statement]:
+    body = parse_statements(cursor, indent + INDENT_WIDTH)
+    if not body:
         cursor.fail("empty_suite", "an action suite needs at least one step")
-    return steps
+    return body
 
 
 def _blank_lines(cursor: Cursor) -> None:
@@ -112,7 +112,7 @@ def _parse_while(cursor: Cursor, indent: int, text: str) -> While:
     reader.position += len(match.group())
     reader.expect(":")
     reader.finish(cursor)
-    return While(condition=condition, limit=limit, steps=_suite(cursor, indent))
+    return While(condition=condition, limit=limit, body=_suite(cursor, indent))
 
 
 def _parse_assert(cursor: Cursor, indent: int, text: str) -> Assert:
@@ -131,7 +131,7 @@ def _parse_assert(cursor: Cursor, indent: int, text: str) -> Assert:
     return Assert(condition=condition, message=message)
 
 
-def _parse_step(cursor: Cursor, indent: int, text: str) -> Step:
+def _parse_statement(cursor: Cursor, indent: int, text: str) -> Statement:
     if text.startswith("ACT "):
         return _parse_act(cursor, text)
     if text.startswith("IF "):
@@ -179,21 +179,21 @@ def _parse_step(cursor: Cursor, indent: int, text: str) -> Step:
         value = reader.value()
         reader.expect(":")
         reader.finish(cursor)
-        return Foreach(binding=binding, value=value, steps=_suite(cursor, indent))
+        return Foreach(binding=binding, value=value, body=_suite(cursor, indent))
     if text == "PAR:":
         cursor.advance()
-        return Par(steps=_suite(cursor, indent))
+        return Par(body=_suite(cursor, indent))
     if text == "JOIN":
         cursor.advance()
         return Join()
     cursor.fail("unknown_step", f"unknown process step {text}")
 
 
-def parse_steps(
+def parse_statements(
     cursor: Cursor, indent: int, stop: AbstractSet[str] | None = None,
-) -> list[Step]:
+) -> list[Statement]:
     """Parse one ordered suite; a dedent belongs to its caller, including ELSE."""
-    steps: list[Step] = []
+    body: list[Statement] = []
     stop = stop or frozenset()
     while not cursor.at_end:
         _blank_lines(cursor)
@@ -207,8 +207,8 @@ def parse_steps(
         text = cursor.peek()[indent:]
         if text in stop:
             break
-        steps.append(_parse_step(cursor, indent, text))
-    return steps
+        body.append(_parse_statement(cursor, indent, text))
+    return body
 
 
-__all__ = ["parse_steps"]
+__all__ = ["parse_statements"]

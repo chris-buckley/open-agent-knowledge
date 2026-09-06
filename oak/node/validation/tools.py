@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING, Protocol
 
 from pydantic_core import PydanticCustomError
 
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Foreach,
     If,
     Par,
-    Step,
+    Statement,
     While,
 )
 
@@ -30,41 +30,41 @@ class ToolContractLike(Protocol):
     output: str | None
 
 
-def _walk_steps(
-    steps: Sequence[Step],
+def _walk_statements(
+    body: Sequence[Statement],
     *,
     parallel: bool = False,
-) -> Iterator[tuple[Step, bool]]:
-    for step in steps:
+) -> Iterator[tuple[Statement, bool]]:
+    for step in body:
         yield step, parallel
 
         if isinstance(step, If):
-            yield from _walk_steps(
+            yield from _walk_statements(
                 step.then,
                 parallel=parallel,
             )
 
             if step.otherwise is not None:
-                yield from _walk_steps(
+                yield from _walk_statements(
                     step.otherwise,
                     parallel=parallel,
                 )
 
         elif isinstance(step, Foreach):
-            yield from _walk_steps(
-                step.steps,
+            yield from _walk_statements(
+                step.body,
                 parallel=parallel,
             )
 
         elif isinstance(step, While):
-            yield from _walk_steps(
-                step.steps,
+            yield from _walk_statements(
+                step.body,
                 parallel=parallel,
             )
 
         elif isinstance(step, Par):
-            yield from _walk_steps(
-                step.steps,
+            yield from _walk_statements(
+                step.body,
                 parallel=True,
             )
 
@@ -75,7 +75,7 @@ def validate_tools(
 ) -> None:
     """Validate exact tool names, contracts, and parallel permission."""
     for process in node.processes:
-        for step, parallel in _walk_steps(process.steps):
+        for step, parallel in _walk_statements(process.body):
             if not isinstance(step, Act) or step.tool is None:
                 continue
 

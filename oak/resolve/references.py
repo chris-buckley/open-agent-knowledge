@@ -9,7 +9,7 @@ from oak.node.parts.constants import Constant
 from oak.node.parts.entry import Entry
 from oak.node.parts.processes.conditions import condition_values
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Assert,
     Call,
@@ -18,9 +18,9 @@ from oak.node.parts.processes.steps import (
     If,
     Par,
     Set,
-    Step,
+    Statement,
     While,
-    iter_steps,
+    iter_statements,
 )
 from oak.node.parts.processes.values import ConstantValue, Value
 from oak.node.parts.schemas.model import Schema
@@ -35,7 +35,7 @@ def value_targets(values: Iterable[Value]) -> Iterator[TypedTarget]:
             yield value.constant, Constant
 
 
-def step_references(step: Step) -> Iterator[TypedTarget]:
+def statement_references(step: Statement) -> Iterator[TypedTarget]:
     """Yield every typed target used by one step and its children."""
     match step:
         case Act():
@@ -62,13 +62,13 @@ def step_references(step: Step) -> Iterator[TypedTarget]:
 
     match step:
         case If():
-            yield from steps_targets_in_process(step.then)
+            yield from statements_targets_in_process(step.then)
 
             if step.otherwise is not None:
-                yield from steps_targets_in_process(step.otherwise)
+                yield from statements_targets_in_process(step.otherwise)
 
         case Foreach() | While() | Par():
-            yield from steps_targets_in_process(step.steps)
+            yield from statements_targets_in_process(step.body)
 
 
 def iter_targets(node: Node) -> Iterator[TypedTarget]:
@@ -95,24 +95,24 @@ def iter_targets(node: Node) -> Iterator[TypedTarget]:
             yield from value_targets(condition_values(trigger.guard))
 
     for process in node.processes:
-        yield from steps_targets_in_process(process.steps)
+        yield from statements_targets_in_process(process.body)
 
 
-def steps_targets_in_process(steps: Sequence[Step]) -> Iterator[TypedTarget]:
+def statements_targets_in_process(body: Sequence[Statement]) -> Iterator[TypedTarget]:
     """Yield each typed target used by one process step sequence."""
-    for step in steps:
-        yield from step_references(step)
+    for step in body:
+        yield from statement_references(step)
 
 
-def walk_calls(steps: Sequence[Step]) -> Iterator[Call]:
+def walk_calls(body: Sequence[Statement]) -> Iterator[Call]:
     """Yield each process call recursively in authored order."""
-    return (step for step in iter_steps(steps) if isinstance(step, Call))
+    return (step for step in iter_statements(body) if isinstance(step, Call))
 
 
 __all__ = [
     "iter_targets",
-    "step_references",
-    "steps_targets_in_process",
+    "statement_references",
+    "statements_targets_in_process",
     "value_targets",
     "walk_calls",
 ]

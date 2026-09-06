@@ -13,7 +13,7 @@ from oak.node.parts.processes.conditions import (
 )
 from oak.node.parts.processes.model import Process
 from oak.node.parts.processes.operators import OPERATOR_TEXT
-from oak.node.parts.processes.steps import (
+from oak.node.parts.processes.statements import (
     Act,
     Assert,
     Call,
@@ -24,7 +24,7 @@ from oak.node.parts.processes.steps import (
     Join,
     Par,
     Set,
-    Step,
+    Statement,
     While,
 )
 from oak.node.parts.processes.values import (
@@ -148,11 +148,11 @@ def _emit_lines(step: Emit, indent: int) -> list[str]:
     return _suffix_lines("EMIT " + step.interface, step.bindings, [], indent)
 
 
-def _child_lines(steps: Sequence[Step], indent: int) -> list[str]:
+def _child_lines(body: Sequence[Statement], indent: int) -> list[str]:
     lines: list[str] = []
 
-    for child in steps:
-        lines.extend(_step_lines(child, indent))
+    for child in body:
+        lines.extend(_statement_lines(child, indent))
 
     return lines
 
@@ -182,23 +182,23 @@ def _foreach_lines(step: Foreach, indent: int) -> list[str]:
     prefix = " " * indent
     inner = indent + INDENT_WIDTH
     head = prefix + f"FOREACH {step.binding} IN " + process_value_text(step.value) + ":"
-    return [head, *_child_lines(step.steps, inner)]
+    return [head, *_child_lines(step.body, inner)]
 
 
 def _while_lines(step: While, indent: int) -> list[str]:
     lines = expression_lines(
         condition_expression(step.condition), indent, prefix="WHILE ", suffix=f" LIMIT {step.limit}:",
     )
-    lines.extend(_child_lines(step.steps, indent + INDENT_WIDTH))
+    lines.extend(_child_lines(step.body, indent + INDENT_WIDTH))
     return lines
 
 
 def _par_lines(step: Par, indent: int) -> list[str]:
     prefix = " " * indent
-    return [prefix + "PAR:", *_child_lines(step.steps, indent + INDENT_WIDTH)]
+    return [prefix + "PAR:", *_child_lines(step.body, indent + INDENT_WIDTH)]
 
 
-def _step_lines(step: Step, indent: int) -> list[str]:
+def _statement_lines(step: Statement, indent: int) -> list[str]:
     surface_for(step)
 
     match step:
@@ -241,7 +241,7 @@ def _step_lines(step: Step, indent: int) -> list[str]:
 def process_lines(process: Process) -> list[str]:
     """Return process steps in authored order."""
     surface_for(process)
-    return _child_lines(process.steps, 0)
+    return _child_lines(process.body, 0)
 
 
 def binding_line(binding: ValueBinding, indent: int = 0) -> str:
@@ -249,9 +249,9 @@ def binding_line(binding: ValueBinding, indent: int = 0) -> str:
     return _binding_line(binding, indent)
 
 
-def step_lines(step: Step, indent: int = 0) -> list[str]:
+def statement_lines(step: Statement, indent: int = 0) -> list[str]:
     """Return one typed step in OAK syntax."""
-    return _step_lines(step, indent)
+    return _statement_lines(step, indent)
 
 
 __all__ = [
@@ -262,5 +262,5 @@ __all__ = [
     "condition_text",
     "process_lines",
     "process_value_text",
-    "step_lines",
+    "statement_lines",
 ]

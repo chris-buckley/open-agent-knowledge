@@ -12,7 +12,7 @@ from oak.node.model import Node
 from oak.node.parts.constants import Constant
 from oak.node.parts.interfaces import Interface
 from oak.node.parts.processes.model import Process
-from oak.node.parts.processes.steps import Act, Call, Emit
+from oak.node.parts.processes.statements import Act, Call, Emit
 from oak.node.parts.processes.values import (
     BindingValue,
     LiteralValue,
@@ -95,7 +95,7 @@ def validate_contract_rules() -> None:
                 Process(
                     id="handle",
                     name="Handle request",
-                    steps=[
+                    body=[
                         Call(
                             process="process.normalise",
                             inputs=[
@@ -125,7 +125,7 @@ def validate_contract_rules() -> None:
                     name="Normalise name",
                     input="schema.raw-name",
                     output="schema.normal-name",
-                    steps=[
+                    body=[
                         Act(
                             instruction="Read <RAW_NAME>.",
                             inputs=[
@@ -153,7 +153,7 @@ def validate_contract_rules() -> None:
                 Process(
                     id="handle",
                     name="Handle request",
-                    steps=[
+                    body=[
                         Call(
                             process="process.normalise"
                         )
@@ -172,7 +172,7 @@ def validate_contract_rules() -> None:
                 Process(
                     id="read-name",
                     name="Read name",
-                    steps=[
+                    body=[
                         Act(
                             input="schema.raw-name",
                             instruction="Read <NOTE>.",
@@ -338,7 +338,7 @@ def validate_contract_rules() -> None:
                 Process(
                     id="handle",
                     name="Handle request",
-                    steps=[Act(instruction="Handle the request.")],
+                    body=[Act(instruction="Handle the request.")],
                 )
             ],
         )
@@ -366,7 +366,7 @@ def validate_contract_rules() -> None:
                     id="read-normal",
                     name="Read normal",
                     input="schema.normal-name",
-                    steps=[
+                    body=[
                         Act(
                             instruction="Read <NORMAL_NAME>.",
                             inputs=[
@@ -396,7 +396,7 @@ def validate_contract_rules() -> None:
                     id="echo-name",
                     name="Echo name",
                     input="schema.raw-name",
-                    steps=[Emit(interface="interface.name")],
+                    body=[Emit(interface="interface.name")],
                 )
             ],
         )
@@ -415,7 +415,7 @@ def validate_contract_rules() -> None:
                 Process(
                     id="emit-name",
                     name="Emit name",
-                    steps=[Emit(interface="interface.normal-result")],
+                    body=[Emit(interface="interface.normal-result")],
                 )
             ],
         )

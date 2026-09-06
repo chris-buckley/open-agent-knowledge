@@ -15,7 +15,7 @@ from oak import (ACT, Act, All, Any, Assert, BindingValue, Call, Compare, Consta
 from oak.parse.errors import OakParseError, ParseError
 from oak.parse.fragments import parse_fragment
 from oak.render.oak.expressions import ListText, expression_lines
-from oak.render.oak.processes import condition_text, step_lines
+from oak.render.oak.processes import condition_text, statement_lines
 from oak.render.oak.styles import styled_node
 from oak.render.oak.triggers import trigger_body
 from oak.surface.syntax import CANONICAL_WIDTH
@@ -91,7 +91,7 @@ def validate_compact_lexing() -> None:
     action = parse_fragment(Act, prose)
     require(action.tool == 'tool,(x)=y' and action.instruction == 'Preserve (notes), #tag, and <VALUE> in <RESULT>.', "ACT tool or prose changed")
     require(action.inputs[0].value.value == 'literal ) (BAD=not syntax', "ACT selected a suffix inside a string")
-    require(parse_fragment(Act, '\n'.join(step_lines(action))) == action, "ACT punctuation round trip failed")
+    require(parse_fragment(Act, '\n'.join(statement_lines(action))) == action, "ACT punctuation round trip failed")
 
     invalid_values = ('$', '$ state.ready', '$\nstate.ready', '"bad\\q"', '"unclosed', '[1,]', '{"a": 1,}',
                       '[1,,2]', '{"a": [1,2)}', "'single'", 'undefined', 'null trailing', '$interface.input.X',
@@ -126,18 +126,18 @@ def validate_compact_control() -> None:
     """C03-C04: nested expressions cannot steal suites or ELSE/MESSAGE metadata."""
     nested = SPECIMENS[5]
     with_blanks = nested.process_text.replace('\n  ELSE:', '\n\n  ELSE:').replace('\nELSE:', '\n\nELSE:')
-    require(parse_fragment(If, with_blanks) == nested.steps[0], "blank lines changed ELSE association")
+    require(parse_fragment(If, with_blanks) == nested.body[0], "blank lines changed ELSE association")
     loops = (
         'WHILE $state.note equals " LIMIT 99:" LIMIT 1:\n  CALL process.publish ()',
         'WHILE ALL(\n$state.ready equals true,\nNOT(\n$state.blocked equals true,\n),\n) LIMIT 10:\n  CALL process.publish ()',
     )
     for text in loops:
         step = parse_fragment(While, text)
-        require(parse_fragment(While, '\n'.join(step_lines(step))) == step, "WHILE continuation did not round trip")
+        require(parse_fragment(While, '\n'.join(statement_lines(step))) == step, "WHILE continuation did not round trip")
     assertion = 'ASSERT ALL(\n  $state.ready equals true,\n  NOT($state.blocked equals true,),\n)\n  MESSAGE "ready (now), LIMIT: true"'
     step = parse_fragment(Assert, assertion)
     require(step.message == "ready (now), LIMIT: true", "assertion metadata was treated as a suite")
-    require(parse_fragment(Assert, '\n'.join(step_lines(step))) == step, "ASSERT did not round trip")
+    require(parse_fragment(Assert, '\n'.join(statement_lines(step))) == step, "ASSERT did not round trip")
 
     # Explicit old-surface rejection fixtures are the only live tests of those tokens.
     invalid_steps = (
@@ -259,7 +259,7 @@ def validate_compact_layout() -> None:
         head = 'CALL process.accept '
         base = len(head + '(VALUE="") -> RESULT')
         step = Call(process='process.accept', inputs=[binding('VALUE', literal('é' * (total - base)))], outputs=['RESULT'])
-        text = '\n'.join(step_lines(step))
+        text = '\n'.join(statement_lines(step))
         require(('\n' not in text) == (total <= CANONICAL_WIDTH), f"wrong width decision at {total}")
         require(parse_fragment(Call, text) == step, "width wrapping changed the step")
         if total <= CANONICAL_WIDTH:
@@ -281,7 +281,7 @@ def validate_compact_layout() -> None:
     require('\n  NOT(\n    ANY(' in text and len(max(text.splitlines(), key=len)) > 100, "nested expansion or atomic exception failed")
     require(parse_fragment(All, text) == nested, "nested expansion changed tree")
     long_prose = ACT('Preserve ' + 'verbatim (text), ' * 15 + '<VALUE>.', inputs=[binding('VALUE', literal('x'))])
-    actual = '\n'.join(step_lines(long_prose))
+    actual = '\n'.join(statement_lines(long_prose))
     require(parse_fragment(Act, actual) == long_prose and long_prose.instruction in actual, "formatter rewrote ACT prose")
 
 

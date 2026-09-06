@@ -35,6 +35,12 @@ python-authoring-rules: YAML<<
   ceremony without hiding schemas, bindings, scope, or effects.
 - Distinguish Python dependency order from canonical OAK part order; keep rendered
   documents canonical.
+- Define meaningful values, bindings, action text, conditions, and statements before
+  their consumers; assemble process and block bodies from those names instead of deeply
+  nested constructors.
+- Flatten Python construction, not execution scope. Keep related definitions together,
+  preserve literal bytes, and use no builder framework or post-construction model
+  mutation.
 >>
 
 evidence-authoring-rules: ["apply findings before freezing and verifying the final candidate", "have host tools compute immutable snapshot revisions and record observed check results", "gate acceptance on matching subject, revision, required check, and successful result", "require the effect-producing host to reject drift before the effect", "do not present schema-valid evidence as proof that a check ran", "label deterministic demonstration adapters and simulated effects honestly"]

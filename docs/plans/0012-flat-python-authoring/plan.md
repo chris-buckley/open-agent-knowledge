@@ -3,8 +3,8 @@
 Prepared: 2026-09-06T14:04:20+10:00
 Classification: PUBLIC
 
-Status: Ready for implementation planning review. Implementation has not started.
-Authorization: The user requested this plan. Begin implementation only after a separate instruction to continue.
+Status: In progress. Implementation authorized; baseline verification passed.
+Authorization: The user authorized end-to-end implementation and PR creation on 2026-09-06. Merge is not authorized.
 Repository: chris-buckley/open-agent-knowledge
 Reviewed main: eca953bd81f78f005fdc1b3d17ed060620f6c97d
 Plan path: docs/plans/0012-flat-python-authoring/plan.md
@@ -229,40 +229,40 @@ Concept of operations: Establish a trustworthy baseline, migrate the model and c
 
 ### Phase 1: Establish the baseline and owning contracts
 Objective: Record the accepted migration and a reproducible before-state before implementation changes.
-- [ ] Key task: P01.01 Confirm the active main revision against the reviewed SHA, read all applicable AGENTS and routed Python/specialist material, and reconcile any intervening changes without rewriting history.
-- [ ] Key task: P01.02 Run the unmodified complete verification commands and capture existing failures separately; record source-derived canonical XML/Markdown, model and JSON-LD samples, scenario outcomes, and generated file sets for comparison.
-- [ ] Key task: P01.03 Inventory Step/StepModel, steps fields, step modules/helpers, surface identifiers, metadata, error codes, and generated examples; classify structural references versus literal/domain/history exceptions.
-- [ ] Key task: P01.04 Update the owning examples AGENTS rule for define-before-assemble authoring, and the relevant node/build ownership contracts for statement bodies and verification; avoid copying the same policy into multiple owners.
+- [x] Key task: P01.01 Confirm the active main revision against the reviewed SHA, read all applicable AGENTS and routed Python/specialist material, and reconcile any intervening changes without rewriting history.
+- [x] Key task: P01.02 Run the unmodified complete verification commands and capture existing failures separately; record source-derived canonical XML/Markdown, model and JSON-LD samples, scenario outcomes, and generated file sets for comparison.
+- [x] Key task: P01.03 Inventory Step/StepModel, steps fields, step modules/helpers, surface identifiers, metadata, error codes, and generated examples; classify structural references versus literal/domain/history exceptions.
+- [x] Key task: P01.04 Update the owning examples AGENTS rule for define-before-assemble authoring, and the relevant node/build ownership contracts for statement bodies and verification; avoid copying the same policy into multiple owners.
 Success criteria: The before-state and all affected owners are identified; E01 through E05 have concrete verification subjects; no baseline failure is represented as a successful check.
 Transition trigger: The migration scope and independent baseline evidence are recorded.
 
 ### Phase 2: Migrate statements and every semantic consumer
 Objective: Make the new contract coherent across models, parsing, validation, resolution, rendering, and execution.
-- [ ] Key task: P02.01 Rename Step/StepModel, the three step modules, exports, recursive annotations/rebuild namespaces, field metadata, and all four steps fields; retain IF branch names and normal model validation.
-- [ ] Key task: P02.02 Update direct authoring helpers, model/index/flow validation, process visitors, target discovery, resolver checks, native interpreter context, executor frames, parallel handling, and supplied handler types without changing behaviour.
-- [ ] Key task: P02.03 Update oak/surface/processes.py and its parser, renderer, grammar, and documentation consumers together, including step-prefixed surface IDs and STEPS slots; preserve authored tokens and delimiters.
-- [ ] Key task: P02.04 Update JSON-LD statement encoding, context terms, helper names, and metadata using explicit body list objects; retain scalar instruction bodies, branch ordering, and literal JSON isolation.
-- [ ] Key task: P02.05 Migrate active model examples and repository checks with the API, and document intentional Python/model/JSON-LD breaks without aliases or forwarding modules; preserve explicitly retained diagnostic contracts.
+- [x] Key task: P02.01 Rename Step/StepModel, the three step modules, exports, recursive annotations/rebuild namespaces, field metadata, and all four steps fields; retain IF branch names and normal model validation.
+- [x] Key task: P02.02 Update direct authoring helpers, model/index/flow validation, process visitors, target discovery, resolver checks, native interpreter context, executor frames, parallel handling, and supplied handler types without changing behaviour.
+- [x] Key task: P02.03 Update oak/surface/processes.py and its parser, renderer, grammar, and documentation consumers together, including step-prefixed surface IDs and STEPS slots; preserve authored tokens and delimiters.
+- [x] Key task: P02.04 Update JSON-LD statement encoding, context terms, helper names, and metadata using explicit body list objects; retain scalar instruction bodies, branch ordering, and literal JSON isolation.
+- [x] Key task: P02.05 Migrate active model examples and repository checks with the API, and document intentional Python/model/JSON-LD breaks without aliases or forwarding modules; preserve explicitly retained diagnostic contracts.
 Success criteria: E02 and E03 pass for all eleven variants, nested combinations, normal dumps, JSON Schema, JSON-LD, and existing OAK text. Current code imports no obsolete statement module or alias.
 Transition trigger: The complete core contract is implemented and its focused positive and negative checks pass.
 
 ### Phase 3: Flatten all applicable human authoring sources
 Objective: Make each example a readable assembly of named, directly validated pieces.
-- [ ] Key task: P03.01 Implement E01 in interpreter_context and flatten shape_writer actions, calls, emissions, and meaningful input groups; retain the existing deterministic adapters and output contracts.
-- [ ] Key task: P03.02 Flatten compound_growth leaf values, binding groups, comparison, loop, calls, writes, reflection, and emission; use schema-before-consumer dependency order and keep runtime work inside host functions.
-- [ ] Key task: P03.03 Flatten implementer verification gates and blocked/success branches while preserving exact snapshot, revision, check, effect, and completion semantics.
-- [ ] Key task: P03.04 Flatten delegation and its task_reviewer without fusing scopes or changing exact tool dispatch; preserve the original worker result.
-- [ ] Key task: P03.05 Flatten successor and its amendment_reviewer/successor_verifier leaf workers, including review guards, start/resume bindings, six proof assertions, state writes, and publication branches.
-- [ ] Key task: P03.06 Review and update all twelve schema sources under the dispositions above; retain simple forms, preserve literal layouts, and move only meaningful dense definitions outside consumers.
-- [ ] Key task: P03.07 Verify fixed_knowledge, the shape_gallery wrapper, repetition helper, binding owner, catalogue, and detached runner; record justified unchanged sources instead of adding unused structure.
+- [x] Key task: P03.01 Implement E01 in interpreter_context and flatten shape_writer actions, calls, emissions, and meaningful input groups; retain the existing deterministic adapters and output contracts.
+- [x] Key task: P03.02 Flatten compound_growth leaf values, binding groups, comparison, loop, calls, writes, reflection, and emission; use schema-before-consumer dependency order and keep runtime work inside host functions.
+- [x] Key task: P03.03 Flatten implementer verification gates and blocked/success branches while preserving exact snapshot, revision, check, effect, and completion semantics.
+- [x] Key task: P03.04 Flatten delegation and its task_reviewer without fusing scopes or changing exact tool dispatch; preserve the original worker result.
+- [x] Key task: P03.05 Flatten successor and its amendment_reviewer/successor_verifier leaf workers, including review guards, start/resume bindings, six proof assertions, state writes, and publication branches.
+- [x] Key task: P03.06 Review and update all twelve schema sources under the dispositions above; retain simple forms, preserve literal layouts, and move only meaningful dense definitions outside consumers.
+- [x] Key task: P03.07 Verify fixed_knowledge, the shape_gallery wrapper, repetition helper, binding owner, catalogue, and detached runner; record justified unchanged sources instead of adding unused structure.
 Success criteria: E01, E02, and E04 hold; all 23 registered source modules have a recorded disposition. No process, loop, or branch hides nontrivial statement construction inside its assembly list, and no new runtime scope was introduced for layout.
 Transition trigger: The source review confirms flat construction, preserved contracts, and complete example coverage.
 
 ### Phase 4: Refresh derived knowledge and delivery
 Objective: Ship one consistent current API and the unchanged scenario knowledge through every generated product.
-- [ ] Key task: P04.01 Refresh shared authoring guidance only where relevant, update build/authoring_guides.py, build/fusion.py, and active teaching snippets for renamed API consumers, preserving literal embedded documents and operational scope.
-- [ ] Key task: P04.02 Run catalogue generation to refresh scenario snapshots, samples, local dependencies, copied bindings, and catalog.oak.md; require unchanged baseline scenario OAK bytes rather than accepting unexplained snapshot updates.
-- [ ] Key task: P04.03 Regenerate EBNF and model/surface reference; inspect model examples, JSON Schema definitions, surface paths, and removal of stale generated pages.
+- [x] Key task: P04.01 Refresh shared authoring guidance only where relevant, update build/authoring_guides.py, build/fusion.py, and active teaching snippets for renamed API consumers, preserving literal embedded documents and operational scope.
+- [x] Key task: P04.02 Run catalogue generation to refresh scenario snapshots, samples, local dependencies, copied bindings, and catalog.oak.md; require unchanged baseline scenario OAK bytes rather than accepting unexplained snapshot updates.
+- [x] Key task: P04.03 Regenerate EBNF and model/surface reference; inspect model examples, JSON Schema definitions, surface paths, and removal of stale generated pages.
 - [ ] Key task: P04.04 Commit the changed core normally, then update the optional validator's immutable revision and source/dependency fingerprints according to its existing identity checks; never point it at floating main or invent a revision.
 - [ ] Key task: P04.05 Regenerate SKILL.md, numbered references, guides, assets/examples, the inert _template scaffold, and outputs/oak-authoring.oak.md; retain current file ownership, consent outcomes, and size budgets.
 Success criteria: E05 holds across the actual exported file sets and validator identity; every generated change is explained by a source change, and no scenario literal or operational scope drifts.
@@ -270,10 +270,10 @@ Transition trigger: All delivered forms are regenerated from their source owners
 
 ### Phase 5: Verify semantics, rejection paths, and freshness
 Objective: Prove the new API and flatter sources preserve meaning while rejecting obsolete structural input.
-- [ ] Key task: P05.01 Add focused checks to the existing verification system for named versus inline construction, all eleven Statement variants, recursive bodies, IF branches, schema metadata, and missing/empty/malformed body rejection.
-- [ ] Key task: P05.02 Reject old steps inputs, mixed body/steps inputs, old public aliases, and stale imports; test valid and invalid nested combinations without relaxing existing validation or PAR/JOIN restrictions.
-- [ ] Key task: P05.03 Compare current canonical models against the baseline with a model-aware field migration only; compare authored XML/Markdown bytes exactly, and validate intentional JSON-LD differences using independent mixed-body/order/literal specimens.
-- [ ] Key task: P05.04 Run every catalogue scenario, both groupings, schema binding and layout checks, and declared detached demonstrations with repository imports/network blocked; verify evidence rejection, state isolation, context scopes, and simulated-effect disclosures.
+- [x] Key task: P05.01 Add focused checks to the existing verification system for named versus inline construction, all eleven Statement variants, recursive bodies, IF branches, schema metadata, and missing/empty/malformed body rejection.
+- [x] Key task: P05.02 Reject old steps inputs, mixed body/steps inputs, old public aliases, and stale imports; test valid and invalid nested combinations without relaxing existing validation or PAR/JOIN restrictions.
+- [x] Key task: P05.03 Compare current canonical models against the baseline with a model-aware field migration only; compare authored XML/Markdown bytes exactly, and validate intentional JSON-LD differences using independent mixed-body/order/literal specimens.
+- [x] Key task: P05.04 Run every catalogue scenario, both groupings, schema binding and layout checks, and declared detached demonstrations with repository imports/network blocked; verify evidence rejection, state isolation, context scopes, and simulated-effect disclosures.
 - [ ] Key task: P05.05 Run compileall, python -m build.examples, and python build/examples.py, including skill-agent parity, consent, fingerprint, reference freshness, plan, and scoped AGENTS checks; record the exact tested commit and observed results.
 - [ ] Key task: P05.06 Repeat all affected generation and require no diff; search obsolete identifiers, fields, module paths, surface IDs, and active snippets, recording each legitimate literal/history/diagnostic exception explicitly.
 Success criteria: E01 through E05 are evidenced at the final candidate; complete verification passes, detached products remain bounded, and repeated generation changes nothing. A text search or valid schema is never substituted for behavioural evidence.

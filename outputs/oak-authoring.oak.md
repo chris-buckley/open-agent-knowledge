@@ -471,8 +471,8 @@ call_statement = "CALL", process_target, binding_list, [ output_bindings ], logi
 emit_statement = "EMIT", local_interface_target, [ binding_list ], logical_nl ;
 set_statement = "SET", local_state_target, "=", process_value, logical_nl ;
 fail_statement = "FAIL", json_string, logical_nl ;
-suite = logical_nl, indent, process_step, { process_step }, dedent ;
-process_step = if_statement | while_statement | assert_statement | call_statement | emit_statement | set_statement | fail_statement | surface_act_native | surface_act_tool | surface_step_foreach | surface_step_par | surface_step_join ;
+suite = logical_nl, indent, process_statement, { process_statement }, dedent ;
+process_statement = if_statement | while_statement | assert_statement | call_statement | emit_statement | set_statement | fail_statement | surface_act_native | surface_act_tool | surface_statement_foreach | surface_statement_par | surface_statement_join ;
 positive_integer = ? an ASCII decimal integer literal with value greater than zero ? ;
 json_string = ? one double-quoted JSON string, with JSON escapes ? ;
 logical_nl = ? physical LF outside balanced delimiters; blank lines are ignored inside process suites ? ;
@@ -579,21 +579,21 @@ surface_condition_any = any_condition ;
 surface_condition_not = not_condition ;
 surface_act_native = ? ACT input="<INPUT>" output="<OUTPUT>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
 surface_act_tool = ? ACT TOOL "<TOOL>" input="<INPUT>" output="<OUTPUT>": <INSTRUCTION> (<INPUTS>) -> <OUTPUTS> ? ;
-surface_step_set = set_statement ;
-surface_step_emit_inferred = "EMIT", local_interface_target, logical_nl ;
-surface_step_emit_explicit = "EMIT", local_interface_target, binding_list, logical_nl ;
-surface_step_if = if_statement ;
-surface_step_call = call_statement ;
-surface_step_fail = fail_statement ;
-surface_step_assert = assert_statement ;
-surface_step_foreach = ? FOREACH <BINDING> IN <VALUE>:
-  <STEPS> ? ;
-surface_step_while = while_statement ;
-surface_step_par = ? PAR:
-  <STEPS> ? ;
-surface_step_join = ? JOIN ? ;
+surface_statement_set = set_statement ;
+surface_statement_emit_inferred = "EMIT", local_interface_target, logical_nl ;
+surface_statement_emit_explicit = "EMIT", local_interface_target, binding_list, logical_nl ;
+surface_statement_if = if_statement ;
+surface_statement_call = call_statement ;
+surface_statement_fail = fail_statement ;
+surface_statement_assert = assert_statement ;
+surface_statement_foreach = ? FOREACH <BINDING> IN <VALUE>:
+  <BODY> ? ;
+surface_statement_while = while_statement ;
+surface_statement_par = ? PAR:
+  <BODY> ? ;
+surface_statement_join = ? JOIN ? ;
 surface_process = ? <process id="<ID>" name="<NAME>" input="<INPUT>" output="<OUTPUT>">
-<STEPS>
+<BODY>
 </process> ? ;
 surface_trigger = trigger_declaration ;
 surface_interface_receives = ? <ID> RECEIVES <SCHEMA_ID>: <DESCRIPTION> ? ;

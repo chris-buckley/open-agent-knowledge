@@ -58,7 +58,7 @@ from oak.render.oak.processes import (
     binding_line,
     condition_text,
     process_value_text,
-    step_lines,
+    statement_lines,
 )
 from oak.render.oak.triggers import trigger_body
 from oak.surface import SURFACES, Surface
@@ -344,7 +344,7 @@ def surface_example(
             return condition_text(instance)
 
         case Act() | Set() | Emit() | If() | Call() | Fail() | Assert() | Foreach() | While() | Par() | Join():
-            return "\n".join(step_lines(instance))
+            return "\n".join(statement_lines(instance))
 
     raise TypeError(type(instance).__name__)
 

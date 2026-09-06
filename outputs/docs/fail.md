@@ -11,12 +11,12 @@ example-1: "FAIL \"The result is empty.\""
 syntax-reference: "outputs/oak.ebnf"
 
 grammar: TEXT<<
-surface_step_fail = fail_statement ;
+surface_statement_fail = fail_statement ;
 >>
 </constants>
 
 <schemas>
-<schema id="step-fail" name="Fail" purpose="One explicit process failure.">
+<schema id="statement-fail" name="Fail" purpose="One explicit process failure.">
 FAIL <MESSAGE>
 
 WHERE:

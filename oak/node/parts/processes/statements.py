@@ -1,4 +1,4 @@
-"""Process step models and direct value traversal."""
+"""Process statement models and direct value traversal."""
 
 from __future__ import annotations
 
@@ -22,13 +22,13 @@ from oak.vocabulary.text.non_blank_line import NonBlankLine
 from oak.vocabulary.text.placeholder import Placeholder, placeholders_in
 
 
-class StepModel(DiscriminatedModel):
-    """One tagged process step."""
+class StatementModel(DiscriminatedModel):
+    """One tagged process statement."""
 
     discriminator_field = "kind"
 
 
-class Act(StepModel):
+class Act(StatementModel):
     """One interpreter-native or exact named-tool action."""
 
     model_config = ConfigDict(
@@ -70,7 +70,7 @@ class Act(StepModel):
     )
     kind: Literal["act"] = Field(
         default="act",
-        description="The process step discriminator.",
+        description="The process statement discriminator.",
         examples=["act"],
     )
     tool: NonBlankLine | None = Field(
@@ -214,7 +214,7 @@ class Act(StepModel):
         return self
 
 
-class Set(StepModel):
+class Set(StatementModel):
     """One local state write."""
 
     model_config = ConfigDict(
@@ -233,7 +233,7 @@ class Set(StepModel):
     )
     kind: Literal["set"] = Field(
         default="set",
-        description="The process step discriminator.",
+        description="The process statement discriminator.",
         examples=["set"],
     )
     state: StateTarget = Field(
@@ -251,7 +251,7 @@ class Set(StepModel):
     )
 
 
-class Emit(StepModel):
+class Emit(StatementModel):
     """One schema instance emitted through one local output interface."""
 
     model_config = ConfigDict(
@@ -279,7 +279,7 @@ class Emit(StepModel):
     )
     kind: Literal["emit"] = Field(
         default="emit",
-        description="The process step discriminator.",
+        description="The process statement discriminator.",
         examples=["emit"],
     )
     interface: InterfaceTarget = Field(
@@ -322,7 +322,7 @@ class Emit(StepModel):
         return self
 
 
-class If(StepModel):
+class If(StatementModel):
     """One recursive condition with a then branch and optional else branch."""
 
     model_config = ConfigDict(
@@ -364,7 +364,7 @@ class If(StepModel):
     )
     kind: Literal["if"] = Field(
         default="if",
-        description="The process step discriminator.",
+        description="The process statement discriminator.",
         examples=["if"],
     )
     condition: Condition = Field(
@@ -384,9 +384,9 @@ class If(StepModel):
             }
         ],
     )
-    then: list[Step] = Field(
+    then: list[Statement] = Field(
         min_length=1,
-        description="The steps run when the condition is true.",
+        description="The statements run when the condition is true.",
         examples=[
             [
                 {
@@ -396,10 +396,10 @@ class If(StepModel):
             ]
         ],
     )
-    otherwise: list[Step] | None = Field(
+    otherwise: list[Statement] | None = Field(
         default=None,
         min_length=1,
-        description="The steps run when the condition is false.",
+        description="The statements run when the condition is false.",
         examples=[
             [
                 {
@@ -411,7 +411,7 @@ class If(StepModel):
     )
 
 
-class Call(StepModel):
+class Call(StatementModel):
     """One synchronous process invocation with schema-bound inputs and outputs."""
 
     model_config = ConfigDict(
@@ -440,7 +440,7 @@ class Call(StepModel):
     )
     kind: Literal["call"] = Field(
         default="call",
-        description="The process step discriminator.",
+        description="The process statement discriminator.",
         examples=["call"],
     )
     process: ProcessTarget = Field(
@@ -469,7 +469,7 @@ class Call(StepModel):
     )
 
 
-class Fail(StepModel):
+class Fail(StatementModel):
     """One explicit process failure."""
 
     model_config = ConfigDict(
@@ -484,7 +484,7 @@ class Fail(StepModel):
     )
     kind: Literal["fail"] = Field(
         default="fail",
-        description="The process step discriminator.",
+        description="The process statement discriminator.",
         examples=["fail"],
     )
     message: NonBlankLine = Field(
@@ -493,7 +493,7 @@ class Fail(StepModel):
     )
 
 
-class Assert(StepModel):
+class Assert(StatementModel):
     """One required condition that aborts the transaction when false."""
 
     model_config = ConfigDict(
@@ -520,7 +520,7 @@ class Assert(StepModel):
     )
     kind: Literal["assert"] = Field(
         default="assert",
-        description="The process step discriminator.",
+        description="The process statement discriminator.",
         examples=["assert"],
     )
     condition: Condition = Field(
@@ -547,7 +547,7 @@ class Assert(StepModel):
     )
 
 
-class Foreach(StepModel):
+class Foreach(StatementModel):
     """One deterministic sequential iteration over a JSON list."""
 
     model_config = ConfigDict(
@@ -560,7 +560,7 @@ class Foreach(StepModel):
                         "source": "literal",
                         "value": ["a", "b"],
                     },
-                    "steps": [
+                    "body": [
                         {
                             "kind": "act",
                             "instruction": "Transform <ITEM> into <RESULT>.",
@@ -582,7 +582,7 @@ class Foreach(StepModel):
     )
     kind: Literal["foreach"] = Field(
         default="foreach",
-        description="The process step discriminator.",
+        description="The process statement discriminator.",
         examples=["foreach"],
     )
     binding: Placeholder = Field(
@@ -598,9 +598,9 @@ class Foreach(StepModel):
             }
         ],
     )
-    steps: list[Step] = Field(
+    body: list[Statement] = Field(
         min_length=1,
-        description="The sequential iteration steps.",
+        description="The sequential iteration body.",
         examples=[
             [
                 {
@@ -612,7 +612,7 @@ class Foreach(StepModel):
     )
 
 
-class While(StepModel):
+class While(StatementModel):
     """One bounded pre-test loop over a recursive condition."""
 
     model_config = ConfigDict(
@@ -633,7 +633,7 @@ class While(StepModel):
                         },
                     },
                     "limit": 10,
-                    "steps": [
+                    "body": [
                         {
                             "kind": "set",
                             "state": "state.status",
@@ -649,7 +649,7 @@ class While(StepModel):
     )
     kind: Literal["while"] = Field(
         default="while",
-        description="The process step discriminator.",
+        description="The process statement discriminator.",
         examples=["while"],
     )
     condition: Condition = Field(
@@ -673,9 +673,9 @@ class While(StepModel):
         description="The hard maximum number of iterations.",
         examples=[10],
     )
-    steps: list[Step] = Field(
+    body: list[Statement] = Field(
         min_length=1,
-        description="The steps run in one fresh child binding scope per iteration.",
+        description="The statements run in one fresh child binding scope per iteration.",
         examples=[
             [
                 {
@@ -691,7 +691,7 @@ class While(StepModel):
     )
 
 
-class Par(StepModel):
+class Par(StatementModel):
     """One deterministic group of exact named-tool acts."""
 
     model_config = ConfigDict(
@@ -699,7 +699,7 @@ class Par(StepModel):
             "examples": [
                 {
                     "kind": "par",
-                    "steps": [
+                    "body": [
                         {
                             "kind": "act",
                             "tool": "tool-a",
@@ -719,10 +719,10 @@ class Par(StepModel):
     )
     kind: Literal["par"] = Field(
         default="par",
-        description="The process step discriminator.",
+        description="The process statement discriminator.",
         examples=["par"],
     )
-    steps: list[Step] = Field(
+    body: list[Statement] = Field(
         min_length=1,
         description="The exact named-tool acts launched in authored order.",
         examples=[
@@ -738,10 +738,10 @@ class Par(StepModel):
     )
 
     @model_validator(mode="after")
-    def parallel_steps(self) -> Self:
+    def parallel_statements(self) -> Self:
         acts: list[Act] = []
 
-        for step in self.steps:
+        for step in self.body:
             if not isinstance(step, Act) or step.tool is None:
                 raise PydanticCustomError(
                     "parallel_step_not_tool_act",
@@ -775,7 +775,7 @@ class Par(StepModel):
         return self
 
 
-class Join(StepModel):
+class Join(StatementModel):
     """The barrier immediately after one parallel group."""
 
     model_config = ConfigDict(
@@ -789,12 +789,12 @@ class Join(StepModel):
     )
     kind: Literal["join"] = Field(
         default="join",
-        description="The process step discriminator.",
+        description="The process statement discriminator.",
         examples=["join"],
     )
 
 
-Step = Annotated[
+Statement = Annotated[
     Act
     | Set
     | Emit
@@ -811,30 +811,30 @@ Step = Annotated[
 
 If.model_rebuild(
     _types_namespace={
-        "Step": Step,
+        "Statement": Statement,
         "Condition": Condition,
     }
 )
 Foreach.model_rebuild(
     _types_namespace={
-        "Step": Step,
+        "Statement": Statement,
     }
 )
 While.model_rebuild(
     _types_namespace={
-        "Step": Step,
+        "Statement": Statement,
         "Condition": Condition,
     }
 )
 Par.model_rebuild(
     _types_namespace={
-        "Step": Step,
+        "Statement": Statement,
     }
 )
 
 
-def step_values(step: Step) -> list[Value]:
-    """Return every value read directly by one step."""
+def statement_values(step: Statement) -> list[Value]:
+    """Return every value read directly by one statement."""
     if isinstance(step, Act):
         return [
             binding.value
@@ -865,7 +865,7 @@ def step_values(step: Step) -> list[Value]:
     if isinstance(step, Par):
         return [
             binding.value
-            for child in step.steps
+            for child in step.body
             if isinstance(child, Act)
             for binding in child.inputs
         ]
@@ -873,19 +873,19 @@ def step_values(step: Step) -> list[Value]:
     return []
 
 
-def iter_steps(steps: Sequence[Step]) -> Iterator[Step]:
-    """Yield each step and its nested steps recursively in authored order."""
-    for step in steps:
+def iter_statements(body: Sequence[Statement]) -> Iterator[Statement]:
+    """Yield each statement and its nested statements in authored order."""
+    for step in body:
         yield step
 
         if isinstance(step, If):
-            yield from iter_steps(step.then)
+            yield from iter_statements(step.then)
 
             if step.otherwise is not None:
-                yield from iter_steps(step.otherwise)
+                yield from iter_statements(step.otherwise)
 
         elif isinstance(step, (Foreach, While, Par)):
-            yield from iter_steps(step.steps)
+            yield from iter_statements(step.body)
 
 
 __all__ = [
@@ -899,9 +899,9 @@ __all__ = [
     "Join",
     "Par",
     "Set",
-    "Step",
-    "StepModel",
+    "Statement",
+    "StatementModel",
     "While",
-    "iter_steps",
-    "step_values",
+    "iter_statements",
+    "statement_values",
 ]

@@ -11,6 +11,27 @@ if str(ROOT) not in sys.path:
 
 from oak import Node, NonEmpty, OneOf, Regex, Schema, Type, parse, render, resolve, where
 
+operation_clause = where(
+    'OPERATION',
+    Type(of='string'),
+    OneOf(values=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']),
+    description='the HTTP method',
+)
+
+endpoint_path_clause = where(
+    'ENDPOINT_PATH',
+    Type(of='string'),
+    Regex(pattern='^/.*$'),
+    description='the absolute path of the API endpoint',
+)
+
+coverage_gap_clause = where(
+    'GAP',
+    Type(of='string'),
+    OneOf(values=['OK', 'MISSING_PATH', 'MISSING_METHOD', 'REQ_SCHEMA_MISMATCH', 'RESP_SCHEMA_MISMATCH', 'STATUS_CODE_MISSING']),
+    description='the coverage gap analysis code',
+)
+
 api_coverage_table_schema = Schema(
     id="api-coverage-table",
     name="API Coverage Table",
@@ -23,10 +44,10 @@ api_coverage_table_schema = Schema(
     ),
     where=[
         where("TABLE_NAME", Type(of="string"), NonEmpty(), description="the title for the API coverage table"),
-        where("OPERATION", Type(of="string"), OneOf(values=["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]), description="the HTTP method"),
-        where("ENDPOINT_PATH", Type(of="string"), Regex(pattern="^/.*$"), description="the absolute path of the API endpoint"),
+        operation_clause,
+        endpoint_path_clause,
         where("SPEC_REF", Type(of="string"), NonEmpty(), description="the reference in the form OpenAPI: target or Swagger: target"),
-        where("GAP", Type(of="string"), OneOf(values=["OK", "MISSING_PATH", "MISSING_METHOD", "REQ_SCHEMA_MISMATCH", "RESP_SCHEMA_MISMATCH", "STATUS_CODE_MISSING"]), description="the coverage gap analysis code"),
+        coverage_gap_clause,
     ],
 )
 

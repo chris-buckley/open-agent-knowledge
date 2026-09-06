@@ -18,6 +18,28 @@ PLACEHOLDER_LEVEL_2_NUMBER = "LEVEL_2_NUMBER"
 PLACEHOLDER_LEVEL_3_NUMBER = "LEVEL_3_NUMBER"
 PLACEHOLDER_STATEMENT = "STATEMENT"
 
+level_one_clause = where(
+    PLACEHOLDER_LEVEL_1_NUMBER,
+    Type(of='string'),
+    Regex(pattern='^[0-9]+$'),
+    description='the level one number',
+)
+
+level_two_clause = where(
+    PLACEHOLDER_LEVEL_2_NUMBER,
+    Type(of='string'),
+    Regex(pattern='^[0-9]+\\.[0-9]+$'),
+    description='the level two number',
+)
+
+level_three_clause = where(
+    PLACEHOLDER_LEVEL_3_NUMBER,
+    Type(of='string'),
+    Regex(pattern='^[0-9]+\\.[0-9]+\\.[0-9]+$'),
+    examples=['1.1.1', '1.1.2'],
+    description='the level three number at the maximum depth',
+)
+
 hierarchical_outline_schema = Schema(
     id="hierarchical-outline",
     name="Hierarchical Outline",
@@ -33,25 +55,9 @@ hierarchical_outline_schema = Schema(
     ),
     where=[
         where(PLACEHOLDER_OUTLINE_TITLE, Type(of="string"), NonEmpty(), description="the title for the outline"),
-        where(
-            PLACEHOLDER_LEVEL_1_NUMBER,
-            Type(of="string"),
-            Regex(pattern="^[0-9]+$"),
-            description="the level one number",
-        ),
-        where(
-            PLACEHOLDER_LEVEL_2_NUMBER,
-            Type(of="string"),
-            Regex(pattern="^[0-9]+\\.[0-9]+$"),
-            description="the level two number",
-        ),
-        where(
-            PLACEHOLDER_LEVEL_3_NUMBER,
-            Type(of="string"),
-            Regex(pattern="^[0-9]+\\.[0-9]+\\.[0-9]+$"),
-            examples=["1.1.1", "1.1.2"],
-            description="the level three number at the maximum depth",
-        ),
+        level_one_clause,
+        level_two_clause,
+        level_three_clause,
         where(PLACEHOLDER_STATEMENT, Type(of="string"), NonEmpty(), description="one atomic statement without obvious content"),
     ],
 )
