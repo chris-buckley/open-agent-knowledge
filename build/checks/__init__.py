@@ -42,6 +42,7 @@ from build.checks.rendering import (
     validate_json_ld_style_display,
 )
 from build.checks.resolution import validate_resolution
+from build.checks.repository_lifecycle import validate_repository_lifecycle
 from build.checks.shapes import validate_shapes
 from build.checks.statements import validate_statement_bodies
 from build.checks.surfaces import validate_surfaces
@@ -82,6 +83,7 @@ CHECKS: tuple[Check, ...] = (
     validate_optional_validator,
     validate_plans,
     validate_agents,
+    validate_repository_lifecycle,
     validate_coding_standards,
     validate_surfaces,
     validate_outputs,

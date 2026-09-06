@@ -296,39 +296,78 @@ def validate_agents() -> None:
     if len({row["concern"] for row in rows if isinstance(row, dict)}) != len(rows):
         raise RuntimeError("root AGENTS router repeats a concern")
 
-    if [schema.id for schema in root.schemas] != [
-        "change-description",
-        "repository-task",
-        "repository-result",
-    ]:
-        raise RuntimeError("root repository schemas are stale")
-    change = root.schemas[0]
+    if root.schemas:
+        raise RuntimeError("root schemas must be owned by the explicit contract modules")
+    changes = parse((ROOT / ".agents" / "rules" / "repository-change.oak.md").read_text(encoding="utf-8"))
+    if [schema.id for schema in changes.schemas] != ["change-description", "change-name", "branch-targets"]:
+        raise RuntimeError("repository change schemas are stale")
+    change = changes.schemas[0]
     kinds = next(constraint.values for field in change.where for constraint in field.constraints
                  if field.placeholder == "TYPE" and isinstance(constraint, OneOf))
-    meanings = _constant(root, "change-type-meanings").value
+    meanings = _constant(changes, "change-type-meanings").value
     if [row["type"] for row in meanings] != kinds or any(not row["meaning"] for row in meanings):
         raise RuntimeError("change type meanings must cover the shared enum exactly")
     for kind in kinds:
-        change.bind({"TYPE": kind, "SCOPE": "plans", "SUMMARY": "add current and desired state examples"})
+        change.bind({"TYPE": kind, "SCOPE": "plans", "SUMMARY": "add current and desired state examples",
+                     "BREAKING": False, "MIGRATION": ""})
     try:
-        change.bind({"TYPE": "platform-name", "SCOPE": "", "SUMMARY": "add state comparisons"})
+        change.bind({"TYPE": "platform-name", "SCOPE": "", "SUMMARY": "add state comparisons",
+                     "BREAKING": False, "MIGRATION": ""})
     except SchemaBindingError:
         pass
     else:
         raise RuntimeError("an unsupported change type was accepted")
     if [trigger.id for trigger in root.triggers] != [
-        "repository-task-requested",
+        "task-started",
+        "task-resumed",
+        "task-decided",
+        "task-cancelled",
+        "status-requested",
+        "name-requested",
+        "branch-update-requested",
+        "merge-requested",
         "branch-merged",
     ]:
         raise RuntimeError("root repository triggers are stale")
     if [process.id for process in root.processes] != [
-        "perform-repository-task",
+        "start-task",
+        "resume-task",
+        "decide-task",
+        "cancel-task",
+        "show-task",
+        "publish-progress",
+        "read-scoped-knowledge",
+        "prepare-task",
+        "read-python-standard",
+        "read-specialist-skills",
+        "select-knowledge-parts",
+        "select-dependencies",
+        "observe-revision",
+        "require-revision",
+        "implement-repository-task",
+        "refresh-repository-deliverables",
+        "verify-repository-change",
+        "produce-repository-result",
+        "name-change",
+        "require-inactive-task",
+        "update-branch",
+        "merge-change",
         "clean-merged-branch",
     ]:
         raise RuntimeError("root repository processes are stale")
     if [interface.id for interface in root.interfaces] != [
         "task-request",
+        "task-resume",
+        "task-approval",
+        "task-cancel",
+        "status-request",
+        "progress",
         "task-result",
+        "name-request",
+        "name-result",
+        "branch-update",
+        "merge-request",
+        "merge-receipt",
     ]:
         raise RuntimeError("root repository interfaces are stale")
 

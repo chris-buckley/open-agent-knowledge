@@ -1,21 +1,40 @@
 <instructions>
 $ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
+Conditions are typed trees; ALL, ANY, and NOT compose comparisons; ASSERT fails a false condition; FOREACH is sequential; WHILE tests before each bounded iteration; PAR outputs become visible only at JOIN.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
 RECEIVES accepts one complete instance of its schema.
 A source-backed trigger supplies the received instance as the selected process input.
 EMITS publishes one complete instance of its schema.
 EMIT without bindings fills the target schema from same-named visible process bindings.
+AS binds one constant or state value to one schema placeholder; the value must satisfy that placeholder at resolution and before each state write commits.
 Constants hold values that do not change while the knowledge runs.
-Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
+State holds values that persist and can change while processes run.
 Each trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
+
+Treat AGENTS hierarchy as host scoping, never implicit OAK imports; each scoped AGENTS document owns its named concern.
+Keep repository development support in .agents and generated product deliveries in generated; use build/AGENTS.md for product ownership and create no repository or directory README indexes.
+Use direct file edits unless the user explicitly requests Computer Use.
+Stop and ask the user whenever an active task conflicts with applicable repository knowledge.
+Keep durable, confirmed repository meaning in the owning AGENTS document, not platform memory; reference other owners instead of copying detail.
+Apply a durable user correction to its owning AGENTS document before continuing; cancel and restart an active lifecycle if its scope or approved inputs change.
+Treat Agnostic Prompt Standard material as legacy reference; use interpreter for the consumer, render for a representation, and output for a generated artifact.
+Use no em dash or asterisk emphasis in repository documentation.
+Use process.name-change for names and .agents/rules/repository-change.oak.md for authorised Git operations.
+The host loads this document as constant.execution-source with explicit references mapped to this checkout, supplies globally unique task ids, serializes arrivals, and durably stores only successfully returned state under the host boundary owned by oak/AGENTS.md; these declarations are initial values, not a file to rewrite after each request.
+Pin the resolved knowledge graph for each task and restore that graph with its checkpoint on resume; load changed governing documents only for a new task.
+The host admits approval inputs only from actual user authorization for that exact task and proposal revision; preserve existing authorization and ask again only when the approved scope changes.
+Host tools derive proposal and workspace revisions from exact content, including relevant uncommitted files and dependencies; a model-written revision or evidence string is not proof.
+After failed native work, reconcile external effects before retrying; if the workspace differs from its stored revision, cancel and start a new task. Never replay completed phases.
 </instructions>
 
 <constants>
-owned-concern: "OAK product intent, repository-wide operating knowledge, and scoped AGENTS routing."
+owned-concern: "OAK product intent, resumable repository tasks, and scoped AGENTS routing."
 
 product-purpose: "Open Agent Knowledge is a portable standard for expressing knowledge as one compact validated unit."
+
+execution-source: "repository/AGENTS.oak.md"
 
 agent-router: CSV<<
 path,concern
@@ -32,47 +51,6 @@ agent-line-limit: 500
 
 part-authoring-priority: ["schemas", "constants", "state", "interfaces", "triggers", "processes", "instructions"]
 
-repository-rules: YAML<<
-- Read the root and every routed AGENTS document that applies before inspecting or
-  changing implementation files.
-- Treat AGENTS hierarchy as host scoping and never as implicit OAK imports.
-- Treat each scoped AGENTS document as the sole current owner of its named concern.
-- Keep repository-development assistance in .agents and generated product deliveries
-  in generated; use build/AGENTS.md for product ownership.
-- Route every persistent repository plan through docs/AGENTS.md before creating it.
-- Use schema.change-description and constant.change-naming-rules when naming work
-  branches, commits, or pull requests.
-- Apply constant.commit-history-rules when committing, updating branches, merging
-  pull requests, or removing branch references.
-- Do not create repository or directory README indexes.
-- Update architecture, implementation, examples, and generated outputs in one pass
-  when the concern requires them.
-- Choose the smallest implementation that preserves every applicable contract.
-- Delete obsolete names, paths, formats, contracts, and support material in the same
-  task.
-- Add compatibility only for an explicitly named contract and consumer.
-- Store durable repository meaning in the owning AGENTS document rather than platform
-  memory.
-- Stop and ask the user when the active task conflicts with applicable repository
-  knowledge.
-- Do not split one requested product change into deferred phases.
-- Show proposed architecture to the user before writing it unless the user approved
-  it in the active task.
-- Treat Agnostic Prompt Standard material as legacy reference rather than OAK source
-  content.
-- Use interpreter for the consumer of OAK knowledge, render for one document representation,
-  and output for one generated artifact.
-- Use existing dependencies before adding code or packages.
-- Check library documentation and types before assuming that a capability is absent.
-- Prefer maintained libraries when they reduce complexity or improve reliability.
-- Make architectural decisions for the long term rather than as planned replacements.
-- Apply a durable user correction to its owning AGENTS document before continuing.
-- Write only confirmed information relevant to the owned concern and point to the
-  exact owner instead of copying detail.
-- Use no em dash or asterisk emphasis in repository documentation.
-- Confirm every applicable repository contract before reporting completion.
->>
-
 skill-router: CSV<<
 topic,path
 Pydantic,.agents/skills/pydantic-v2.12/SKILL.md
@@ -80,145 +58,327 @@ JSON Schema,.agents/skills/json-schema-2020-12/SKILL.md
 JSON-LD,.agents/skills/json-ld/SKILL.md
 >>
 
-communication-contract: YAML<<
-- Lead with the answer or outcome.
-- Use short plain sentences.
-- State uncertainty directly.
-- Avoid jargon, filler, praise, and repetition.
->>
-
-change-type-meanings: CSV<<
-type,meaning
-feat,new capability or behavior
-fix,correction of faulty behavior
-refactor,internal restructuring that preserves behavior
-perf,performance improvement
-docs,"documentation, knowledge, or planning-only change"
-test,verification coverage or test correction
-build,build tooling or dependency change
-ci,continuous integration configuration
-chore,repository housekeeping
-revert,reversal of an earlier change
->>
-
-change-name-patterns: {"branch": "<TYPE>/<SUMMARY-AS-KEBAB-CASE>", "subject": "<TYPE>(<SCOPE>): <SUMMARY>", "sentence": "<IMPERATIVE_VERB> <OBJECT> [<NECESSARY_QUALIFIER>]"}
-
-change-naming-rules: YAML<<
-- Use only approved change types as branch prefixes, never platform, tool, or agent
-  names.
-- Select the type from schema.change-description using constant.change-type-meanings.
-- Apply constant.change-name-patterns to work branches, authored commit subjects,
-  and pull request titles. Name the actual change at the scope of that artifact.
-- Derive the branch topic from the summary using lowercase words separated by single
-  hyphens; put one slash after the type.
-- Use a lowercase imperative verb, its object, and only a qualifier needed to identify
-  the change. Omit vague summaries and a terminal period.
-- Omit the scope and its parentheses from a subject when no useful scope is needed.
-- Use ! immediately before the subject colon only for a breaking change, and explain
-  the affected contract and migration in the body.
->>
-
-commit-history-rules: YAML<<
-- Preserve every original commit and its identity in repository history, including
-  after a pull request is merged.
-- Merge pull requests with a merge commit. Do not squash or rebase during merging.
-- Make corrections and reversals as new commits. Do not amend, squash, rebase, or
-  force-push away existing commits.
-- Update a work branch from its destination by merging so both histories retain their
-  original commits.
-- Before deleting merged branch references, verify that the source branch tip is an
-  ancestor of the destination branch. Retain the references if that check fails.
->>
-
 coding-standard: ".agents/rules/coding-standards.oak.md"
+
+instruction-justification: "Host trust, persistent-state ownership, and global scope invariants apply across independent arrivals and cannot be owned by one action or payload schema."
 </constants>
 
-<schemas>
-<schema id="change-description" name="Change Description" purpose="Describe one change for branch names, commit subjects, and pull request titles.">
-Type: <TYPE>
-Scope: <SCOPE>
-Summary: <SUMMARY>
-
-WHERE:
-- <TYPE> is string; is one of `feat`, `fix`, `refactor`, `perf`, `docs`, `test`, `build`, `ci`, `chore`, `revert`; the kind of change.
-- <SCOPE> is string; the affected repository area in lowercase kebab-case, empty when omitted.
-- <SUMMARY> is string; is non-empty; an imperative verb followed by its object and any necessary qualifier.
-</schema>
-
-<schema id="repository-task" name="Repository Task" purpose="Carry one requested repository change and its constraints.">
-Task: <TASK>
-Paths: <PATHS>
-Constraints: <CONSTRAINTS>
-
-WHERE:
-- <TASK> is string; is non-empty; the requested repository outcome.
-- <PATHS> is string; is non-empty; the affected or inspected repository paths.
-- <CONSTRAINTS> is string; task-specific constraints, empty when none are supplied.
-</schema>
-
-<schema id="repository-result" name="Repository Result" purpose="Carry the completed repository outcome and verification evidence.">
-Outcome: <OUTCOME>
-Evidence: <EVIDENCE>
-Changed paths: <CHANGED_PATHS>
-
-WHERE:
-- <OUTCOME> is string; is non-empty; the completed task outcome.
-- <EVIDENCE> is string; is non-empty; the checks and review evidence.
-- <CHANGED_PATHS> is string; the changed paths, empty for read-only work.
-</schema>
-</schemas>
+<state>
+task-id AS .agents/rules/repository-task.oak.md#schema.task-checkpoint.TASK_ID: ""
+task AS .agents/rules/repository-task.oak.md#schema.task-checkpoint.TASK: ""
+paths AS .agents/rules/repository-task.oak.md#schema.task-checkpoint.PATHS: ""
+constraints AS .agents/rules/repository-task.oak.md#schema.task-checkpoint.CONSTRAINTS: ""
+phase AS .agents/rules/repository-task.oak.md#schema.task-checkpoint.PHASE: "idle"
+proposal AS .agents/rules/repository-task.oak.md#schema.task-checkpoint.PROPOSAL: ""
+proposal-revision AS .agents/rules/repository-task.oak.md#schema.task-checkpoint.PROPOSAL_REVISION: ""
+working-revision AS .agents/rules/repository-task.oak.md#schema.task-checkpoint.WORKING_REVISION: ""
+approved-revision AS .agents/rules/repository-task.oak.md#schema.task-checkpoint.APPROVED_REVISION: ""
+verified-revision AS .agents/rules/repository-task.oak.md#schema.task-checkpoint.VERIFIED_REVISION: ""
+evidence AS .agents/rules/repository-task.oak.md#schema.task-checkpoint.EVIDENCE: ""
+changed-paths AS .agents/rules/repository-task.oak.md#schema.task-checkpoint.CHANGED_PATHS: ""
+</state>
 
 <triggers>
-repository-task-requested(
-  event="A repository task is requested.",
-  source=interface.task-request,
-  process=process.perform-repository-task,
+task-started(event="Task requested.", source=interface.task-request, process=process.start-task)
+task-resumed(event="Task resumed.", source=interface.task-resume, process=process.resume-task)
+task-decided(event="Task decided.", source=interface.task-approval, process=process.decide-task)
+task-cancelled(event="Task cancelled.", source=interface.task-cancel, process=process.cancel-task)
+status-requested(event="Task status.", source=interface.status-request, process=process.show-task)
+name-requested(event="Name requested.", source=interface.name-request, process=process.name-change)
+branch-update-requested(
+  event="Branch update requested.",
+  source=interface.branch-update,
+  process=process.update-branch,
 )
-branch-merged(event="A repository branch is merged.", process=process.clean-merged-branch)
+merge-requested(
+  event="Merge requested.",
+  source=interface.merge-request,
+  process=process.merge-change,
+)
+branch-merged(
+  event="Branch merged.",
+  source=interface.merge-receipt,
+  process=process.clean-merged-branch,
+)
 </triggers>
 
 <processes>
-<process id="perform-repository-task" name="Perform task" input="schema.repository-task" output="schema.repository-result">
-ACT Use <ROUTER> to select and read every scoped AGENTS document that applies to <PATHS> before changing implementation. (
-  ROUTER=$constant.agent-router,
-  PATHS=$PATHS,
-)
-ACT For Python work in <PATHS>, read <STANDARD> and its routed topic documents before implementation; apply these defaults after scoped repository contracts. (
-  PATHS=$PATHS,
-  STANDARD=$constant.coding-standard,
-)
-ACT Apply <PART_PRIORITY> to represent <TASK>; add authored instructions only after no structured OAK part can carry the meaning. (
-  PART_PRIORITY=$constant.part-authoring-priority,
-  TASK=$TASK,
-)
-ACT Apply <RULES> and <CONSTRAINTS> to choose one owner for each concern and implement the smallest complete change for <TASK>. (
-  RULES=$constant.repository-rules,
-  CONSTRAINTS=$CONSTRAINTS,
-  TASK=$TASK,
-)
-ACT Use <SKILLS> to read matching specialist material before work on formats used by <PATHS>. (
-  SKILLS=$constant.skill-router,
-  PATHS=$PATHS,
-)
-ACT Update every affected source, example, output, and scoped AGENTS document for <TASK>, then remove obsolete paths and contracts. (
-  TASK=$TASK,
-)
-ACT Run the complete verification process owned by build/AGENTS.md, inspect the final diff, and search for every replaced identifier, path, format, and contract. ()
-ACT output="schema.repository-result": Produce <OUTCOME>, <EVIDENCE>, and <CHANGED_PATHS> for <TASK> under <COMMUNICATION>. (
-  TASK=$TASK,
-  COMMUNICATION=$constant.communication-contract,
-) -> OUTCOME, EVIDENCE, CHANGED_PATHS
-EMIT interface.task-result
+<process id="start-task" name="Start task" input=".agents/rules/repository-task.oak.md#schema.repository-task">
+CALL process.require-inactive-task ()
+ASSERT $TASK_ID does not equal $state.task-id
+  MESSAGE "Task identifiers must not be reused."
+SET state.task-id = $TASK_ID
+SET state.task = $TASK
+SET state.paths = $PATHS
+SET state.constraints = $CONSTRAINTS
+SET state.proposal = ""
+SET state.proposal-revision = ""
+SET state.working-revision = ""
+SET state.approved-revision = ""
+SET state.verified-revision = ""
+SET state.evidence = ""
+SET state.changed-paths = ""
+SET state.phase = "prepare"
+CALL process.publish-progress ()
 </process>
 
-<process id="clean-merged-branch" name="Clean branch">
-ACT Apply <HISTORY> to delete the merged branch on the remote and locally after a successful merge. (
-  HISTORY=$constant.commit-history-rules,
+<process id="resume-task" name="Resume task" input=".agents/rules/repository-task.oak.md#schema.resume-request">
+ASSERT $TASK_ID equals $state.task-id
+  MESSAGE "Resume targets a different task."
+ASSERT $PHASE equals $state.phase
+  MESSAGE "Resume targets a stale or inactive checkpoint."
+CALL process.read-scoped-knowledge ()
+IF $PHASE equals "prepare":
+  CALL process.prepare-task ()
+ELSE:
+  ASSERT ALL(
+    $state.approved-revision does not equal "",
+    $state.approved-revision equals $state.proposal-revision,
+  )
+    MESSAGE "The current proposal has no matching approval."
+  CALL process.require-revision (EXPECTED_REVISION=$state.working-revision)
+  IF $PHASE equals "implement":
+    CALL process.implement-repository-task ()
+  IF $PHASE equals "refresh":
+    CALL process.refresh-repository-deliverables ()
+  IF $PHASE equals "verify":
+    CALL process.verify-repository-change ()
+  IF $PHASE equals "report":
+    CALL process.produce-repository-result ()
+IF $state.phase does not equal "complete":
+  CALL process.publish-progress ()
+</process>
+
+<process id="decide-task" name="Decide task" input=".agents/rules/repository-task.oak.md#schema.approval-decision">
+ASSERT ALL($TASK_ID equals $state.task-id, $state.phase equals "awaiting-approval")
+  MESSAGE "No matching task is awaiting approval."
+ASSERT $PROPOSAL_REVISION equals $state.proposal-revision
+  MESSAGE "Approval targets a stale proposal."
+IF $APPROVED equals true:
+  CALL process.require-revision (EXPECTED_REVISION=$state.working-revision)
+  SET state.approved-revision = $PROPOSAL_REVISION
+  SET state.phase = "implement"
+ELSE:
+  SET state.approved-revision = ""
+  SET state.phase = "cancelled"
+CALL process.publish-progress ()
+</process>
+
+<process id="cancel-task" name="Cancel task" input=".agents/rules/repository-task.oak.md#schema.task-handle">
+ASSERT $TASK_ID equals $state.task-id
+  MESSAGE "Cancellation targets a different task."
+ASSERT NOT(
+  ANY($state.phase equals "idle", $state.phase equals "complete", $state.phase equals "cancelled"),
+)
+  MESSAGE "Only an active task can be cancelled."
+SET state.approved-revision = ""
+SET state.phase = "cancelled"
+CALL process.publish-progress ()
+</process>
+
+<process id="show-task" name="Show task" input=".agents/rules/repository-task.oak.md#schema.task-handle">
+ASSERT $TASK_ID equals $state.task-id
+  MESSAGE "Status targets a different task."
+CALL process.publish-progress ()
+</process>
+
+<process id="publish-progress" name="Publish progress">
+EMIT interface.progress (
+  TASK_ID=$state.task-id,
+  PHASE=$state.phase,
+  PROPOSAL_REVISION=$state.proposal-revision,
+  PROPOSAL=$state.proposal,
+)
+</process>
+
+<process id="read-scoped-knowledge" name="Read knowledge">
+ACT Use <ROUTER> to read the root and every owning AGENTS document before inspecting or changing <PATHS> for <TASK>; read docs/AGENTS.md before creating any persistent plan. (
+  ROUTER=$constant.agent-router,
+  TASK=$state.task,
+  PATHS=$state.paths,
+)
+</process>
+
+<process id="prepare-task" name="Prepare task">
+CALL process.read-python-standard ()
+CALL process.read-specialist-skills ()
+CALL process.select-knowledge-parts ()
+CALL process.select-dependencies ()
+CALL process.observe-revision () -> OBSERVED_REVISION
+ACT output=".agents/rules/repository-task.oak.md#schema.task-proposal": Prepare one complete, read-only proposal for <TASK> within <PATHS> and <CONSTRAINTS>, identifying each owner and required source, example, output and verification change. Choose the smallest complete long-term design, not deferred product phases or planned replacements. Include only explicitly named compatibility contracts and consumers. Have host tools derive <PROPOSAL_REVISION> from <TASK_ID>, these inputs, <OBSERVED_REVISION> and the exact <PROPOSAL>; publish the architecture before implementation. (
+  TASK_ID=$state.task-id,
+  TASK=$state.task,
+  PATHS=$state.paths,
+  CONSTRAINTS=$state.constraints,
+  OBSERVED_REVISION=$OBSERVED_REVISION,
+) -> PROPOSAL, PROPOSAL_REVISION
+CALL process.require-revision (EXPECTED_REVISION=$OBSERVED_REVISION)
+SET state.proposal = $PROPOSAL
+SET state.proposal-revision = $PROPOSAL_REVISION
+SET state.working-revision = $OBSERVED_REVISION
+SET state.phase = "awaiting-approval"
+</process>
+
+<process id="read-python-standard" name="Read standard">
+ACT For Python work in <PATHS>, read <STANDARD> and its routed topics before implementation; apply those defaults after scoped repository contracts. (
+  PATHS=$state.paths,
+  STANDARD=$constant.coding-standard,
+)
+</process>
+
+<process id="read-specialist-skills" name="Read skills">
+ACT Use <SKILLS> to read the matching specialist material before work on formats used by <PATHS>. (
+  SKILLS=$constant.skill-router,
+  PATHS=$state.paths,
+)
+</process>
+
+<process id="select-knowledge-parts" name="Select parts">
+ACT Apply <PRIORITY> to place the meaning of <TASK> in justified structured parts; author instructions only when no structured part can carry it. (
+  PRIORITY=$constant.part-authoring-priority,
+  TASK=$state.task,
+)
+</process>
+
+<process id="select-dependencies" name="Select dependencies">
+ACT Inspect existing dependencies for <TASK> before adding code or packages. Check library documentation and types before concluding a capability is absent; prefer maintained libraries when they reduce complexity or improve reliability. (
+  TASK=$state.task,
+)
+</process>
+
+<process id="observe-revision" name="Observe revision" output=".agents/rules/repository-task.oak.md#schema.revision-reading">
+ACT output=".agents/rules/repository-task.oak.md#schema.revision-reading": Use host tools to fingerprint the actual <PATHS> and their relevant dependencies, including governing knowledge and uncommitted content. Return the same <OBSERVED_REVISION> for unchanged content. (
+  PATHS=$state.paths,
+) -> OBSERVED_REVISION
+</process>
+
+<process id="require-revision" name="Check revision" input=".agents/rules/repository-task.oak.md#schema.expected-revision">
+CALL process.observe-revision () -> OBSERVED_REVISION
+ASSERT $OBSERVED_REVISION equals $EXPECTED_REVISION
+  MESSAGE "The workspace changed; reconcile effects before retrying preparation or starting a new task."
+</process>
+
+<process id="implement-repository-task" name="Implement task">
+ACT output=".agents/rules/repository-task.oak.md#schema.change-receipt": Implement the complete approved <PROPOSAL> for <TASK_ID> under <CONSTRAINTS> in <PATHS>. Preserve unrelated work; use the smallest implementation that satisfies every applicable contract and do not defer part of the requested product change. Use the stable operation identity <TASK_ID> plus implement to reconcile any prior external effects before retrying. Return the host-observed final <REVISION> and complete <CHANGED_PATHS>. (
+  TASK_ID=$state.task-id,
+  PROPOSAL=$state.proposal,
+  PATHS=$state.paths,
+  CONSTRAINTS=$state.constraints,
+) -> REVISION, CHANGED_PATHS
+CALL process.require-revision (EXPECTED_REVISION=$REVISION)
+SET state.working-revision = $REVISION
+SET state.changed-paths = $CHANGED_PATHS
+SET state.phase = "refresh"
+</process>
+
+<process id="refresh-repository-deliverables" name="Refresh deliverables">
+ACT output=".agents/rules/repository-task.oak.md#schema.change-receipt": Complete every affected architecture record, source, example, generated output and scoped AGENTS update for <TASK_ID> and <TASK> under <PROPOSAL>. Remove obsolete names, paths, formats, contracts and support material in this task. Record durable validated lessons with their exact owners. Reconcile prior effects using <TASK_ID> plus refresh; return the observed <REVISION> and complete <CHANGED_PATHS>, including <PRIOR_PATHS>. (
+  TASK_ID=$state.task-id,
+  TASK=$state.task,
+  PROPOSAL=$state.proposal,
+  PRIOR_PATHS=$state.changed-paths,
+) -> REVISION, CHANGED_PATHS
+CALL process.require-revision (EXPECTED_REVISION=$REVISION)
+SET state.working-revision = $REVISION
+SET state.changed-paths = $CHANGED_PATHS
+SET state.phase = "verify"
+</process>
+
+<process id="verify-repository-change" name="Verify change">
+ACT output=".agents/rules/repository-task.oak.md#schema.verification-receipt": Run the complete verification process owned by build/AGENTS.md for <TASK_ID>, inspect the final diff, search for replaced identifiers, paths, formats and contracts, and check the <LIMIT> line bound. Return observed <EVIDENCE>, the exact verified <REVISION>, and whether every applicable check <PASSED>. (
+  TASK_ID=$state.task-id,
+  LIMIT=$constant.agent-line-limit,
+) -> REVISION, EVIDENCE, PASSED
+ASSERT $PASSED equals true
+  MESSAGE "Required verification checks did not pass."
+ASSERT $REVISION equals $state.working-revision
+  MESSAGE "Verification does not cover the current checkpoint."
+CALL process.require-revision (EXPECTED_REVISION=$REVISION)
+SET state.verified-revision = $REVISION
+SET state.evidence = $EVIDENCE
+SET state.phase = "report"
+</process>
+
+<process id="produce-repository-result" name="Produce result">
+ASSERT ALL(
+  $state.verified-revision equals $state.working-revision,
+  $state.evidence does not equal "",
+)
+  MESSAGE "Completion requires evidence for the current revision."
+ACT output=".agents/rules/repository-task.oak.md#schema.task-outcome": Produce <OUTCOME> for completed <TASK> from observed <EVIDENCE> and <CHANGED_PATHS>. Lead with the outcome, use short plain sentences, state uncertainty directly, and avoid jargon, filler, praise and repetition. Compose only the response; do not change repository files. (
+  TASK=$state.task,
+  EVIDENCE=$state.evidence,
+  CHANGED_PATHS=$state.changed-paths,
+) -> OUTCOME
+CALL process.require-revision (EXPECTED_REVISION=$state.verified-revision)
+SET state.phase = "complete"
+EMIT interface.task-result (
+  TASK_ID=$state.task-id,
+  OUTCOME=$OUTCOME,
+  EVIDENCE=$state.evidence,
+  CHANGED_PATHS=$state.changed-paths,
+)
+</process>
+
+<process id="name-change" name="Name change" input=".agents/rules/repository-change.oak.md#schema.change-description" output=".agents/rules/repository-change.oak.md#schema.change-name">
+CALL .agents/rules/repository-change.oak.md#process.name-change (
+  TYPE=$TYPE,
+  SCOPE=$SCOPE,
+  SUMMARY=$SUMMARY,
+  BREAKING=$BREAKING,
+  MIGRATION=$MIGRATION,
+) -> BRANCH, SUBJECT, BODY
+EMIT interface.name-result
+</process>
+
+<process id="require-inactive-task" name="Check inactivity">
+ASSERT ANY(
+  $state.phase equals "idle",
+  $state.phase equals "complete",
+  $state.phase equals "cancelled",
+)
+  MESSAGE "Finish or cancel the active task before starting another task or independent Git operation."
+</process>
+
+<process id="update-branch" name="Update branch" input=".agents/rules/repository-change.oak.md#schema.branch-targets">
+CALL process.require-inactive-task ()
+CALL .agents/rules/repository-change.oak.md#process.update-branch (
+  REMOTE=$REMOTE,
+  SOURCE=$SOURCE,
+  DESTINATION=$DESTINATION,
+)
+</process>
+
+<process id="merge-change" name="Merge change" input=".agents/rules/repository-change.oak.md#schema.branch-targets">
+CALL process.require-inactive-task ()
+CALL .agents/rules/repository-change.oak.md#process.merge-change (
+  REMOTE=$REMOTE,
+  SOURCE=$SOURCE,
+  DESTINATION=$DESTINATION,
+)
+</process>
+
+<process id="clean-merged-branch" name="Clean branch" input=".agents/rules/repository-change.oak.md#schema.branch-targets">
+CALL process.require-inactive-task ()
+CALL .agents/rules/repository-change.oak.md#process.clean-merged-branch (
+  REMOTE=$REMOTE,
+  SOURCE=$SOURCE,
+  DESTINATION=$DESTINATION,
 )
 </process>
 </processes>
 
 <interfaces>
-task-request RECEIVES schema.repository-task
-task-result EMITS schema.repository-result
+task-request RECEIVES .agents/rules/repository-task.oak.md#schema.repository-task
+task-resume RECEIVES .agents/rules/repository-task.oak.md#schema.resume-request
+task-approval RECEIVES .agents/rules/repository-task.oak.md#schema.approval-decision
+task-cancel RECEIVES .agents/rules/repository-task.oak.md#schema.task-handle
+status-request RECEIVES .agents/rules/repository-task.oak.md#schema.task-handle
+progress EMITS .agents/rules/repository-task.oak.md#schema.task-progress
+task-result EMITS .agents/rules/repository-task.oak.md#schema.repository-result
+name-request RECEIVES .agents/rules/repository-change.oak.md#schema.change-description
+name-result EMITS .agents/rules/repository-change.oak.md#schema.change-name
+branch-update RECEIVES .agents/rules/repository-change.oak.md#schema.branch-targets
+merge-request RECEIVES .agents/rules/repository-change.oak.md#schema.branch-targets
+merge-receipt RECEIVES .agents/rules/repository-change.oak.md#schema.branch-targets
 </interfaces>
