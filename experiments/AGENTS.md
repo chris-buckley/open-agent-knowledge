@@ -18,6 +18,8 @@ experiment-records: "Keep experimental intent in the experiment directory and im
 experiment-proposer-accounting: "Record physical proposer count separately from logical node responsibilities; shared-context sequential role-taking is not evidence of independent agents. The agent-guided-network execution model is owned by its EXPERIMENT.md."
 
 experiment-learning-index: "Maintain each continuing experiment's LEARNINGS.md as an evidence ledger with stable finding IDs, source links, scope, uncertainty, and contradictory results. Keep exact compression, task-specific replacement, and agent-attributable advantage distinct."
+
+experiment-goal-alignment: "Judge each experiment against the user's stated goal. Do not substitute comparative superiority for demonstrated participation, transfer, or other separately stated outcomes; retain controls and limitations without treating them as a different goal."
 </constants>
 
 <processes>

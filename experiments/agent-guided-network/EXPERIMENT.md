@@ -1,7 +1,7 @@
 # Agent-guided numerical networks
 
 Prepared: 2026-09-05
-Status: Feasibility, attention, and compression studies are implemented and measured. Agent-free numerical execution and task-specific compression are demonstrated; an advantage attributable to agent judgement is not established. See LEARNINGS.md for the evidence index.
+Status: Feasibility, attention, and compression studies are implemented and measured. Agent-free numerical execution and task-specific compression are demonstrated; an advantage attributable to agent judgement is not established. Generalisation and natural-language conversation are the next research direction, not demonstrated results. See LEARNINGS.md for the evidence index.
 Baseline: OAK `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a`.
 Branch: `experiment/agent-guided-network`.
 
@@ -9,11 +9,21 @@ Branch: `experiment/agent-guided-network`.
 
 Build a numerical network whose computational modules are defined by OAK documents. During learning, an agent wraps each module, understands its intended responsibility, examines evidence about its behaviour, and participates in proposing updates to that module's matrices. The network's collective output is evaluated, feedback informs further proposals, and accepted changes become new versions of the node documents.
 
-After learning, remove the agents completely. The remaining matrices, mathematical operations, connections, and input/output transformations must perform inference without language-model calls, conversational memory, natural-language interpretation, or agent judgement.
+After learning, remove the agents completely. The remaining matrices, mathematical operations, connections, and input/output transformations must perform inference without external language-model calls, the training agent's conversation history, or agent judgement. A deployed numerical language model may interpret language and maintain its own explicit dialogue state; those capabilities must belong to the exported network.
 
 The user's defining idea is agents participating in the learning journey, not agents remaining responsible for the learned capability. The intended eventual scale is hundreds of connected OAK-defined modules. A small, inspectable experiment comes first to test the mechanism, not to replace that ambition.
 
 The central requirement is that useful agent contributions become concrete numerical changes. A revised prompt, a persuasive explanation, or an agent correcting an answer is not a learned network update.
+
+## Primary goal and ultimate aim
+
+On 6 September 2026, Brisbane time, the user clarified that agent participation itself is the intended mechanism: an agent deliberately shapes a network during learning, then leaves a useful network that operates alone. Outperforming conventional training is a separate question, not a condition for acknowledging that mechanism. Existing control matches remain valid and are not erased or reinterpreted as agent superiority.
+
+The next priority is generalisation: can the same numerical network reuse learned relationships across unfamiliar objects, event combinations, longer histories, and questions? The ultimate aim is natural-language conversation produced by that network without a serving agent. Compactness remains desirable, but a tiny specialised solution is not a substitute for broader capability.
+
+The proposed bridge is a small changing world, with shared representations of objects, relations, events, time, and quantities, paired with language from the beginning. These are useful candidate building blocks, not a claim to have identified the fundamental laws of intelligence, matter, or language. [World and language generalisation](generalisation/WORLD_LANGUAGE.md) defines the proposed scope, non-scripted language criterion, evidence separation, and research connections. No world-language model or new measured result is introduced by this direction update.
+
+A numerical memory of the current world and conversation is allowed and needed by the proposed design. Agent-free means no training-agent reasoning at inference; it does not mean a memoryless network. Learned weights remain fixed during scored dialogue, while declared runtime state changes with observations and turns.
 
 ## Execution model: one running agent, many node responsibilities
 
@@ -71,9 +81,9 @@ OAK's node and host boundaries are defined by [the node owner](../../oak/node/AG
 
 ## Questions the experiment must answer
 
-H01, engineering: can agent-proposed updates produce useful numerical behaviour that persists after the wrappers are removed?
+H01, primary mechanism: can agent-proposed updates produce useful numerical behaviour that persists after the wrappers are removed?
 
-H02, learning value: does agent-guided numerical fitting outperform strong non-agent alternatives under declared resource budgets? No advantage is a valid result.
+H02, secondary comparative question: does agent-guided numerical fitting outperform strong non-agent alternatives under declared resource budgets? No advantage is a valid result.
 
 H03, meaning: do correct module descriptions and stable semantic interfaces improve proposals relative to missing or shuffled descriptions?
 
@@ -81,7 +91,11 @@ H04, organisation: do local node agents provide an advantage over one central ag
 
 H05, scale: does the approach remain useful as the number of modules grows toward hundreds? This is a later measurement target, not an established property.
 
-Engineering success and scientific advantage are separate verdicts. A working export demonstrates the former, not automatically the latter. Modularity, parameter changes, and explanatory labels alone do not establish learning, causality, or interpretability.
+H07, next capability question: can one agent-shaped numerical model transfer shared object, event, temporal, and quantity representations to held-out combinations and longer histories? This remains untested.
+
+H08, ultimate language question: can that exported network generate grounded, coherent multi-turn language for unfamiliar situations without an agent or a hand-written answer renderer? This remains untested; bounded dialogue is an intermediate target, not open-domain conversation.
+
+Mechanism feasibility, generalisation, conversation, compression, and comparative advantage are separate verdicts. A working export demonstrates the former, not automatically the latter. Modularity, parameter changes, and explanatory labels alone do not establish learning, causality, or interpretability.
 
 ## What each node owns
 
@@ -219,6 +233,8 @@ experiments/
   agent-guided-network/
     EXPERIMENT.md
     LEARNINGS.md
+    generalisation/
+      WORLD_LANGUAGE.md
     compression/
       COMPRESSION.md
       study.py and study.oak.md
@@ -264,9 +280,9 @@ Create per-run result directories only when runs exist. Do not fill the structur
 
 ## Current decision
 
-Implement and run the numerical-first feasibility experiment with the current assistant serving all logical node-agent roles sequentially. Preserve immutable inline node parameters, behavioural proposals materialised by numerical tools, independent acceptance, and agent-free export.
+Prioritise H01, H07, and H08: use the executing assistant as a training collaborator, test whether useful numerical capability transfers, and work toward agent-free conversation about a shared world. Preserve H06 compression and H02 comparative questions as separate measurements, not replacements for the primary aim.
 
-The user authorised execution on 2026-09-05 after requesting this documentation change as the next commit. First establish the smallest working numerical path, then make and evaluate actual assistant proposals, and report measured results with limitations. This authorisation does not claim that implementation, training, or export has already succeeded, and does not authorise merging into main.
+The three existing studies remain measured evidence with their original limitations. The [world-language design](generalisation/WORLD_LANGUAGE.md) is the next proposed experiment, not a completed study. Freeze its implementation, task generation, language splits, evaluation criteria, and bounded resource settings before scored teaching. Do not reinterpret the earlier retrieval tests as evidence of physical understanding or conversation. This direction update does not authorise a merge into main or paid external training.
 
 ## First measured execution
 
@@ -288,7 +304,7 @@ The [measured attention report](results/attention-run/REPORT.md) records four ac
 
 On 6 September 2026, Brisbane time, the user clarified the intended payoff: a much more compressed AI because agents can deliberately place or change its weights. H06 asks whether this produces retained capability at smaller parameter and deployed storage budgets. Direct editing alone does not imply compression. Preserve the distinction between exact functional folding, a smaller task-specific replacement, and an advantage attributable to agent judgement.
 
-[LEARNINGS.md](LEARNINGS.md) consolidates findings with stable IDs, evidence links, uncertainty, and contradictions as studies progress. [The compression protocol](compression/COMPRESSION.md) and [its frozen OAK study](compression/study.oak.md) define the current extension. The shared-context executing assistant continues to act for the logical node roles; prediction remains purely numerical.
+[LEARNINGS.md](LEARNINGS.md) consolidates findings with stable IDs, evidence links, uncertainty, and contradictions as studies progress. [The compression protocol](compression/COMPRESSION.md) and [its frozen OAK study](compression/study.oak.md) define the measured compression extension. The shared-context executing assistant continues to act for the logical node roles; prediction remains purely numerical.
 
 [The measured compression report](results/compression-run/REPORT.md) records 416-to-144 exact projection folding and a three-shared-gain task replacement. Seven live proposals across three fresh data seeds produced six acceptances and one rejection. Final accuracy was 100% on short, sixteen-entry, and near-key regimes, but 61.78% on harder unseen stress cases. A four-candidate non-agent search selected exactly the same model. A separate zero-learned-parameter task algorithm solved every regime. The three-gain result encodes aligned-key task structure, not general intelligence or demonstrated agent superiority.
 
