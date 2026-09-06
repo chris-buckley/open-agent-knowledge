@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: 80f2712feff87d06f25ac7a170b647f5abafe7b2
       - name: Export exact tracked baseline
         run: |
           git archive --format=tar --output="${RUNNER_TEMP}/oak-skill-layout-baseline.tar" 80f2712feff87d06f25ac7a170b647f5abafe7b2
