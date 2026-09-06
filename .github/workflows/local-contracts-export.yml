@@ -1,0 +1,27 @@
+name: Export local contracts worktree
+on:
+  push:
+    branches: [feat/add-resumable-repository-lifecycle]
+    paths: [.github/workflows/local-contracts-export.yml]
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Bundle the exact repository history without credentials
+        run: |
+          mkdir -p "$RUNNER_TEMP/oak-export"
+          git bundle create "$RUNNER_TEMP/oak-export/repository.bundle" HEAD
+          git rev-parse HEAD > "$RUNNER_TEMP/oak-export/revision.txt"
+          cd "$RUNNER_TEMP/oak-export"
+          sha256sum repository.bundle revision.txt > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-contracts-checkout
+          path: ${{ runner.temp }}/oak-export
+          retention-days: 1
