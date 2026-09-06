@@ -1,0 +1,81 @@
+diff --git a/build/checks/outputs.py b/build/checks/outputs.py
+index 544a8135a155aafed27cf9b8366068c4627f8971..2d346f39d411cc570e54b0331e5ab28bb4e55af0 100644
+--- a/build/checks/outputs.py
++++ b/build/checks/outputs.py
+@@ -18,3 +18,12 @@ sys.path.insert(0, sys.argv[1])
+-def refuse_network(*args, **kwargs):
+-    raise RuntimeError('generation attempted network access')
+-socket.socket = refuse_network
++def refuse_network(event, args):
++    if event.startswith('socket.'):
++        raise RuntimeError('generation attempted network access')
++sys.addaudithook(refuse_network)
++# Keep socket a class: SSL must remain importable after the test guard is installed.
++import ssl
++try:
++    socket.socket()
++except RuntimeError:
++    pass
++else:
++    raise RuntimeError('network test guard was not installed')
+@@ -37,3 +46,12 @@ sys.meta_path.insert(0, RejectBuildImports())
+-def refuse_network(*args, **kwargs):
+-    raise RuntimeError('detached validation attempted network access')
+-socket.socket = refuse_network
++def refuse_network(event, args):
++    if event.startswith('socket.'):
++        raise RuntimeError('detached validation attempted network access')
++sys.addaudithook(refuse_network)
++# Keep socket a class: SSL must remain importable after the test guard is installed.
++import ssl
++try:
++    socket.socket()
++except RuntimeError:
++    pass
++else:
++    raise RuntimeError('network test guard was not installed')
+diff --git a/docs/plans/0014-generated-products/evidence/verification.json b/docs/plans/0014-generated-products/evidence/verification.json
+index 5e120a1e8225b4dfc6ba9d052e9188ec3e839930..25c1e088c3224ff6821104811efb8878867bbda0 100644
+--- a/docs/plans/0014-generated-products/evidence/verification.json
++++ b/docs/plans/0014-generated-products/evidence/verification.json
+@@ -38 +38 @@
+-      "seconds": 1.07,
++      "seconds": 0.97,
+@@ -48 +48 @@
+-      "seconds": 0.72,
++      "seconds": 0.77,
+@@ -58 +58 @@
+-      "seconds": 0.97,
++      "seconds": 1.23,
+@@ -68 +68 @@
+-      "seconds": 0.87,
++      "seconds": 1.02,
+@@ -78 +78 @@
+-      "seconds": 39.99,
++      "seconds": 40.56,
+@@ -87 +87 @@
+-      "seconds": 39.48,
++      "seconds": 41.28,
+@@ -99 +99,10 @@
+-  ]
++  ],
++  "corrected_remote_finding": {
++    "run": "https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34034104544",
++    "python": "3.13.15",
++    "result": "failed before publication",
++    "error": "TypeError: function() argument 'code' must be code, not str",
++    "cause": "The isolated test replaced socket.socket with a function before SSL was imported.",
++    "correction": "Use a socket-event audit hook, import SSL after installing it, and require an attempted socket construction to be rejected. This is a test guard, not a security sandbox.",
++    "reverification": "The final_commands above were rerun after this correction; every command returned zero."
++  }
+diff --git a/docs/plans/0014-generated-products/report.md b/docs/plans/0014-generated-products/report.md
+index 73f88f9fc634f0f985c27c160f65082c6a965039..43212e78bfc96b9549fcf1cb09d2a9985083191e 100644
+--- a/docs/plans/0014-generated-products/report.md
++++ b/docs/plans/0014-generated-products/report.md
+@@ -94,0 +95,6 @@ Local verdict: Approved for remote candidate verification. This is not a merge a
++## Corrected remote finding
++
++The first remote candidate run, [34034104544](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34034104544), reproduced the expected Git tree but failed before publication. Its fresh Python 3.13.15 interpreter imported SSL after the test had replaced `socket.socket` with a function; SSL subclasses that class and raised `TypeError: function() argument 'code' must be code, not str`.
++
++Both isolated test programs now block socket audit events without replacing the socket class. Each imports SSL after installing the guard and asserts that socket construction is rejected. This is a no-network regression guard for trusted test code, not a security sandbox. The focused product checks and both complete local entry points passed again after the correction, with unchanged generated hashes. The OAK runtime and optional validator were not changed by this fix.
++
