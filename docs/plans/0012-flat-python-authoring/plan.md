@@ -3,7 +3,7 @@
 Prepared: 2026-09-06T14:04:20+10:00
 Classification: PUBLIC
 
-Status: Implementation and local verification complete. PR delivery pending.
+Status: Complete. All 30 tasks are evidenced; delivered for review in PR #18. Merge is not authorized.
 Authorization: The user authorized end-to-end implementation and PR creation on 2026-09-06. Merge is not authorized.
 Repository: chris-buckley/open-agent-knowledge
 Reviewed main: eca953bd81f78f005fdc1b3d17ed060620f6c97d
@@ -283,7 +283,7 @@ Transition trigger: The exact final candidate satisfies every preservation, reje
 Objective: Complete the implementation only after independent contract and source review.
 - [x] Key task: P06.01 Review the final diff independently against the migration table, every example disposition, and E01 through E05; apply findings and rerun all affected verification against the resulting candidate.
 - [x] Key task: P06.02 Add report.md with actual changed paths, retained examples, compatibility changes, commands/results, final revision, and remaining limitations; check off tasks only when their evidence is present.
-- [ ] Key task: P06.03 Commit without rewriting history and open the implementation PR with a subject marking the deliberate breaking contract; do not merge without a separate user instruction.
+- [x] Key task: P06.03 Commit without rewriting history and open the implementation PR with a subject marking the deliberate breaking contract; do not merge without a separate user instruction.
 Success criteria: All applicable tasks are complete, E01 through E05 are independently reviewed, the final verdict is supported, and the PR points to the verified candidate rather than an earlier revision.
 Transition trigger: Implementation is ready for user review; merge authorization remains separate.
 
@@ -307,9 +307,9 @@ Transition trigger: Implementation is ready for user review; merge authorization
 | Pinned source review | One main revision | eca953bd81f78f005fdc1b3d17ed060620f6c97d through GitHub | AVAILABLE |
 | Example authoring inventory | 23 registered modules plus support sources | examples/catalog.py and the review table | AVAILABLE |
 | Owning knowledge and format | Root/scoped AGENTS and SMEAC schema | Existing repository sources | AVAILABLE |
-| Executable repository checkout and declared dependencies | One isolated implementation environment | Provision during implementation | PENDING |
-| Baseline and candidate verification evidence | Two revision-linked records | Existing build and example checks | PENDING |
-| Independent implementation review | One final-candidate review | Implementation completion gate | PENDING |
+| Executable repository checkout and declared dependencies | Local Python 3.13 and hosted verification | Exact Git bundle and declared dependencies | AVAILABLE |
+| Baseline and candidate verification evidence | Local and hosted revision-linked records | report.md and evidence/verification.json | AVAILABLE |
+| Contract-led implementation review | One separate review using independent expected results | Implementing agent; no external reviewer claimed | AVAILABLE |
 
 Supply: Reuse the declared dependencies and current helper owners. Read the routed Pydantic, JSON Schema, and JSON-LD specialist material before changing those contracts; do not install optional tooling without required approval.
 Transportation: Keep the plan on a docs branch from the reviewed main revision. Carry the implementation through ordinary commits; regenerate artifacts rather than copying their edits between owners.

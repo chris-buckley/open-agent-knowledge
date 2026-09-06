@@ -1,6 +1,6 @@
 # Flat Python authoring completion report
 
-Status: Implementation and local verification complete; remote verification and PR delivery pending.
+Status: Complete; all 30 plan tasks are evidenced and PR #18 is open for review. No merge performed.
 Plan: [0012](plan.md)
 Reviewed main: `eca953bd81f78f005fdc1b3d17ed060620f6c97d`
 Verified implementation: `6be73d22fc1e97c3616502c57949ed798d4abfb6`
@@ -70,7 +70,7 @@ All paths below are relative to `examples/`.
 | git diff --check | Exit 0. |
 | Source pin identity | Core matches `dc71e5ec140e1b94351ceabab3a55b9ab8aa9dce` exactly; dependencies unchanged. |
 | Product size | 63,974 bytes against the unchanged 64,000-byte limit. |
-| Live download/bootstrap | Pending remote CI, not claimed by offline fixtures. |
+| Live download/bootstrap | Passed in PR run 34015349711, job 101438034669: approved pinned download, isolated installation, standalone validation, and cache reuse. |
 
 The complete suite includes detached runs with repository imports and network blocked, source/guard routing, state isolation, evidence rejection, native context scope, exact tool dispatch, PAR/JOIN restrictions, skill fusion, optional-validator consent/identity/cache cases, plans, and scoped AGENTS checks. The fixtures are not evidence of live model quality.
 
@@ -86,10 +86,23 @@ The implementing agent performed a separate contract-led diff review against E01
 4. Longer grammar identifiers exceeded the assembled-agent budget by 64 bytes. Shorter equivalent grammar commentary restores the existing limit without removing validation or changing production tokens.
 5. Blind replacement would damage literal steps data and STEP placeholders. Model-aware baseline comparison and literal fixtures prove those values unchanged.
 
-Review verdict: Approved for PR delivery on the tested product. Remote bootstrap and final-head CI remain explicit delivery gates; no merge is authorized.
+Review verdict: Approved for review delivery after local and hosted verification, including real validator bootstrap. All 30 tasks have observed evidence. No external reviewer, human approval, or merge is claimed.
 
 ## Compatibility and limitations
 
 This intentionally breaks Python step imports/constructor fields, serialized model fields, generated surface IDs, and JSON-LD steps/thenSteps fields. `outputs/docs/process.md` is the generated migration-note owner. Authored OAK tokens, meaning, document boundaries, and stable diagnostic codes are unchanged. Existing unrelated diagnostic or natural-language uses of step are retained.
 
 Product fingerprint: `ca9252b1a8fb47ec860a6b4b9fdc4c78e1ae654c1fa2cd5624dcad06bf101c96`. The fingerprint scope excludes historical completion records so their final PR evidence can be added without changing the tested product. Final delivery records must identify the resulting commit and observed CI; this report does not claim its own future verification.
+
+
+## Delivery evidence
+
+PR: [#18](https://github.com/chris-buckley/open-agent-knowledge/pull/18), from `refactor/flatten-python-authoring` into `main`; open, non-draft, and not merged.
+
+Verified integration: `df91c0325387802ef1d43b7efbe25de32bc77d10`, tree `273758612a5411a2d0c2195e2a88aebf4e26ee75`, exactly matching local candidate `0de10cf10e9728e833fa1ee34bce91a978cfaf22`. The original plan and all four implementation commits retain their identities. Temporary transfer workflow and payload files are absent from the product tree.
+
+Hosted integration [run 34015267995](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34015267995) verified every transferred blob, tree, and commit, then passed compilation, both complete verification entry points, the independent 28-document preservation comparison, and repeated generation before preserving both histories in the clean integration commit.
+
+PR [run 34015349711](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34015349711), job `101438034669`, completed successfully against head `df91c0325387802ef1d43b7efbe25de32bc77d10` and base `eca953bd81f78f005fdc1b3d17ed060620f6c97d`. Every step passed, including the approved real pinned-validator download, isolated installation, standalone validation, and cache reuse.
+
+P06.03 is complete: the breaking-change PR is open and all original commits are preserved. This documentation-only closeout changes the plan, report, and verification record, not the tested product fingerprint. Its exact commit and final hosted verification are recorded in the PR conversation after observation, rather than making a commit claim to contain its own future CI result.
