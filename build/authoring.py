@@ -38,8 +38,8 @@ def skill_documents() -> dict[str, str]:
     """The exact OAK material shared by progressive loading and agent fusion."""
     validator = validator_module()
     nodes = knowledge_nodes(SCRIPT.read_text(encoding="utf-8"), validator.SKILL_VERSION, validator.REVISION)
-    return {ENTRY: render(entry_node(), grouping="markdown"),
-            **{path: render(node, grouping="markdown") for path, node in nodes.items()}}
+    return {ENTRY: render(entry_node()),
+            **{path: render(node) for path, node in nodes.items()}}
 
 
 def tree(documents: dict[str, str] | None = None) -> Node:
@@ -47,7 +47,7 @@ def tree(documents: dict[str, str] | None = None) -> Node:
 
 
 def authoring() -> str:
-    return render(tree(), grouping="markdown") + "\n"
+    return render(tree()) + "\n"
 
 
 def artifacts() -> dict[Path, str]:
@@ -67,7 +67,7 @@ def artifacts() -> dict[Path, str]:
         PACKAGE / "references" / "oak.ebnf": grammar(),
         PACKAGE / "_template" / "SKILL.md": TEMPLATE_ENTRY,
         **{PACKAGE / "_template" / path / ".gitkeep": "" for path in TEMPLATE_DIRECTORIES},
-        TARGET: render(tree(shared), grouping="markdown") + "\n",
+        TARGET: render(tree(shared)) + "\n",
     }
 
 

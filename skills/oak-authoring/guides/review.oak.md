@@ -1,8 +1,8 @@
-~~~~instructions
+<instructions>
 Constants hold values that do not change while the knowledge runs.
-~~~~
+</instructions>
 
-~~~~constants
+<constants>
 guidance: YAML<<
 - Produce exactly one valid OAK document.
 >>
@@ -27,4 +27,4 @@ teaching: JSON<<
   "assets/examples/compound_growth/sample.oak.md": "<instructions>\nConstants hold values that do not change while the knowledge runs.\n</instructions>\n\n<constants>\narrival: {\"event\": \"Continue growing the balance.\", \"count\": 2}\n\ninitial-state: {\"state.current-balance\": 100, \"state.reflection-target\": 800}\n\nexpected-states: [{\"state.current-balance\": 815.04, \"state.reflection-target\": 6400}, {\"state.current-balance\": 6642.28, \"state.reflection-target\": 51200}]\n\nexpected-emissions: [{\"BALANCE\": 815.04, \"REFLECTION\": \"Balance 815.04 passed target 800.\"}, {\"BALANCE\": 6642.28, \"REFLECTION\": \"Balance 6642.28 passed target 6400.\"}]\n\nfailure: \"A reflection failure after staged growth leaves caller state unchanged and returns no committed result. Host calls are not rolled back.\"\n\nhost: \"Exact math.multiply arithmetic and deterministic reflection; two fixture arrivals, not an automatic infinite scheduler.\"\n</constants>"
 }
 >>
-~~~~
+</constants>

@@ -1,8 +1,8 @@
-~~~~instructions
+<instructions>
 Constants hold values that do not change while the knowledge runs.
-~~~~
+</instructions>
 
-~~~~constants
+<constants>
 guidance: YAML<<
 - Write one idless node using only the seven parts in canonical order.
 - Keep tool implementations, handlers, transport, credentials, model selection, and
@@ -368,4 +368,4 @@ surface_node = ? <instructions>
 <INTERFACES>
 </interfaces> ? ;
 >>
-~~~~
+</constants>

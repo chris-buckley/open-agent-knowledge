@@ -1,4 +1,4 @@
-~~~~instructions
+<instructions>
 $ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
@@ -10,9 +10,9 @@ Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 Each trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
-~~~~
+</instructions>
 
-~~~~constants
+<constants>
 guide-1-guidance: YAML<<
 - Treat the complete supplied host context as the source, regardless of modality.
 - Omit every part and entry that the source does not justify.
@@ -28,7 +28,7 @@ guide-1-skill-template: JSON<<
 "---\nname: \"<SKILL_NAME>\"\ndescription: \"<SKILL_DESCRIPTION>\"\n---\n\n<INSTRUCTIONS_PART>\n<constants>\npurpose: <PURPOSE_JSON>\n\nlayout: TEXT<<\nSKILL_TREE:\n  SKILL.md→Skill entry point\n  references/→Supporting knowledge\n  assets/\n    constants/→Reusable fixed values\n    schemas/→Reusable information shapes\n  processes/→OAK workflows\n  guides/→Practical guidance\n  scripts/→Executable helpers\n>>\n\n<CONSTANT_ENTRIES>\n</constants>\n<SCHEMAS_PART>\n<STATE_PART>\n<TRIGGERS_PART>\n<PROCESSES_PART>\n<INTERFACES_PART>\n"
 >>
 
-guide-1-template-use: "For a new skill, copy _template/SKILL.md or materialize skill-template verbatim. Fill metadata markers as quoted YAML strings and PURPOSE_JSON as a JSON string. Replace each PART line with a justified OAK section and one blank-line separator, or remove the whole line. CONSTANT_ENTRIES adds fixed values or is empty. Remove all markers, unused parts and resources, and .gitkeep when adding content. The tree displays knowledge, not imports. Unfilled scaffolding is inert."
+guide-1-template-use: "For new skills, copy _template/SKILL.md or materialize skill-template verbatim. Quote metadata markers as YAML strings; fill PURPOSE_JSON with a JSON string. Replace each PART line with a justified OAK section and one blank line, or delete the line. CONSTANT_ENTRIES holds fixed values or is empty. Remove all markers, unused parts/resources, and .gitkeep when adding content. Displayed paths are not imports. Unfilled scaffolding is inert."
 
 guide-2-guidance: YAML<<
 - Produce exactly one valid OAK document.
@@ -72,8 +72,8 @@ guide-3-validation-policy: YAML<<
   match, not just the package name or version.
 - Use scripts/validate.py from the skill. In the standalone agent, materialize validator-script
   exactly as a local validate.py only when validation is requested.
-- 'First run: python validate.py document.oak.md. Use --root for a larger explicitly
-  allowed document graph. In the skill directory the script path is scripts/validate.py.'
+- Run python validate.py document.oak.md. Use --root for larger explicitly allowed
+  graphs.
 - When the result says permission-required, ask permission to download the identified
   OAK revision and install its declared dependencies in an isolated cached environment.
   Requesting validation is not installation consent.
@@ -880,51 +880,51 @@ guide-11-guidance: YAML<<
 >>
 
 guide-11-last-decision: "Do not author copies of the node-derived interpretation guidance."
-~~~~
+</constants>
 
-~~~~schemas
-~~~schema;id="authoring-request"
+<schemas>
+<schema id="authoring-request">
 SOURCE: <SOURCE>
 VALIDATE: <VALIDATE>
 
 WHERE:
 - <SOURCE> is string; is non-empty.
 - <VALIDATE> is boolean.
-~~~
+</schema>
 
-~~~schema;id="oak-candidate"
+<schema id="oak-candidate">
 CANDIDATE: <CANDIDATE>
 
 WHERE:
 - <CANDIDATE> is string; is non-empty.
-~~~
+</schema>
 
-~~~schema;id="authoring-result"
+<schema id="authoring-result">
 OAK: <OAK>
 VALIDATION: <VALIDATION>
 
 WHERE:
 - <OAK> is string; is non-empty.
 - <VALIDATION> is string; is non-empty.
-~~~
+</schema>
 
-~~~schema;id="validator-check"
+<schema id="validator-check">
 INSTALL_REQUIRED: <INSTALL_REQUIRED>
 REPORT: <REPORT>
 
 WHERE:
 - <INSTALL_REQUIRED> is boolean.
 - <REPORT> is string; is non-empty.
-~~~
+</schema>
 
-~~~schema;id="installation-consent"
+<schema id="installation-consent">
 APPROVED: <APPROVED>
 
 WHERE:
 - <APPROVED> is boolean.
-~~~
+</schema>
 
-~~~schema;id="validation-context"
+<schema id="validation-context">
 CANDIDATE: <CANDIDATE>
 REPORT: <REPORT>
 ALLOW_INSTALL: <ALLOW_INSTALL>
@@ -933,9 +933,9 @@ WHERE:
 - <CANDIDATE> is string; is non-empty.
 - <REPORT> is string; is non-empty.
 - <ALLOW_INSTALL> is boolean.
-~~~
+</schema>
 
-~~~schema;id="guide-5-option-comparison";name="Option Comparison";purpose="Compare current and proposed behaviour for one criterion."
+<schema id="guide-5-option-comparison" name="Option Comparison" purpose="Compare current and proposed behaviour for one criterion.">
 | Criterion | Current | Proposed |
 | --- | --- | --- |
 | <CRITERION> | <CURRENT> | <PROPOSED> |
@@ -944,9 +944,9 @@ WHERE:
 - <CRITERION> is string; matches `^[^|\r\n]+$`.
 - <CURRENT> is string; matches `^[^|\r\n]+$`.
 - <PROPOSED> is string; matches `^[^|\r\n]+$`.
-~~~
+</schema>
 
-~~~schema;id="guide-5-decision-brief";name="Decision Brief";purpose="State one decision and explain its rationale."
+<schema id="guide-5-decision-brief" name="Decision Brief" purpose="State one decision and explain its rationale.">
 ## Decision
 <DECISION>
 
@@ -956,9 +956,9 @@ WHERE:
 WHERE:
 - <DECISION> is string; is non-empty.
 - <RATIONALE> is string; is non-empty.
-~~~
+</schema>
 
-~~~schema;id="guide-5-work-outline";name="Work Outline";purpose="Nest one implementation step and its check beneath one goal."
+<schema id="guide-5-work-outline" name="Work Outline" purpose="Nest one implementation step and its check beneath one goal.">
 1. <GOAL>
    1. <STEP>
       1. <CHECK>
@@ -967,9 +967,9 @@ WHERE:
 - <GOAL> is string; is non-empty; is one line.
 - <STEP> is string; is non-empty; is one line.
 - <CHECK> is string; is non-empty; is one line.
-~~~
+</schema>
 
-~~~schema;id="guide-5-code-file";name="Code File";purpose="Present one Python file with its complete source."
+<schema id="guide-5-code-file" name="Code File" purpose="Present one Python file with its complete source.">
 ### <FILE_PATH>
 
 ```python
@@ -979,10 +979,10 @@ WHERE:
 WHERE:
 - <FILE_PATH> is path; matches `^[A-Za-z0-9_./\-]+$`.
 - <CODE> is string; is non-empty.
-~~~
-~~~~
+</schema>
+</schemas>
 
-~~~~triggers
+<triggers>
 authoring-requested(
   event="OAK authoring is requested for supplied source material.",
   process=process.capture-request,
@@ -992,15 +992,15 @@ request-received(
   source=interface.authoring-input,
   process=process.author-document,
 )
-~~~~
+</triggers>
 
-~~~~processes
-~~~process;id="capture-request";name="Capture request"
+<processes>
+<process id="capture-request" name="Capture request">
 ACT output="schema.authoring-request": Capture all supplied <SOURCE>; set <VALIDATE> true only for requested programmatic validation, otherwise false. () -> SOURCE, VALIDATE
 CALL process.author-document (SOURCE=$SOURCE, VALIDATE=$VALIDATE)
-~~~
+</process>
 
-~~~process;id="author-document";name="Author document";input="schema.authoring-request"
+<process id="author-document" name="Author document" input="schema.authoring-request">
 ACT Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> to define <SCOPE>. For a new skill, use <TEMPLATE> under <TEMPLATE_USE>; otherwise do not add scaffolding. Consult each guide's remaining knowledge as needed. (
   AUTHORING=$constant.guide-1-guidance,
   STRUCTURE=$constant.guide-4-guidance,
@@ -1057,9 +1057,9 @@ ELSE:
     OAK=$CANDIDATE,
     VALIDATION="Programmatic validation was not performed (not requested).",
   )
-~~~
+</process>
 
-~~~process;id="validate-and-deliver";name="Check validator";input="schema.oak-candidate"
+<process id="validate-and-deliver" name="Check validator" input="schema.oak-candidate">
 ACT output="schema.validator-check": Apply <POLICY> with exact <HELPER> to <CANDIDATE> without --allow-install. Return actual <REPORT>; <INSTALL_REQUIRED> is true only for permission-required, not invalid OAK or unavailable execution. (
   POLICY=$constant.guide-3-validation-policy,
   HELPER=$constant.guide-3-validator-script,
@@ -1078,9 +1078,9 @@ IF $INSTALL_REQUIRED equals true:
     )
 ELSE:
   CALL process.finalize-validation (CANDIDATE=$CANDIDATE, REPORT=$REPORT, ALLOW_INSTALL=false)
-~~~
+</process>
 
-~~~process;id="finalize-validation";name="Report validation";input="schema.validation-context"
+<process id="finalize-validation" name="Report validation" input="schema.validation-context">
 ACT output="schema.authoring-result": Finalize <CANDIDATE> from <REPORT> under <POLICY>. Run exact <HELPER> with --allow-install only when <ALLOW_INSTALL> is true; otherwise never install or download. Repair errors and recheck changes under the same permission, not unchanged successes. Produce <OAK> and truthful <VALIDATION>. (
   REPORT=$REPORT,
   CANDIDATE=$CANDIDATE,
@@ -1089,10 +1089,10 @@ ACT output="schema.authoring-result": Finalize <CANDIDATE> from <REPORT> under <
   HELPER=$constant.guide-3-validator-script,
 ) -> OAK, VALIDATION
 EMIT interface.authored-document
-~~~
-~~~~
+</process>
+</processes>
 
-~~~~interfaces
+<interfaces>
 authoring-input RECEIVES schema.authoring-request
 authored-document EMITS schema.authoring-result
-~~~~
+</interfaces>

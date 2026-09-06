@@ -1,8 +1,8 @@
-~~~~instructions
+<instructions>
 Constants hold values that do not change while the knowledge runs.
-~~~~
+</instructions>
 
-~~~~constants
+<constants>
 guidance: YAML<<
 - Review the draft against the grammar, populated examples, and OAK contracts; run
   programmatic validation only when requested and report whether it actually ran.
@@ -20,8 +20,8 @@ validation-policy: YAML<<
   match, not just the package name or version.
 - Use scripts/validate.py from the skill. In the standalone agent, materialize validator-script
   exactly as a local validate.py only when validation is requested.
-- 'First run: python validate.py document.oak.md. Use --root for a larger explicitly
-  allowed document graph. In the skill directory the script path is scripts/validate.py.'
+- Run python validate.py document.oak.md. Use --root for larger explicitly allowed
+  graphs.
 - When the result says permission-required, ask permission to download the identified
   OAK revision and install its declared dependencies in an isolated cached environment.
   Requesting validation is not installation consent.
@@ -334,4 +334,4 @@ def main(argv: list[str] | None = None) -> int:
 if __name__ == "__main__":
     raise SystemExit(main())
 >>
-~~~~
+</constants>
