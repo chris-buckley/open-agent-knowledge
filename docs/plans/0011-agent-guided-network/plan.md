@@ -148,6 +148,14 @@ Transition trigger: The verified research delivery is recorded; broader conversa
 - If controls show no useful agent advantage then report that outcome without relabelling it as success.
 - If a required verification surface is unavailable then record the exact limitation and do not claim the check passed.
 
+### Phase 13: Generate dialogue and compare representations
+Objective: Measure generated replies and matched OAK/Python learning without claiming broad conversation.
+- [x] Key task: P13.01 Commit the protocol, freeze numerical source and data, and implement an eight-document generator and the same Python computation.
+- [x] Key task: P13.02 Record one live teaching proposal, fit it separately through both representations, retain controls and close selection before final cases.
+- [x] Key task: P13.03 Audit saved replies, scoped edits, isolated exports and sampled restored/native state; preserve the evidence and update LEARNINGS.md.
+Success criteria: Each frozen-model audit reproduces its own saved predictions. Cross-environment retraining differences are retained rather than claimed to pass exact replay. Scientific capability failure, host versus OAK checks and unmatched agent effort are explicit.
+Transition trigger: The audited research artifact is preserved. No reliable conversational deployment, independent-agent advantage or merge into main is authorised.
+
 ## 4. Admin and Logistics
 
 | Resource | Quantity | Source | Status |

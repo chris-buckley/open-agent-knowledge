@@ -1,6 +1,6 @@
 # Learning index
 
-Updated: 6 September 2026.
+Updated: 7 September 2026.
 Scope: Evidence from this experiment, not established properties of general AI.
 Intent owner: [EXPERIMENT.md](EXPERIMENT.md).
 
@@ -53,6 +53,16 @@ D005, 6 September 2026: missing context/world-language run files and their quote
 | L023 | Selected one-token models survive state restoration and agent-free export on tested cases. | 6,144 isolated predictions, 96 OAK samples; not a conversational or universal-equivalence result. | [Verification](results/meaning-run/REPORT.md#verification-and-finalisation) |
 | L024 | More wording variation or agreement training is not uniformly better in this fixed study. | Ordinary repetition is stronger on some paired tests; all controls and losses remain visible. | [Comparisons](results/meaning-run/REPORT.md#paired-meaning-tests) |
 
+| L025 | An OAK graph generates multiword replies and consumes its own previous replies. | Restricted 47-token, four-object, four-room task; no open-domain competence. | [Dialogue evidence](results/dialogue-run/REPORT.md) |
+| L026 | Separately fitting the same update from OAK and Python sources gives identical weights and replies. | Within each paired execution; not independent agent-productivity trials. | [Dialogue evidence](results/dialogue-run/REPORT.md) |
+| L027 | Equivalent host safeguards accept the same valid edit and reject the same invalid edits. | Six fault classes; scripted checks, not measured agent error rates or native OAK tensor checks. | [Dialogue evidence](results/dialogue-run/REPORT.md) |
+| L028 | Individual-reply accuracy substantially overstates complete-conversation success. | Local scoped model: 55.76% ordinary replies but 11.72% complete conversations. Replication is reported separately. | [Dialogue evidence](results/dialogue-run/REPORT.md) |
+| L029 | The tested networks fail withheld object-destination associations. | Local scoped model: zero correct first answers and complete dialogues in 256 combination cases. Replication counts remain separate. | [Dialogue evidence](results/dialogue-run/REPORT.md) |
+| L030 | The scoped model rarely acknowledges missing information. | Local run: one correct reply in 85 ordinary missing-information cases. Replication counts are separate. | [Dialogue evidence](results/dialogue-run/REPORT.md) |
+| L031 | This OAK execution adapter adds storage and latency overhead. | Identical numerical model; fixture-specific timing, not a general performance or productivity verdict. | [Dialogue evidence](results/dialogue-run/REPORT.md) |
+| L032 | The wording test also introduces vocabulary entries unused in teaching. | Mixed wording and lexical shift, not a clean familiar-word-order experiment. | [Dialogue evidence](results/dialogue-run/REPORT.md) |
+| L033 | Fixed seeds and matching scientific source did not reproduce local checkpoints in another environment. | Strict CI replay failed. Replication is labelled separately; its cause is not isolated. Within-run representation equality still holds. | [Dialogue evidence](results/dialogue-run/REPORT.md) |
+
 ## How to extend this index
 
 Give each finding a stable ID, a falsifiable statement, an observed/proposed/inconclusive status, a scope limit, and a link to immutable run evidence. Record contradictory results and rejected updates. Update the index after a completed observation or study, not on the strength of an agent explanation.
@@ -61,6 +71,6 @@ Keep parameter counts, active weights, dtype, metadata, code bytes, and complete
 
 ## Questions still open
 
-Can shared concepts support unfamiliar combinations and longer histories without new weight changes? Does joint world-and-language teaching support generated multi-turn conversation rather than selecting prepared replies? Can the model distinguish what happened from what was observed, handle corrections, and ask for missing information? The meaning resumption measures a narrow six-choice version, not those broader conversational abilities.
+Can shared concepts support unfamiliar combinations and longer histories without new weight changes? Does joint world-and-language teaching support generated multi-turn conversation rather than selecting prepared replies? Can the model distinguish what happened from what was observed, handle corrections, and ask for missing information? The dialogue study generates short sentences, but fails reliable four-turn conversation and unfamiliar combinations.
 
 Compactness, less-structured transfer, and superiority to automatic structure selection remain secondary research questions. The compression study confirms a compact task-specific solution but its non-agent control matches it. That is compatible with the demonstrated participation mechanism and does not establish broad intelligence. Keep new direction decisions separate from empirical ledger entries until runs supply evidence.

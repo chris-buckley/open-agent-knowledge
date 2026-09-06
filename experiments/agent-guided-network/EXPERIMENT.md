@@ -1,7 +1,7 @@
 # Agent-guided numerical networks
 
 Prepared: 2026-09-05
-Status: Feasibility, attention, compression and wording-versus-meaning studies are measured. The latest study verifies one-token numerical answers and exposes failed unseen-wording transfer. Reliable conversation and broad generalisation remain unproven. See LEARNINGS.md.
+Status: Restricted generated dialogue and matched OAK/Python training are measured. Paired representations give identical weights within each run; reliable conversation fails. Cross-environment retraining differs and is reported separately. See LEARNINGS.md and results/dialogue-run/REPORT.md.
 Baseline: OAK `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a`.
 Branch: `experiment/agent-guided-network`.
 
@@ -313,3 +313,7 @@ Coefficient payload fell from 3,328 to 24 bytes, but the actual complete exporte
 ## Verified wording-versus-meaning resumption
 
 The [meaning report](results/meaning-run/REPORT.md) records a new execution of the existing committed protocol, not recovery of missing context results. One live teaching choice is followed by numerical replay, independent metric recomputation and model-bound memory-restoration checks. The original scientific source remains unchanged. This model selects a single location word; it is not the proposed conversational world model.
+
+## Measured generated-dialogue comparison
+
+The [dialogue study](dialogue/PROTOCOL.md) uses eight executable OAK documents and 38,519 coefficients to generate words. The [report](results/dialogue-run/REPORT.md) records identical paired OAK/Python updates, equivalent host safeguard checks and severe factual and whole-conversation failures. This is no demonstrated learning-quality or agent-productivity advantage for OAK. Exact cross-environment checkpoint replay failed; a separately labelled replication retains its own weights and predictions. Parameters remain fixed during dialogue, while the exported numerical system updates its own conversation history. Earlier unverified context studies are not reinstated.
