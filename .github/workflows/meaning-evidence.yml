@@ -1,0 +1,79 @@
+name: Verify and preserve meaning evidence
+on:
+  push:
+    branches: ['experiment/agent-guided-network']
+    paths: ['.github/workflows/meaning-evidence.yml']
+permissions:
+  contents: write
+concurrency:
+  group: oak-meaning-evidence-publication
+  cancel-in-progress: false
+jobs:
+  evidence:
+    if: github.repository == 'chris-buckley/open-agent-knowledge' && github.ref == 'refs/heads/experiment/agent-guided-network'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install declared dependencies and fixed numerical versions
+        run: |
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.10.0
+          python - <<'PY'
+          import pathlib, subprocess, sys, tomllib
+          dependencies = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['dependencies']
+          subprocess.run([sys.executable, '-m', 'pip', 'install', *dependencies, 'numpy==2.3.5', '-r', 'experiments/agent-guided-network/meaning/requirements.txt'], check=True)
+          PY
+      - name: Verify branch and all four experiment test suites
+        run: |
+          python -m compileall -q oak build examples experiments
+          python -m examples.catalog
+          python -m build.ebnf
+          python -m build.docs
+          python -m build.authoring
+          python -m build.examples
+          python build/examples.py
+          python -m build.authoring
+          git diff --exit-code
+          python experiments/agent-guided-network/run.py test
+          python experiments/agent-guided-network/attention/run.py test
+          python experiments/agent-guided-network/compression/run.py test
+          python experiments/agent-guided-network/meaning/run.py test
+      - name: Reproduce recorded choices and audit every saved score
+        run: python experiments/agent-guided-network/meaning/reproduce.py replay "$RUNNER_TEMP/meaning-replay"
+      - name: Prepare audited archive and evidence-linked documents
+        run: |
+          python experiments/agent-guided-network/meaning/publication.py "$RUNNER_TEMP/meaning-replay"
+          python -m build.examples
+          python build/examples.py
+      - name: Commit evidence only to the unchanged experiment branch
+        run: |
+          test "$GITHUB_REF" = 'refs/heads/experiment/agent-guided-network'
+          current=$(git ls-remote origin refs/heads/experiment/agent-guided-network | cut -f1)
+          test "$current" = "$GITHUB_SHA"
+          git add -- experiments/agent-guided-network/results/meaning-run/reproduced experiments/agent-guided-network/results/meaning-run/REPORT.md experiments/agent-guided-network/results/meaning-run/publication.json experiments/agent-guided-network/LEARNINGS.md experiments/agent-guided-network/EXPERIMENT.md docs/plans/0011-agent-guided-network/plan.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'test(meaning): publish independently reproduced evidence'
+          git push origin HEAD:refs/heads/experiment/agent-guided-network
+      - name: Package the exact published source
+        run: |
+          mkdir -p "$RUNNER_TEMP/meaning-source"
+          git rev-parse HEAD > "$RUNNER_TEMP/meaning-source/REVISION"
+          git archive --format=tar HEAD > "$RUNNER_TEMP/meaning-source/source.tar"
+          cd "$RUNNER_TEMP/meaning-source"
+          sha256sum source.tar > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oak-meaning-verified-source
+          path: ${{ runner.temp }}/meaning-source/
+          if-no-files-found: error
+          retention-days: 7
