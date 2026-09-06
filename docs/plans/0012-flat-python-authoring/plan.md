@@ -3,7 +3,7 @@
 Prepared: 2026-09-06T14:04:20+10:00
 Classification: PUBLIC
 
-Status: In progress. Implementation authorized; baseline verification passed.
+Status: Implementation and local verification complete. PR delivery pending.
 Authorization: The user authorized end-to-end implementation and PR creation on 2026-09-06. Merge is not authorized.
 Repository: chris-buckley/open-agent-knowledge
 Reviewed main: eca953bd81f78f005fdc1b3d17ed060620f6c97d
@@ -263,8 +263,8 @@ Objective: Ship one consistent current API and the unchanged scenario knowledge 
 - [x] Key task: P04.01 Refresh shared authoring guidance only where relevant, update build/authoring_guides.py, build/fusion.py, and active teaching snippets for renamed API consumers, preserving literal embedded documents and operational scope.
 - [x] Key task: P04.02 Run catalogue generation to refresh scenario snapshots, samples, local dependencies, copied bindings, and catalog.oak.md; require unchanged baseline scenario OAK bytes rather than accepting unexplained snapshot updates.
 - [x] Key task: P04.03 Regenerate EBNF and model/surface reference; inspect model examples, JSON Schema definitions, surface paths, and removal of stale generated pages.
-- [ ] Key task: P04.04 Commit the changed core normally, then update the optional validator's immutable revision and source/dependency fingerprints according to its existing identity checks; never point it at floating main or invent a revision.
-- [ ] Key task: P04.05 Regenerate SKILL.md, numbered references, guides, assets/examples, the inert _template scaffold, and outputs/oak-authoring.oak.md; retain current file ownership, consent outcomes, and size budgets.
+- [x] Key task: P04.04 Commit the changed core normally, then update the optional validator's immutable revision and source/dependency fingerprints according to its existing identity checks; never point it at floating main or invent a revision.
+- [x] Key task: P04.05 Regenerate SKILL.md, numbered references, guides, assets/examples, the inert _template scaffold, and outputs/oak-authoring.oak.md; retain current file ownership, consent outcomes, and size budgets.
 Success criteria: E05 holds across the actual exported file sets and validator identity; every generated change is explained by a source change, and no scenario literal or operational scope drifts.
 Transition trigger: All delivered forms are regenerated from their source owners and ready for full verification.
 
@@ -274,15 +274,15 @@ Objective: Prove the new API and flatter sources preserve meaning while rejectin
 - [x] Key task: P05.02 Reject old steps inputs, mixed body/steps inputs, old public aliases, and stale imports; test valid and invalid nested combinations without relaxing existing validation or PAR/JOIN restrictions.
 - [x] Key task: P05.03 Compare current canonical models against the baseline with a model-aware field migration only; compare authored XML/Markdown bytes exactly, and validate intentional JSON-LD differences using independent mixed-body/order/literal specimens.
 - [x] Key task: P05.04 Run every catalogue scenario, both groupings, schema binding and layout checks, and declared detached demonstrations with repository imports/network blocked; verify evidence rejection, state isolation, context scopes, and simulated-effect disclosures.
-- [ ] Key task: P05.05 Run compileall, python -m build.examples, and python build/examples.py, including skill-agent parity, consent, fingerprint, reference freshness, plan, and scoped AGENTS checks; record the exact tested commit and observed results.
-- [ ] Key task: P05.06 Repeat all affected generation and require no diff; search obsolete identifiers, fields, module paths, surface IDs, and active snippets, recording each legitimate literal/history/diagnostic exception explicitly.
+- [x] Key task: P05.05 Run compileall, python -m build.examples, and python build/examples.py, including skill-agent parity, consent, fingerprint, reference freshness, plan, and scoped AGENTS checks; record the exact tested commit and observed results.
+- [x] Key task: P05.06 Repeat all affected generation and require no diff; search obsolete identifiers, fields, module paths, surface IDs, and active snippets, recording each legitimate literal/history/diagnostic exception explicitly.
 Success criteria: E01 through E05 are evidenced at the final candidate; complete verification passes, detached products remain bounded, and repeated generation changes nothing. A text search or valid schema is never substituted for behavioural evidence.
 Transition trigger: The exact final candidate satisfies every preservation, rejection, and delivery check.
 
 ### Phase 6: Review and deliver the completed change
 Objective: Complete the implementation only after independent contract and source review.
-- [ ] Key task: P06.01 Review the final diff independently against the migration table, every example disposition, and E01 through E05; apply findings and rerun all affected verification against the resulting candidate.
-- [ ] Key task: P06.02 Add report.md with actual changed paths, retained examples, compatibility changes, commands/results, final revision, and remaining limitations; check off tasks only when their evidence is present.
+- [x] Key task: P06.01 Review the final diff independently against the migration table, every example disposition, and E01 through E05; apply findings and rerun all affected verification against the resulting candidate.
+- [x] Key task: P06.02 Add report.md with actual changed paths, retained examples, compatibility changes, commands/results, final revision, and remaining limitations; check off tasks only when their evidence is present.
 - [ ] Key task: P06.03 Commit without rewriting history and open the implementation PR with a subject marking the deliberate breaking contract; do not merge without a separate user instruction.
 Success criteria: All applicable tasks are complete, E01 through E05 are independently reviewed, the final verdict is supported, and the PR points to the verified candidate rather than an earlier revision.
 Transition trigger: Implementation is ready for user review; merge authorization remains separate.
