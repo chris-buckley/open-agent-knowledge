@@ -1,0 +1,35 @@
+name: Flat authoring source transfer
+on:
+  push:
+    branches: [refactor/flatten-python-authoring]
+    paths: [.github/workflows/flat-authoring-transfer.yml]
+permissions:
+  contents: read
+jobs:
+  export:
+    if: github.ref == 'refs/heads/refactor/flatten-python-authoring'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Export source and declared dependencies
+        run: |
+          mkdir -p /tmp/oak-transfer/wheels
+          git bundle create /tmp/oak-transfer/source.bundle HEAD
+          python - <<'PY'
+          import pathlib, subprocess, sys, tomllib
+          dependencies = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['dependencies']
+          subprocess.run([sys.executable, '-m', 'pip', 'download', '--only-binary=:all:', '-d', '/tmp/oak-transfer/wheels', *dependencies], check=True)
+          PY
+          git rev-parse HEAD > /tmp/oak-transfer/revision.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flat-authoring-source
+          path: /tmp/oak-transfer
+          retention-days: 3
