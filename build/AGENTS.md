@@ -23,7 +23,7 @@ authoring-product-byte-limits: {"skill-entry": 10000, "standalone-agent": 64000}
 
 agent-graph-checks: ["exact path discovery", "canonical parse and render equality", "500-line maximum", "root router coverage", "one owned concern per file", "structured content before authored instructions", "duplicate authored-claim rejection", "obsolete owner rejection"]
 
-plan-checks: ["apply the storage and format policy owned by docs/AGENTS.md", "check unique named plan directories and required plan files", "derive SMEAC section order and phase labels from the referenced schema", "check populated sections and compact phase checkboxes with unique task identifiers", "preserve the named historical format exceptions", "exercise rejected plan structures as well as accepted examples"]
+plan-checks: ["apply the storage and format policy owned by docs/AGENTS.md", "check unique named plan directories and required plan files", "derive SMEAC section order, phase labels, and comparison fields from the referenced schema", "check populated sections and compact phase checkboxes with unique task identifiers", "validate paired current and desired specimens, comparison authority, unique example identifiers, and required comparison coverage in success criteria", "preserve the named historical format exceptions", "exercise rejected plan structures as well as accepted examples"]
 
 freshness-rules: YAML<<
 - Generate each product once from package sources.

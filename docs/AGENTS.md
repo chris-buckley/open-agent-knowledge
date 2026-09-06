@@ -23,6 +23,24 @@ historical-plan-formats: ["0000-repository-refactor", "0001-interface-flow", "00
 
 plan-authoring-rules: ["use the referenced SMEAC schema as the default for every new saved plan", "populate the format as a Markdown planning brief rather than copying its schema definition", "retain Situation, Mission, Execution, Admin and Logistics, and Command and Signal in that order", "give execution tasks unique stable identifiers such as P01.01 and explicit success criteria, evidence requirements, and transition gates", "record any user authorisation gate separately from plan readiness", "apply the phase layout owned by examples/AGENTS.md", "preserve the original formats of the named historical plans and do not extend that exception to new plans"]
 
+state-comparison-rules: YAML<<
+- Use the State Comparisons subsection of Mission when supplied examples or a visible
+  before-and-after result clarify a new or active plan. Omit it when no comparison
+  is useful; do not retrofit completed records.
+- Give each comparison a stable E01-style identifier, a short name, authority, current
+  state, desired state, and acceptance criteria using the referenced SMEAC schema.
+- Show the observed current state and intended desired state together. State when
+  an artifact is absent or the baseline is unknown instead of inventing a starting
+  point.
+- Preserve agreed specimen text and formatting in fenced blocks. Link larger specimens
+  from the plan's evidence directory and label their role as expected or observed.
+- Mark accepted completion criteria required and explanatory examples illustrative.
+  State exactly what must match, what may vary, and how the comparison is verified.
+- Cite required comparison identifiers in execution success criteria and record their
+  observed verification in the completion report. A populated example is not proof
+  of implementation or authorisation to perform it.
+>>
+
 history-rules: ["plans are active only while their named change is in progress", "completed plans and reports are historical evidence, not current architecture", "preserve recorded claims and historical path snapshots when moving records, and repair navigational links", "a plan becomes complete only after every applicable checkbox passes"]
 </constants>
 
@@ -38,6 +56,9 @@ ACT Use <ROOT> and <STORAGE> to place each persistent plan and its supporting re
 ACT Use <FORMAT> and <PLAN_RULES> when preparing a new plan. (
   FORMAT=$constant.plan-format,
   PLAN_RULES=$constant.plan-authoring-rules,
+)
+ACT Apply <COMPARISONS> when recording intended changes and their completion evidence. (
+  COMPARISONS=$constant.state-comparison-rules,
 )
 ACT Apply <RULES> before changing status, checkboxes, evidence, or verdict. (
   RULES=$constant.history-rules,
