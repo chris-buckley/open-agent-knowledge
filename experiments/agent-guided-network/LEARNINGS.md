@@ -18,6 +18,10 @@ D001, 6 September 2026: the user clarified participation as the intended mechani
 
 D002, 6 September 2026: distinguish ordinary numerical world/dialogue memory from the removed training agent's conversation history. A deployed network may remember its own inputs in declared state. Generated dialogue, hard-coded sentence rendering, and externally generated answers are different outcomes and must be labelled separately.
 
+D003, 6 September 2026, proposed: frame reusable modules around testable questions about identity, relations, time, change, and evidence. Do not presume that each individual weight matrix has one semantic meaning. Naming alone supplies neither learned behaviour nor proof of use. [Question and context research](generalisation/QUESTIONS_CONTEXT.md) records primary sources and falsifiers, not a new measured result.
+
+D004, 6 September 2026, proposed: compare the existing message-log design with a learned shared context workspace inside the numerical network. Keep learned update/read parameters distinct from changing episode state, preserve source and temporal distinctions, and compare with equal access to relevant observations. Recover or rebuild and verify the missing world-language baseline before drawing conclusions. The existing frozen STUDY.md remains unchanged; a new architecture needs a separate protocol and fresh held-out evidence.
+
 ## Evidence ledger
 
 | ID | Finding | Status and limit | Evidence |
