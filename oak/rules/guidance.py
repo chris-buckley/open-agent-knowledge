@@ -64,6 +64,22 @@ AUTHORING_GUIDANCE = (
         "Map complete document-boundary crossings to one-way interfaces.",
     ),
     GuidanceRule(
+        "own-boundary-contracts",
+        "Prefer local interface schemas for independently understandable documents; define them in schemas, not interfaces. Deliberately graph-composed documents may share external schemas.",
+    ),
+    GuidanceRule(
+        "explain-boundary-contracts",
+        "Use schema purpose and WHERE descriptions for field meaning, interface descriptions for boundary purpose and authority, and triggers/processes for routing, conditions, effects, and failures. Omit redundant prose; its presence does not prove completeness.",
+    ),
+    GuidanceRule(
+        "disclose-completeness",
+        "Distinguish boundary completeness, supplied knowledge closure, and host capability. Standalone knowledge contains its required definitions in one document; graph deliveries supply every dependency. Prose paths are not imports; host declarations are not implementations.",
+    ),
+    GuidanceRule(
+        "adapt-external-contracts",
+        "Keep external owners explicit. Source-backed arrivals share exact schema identities, not equivalent copies; adapt distinct public/private contracts with typed CALL bindings and validated local emissions.",
+    ),
+    GuidanceRule(
         "omit-unjustified",
         "Omit every part and entry that the source does not justify.",
     ),
