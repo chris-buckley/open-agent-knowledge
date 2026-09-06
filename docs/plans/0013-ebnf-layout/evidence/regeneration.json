@@ -1,0 +1,30 @@
+{
+  "commands": [
+    {
+      "command": "python -m examples.catalog",
+      "exit_code": 0,
+      "stdout": "wrote /mnt/data/oak-work/examples/catalog.oak.md\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m build.ebnf",
+      "exit_code": 0,
+      "stdout": "wrote /mnt/data/oak-work/outputs/oak.ebnf\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m build.docs",
+      "exit_code": 0,
+      "stdout": "wrote /mnt/data/oak-work/outputs/docs\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m build.authoring",
+      "exit_code": 0,
+      "stdout": "wrote /mnt/data/oak-work/outputs/oak-authoring.oak.md\n",
+      "stderr": ""
+    }
+  ],
+  "changed_paths_after_repeat": [],
+  "result": "passed"
+}

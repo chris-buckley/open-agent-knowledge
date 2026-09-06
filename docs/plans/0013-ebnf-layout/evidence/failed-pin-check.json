@@ -1,0 +1,7 @@
+{
+  "command": "python -m build.examples",
+  "exit_code": 1,
+  "seconds": 7.691,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/mnt/data/oak-work/build/examples.py\", line 25, in <module>\n    validate_examples()\n    ~~~~~~~~~~~~~~~~~^^\n  File \"/mnt/data/oak-work/build/examples.py\", line 21, in validate_examples\n    check()\n    ~~~~~^^\n  File \"/mnt/data/oak-work/build/checks/authoring.py\", line 54, in validate_authoring_skill\n    require(validator.package_digest(ROOT / \"oak\") == validator.SOURCE_SHA256, \"validator source pin is stale\")\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/mnt/data/oak-work/build/checks/authoring.py\", line 31, in require\n    raise RuntimeError(message)\nRuntimeError: validator source pin is stale\n"
+}

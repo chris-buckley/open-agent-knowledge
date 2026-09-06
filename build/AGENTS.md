@@ -33,6 +33,26 @@ freshness-rules: YAML<<
 - Treat EBNF as syntax documentation rather than validation authority.
 >>
 
+ebnf-presentation: YAML<<
+- Keep reference ordering and outer whitespace in build/ebnf.py and its build-only
+  formatter. Consume package productions and surface projections without a second
+  language definition.
+- Use component-to-document sections, canonical part subsections, local alignment,
+  and vertical long alternatives. The EBNF soft width is 100 Unicode code points;
+  it is independent of the authored OAK width policy.
+- Preserve source-qualified occurrences, ordered grammar tokens, quoted terminals,
+  and descriptive special-sequence bodies. Opaque productions are width exceptions.
+- Place source-owned convention notes beside their concern. Review every claim when
+  shortening commentary; do not reflow embedded literal bodies.
+- Preserve the known duplicate constant_target pair and opaque surface definitions
+  until a separately authorised grammar change. Reject unexplained new duplication.
+- Run build/checks/ebnf.py through the complete checks. Keep fixed expectations independent
+  of formatting, exercise corruption rejections, and cover both grouping selections
+  and orders.
+- Keep the two grammar files byte-identical and both embedded grammar values equal.
+  Preserve non-grammar knowledge and the existing skill and agent byte limits.
+>>
+
 example-checks: YAML<<
 - Run the catalogue-driven checks in build/checks/human_examples.py through the existing
   complete entry point, including original shared schema examples and the repeat-marker
@@ -67,6 +87,9 @@ ACT Apply <PLAN_CHECKS> to persistent plan records and their verification exampl
 )
 ACT Apply <CHECKS> when Python convention knowledge or its root routing changes. (
   CHECKS=$constant.coding-standard-checks,
+)
+ACT Apply <EBNF> when changing the grammar reference or its source presentation. (
+  EBNF=$constant.ebnf-presentation,
 )
 ACT Apply <EXAMPLES> when source registration, fixture delivery, or shared teaching changes. (
   EXAMPLES=$constant.example-checks,

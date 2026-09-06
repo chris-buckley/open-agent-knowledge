@@ -2,8 +2,8 @@
 
 Prepared: 2026-09-06T17:23:33+10:00
 Classification: PUBLIC
-Status: Ready for implementation. Implementation has not started.
-Authorisation: The user approved preparing and committing this plan. Implementation and pull-request delivery await an explicit instruction to continue. Plan readiness is not implementation authorisation.
+Status: Implemented and verified locally. Independent review and remote delivery remain open.
+Authorisation: The user explicitly authorised end-to-end implementation and a review-ready pull request into main on 2026-09-06T17:53:49+10:00. Merge into main is not authorised.
 Repository: chris-buckley/open-agent-knowledge
 Branch: docs/plan-ebnf-layout
 Destination: main
@@ -86,6 +86,8 @@ Preserve every byte inside quoted terminals and descriptive special sequences, i
 Place each surface alias or descriptive surface production beside the construct it explains. Put schema constraints with schemas, condition surfaces with conditions, and statement surfaces with processes. Distinguish expanded productions from descriptive special sequences in nearby concise commentary; retain both kinds wherever they are currently referenced.
 
 Move lexical conventions beside lexical rules, condition semantics beside conditions, trigger validation and canonical-order notes beside triggers, and suite and statement notes beside processes. Keep shared list-layout notes in one nearby home. Every existing commentary claim must retain one source owner and an identifiable location. Concise source-owned wording is permitted for size control, with a claim-by-claim preservation review; do not create a second paraphrase registry in the build layer.
+
+Implementation refinement observed during execution: the optional validator fingerprints every Python byte under oak, including unused grammar commentary. Keep that package byte-identical rather than changing the validator identity or weakening its check. Emit the original convention wording verbatim where it carries additional meaning; avoid repeating seven claims already expressed by the existing productions. The evidence claim map identifies every retained prose location or exact structural counterpart. Build metadata only selects and places source contributions; it defines no replacement prose registry. This supersedes the tentative option to shorten package-owned commentary, not the language-preservation or four-delivery contracts.
 
 The duplicate constant_target definitions and further expansion of opaque special sequences are out of scope. Preserve their current production content and multiplicity, record them as known baseline limitations, and reject new unexplained duplication. This avoids disguising a grammar-correction project as layout work.
 
@@ -243,51 +245,51 @@ Concept of operations: Freeze an observed baseline and classify every production
 
 ### Phase 1: Establish baseline and preservation contracts
 Objective: Record the exact starting grammar, its consumers, constraints, and independent comparison data before implementation.
-- [ ] Key task: P01.01 Confirm explicit implementation authorisation, inspect the branch and destination refs, and read all applicable AGENTS documents plus the routed Python conventions before changing sources.
-- [ ] Key task: P01.02 Obtain a real checkout and run the existing complete verification entry points before changes; record the commit, environment, commands, exit codes, and any baseline failures without attributing them to this work.
-- [ ] Key task: P01.03 Inventory build/ebnf.py scaffolding, EXPRESSION_GRAMMAR, EXPRESSION_SURFACES, OPERATOR_TEXT, vocabulary productions, and every SURFACES projection; capture source-qualified occurrences and existing duplicate definitions.
-- [ ] Key task: P01.04 Map every current grammar commentary claim to its source owner and intended section; distinguish token conventions, validation restrictions, runtime semantics, canonical rendering, and descriptive surfaces.
-- [ ] Key task: P01.05 Capture full and single-grouping baseline outputs, both grouping orders where supported, delivered file hashes and sizes, embedded grammar values, and representative literal-sensitive fixtures in evidence only where supporting files are needed.
+- [x] Key task: P01.01 Confirm explicit implementation authorisation, inspect the branch and destination refs, and read all applicable AGENTS documents plus the routed Python conventions before changing sources.
+- [x] Key task: P01.02 Obtain a real checkout and run the existing complete verification entry points before changes; record the commit, environment, commands, exit codes, and any baseline failures without attributing them to this work.
+- [x] Key task: P01.03 Inventory build/ebnf.py scaffolding, EXPRESSION_GRAMMAR, EXPRESSION_SURFACES, OPERATOR_TEXT, vocabulary productions, and every SURFACES projection; capture source-qualified occurrences and existing duplicate definitions.
+- [x] Key task: P01.04 Map every current grammar commentary claim to its source owner and intended section; distinguish token conventions, validation restrictions, runtime semantics, canonical rendering, and descriptive surfaces.
+- [x] Key task: P01.05 Capture full and single-grouping baseline outputs, both grouping orders where supported, delivered file hashes and sizes, embedded grammar values, and representative literal-sensitive fixtures in evidence only where supporting files are needed.
 Success criteria: The baseline is pinned and actually inspected in the execution environment; E01 and E06 have complete placement and preservation inventories; E07 has measured starting sizes and delivery identities; no baseline failure is hidden.
 Transition trigger: The baseline, owner map, and evidence requirements are recorded and sufficient to distinguish presentation changes from grammar changes.
 
 ### Phase 2: Implement sectioned presentation
 Objective: Generate the accepted readable layout from existing grammar and surface sources.
-- [ ] Key task: P02.01 Replace assembly-order presentation with the six named sections and canonical seven-part subsections; keep grouping scaffolding and document composition near the end without altering PART_ORDER or supported grouping behaviour.
-- [ ] Key task: P02.02 Add restrained local alignment and safe multiline formatting for the specified compact groups, long alternatives, and trigger sequence; preserve source-derived right-hand sides instead of maintaining alternate grammar strings.
-- [ ] Key task: P02.03 Keep quoted terminals, special-sequence bodies, escaped-question-mark projections, and opaque lexical productions intact; preserve multiline template indentation and allow explicit soft-width exceptions.
-- [ ] Key task: P02.04 Place each surface projection and convention beside its owning construct, distinguish descriptive material from expanded productions, and retain every commentary claim with one existing source owner.
-- [ ] Key task: P02.05 Rehearse complete authoring generation against the fixed size limits early; use short section comments and reviewed concise grammar commentary rather than widening budgets or changing unrelated knowledge.
+- [x] Key task: P02.01 Replace assembly-order presentation with the six named sections and canonical seven-part subsections; keep grouping scaffolding and document composition near the end without altering PART_ORDER or supported grouping behaviour.
+- [x] Key task: P02.02 Add restrained local alignment and safe multiline formatting for the specified compact groups, long alternatives, and trigger sequence; preserve source-derived right-hand sides instead of maintaining alternate grammar strings.
+- [x] Key task: P02.03 Keep quoted terminals, special-sequence bodies, escaped-question-mark projections, and opaque lexical productions intact; preserve multiline template indentation and allow explicit soft-width exceptions.
+- [x] Key task: P02.04 Place each surface projection and convention beside its owning construct, distinguish descriptive material from expanded productions, and retain every commentary claim with one existing source owner.
+- [x] Key task: P02.05 Rehearse complete authoring generation against the fixed size limits early; use short section comments and reviewed concise grammar commentary rather than widening budgets or changing unrelated knowledge.
 Success criteria: E01, E02, E03, E04, and E05 match their required layout and content criteria; E06's occurrence inventory is unchanged; E07's budget has an observed passing result before integration is considered complete.
 Transition trigger: The generated candidate is readable, source-derived, literal-safe, and within the existing delivery budgets.
 
 ### Phase 3: Add focused regression coverage
 Objective: Make the presentation contract executable without treating EBNF as the OAK validator.
-- [ ] Key task: P03.01 Add focused checks in build/checks/ebnf.py and register them through the existing complete verification entry point; keep test helpers narrow and use existing dependencies.
-- [ ] Key task: P03.02 Check the exact section and subsection order, local alignment specimens, long-alternative specimens, continuation and terminator layout, one final LF, deterministic output, and documented opaque-width exceptions.
-- [ ] Key task: P03.03 Compare the full source-qualified baseline occurrence inventory and fixed expected specimens independently of the formatter; preserve alternative order, terminals, special sequences, and the known duplicate pair without a blanket name-uniqueness assertion.
-- [ ] Key task: P03.04 Add negative fixtures that remove or reorder alternatives, change punctuation or quoted text, reindent a descriptive body, drop a production occurrence, introduce a duplicate, or leave a source surface unassigned; require each corruption to fail for the intended reason.
-- [ ] Key task: P03.05 Exercise XML-only, Markdown-only, default combined, and supported reversed grouping order; verify selected wrapper productions and document composition without misclassifying existing XML text inside descriptive surfaces as an extra grouping.
-- [ ] Key task: P03.06 Review existing grammar-sensitive substring and snapshot assertions, including compact-syntax and authoring checks; update only presentation assumptions and retain their semantic coverage.
+- [x] Key task: P03.01 Add focused checks in build/checks/ebnf.py and register them through the existing complete verification entry point; keep test helpers narrow and use existing dependencies.
+- [x] Key task: P03.02 Check the exact section and subsection order, local alignment specimens, long-alternative specimens, continuation and terminator layout, one final LF, deterministic output, and documented opaque-width exceptions.
+- [x] Key task: P03.03 Compare the full source-qualified baseline occurrence inventory and fixed expected specimens independently of the formatter; preserve alternative order, terminals, special sequences, and the known duplicate pair without a blanket name-uniqueness assertion.
+- [x] Key task: P03.04 Add negative fixtures that remove or reorder alternatives, change punctuation or quoted text, reindent a descriptive body, drop a production occurrence, introduce a duplicate, or leave a source surface unassigned; require each corruption to fail for the intended reason.
+- [x] Key task: P03.05 Exercise XML-only, Markdown-only, default combined, and supported reversed grouping order; verify selected wrapper productions and document composition without misclassifying existing XML text inside descriptive surfaces as an extra grouping.
+- [x] Key task: P03.06 Review existing grammar-sensitive substring and snapshot assertions, including compact-syntax and authoring checks; update only presentation assumptions and retain their semantic coverage.
 Success criteria: E01 through E06 have positive and negative regression evidence; checks detect grammar-content drift independently of generated freshness; no parser, runtime, or surface descriptor is changed to make the checks pass.
 Transition trigger: Focused checks pass, intentional corruptions are rejected, and the formatter cannot silently drop or rewrite a source contribution.
 
 ### Phase 4: Regenerate all affected deliveries
 Objective: Publish the layout consistently and keep durable presentation rules with their owner.
-- [ ] Key task: P04.01 Record the durable EBNF presentation, literal-preservation, known-limitation, and verification contract in build/AGENTS.md without duplicating language policy or changing product byte limits.
-- [ ] Key task: P04.02 Regenerate outputs/oak.ebnf and all authoring products through their owning generators; refresh the packaged .ebnf file, structure-guide grammar constant, and assembled-agent grammar constant in the same pass.
-- [ ] Key task: P04.03 Compare grammar-file bytes and parsed embedded values; verify fusion preserves all non-grammar knowledge, teaching instances, tool names, metadata, optional-validator identity, and operational scope.
-- [ ] Key task: P04.04 Verify the skill-entry and standalone-agent byte limits, unchanged unrelated generated reference and example outputs, and zero diff after a repeated generation pass.
+- [x] Key task: P04.01 Record the durable EBNF presentation, literal-preservation, known-limitation, and verification contract in build/AGENTS.md without duplicating language policy or changing product byte limits.
+- [x] Key task: P04.02 Regenerate outputs/oak.ebnf and all authoring products through their owning generators; refresh the packaged .ebnf file, structure-guide grammar constant, and assembled-agent grammar constant in the same pass.
+- [x] Key task: P04.03 Compare grammar-file bytes and parsed embedded values; verify fusion preserves all non-grammar knowledge, teaching instances, tool names, metadata, optional-validator identity, and operational scope.
+- [x] Key task: P04.04 Verify the skill-entry and standalone-agent byte limits, unchanged unrelated generated reference and example outputs, and zero diff after a repeated generation pass.
 Success criteria: E07 passes across all four delivery locations; generation is repeatable; all non-grammar deliveries and canonical example behaviour remain unchanged except for deliberately updated build-owned operating knowledge.
 Transition trigger: Generated products are fresh, equivalent in content, within budget, and ready for complete repository verification.
 
 ### Phase 5: Verify and independently review
 Objective: Demonstrate the change is complete, readable, and behaviour-preserving on the final candidate.
-- [ ] Key task: P05.01 Run Python compilation for changed modules, focused EBNF checks, SMEAC plan checks, python -m build.examples, and python build/examples.py on the candidate; record actual commands, revisions, outputs, and exit codes.
-- [ ] Key task: P05.02 Confirm existing parsing, rendering, round-trip, model, execution, JSON-LD, detached-example, skill-agent, and generated-freshness gates remain covered by the complete checks and pass without weakened assertions.
-- [ ] Key task: P05.03 Inspect the entire generated grammar, all required specimens, note placement, both groupings, literal-sensitive fragments, and size results; review every old commentary claim against its new location and wording.
+- [x] Key task: P05.01 Run Python compilation for changed modules, focused EBNF checks, SMEAC plan checks, python -m build.examples, and python build/examples.py on the candidate; record actual commands, revisions, outputs, and exit codes.
+- [x] Key task: P05.02 Confirm existing parsing, rendering, round-trip, model, execution, JSON-LD, detached-example, skill-agent, and generated-freshness gates remain covered by the complete checks and pass without weakened assertions.
+- [x] Key task: P05.03 Inspect the entire generated grammar, all required specimens, note placement, both groupings, literal-sensitive fragments, and size results; review every old commentary claim against its new location and wording.
 - [ ] Key task: P05.04 Have an independent review of the candidate diff and evidence check scope, owner boundaries, source coverage, preservation, and readability; record the review method honestly and fix findings before freezing the final candidate.
-- [ ] Key task: P05.05 Rerun affected and complete checks after corrections, inspect git diff --check, and verify that no runtime changes, new dependencies, APS syntax, silent duplicate cleanup, changed width contracts, or hand-edited outputs entered the diff.
+- [x] Key task: P05.05 Rerun affected and complete checks after corrections, inspect git diff --check, and verify that no runtime changes, new dependencies, APS syntax, silent duplicate cleanup, changed width contracts, or hand-edited outputs entered the diff.
 Success criteria: Actual verification evidence covers E01 through E07; every applicable check passes on the reviewed final candidate; the final review verdict is Approved with no unresolved in-scope finding.
 Transition trigger: The reviewed revision and its passing evidence agree, and the complete implementation is ready for delivery.
 
@@ -301,7 +303,7 @@ Success criteria: All applicable tasks are evidenced and checked, the report rec
 Transition trigger: Mission complete; the completed branch is delivered for review, not merged automatically.
 
 ### Coordinating Instructions
-- Timeline: Plan preparation is authorised in this turn. Implementation starts only after explicit continuation, proceeds through every phase in one effort, and has no invented elapsed-time commitment.
+- Timeline: Implementation was authorised on 2026-09-06T17:53:49+10:00 and proceeds through every phase in one effort. No elapsed-time commitment is invented.
 - Boundaries: Change generated-reference presentation, its narrowly scoped source organisation, build-owned guidance, and verification only. Do not change the OAK language, runtime, public Python model API, skill packaging layout, validator identity, or APS snapshot.
 - Operating guidelines: Keep plain short documentation, small cohesive Python code, unchanged source authority, exact specimen fences, and the existing generated-file workflow. Read additional scoped owners before inspecting or changing files under them.
 - Risk mitigation: Compare independent baseline content as well as generated freshness, keep source occurrence identities, protect literal regions, budget embedded output early, and review commentary meaning rather than equating successful formatting with correctness.
@@ -323,7 +325,7 @@ Transition trigger: Mission complete; the completed branch is delivered for revi
 | Source grammar and surface descriptors | Existing repository owners | build/ebnf.py, build/surfaces.py, oak/surface/syntax.py, oak/vocabulary/text | AVAILABLE |
 | Readability reference | One read-only legacy document | legacy-snapshot-aps/references/05-grammar.md | AVAILABLE |
 | SMEAC format and plan checks | Existing schema and checker | examples/schemas/smeac_plan.oak.md, build/checks/plans.py | AVAILABLE |
-| Executable repository checkout | One isolated working tree | Implementation environment | PENDING |
+| Executable repository checkout | One isolated working tree | Verified Git bundle from Actions run 34020468020 | AVAILABLE |
 | Final verification and independent review | One final-candidate evidence set | Repository checks and reviewer | PENDING |
 
 Supply: Reuse existing dependencies, descriptors, examples, and repository checks. Create evidence files only for observed baselines, fixed expected specimens, preservation comparisons, and actual verification results that support the final report.
@@ -342,7 +344,7 @@ Rollback: Revert the implementation commits with new commits and regenerate affe
 | Plan and report | Git-versioned Markdown | Track task state, specimen acceptance, and observed evidence | At verified phase gates and final delivery |
 | Pull request | GitHub review | Review the complete diff, checks, preservation results, and history | After implementation and verification |
 
-Reporting: Keep this plan Ready for implementation until an explicit continuation is received. During execution, report exact revisions, commands and results, production-preservation coverage, all four delivery identities, byte counts, and E01 through E07 acceptance evidence. State unperformed checks and known limitations directly.
+Reporting: Explicit continuation was received on 2026-09-06T17:53:49+10:00; record observed progress toward delivery. During execution, report exact revisions, commands and results, production-preservation coverage, all four delivery identities, byte counts, and E01 through E07 acceptance evidence. State unperformed checks and known limitations directly.
 
 | Decision | Authority | Escalation |
 | --- | --- | --- |
@@ -353,4 +355,4 @@ Reporting: Keep this plan Ready for implementation until an explicit continuatio
 | Merge into main | Repository owner | Require separate merge authorisation |
 
 ### Acknowledgement
-The implementation agent must acknowledge receipt, the accepted presentation-only scope, all required comparisons, and the distinction between plan readiness and authorisation before starting implementation. The user's approval to prepare this plan is recorded; no implementation approval or completed check is inferred from it.
+The implementation agent acknowledges the presentation-only scope, all seven required comparisons, and the explicit implementation and pull-request authorisation received on 2026-09-06T17:53:49+10:00. Completion still requires observed evidence; merge authority remains with the repository owner.
