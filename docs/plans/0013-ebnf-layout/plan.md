@@ -31,7 +31,7 @@ Observed source and delivery ownership:
 | [build/authoring_guides.py](../../../build/authoring_guides.py) | Embed grammar in the structure guide as constant.oak-ebnf | Preserve this shared skill-agent knowledge path |
 | [build/checks/__init__.py](../../../build/checks/__init__.py) | Register complete repository verification | Register focused EBNF presentation and preservation checks |
 | [build/checks/plans.py](../../../build/checks/plans.py) | Check SMEAC structure, paired comparisons, and plan storage | Use the existing plan checks; do not change the plan format |
-| [outputs/AGENTS.md](../../../outputs/AGENTS.md) | Generated-only output ownership | Do not patch generated files by hand |
+| [outputs/AGENTS.md](https://github.com/chris-buckley/open-agent-knowledge/blob/2a3ba6c27b6110de4ace334e51d2f195a7ded522/outputs/AGENTS.md) | Generated-only output ownership | Do not patch generated files by hand |
 
 The generated grammar occurs in four affected delivery paths: outputs/oak.ebnf, skills/oak-authoring/references/oak.ebnf, the grammar constant in skills/oak-authoring/references/00-structure.oak.md, and that same constant in outputs/oak-authoring.oak.md. At the inspected Git tree, the grammar file is 13,284 bytes and the standalone agent is 63,974 bytes. The existing standalone limit is 64,000 bytes, so increased grammar whitespace and commentary must be budgeted rather than treated as free.
 

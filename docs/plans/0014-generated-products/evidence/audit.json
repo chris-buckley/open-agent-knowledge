@@ -1,0 +1,15 @@
+{
+  "baseline": "2a3ba6c27b6110de4ace334e51d2f195a7ded522",
+  "bytes": {
+    "agent": 63995,
+    "skill_entry": 8107
+  },
+  "checked_changes": {
+    "definition path constant": 38,
+    "identical bytes": 30,
+    "maintained source plus generated copy": 1
+  },
+  "guidance": "Consolidation requires scoped-rule and source review; not a byte-equivalence claim.",
+  "products": 69,
+  "verdict": "passed"
+}

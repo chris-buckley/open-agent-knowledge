@@ -1,0 +1,109 @@
+{
+  "environment": {
+    "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+    "executable": "/opt/pyvenv/bin/python",
+    "platform": "Linux-6.18.35-x86_64-with-glibc2.41",
+    "pydantic": "2.13.4",
+    "pyyaml": "6.0.3",
+    "checkout": "Verified archive extraction; local Git tree matches remote export. No editable package installation."
+  },
+  "baseline_check": {
+    "command": "python -m build.examples",
+    "exit": 0,
+    "log": ""
+  },
+  "final_commands": [
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "compileall",
+        "-q",
+        "oak",
+        "build",
+        "examples",
+        "generated/oak-authoring.skill/scripts"
+      ],
+      "exit": 0,
+      "seconds": 0.62,
+      "stdout_stderr": ""
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "examples.catalog"
+      ],
+      "exit": 0,
+      "seconds": 0.97,
+      "stdout_stderr": "wrote /mnt/data/oak-work/examples/catalog.oak.md\n"
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "build.ebnf"
+      ],
+      "exit": 0,
+      "seconds": 0.77,
+      "stdout_stderr": "wrote /mnt/data/oak-work/generated/oak.ebnf\n"
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "build.definitions"
+      ],
+      "exit": 0,
+      "seconds": 1.23,
+      "stdout_stderr": "wrote /mnt/data/oak-work/generated/definitions\n"
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "build.authoring"
+      ],
+      "exit": 0,
+      "seconds": 1.02,
+      "stdout_stderr": "wrote /mnt/data/oak-work/generated/oak-authoring.oak.md\n"
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "-m",
+        "build.examples"
+      ],
+      "exit": 0,
+      "seconds": 40.56,
+      "stdout_stderr": ""
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "build/examples.py"
+      ],
+      "exit": 0,
+      "seconds": 41.28,
+      "stdout_stderr": ""
+    },
+    {
+      "command": "repeat all generators and compare complete generated SHA-256 manifest",
+      "exit": 0,
+      "files": 69
+    }
+  ],
+  "limitations": [
+    "Direct GitHub DNS resolution is unavailable in this container. GitHub Actions and the connector transport repository files and verify remote delivery.",
+    "Approved network bootstrap integration is retained in CI, not executed by the local no-network run."
+  ],
+  "corrected_remote_finding": {
+    "run": "https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34034104544",
+    "python": "3.13.15",
+    "result": "failed before publication",
+    "error": "TypeError: function() argument 'code' must be code, not str",
+    "cause": "The isolated test replaced socket.socket with a function before SSL was imported.",
+    "correction": "Use a socket-event audit hook, import SSL after installing it, and require an attempted socket construction to be rejected. This is a test guard, not a security sandbox.",
+    "reverification": "The final_commands above were rerun after this correction; every command returned zero."
+  }
+}
