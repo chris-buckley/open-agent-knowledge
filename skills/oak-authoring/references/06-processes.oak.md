@@ -1,8 +1,8 @@
-~~~~instructions
+<instructions>
 Constants hold values that do not change while the knowledge runs.
-~~~~
+</instructions>
 
-~~~~constants
+<constants>
 guidance: YAML<<
 - Map ordered local work to processes.
 - Start each process id with an exact base-form action verb and name the result it
@@ -31,4 +31,4 @@ guidance: YAML<<
 scopes: TEXT<<
 Bindings are immutable per frame. CALL promotes declared outputs; branches and iterations are local. IF promotes nothing: EMIT inside it or use process contracts, not invented state. Justify assertions, conditions, loops, and parallel work from the source.
 >>
-~~~~
+</constants>

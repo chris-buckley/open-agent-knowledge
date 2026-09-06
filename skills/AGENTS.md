@@ -23,6 +23,8 @@ delivery-contract: YAML<<
   optional. Do not add provider-specific metadata or directory README indexes.'
 - Treat generated knowledge guides as the identical input documents for the skill
   and agent, not independently maintained prompts. Keep grammar material in EBNF.
+- Use the default OAK render for the skill entry, shared knowledge documents, and
+  standalone agent. The representation defaults are owned by oak/AGENTS.md.
 - Deliver the registered core under assets/examples with its generated catalogue.
   Embed the identical complete document mapping as literal JSON knowledge in the review
   guide and assembled agent; Python demonstration hosts stay in repository scenario

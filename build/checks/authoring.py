@@ -65,7 +65,7 @@ def validate_authoring_skill() -> None:
         actual[path] = (PACKAGE / path).read_text(encoding="utf-8").rstrip("\n")
     require(actual == skill_documents(), "skill knowledge differs from its source")
     fused = tree(actual)
-    require(render(fused, grouping="markdown") + "\n" == TARGET.read_text(encoding="utf-8"), "agent is not the exact assembled skill")
+    require(render(fused) + "\n" == TARGET.read_text(encoding="utf-8"), "agent is not the exact assembled skill")
     require(len(resolve(fused).documents) == 1, "standalone agent has an external dependency")
     for text in (*actual.values(), render(fused)):
         node = parse(text)

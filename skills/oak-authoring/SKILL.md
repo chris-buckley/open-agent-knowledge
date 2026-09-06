@@ -10,7 +10,7 @@ metadata:
   validator-sha256: 4adedc8035e384d57c2ca7762faadd3b0e5f425f5ece1bf0a95e0be00f7c75f3
 ---
 
-~~~~instructions
+<instructions>
 $ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
 ACT input and output schemas validate resolved inputs before invocation and produced outputs before promotion.
@@ -21,51 +21,51 @@ EMIT without bindings fills the target schema from same-named visible process bi
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 Each trigger is one named declaration: event carries the meaning, an optional source names the exact receive interface, an optional guard checks state after the match, and process selects the work.
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
-~~~~
+</instructions>
 
-~~~~schemas
-~~~schema;id="authoring-request"
+<schemas>
+<schema id="authoring-request">
 SOURCE: <SOURCE>
 VALIDATE: <VALIDATE>
 
 WHERE:
 - <SOURCE> is string; is non-empty.
 - <VALIDATE> is boolean.
-~~~
+</schema>
 
-~~~schema;id="oak-candidate"
+<schema id="oak-candidate">
 CANDIDATE: <CANDIDATE>
 
 WHERE:
 - <CANDIDATE> is string; is non-empty.
-~~~
+</schema>
 
-~~~schema;id="authoring-result"
+<schema id="authoring-result">
 OAK: <OAK>
 VALIDATION: <VALIDATION>
 
 WHERE:
 - <OAK> is string; is non-empty.
 - <VALIDATION> is string; is non-empty.
-~~~
+</schema>
 
-~~~schema;id="validator-check"
+<schema id="validator-check">
 INSTALL_REQUIRED: <INSTALL_REQUIRED>
 REPORT: <REPORT>
 
 WHERE:
 - <INSTALL_REQUIRED> is boolean.
 - <REPORT> is string; is non-empty.
-~~~
+</schema>
 
-~~~schema;id="installation-consent"
+<schema id="installation-consent">
 APPROVED: <APPROVED>
 
 WHERE:
 - <APPROVED> is boolean.
-~~~
+</schema>
 
-~~~schema;id="validation-context"
+<schema id="validation-context">
 CANDIDATE: <CANDIDATE>
 REPORT: <REPORT>
 ALLOW_INSTALL: <ALLOW_INSTALL>
@@ -74,10 +74,10 @@ WHERE:
 - <CANDIDATE> is string; is non-empty.
 - <REPORT> is string; is non-empty.
 - <ALLOW_INSTALL> is boolean.
-~~~
-~~~~
+</schema>
+</schemas>
 
-~~~~triggers
+<triggers>
 authoring-requested(
   event="OAK authoring is requested for supplied source material.",
   process=process.capture-request,
@@ -87,15 +87,15 @@ request-received(
   source=interface.authoring-input,
   process=process.author-document,
 )
-~~~~
+</triggers>
 
-~~~~processes
-~~~process;id="capture-request";name="Capture request"
+<processes>
+<process id="capture-request" name="Capture request">
 ACT output="schema.authoring-request": Capture all supplied <SOURCE>; set <VALIDATE> true only for requested programmatic validation, otherwise false. () -> SOURCE, VALIDATE
 CALL process.author-document (SOURCE=$SOURCE, VALIDATE=$VALIDATE)
-~~~
+</process>
 
-~~~process;id="author-document";name="Author document";input="schema.authoring-request"
+<process id="author-document" name="Author document" input="schema.authoring-request">
 ACT Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> to define <SCOPE>. For a new skill, use <TEMPLATE> under <TEMPLATE_USE>; otherwise do not add scaffolding. Consult each guide's remaining knowledge as needed. (
   AUTHORING=$guides/authoring.oak.md#constant.guidance,
   STRUCTURE=$references/00-structure.oak.md#constant.guidance,
@@ -152,9 +152,9 @@ ELSE:
     OAK=$CANDIDATE,
     VALIDATION="Programmatic validation was not performed (not requested).",
   )
-~~~
+</process>
 
-~~~process;id="validate-and-deliver";name="Check validator";input="schema.oak-candidate"
+<process id="validate-and-deliver" name="Check validator" input="schema.oak-candidate">
 ACT output="schema.validator-check": Apply <POLICY> with exact <HELPER> to <CANDIDATE> without --allow-install. Return actual <REPORT>; <INSTALL_REQUIRED> is true only for permission-required, not invalid OAK or unavailable execution. (
   POLICY=$guides/validation.oak.md#constant.validation-policy,
   HELPER=$guides/validation.oak.md#constant.validator-script,
@@ -173,9 +173,9 @@ IF $INSTALL_REQUIRED equals true:
     )
 ELSE:
   CALL process.finalize-validation (CANDIDATE=$CANDIDATE, REPORT=$REPORT, ALLOW_INSTALL=false)
-~~~
+</process>
 
-~~~process;id="finalize-validation";name="Report validation";input="schema.validation-context"
+<process id="finalize-validation" name="Report validation" input="schema.validation-context">
 ACT output="schema.authoring-result": Finalize <CANDIDATE> from <REPORT> under <POLICY>. Run exact <HELPER> with --allow-install only when <ALLOW_INSTALL> is true; otherwise never install or download. Repair errors and recheck changes under the same permission, not unchanged successes. Produce <OAK> and truthful <VALIDATION>. (
   REPORT=$REPORT,
   CANDIDATE=$CANDIDATE,
@@ -184,10 +184,10 @@ ACT output="schema.authoring-result": Finalize <CANDIDATE> from <REPORT> under <
   HELPER=$guides/validation.oak.md#constant.validator-script,
 ) -> OAK, VALIDATION
 EMIT interface.authored-document
-~~~
-~~~~
+</process>
+</processes>
 
-~~~~interfaces
+<interfaces>
 authoring-input RECEIVES schema.authoring-request
 authored-document EMITS schema.authoring-result
-~~~~
+</interfaces>

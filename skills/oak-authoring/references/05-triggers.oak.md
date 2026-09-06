@@ -1,8 +1,8 @@
-~~~~instructions
+<instructions>
 Constants hold values that do not change while the knowledge runs.
-~~~~
+</instructions>
 
-~~~~constants
+<constants>
 guidance: YAML<<
 - Map outside events, receive sources, state guards, and selected work to triggers.
 - Route each receive interface through one source-backed trigger into a process with
@@ -12,4 +12,4 @@ guidance: YAML<<
 >>
 
 routing: "Sources identify receive interfaces with the same resolved schema as process input and no seeds. Guards require state reads, may compare literals or constants, and never read process bindings. Internal work uses CALL, not triggers."
-~~~~
+</constants>

@@ -127,7 +127,7 @@ def knowledge_nodes(script: str, version: str, revision: str) -> dict[str, Node]
             "Run programmatic validation only when the user requests it. Authoring and interpretation need no installation.",
             "The script uses Python 3.11 or newer. Reuse a matching installed validator, an explicit --source and optional --python, or its retained cache. The source fingerprint must match, not just the package name or version.",
             "Use scripts/validate.py from the skill. In the standalone agent, materialize validator-script exactly as a local validate.py only when validation is requested.",
-            "First run: python validate.py document.oak.md. Use --root for a larger explicitly allowed document graph. In the skill directory the script path is scripts/validate.py.",
+            "Run python validate.py document.oak.md. Use --root for larger explicitly allowed graphs.",
             "When the result says permission-required, ask permission to download the identified OAK revision and install its declared dependencies in an isolated cached environment. Requesting validation is not installation consent.",
             "Only after explicit approval, repeat the command with --allow-install. No published OAK package is needed. Keep the matching installation for future requests.",
             "When installation is declined, continue authoring and say: Programmatic validation was not performed (installation declined). Do not run the installer.",
@@ -144,11 +144,11 @@ def knowledge_nodes(script: str, version: str, revision: str) -> dict[str, Node]
             "The assembled agent has identical knowledge locally. Both forms author and interpret OAK without Python, installation, network, or validation.")),
         Constant(id="skill-template", form="json", value=TEMPLATE_ENTRY),
         Constant(id="template-use", value=(
-            "For a new skill, copy _template/SKILL.md or materialize skill-template verbatim. "
-            "Fill metadata markers as quoted YAML strings and PURPOSE_JSON as a JSON string. "
-            "Replace each PART line with a justified OAK section and one blank-line separator, or remove the whole line. CONSTANT_ENTRIES adds fixed values or is empty. "
-            "Remove all markers, unused parts and resources, and .gitkeep when adding content. "
-            "The tree displays knowledge, not imports. Unfilled scaffolding is inert.")),
+            "For new skills, copy _template/SKILL.md or materialize skill-template verbatim. "
+            "Quote metadata markers as YAML strings; fill PURPOSE_JSON with a JSON string. "
+            "Replace each PART line with a justified OAK section and one blank line, or delete the line. CONSTANT_ENTRIES holds fixed values or is empty. "
+            "Remove all markers, unused parts/resources, and .gitkeep when adding content. "
+            "Displayed paths are not imports. Unfilled scaffolding is inert.")),
     ]
     return {name: Node(constants=items, schemas=list(SHAPES) if index == 1 else [])
             for index, (name, items) in enumerate(zip(GUIDES, constants, strict=True))}
