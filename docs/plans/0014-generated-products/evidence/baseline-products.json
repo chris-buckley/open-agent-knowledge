@@ -1,0 +1,433 @@
+{
+  "baseline": "2a3ba6c27b6110de4ace334e51d2f195a7ded522",
+  "planning_tip": "df5b1af4b610c7d2f804ea4079962a7bb1f64115",
+  "workspace_tree": "54cfe6a921e7d162fcb87d8ee5b8335874a644d2",
+  "products": {
+    "outputs/AGENTS.md": {
+      "destination": "build/AGENTS.md",
+      "change": "consolidated guidance",
+      "bytes": 1421,
+      "sha256": "94361d6aa4f15b2fd30e93c89565dc8c0429b1c4a0a23009f5bb8ea2165339fe"
+    },
+    "outputs/docs/act.md": {
+      "destination": "generated/definitions/act.oak.md",
+      "change": "definition path constant",
+      "bytes": 2698,
+      "sha256": "5fa1121093b6009fbb900fa49834514d5c97e26162db9735ef363214c96d0c0f"
+    },
+    "outputs/docs/all.md": {
+      "destination": "generated/definitions/all.oak.md",
+      "change": "definition path constant",
+      "bytes": 775,
+      "sha256": "23aa5c6ce56c1422c328195438dfb5c98211f2b10c7efa26d9f7dd1ca4008f78"
+    },
+    "outputs/docs/any.md": {
+      "destination": "generated/definitions/any.oak.md",
+      "change": "definition path constant",
+      "bytes": 786,
+      "sha256": "cb1410956a6f6a8e7a7a9f94c7b428aab1c32bc7384ff925e1f09a5b38f1d163"
+    },
+    "outputs/docs/assert.md": {
+      "destination": "generated/definitions/assert.oak.md",
+      "change": "definition path constant",
+      "bytes": 945,
+      "sha256": "dd1a88cf6ee2bae2b727125120800cd0405d30afba78969cf4f598c16cf96b85"
+    },
+    "outputs/docs/at-least.md": {
+      "destination": "generated/definitions/at-least.oak.md",
+      "change": "definition path constant",
+      "bytes": 726,
+      "sha256": "43105b0d467059aa141bcd61e99dc8090728158c86c01ab42ec12865f4c689f1"
+    },
+    "outputs/docs/at-most.md": {
+      "destination": "generated/definitions/at-most.oak.md",
+      "change": "definition path constant",
+      "bytes": 719,
+      "sha256": "e14133e9d3ab07b0d93ea1a86ad15d873e350b768a2a873ae26d52aa51b92887"
+    },
+    "outputs/docs/binding-value.md": {
+      "destination": "generated/definitions/binding-value.oak.md",
+      "change": "definition path constant",
+      "bytes": 671,
+      "sha256": "a7201b6a03cbdc47d94ab9804fbcf28ac1ef5f330b650b9447e1a4aa89143367"
+    },
+    "outputs/docs/call.md": {
+      "destination": "generated/definitions/call.oak.md",
+      "change": "definition path constant",
+      "bytes": 1091,
+      "sha256": "38714e9089cfebfce4d73ed1e4df51ce9333c66e55b821905fe66e57a9921491"
+    },
+    "outputs/docs/compare.md": {
+      "destination": "generated/definitions/compare.oak.md",
+      "change": "definition path constant",
+      "bytes": 887,
+      "sha256": "df6b7b76dc83d205c21690347db12954ebdcfdd89317b510f046ed8eb5953b63"
+    },
+    "outputs/docs/constant-value.md": {
+      "destination": "generated/definitions/constant-value.oak.md",
+      "change": "definition path constant",
+      "bytes": 697,
+      "sha256": "640dc94e1fcdce812a2ca863aabe22af51763b9561c581b0869c0002c7d72164"
+    },
+    "outputs/docs/constant.md": {
+      "destination": "generated/definitions/constant.oak.md",
+      "change": "definition path constant",
+      "bytes": 4084,
+      "sha256": "38949a85989575fdcce02e5176262f249f72f07705c024fa3b3def1f68ffa796"
+    },
+    "outputs/docs/emit.md": {
+      "destination": "generated/definitions/emit.oak.md",
+      "change": "definition path constant",
+      "bytes": 1612,
+      "sha256": "d81b3d20fbe0580100f4a29d3bbb743f078428c6a20c59e71f92cc4099896409"
+    },
+    "outputs/docs/fail.md": {
+      "destination": "generated/definitions/fail.oak.md",
+      "change": "definition path constant",
+      "bytes": 615,
+      "sha256": "9118920b59dd5b98ad8329e773013d016d99e7d74781c9588d41fbf337ef826f"
+    },
+    "outputs/docs/foreach.md": {
+      "destination": "generated/definitions/foreach.oak.md",
+      "change": "definition path constant",
+      "bytes": 1072,
+      "sha256": "cd601eaa51cf93d83a70792544bafbbc8e05593a17c612239fcdfb114225749a"
+    },
+    "outputs/docs/if.md": {
+      "destination": "generated/definitions/if.oak.md",
+      "change": "definition path constant",
+      "bytes": 1023,
+      "sha256": "65948243bbb3feb9097c3209be61cc90bf2e0d237fa61938624b9dfd99613f74"
+    },
+    "outputs/docs/instruction.md": {
+      "destination": "generated/definitions/instruction.oak.md",
+      "change": "definition path constant",
+      "bytes": 652,
+      "sha256": "bb810a30a96bf340d89b8a97cfe8205132f05332e0738f00f426e366f2fb0eaa"
+    },
+    "outputs/docs/interface.md": {
+      "destination": "generated/definitions/interface.oak.md",
+      "change": "definition path constant",
+      "bytes": 1861,
+      "sha256": "53d2517f899a0a2eade2a5a0c8ece65fc3c65dda6b8600103f325631fa2089a4"
+    },
+    "outputs/docs/join.md": {
+      "destination": "generated/definitions/join.oak.md",
+      "change": "definition path constant",
+      "bytes": 625,
+      "sha256": "cc8a1e91dacb346a0e20e70ab386bbd6848aeeed79f211f052a1dda00813ee54"
+    },
+    "outputs/docs/lines.md": {
+      "destination": "generated/definitions/lines.oak.md",
+      "change": "definition path constant",
+      "bytes": 793,
+      "sha256": "8f93bddba872fb5afbfeac93d4d683fdcbe06221b3d6a974c5d86255837e577c"
+    },
+    "outputs/docs/list-of.md": {
+      "destination": "generated/definitions/list-of.oak.md",
+      "change": "definition path constant",
+      "bytes": 835,
+      "sha256": "2b4dde596c718bf850d4cfb216ea466657cece28554d74fad08182971e53dff7"
+    },
+    "outputs/docs/literal-value.md": {
+      "destination": "generated/definitions/literal-value.oak.md",
+      "change": "definition path constant",
+      "bytes": 594,
+      "sha256": "e3edd0dd030115f3929d3a57d011b4e8dfa75c2213bc72ed83732397c823c3ac"
+    },
+    "outputs/docs/max-chars.md": {
+      "destination": "generated/definitions/max-chars.oak.md",
+      "change": "definition path constant",
+      "bytes": 675,
+      "sha256": "75b72513c329edcb20129beb23c1d045a76c40de0a6fa7b708a5e0640be6026d"
+    },
+    "outputs/docs/node.md": {
+      "destination": "generated/definitions/node.oak.md",
+      "change": "definition path constant",
+      "bytes": 1691,
+      "sha256": "f0116666241be65804ee423b7ef78887da8389e1c965fc834dbae4fe7a33e6c1"
+    },
+    "outputs/docs/non-empty.md": {
+      "destination": "generated/definitions/non-empty.oak.md",
+      "change": "definition path constant",
+      "bytes": 603,
+      "sha256": "7687d9efe80cf025ec7ceb5a90444b22d530efbb468c55e5c39803d055980a33"
+    },
+    "outputs/docs/not.md": {
+      "destination": "generated/definitions/not.oak.md",
+      "change": "definition path constant",
+      "bytes": 663,
+      "sha256": "c541bc8c5313317c91f77c900494e71cd32869a0069fc60e36d5ee2f640e6e05"
+    },
+    "outputs/docs/one-of.md": {
+      "destination": "generated/definitions/one-of.oak.md",
+      "change": "definition path constant",
+      "bytes": 660,
+      "sha256": "6b81b1f58a5a09cbc6d5bd645ec0c045f27750a38ee0f3d59bab0822dcb21293"
+    },
+    "outputs/docs/par.md": {
+      "destination": "generated/definitions/par.oak.md",
+      "change": "definition path constant",
+      "bytes": 976,
+      "sha256": "47b0daff7e39320b2ac9f83677718c3eccb7924849e9561c6f4c37e810aac88c"
+    },
+    "outputs/docs/process.md": {
+      "destination": "generated/definitions/process.oak.md",
+      "change": "definition path constant",
+      "bytes": 2526,
+      "sha256": "0c6307b66cc77cee00dd7761ea9520e924cbd6feab851188f3caad2c1f4761d7"
+    },
+    "outputs/docs/regex.md": {
+      "destination": "generated/definitions/regex.oak.md",
+      "change": "definition path constant",
+      "bytes": 709,
+      "sha256": "57dadc511e515555b735b2380bf85a06eee351195e2320ce222bbe0d9abfdbe8"
+    },
+    "outputs/docs/schema.md": {
+      "destination": "generated/definitions/schema.oak.md",
+      "change": "definition path constant",
+      "bytes": 1417,
+      "sha256": "602d1818068759f7d0f86530cde6dc70c7c16c0b05f1c5134b54821d634c9078"
+    },
+    "outputs/docs/set.md": {
+      "destination": "generated/definitions/set.oak.md",
+      "change": "definition path constant",
+      "bytes": 741,
+      "sha256": "052c1b03da2503a14b87aebfaccef91513ce6ca6a5629684139434430ae18b98"
+    },
+    "outputs/docs/state-value.md": {
+      "destination": "generated/definitions/state-value.oak.md",
+      "change": "definition path constant",
+      "bytes": 666,
+      "sha256": "817a2bbe6cea998554e711583c81a6a8d2cb532c9fdf35e917daaa63ec14539c"
+    },
+    "outputs/docs/state.md": {
+      "destination": "generated/definitions/state.oak.md",
+      "change": "definition path constant",
+      "bytes": 1222,
+      "sha256": "0391118fd242647a148d0cf9f51dd76480e6348adb69449aca0f69f6ef1fb2ca"
+    },
+    "outputs/docs/trigger.md": {
+      "destination": "generated/definitions/trigger.oak.md",
+      "change": "definition path constant",
+      "bytes": 1863,
+      "sha256": "58279aa31b6ff46e6b6b8429ed9fabe00addd60e0ec432469fa5d8d109f47847"
+    },
+    "outputs/docs/type.md": {
+      "destination": "generated/definitions/type.oak.md",
+      "change": "definition path constant",
+      "bytes": 644,
+      "sha256": "cfdebd17e6e667c4522230f76e22cd9d232d60dd914b3adb4e12d9435bab68a3"
+    },
+    "outputs/docs/value-binding.md": {
+      "destination": "generated/definitions/value-binding.oak.md",
+      "change": "definition path constant",
+      "bytes": 768,
+      "sha256": "817bdd77b68e0b0d4186e8d449222779a96792f7419874db89ba1cda18c682b0"
+    },
+    "outputs/docs/where.md": {
+      "destination": "generated/definitions/where.oak.md",
+      "change": "definition path constant",
+      "bytes": 1146,
+      "sha256": "36091f075a8d925620b01dafa467a7fa601a96de50200d1e1a5c4799a032f993"
+    },
+    "outputs/docs/while.md": {
+      "destination": "generated/definitions/while.oak.md",
+      "change": "definition path constant",
+      "bytes": 1012,
+      "sha256": "01b1061c94933f9838bad7905f61527bfba55e4c7063da0fe1c3cf4f5d323617"
+    },
+    "outputs/oak-authoring.oak.md": {
+      "destination": "generated/oak-authoring.oak.md",
+      "change": "identical bytes",
+      "bytes": 63995,
+      "sha256": "8b22e4c7999d02521b47d5e91949dc241ef6feb2976ea497f70c0703601a4772"
+    },
+    "outputs/oak.ebnf": {
+      "destination": "generated/oak.ebnf",
+      "change": "identical bytes",
+      "bytes": 13307,
+      "sha256": "ce419c687b9f4d84f22cef4471ec54e018be1f1222b8aba0d0e93f4fd85350ec"
+    },
+    "skills/AGENTS.md": {
+      "destination": "build/AGENTS.md",
+      "change": "consolidated guidance",
+      "bytes": 3941,
+      "sha256": "27f46725fbbe69cc15ab75c79ffbdacc8c3da61cd52b196a21204c073b9ead12"
+    },
+    "skills/oak-authoring/SKILL.md": {
+      "destination": "generated/oak-authoring.skill/SKILL.md",
+      "change": "identical bytes",
+      "bytes": 8107,
+      "sha256": "8979d417008e1a3579d067f7aec3c995bfe7bdf53919794d973fbb9889a4c948"
+    },
+    "skills/oak-authoring/_template/SKILL.md": {
+      "destination": "generated/oak-authoring.skill/_template/SKILL.md",
+      "change": "identical bytes",
+      "bytes": 516,
+      "sha256": "6c5e706344aef4c649256cf57a6842761a7aa3491b4efe5a190fa2e681169c17"
+    },
+    "skills/oak-authoring/_template/assets/constants/.gitkeep": {
+      "destination": "generated/oak-authoring.skill/_template/assets/constants/.gitkeep",
+      "change": "identical bytes",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "skills/oak-authoring/_template/assets/schemas/.gitkeep": {
+      "destination": "generated/oak-authoring.skill/_template/assets/schemas/.gitkeep",
+      "change": "identical bytes",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "skills/oak-authoring/_template/guides/.gitkeep": {
+      "destination": "generated/oak-authoring.skill/_template/guides/.gitkeep",
+      "change": "identical bytes",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "skills/oak-authoring/_template/processes/.gitkeep": {
+      "destination": "generated/oak-authoring.skill/_template/processes/.gitkeep",
+      "change": "identical bytes",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "skills/oak-authoring/_template/references/.gitkeep": {
+      "destination": "generated/oak-authoring.skill/_template/references/.gitkeep",
+      "change": "identical bytes",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "skills/oak-authoring/_template/scripts/.gitkeep": {
+      "destination": "generated/oak-authoring.skill/_template/scripts/.gitkeep",
+      "change": "identical bytes",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "skills/oak-authoring/assets/examples/catalog.oak.md": {
+      "destination": "generated/oak-authoring.skill/assets/examples/catalog.oak.md",
+      "change": "identical bytes",
+      "bytes": 1209,
+      "sha256": "f0d713bf0ebee64a7c88348d9ed63ad3ed229ac8a6a1600e1c43ec12d37783bc"
+    },
+    "skills/oak-authoring/assets/examples/compound_growth/example.oak.md": {
+      "destination": "generated/oak-authoring.skill/assets/examples/compound_growth/example.oak.md",
+      "change": "identical bytes",
+      "bytes": 4380,
+      "sha256": "a2466e89b8d4eadcbc8146b5557a37fda6e4227ac857fadd2a3f2715adee01df"
+    },
+    "skills/oak-authoring/assets/examples/compound_growth/sample.oak.md": {
+      "destination": "generated/oak-authoring.skill/assets/examples/compound_growth/sample.oak.md",
+      "change": "identical bytes",
+      "bytes": 870,
+      "sha256": "f872254206bdd118b486b29700f8a58df75a256c40e3e28d09aac461fbe6ecc5"
+    },
+    "skills/oak-authoring/assets/examples/fixed_knowledge/example.oak.md": {
+      "destination": "generated/oak-authoring.skill/assets/examples/fixed_knowledge/example.oak.md",
+      "change": "identical bytes",
+      "bytes": 169,
+      "sha256": "67d9a9b30d55c6bfba75d7a46013cab1e9d1680d1d1f6c51fa322ebd1e57ed7a"
+    },
+    "skills/oak-authoring/assets/examples/shape_gallery/example.oak.md": {
+      "destination": "generated/oak-authoring.skill/assets/examples/shape_gallery/example.oak.md",
+      "change": "identical bytes",
+      "bytes": 1981,
+      "sha256": "371ea60f0ca805839c8033bcefd3df6d544b234a882f4ac19dc3e0623fb6efad"
+    },
+    "skills/oak-authoring/assets/examples/shape_writer/example.oak.md": {
+      "destination": "generated/oak-authoring.skill/assets/examples/shape_writer/example.oak.md",
+      "change": "identical bytes",
+      "bytes": 4109,
+      "sha256": "89d6de217966134ed22aed5dd697d14d465260c68b956eb465712446030fac1f"
+    },
+    "skills/oak-authoring/assets/examples/shape_writer/sample.oak.md": {
+      "destination": "generated/oak-authoring.skill/assets/examples/shape_writer/sample.oak.md",
+      "change": "identical bytes",
+      "bytes": 1516,
+      "sha256": "3f8b5a28532baa8ca6eb05e0223b1178c9c1483a2a14dc1bdf53eeb27f44e00f"
+    },
+    "skills/oak-authoring/assets/examples/shape_writer/shape_gallery.oak.md": {
+      "destination": "generated/oak-authoring.skill/assets/examples/shape_writer/shape_gallery.oak.md",
+      "change": "identical bytes",
+      "bytes": 1981,
+      "sha256": "371ea60f0ca805839c8033bcefd3df6d544b234a882f4ac19dc3e0623fb6efad"
+    },
+    "skills/oak-authoring/guides/authoring.oak.md": {
+      "destination": "generated/oak-authoring.skill/guides/authoring.oak.md",
+      "change": "identical bytes",
+      "bytes": 1878,
+      "sha256": "94bdcbe3ceeb1c869d167e9a91d364e184bf84a4510b55997bbf881f9f063edb"
+    },
+    "skills/oak-authoring/guides/review.oak.md": {
+      "destination": "generated/oak-authoring.skill/guides/review.oak.md",
+      "change": "identical bytes",
+      "bytes": 17992,
+      "sha256": "879394b4dac38d10ce03fa52517ff3df8f65d5e88283911496e3ee4ab3e709b5"
+    },
+    "skills/oak-authoring/guides/validation.oak.md": {
+      "destination": "generated/oak-authoring.skill/guides/validation.oak.md",
+      "change": "identical bytes",
+      "bytes": 15786,
+      "sha256": "a4adb011c687187a255f203c8e1a2f55bf7ba5b5d2c4d83704889c095455ceb7"
+    },
+    "skills/oak-authoring/references/00-structure.oak.md": {
+      "destination": "generated/oak-authoring.skill/references/00-structure.oak.md",
+      "change": "identical bytes",
+      "bytes": 14758,
+      "sha256": "20d772259bcb545cd070a65a0c29feb98b8c0dc8700f7d513ab12e2b414e417a"
+    },
+    "skills/oak-authoring/references/01-schemas.oak.md": {
+      "destination": "generated/oak-authoring.skill/references/01-schemas.oak.md",
+      "change": "identical bytes",
+      "bytes": 2979,
+      "sha256": "70e862cf92d3899966907a5915858740bf78fb399deae538652a8801531d0262"
+    },
+    "skills/oak-authoring/references/02-constants.oak.md": {
+      "destination": "generated/oak-authoring.skill/references/02-constants.oak.md",
+      "change": "identical bytes",
+      "bytes": 363,
+      "sha256": "b4b1d6d5e7e6bb07ba46f1cc5a4606185d91472b62cdc7ef9daecbb179c3c207"
+    },
+    "skills/oak-authoring/references/03-state.oak.md": {
+      "destination": "generated/oak-authoring.skill/references/03-state.oak.md",
+      "change": "identical bytes",
+      "bytes": 673,
+      "sha256": "dd7b2da314245cdc4a00fe9b542f2fe7e086b48b016b510c66b5c840826e83d2"
+    },
+    "skills/oak-authoring/references/04-interfaces.oak.md": {
+      "destination": "generated/oak-authoring.skill/references/04-interfaces.oak.md",
+      "change": "identical bytes",
+      "bytes": 446,
+      "sha256": "aaca316f1fee6ce4ef1a8f80839c33b1563e93f4c9ff07de0d50c3c479cbd94e"
+    },
+    "skills/oak-authoring/references/05-triggers.oak.md": {
+      "destination": "generated/oak-authoring.skill/references/05-triggers.oak.md",
+      "change": "identical bytes",
+      "bytes": 711,
+      "sha256": "d6c6a968d4201303e4ab9bb7502cdf6137b1e508591c42067c3d81a449b82ce0"
+    },
+    "skills/oak-authoring/references/06-processes.oak.md": {
+      "destination": "generated/oak-authoring.skill/references/06-processes.oak.md",
+      "change": "identical bytes",
+      "bytes": 1930,
+      "sha256": "94e1d5383964a13524f4358e926f36ab70e906d2c8bbd13a40fbb5a536ea8a48"
+    },
+    "skills/oak-authoring/references/07-instructions.oak.md": {
+      "destination": "generated/oak-authoring.skill/references/07-instructions.oak.md",
+      "change": "identical bytes",
+      "bytes": 363,
+      "sha256": "5fae40d20f3e630bde0dddf471c94fff21bc137758660774bf14a4ec75a9742f"
+    },
+    "skills/oak-authoring/references/oak.ebnf": {
+      "destination": "generated/oak-authoring.skill/references/oak.ebnf",
+      "change": "identical bytes",
+      "bytes": 13307,
+      "sha256": "ce419c687b9f4d84f22cef4471ec54e018be1f1222b8aba0d0e93f4fd85350ec"
+    },
+    "skills/oak-authoring/scripts/validate.py": {
+      "destination": "build/authoring_validator.py",
+      "change": "maintained source plus generated copy",
+      "bytes": 13508,
+      "sha256": "bc03b31253b34e0b4221eb215ee7a3be0fa0d271fa861789042b5a1edfc85dea"
+    }
+  }
+}

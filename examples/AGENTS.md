@@ -89,6 +89,6 @@ ACT Complete <CONTRACT> before accepting the example. (CONTRACT=$constant.exampl
 ACT Apply <SCENARIOS> when registering and delivering a scenario, then refresh all example-owned files with python -m examples.catalog. (
   SCENARIOS=$constant.scenario-contract,
 )
-ACT Use outputs/oak.ebnf and outputs/docs only when exact syntax or model fields are required. ()
+ACT Use generated/oak.ebnf and generated/definitions only when exact syntax or model fields are required. ()
 </process>
 </processes>

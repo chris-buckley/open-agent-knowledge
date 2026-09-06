@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+from types import ModuleType
 from pathlib import Path
 import sys
 
@@ -17,16 +18,18 @@ from oak.surface import SURFACES as SURFACE_SOURCE
 from build.authoring_guides import TEMPLATE_DIRECTORIES, TEMPLATE_ENTRY, entry_node, knowledge_nodes, teaching_examples
 from build.ebnf import grammar
 from build.fusion import fuse
+from build.generated import write_generated
 
-PACKAGE = ROOT / "skills" / "oak-authoring"
+PACKAGE = ROOT / "generated" / "oak-authoring.skill"
 SCRIPT = PACKAGE / "scripts" / "validate.py"
-TARGET = ROOT / "outputs" / "oak-authoring.oak.md"
+VALIDATOR_SOURCE = ROOT / "build" / "authoring_validator.py"
+TARGET = ROOT / "generated" / "oak-authoring.oak.md"
 ENTRY = "SKILL.oak.md"  # Virtual identity for the OAK body beneath skill metadata.
 
 
-def validator_module():
+def validator_module() -> ModuleType:
     """Read the helper's version and immutable validator identity without running it."""
-    spec = importlib.util.spec_from_file_location("oak_authoring_validator", SCRIPT)
+    spec = importlib.util.spec_from_file_location("oak_authoring_validator", VALIDATOR_SOURCE)
     if spec is None or spec.loader is None:
         raise RuntimeError("missing optional validator helper")
     module = importlib.util.module_from_spec(spec)
@@ -37,7 +40,7 @@ def validator_module():
 def skill_documents() -> dict[str, str]:
     """The exact OAK material shared by progressive loading and agent fusion."""
     validator = validator_module()
-    nodes = knowledge_nodes(SCRIPT.read_text(encoding="utf-8"), validator.SKILL_VERSION, validator.REVISION)
+    nodes = knowledge_nodes(VALIDATOR_SOURCE.read_text(encoding="utf-8"), validator.SKILL_VERSION, validator.REVISION)
     return {ENTRY: render(entry_node()),
             **{path: render(node) for path, node in nodes.items()}}
 
@@ -61,6 +64,7 @@ def artifacts() -> dict[Path, str]:
     }
     frontmatter = "---\n" + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True) + "---\n\n"
     return {
+        SCRIPT: VALIDATOR_SOURCE.read_text(encoding="utf-8"),
         PACKAGE / "SKILL.md": frontmatter + shared[ENTRY] + "\n",
         **{PACKAGE / path: text + "\n" for path, text in shared.items() if path != ENTRY},
         **{PACKAGE / path: text + "\n" for path, text in teaching_examples().items()},
@@ -73,19 +77,7 @@ def artifacts() -> dict[Path, str]:
 
 def write() -> Path:
     """Generate products and prune only this generator's owned document paths."""
-    expected = artifacts()
-    for directory in ("references", "guides", "assets", "_template"):
-        owned = PACKAGE / directory
-        for path in owned.rglob("*"):
-            if path.is_file() and "__pycache__" not in path.parts and path not in expected:
-                path.unlink()
-        for path in sorted(owned.rglob("*"), reverse=True):
-            if path.is_dir() and not any(path.iterdir()):
-                path.rmdir()
-    (ROOT / "outputs" / "authoring.md").unlink(missing_ok=True)
-    for path, text in expected.items():
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text, encoding="utf-8", newline="\n")
+    write_generated(artifacts(), root=ROOT / "generated", owned=PACKAGE)
     return TARGET
 
 

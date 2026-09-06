@@ -23,11 +23,9 @@ oak/AGENTS.md,"package representation, syntax, parsing, rendering, vocabulary, s
 oak/node/AGENTS.md,"document, node, parts, values, schemas, and same-document validation"
 oak/resolve/AGENTS.md,"target paths, loading, graph resolution, and cross-document contracts"
 oak/execute/AGENTS.md,"arrivals, processes, tools, state, emissions, failures, and transactions"
-build/AGENTS.md,"generators, checks, freshness, generated reference, and authoring prompt"
+build/AGENTS.md,"generators, generated products, authoring capability, validator identity, and verification"
 examples/AGENTS.md,"practical authoring, naming, decomposition, examples, and sibling renders"
-outputs/AGENTS.md,generated artifacts and regeneration ownership
 docs/AGENTS.md,"persistent plan creation, plan storage, and completion reports"
-skills/AGENTS.md,"portable authoring capability, skill packaging, scope-safe fusion, and optional validator identity"
 >>
 
 agent-line-limit: 500
@@ -39,8 +37,8 @@ repository-rules: YAML<<
   changing implementation files.
 - Treat AGENTS hierarchy as host scoping and never as implicit OAK imports.
 - Treat each scoped AGENTS document as the sole current owner of its named concern.
-- Keep repository-development assistance in .agents and distributable skill products
-  in skills.
+- Keep repository-development assistance in .agents and generated product deliveries
+  in generated; use build/AGENTS.md for product ownership.
 - Route every persistent repository plan through docs/AGENTS.md before creating it.
 - Use schema.change-description and constant.change-naming-rules when naming work
   branches, commits, or pull requests.
