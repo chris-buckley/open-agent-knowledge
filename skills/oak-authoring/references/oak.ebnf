@@ -64,9 +64,9 @@ logical_nl = ? physical LF outside balanced delimiters; blank lines are ignored 
 indent = ? exactly two additional spaces for a suite or MESSAGE metadata; tabs are invalid ? ;
 dedent = ? return to the immediately enclosing suite indentation ? ;
 comparison_operator = "equals" | "does not equal" | "is less than" | "is at most" | "is greater than" | "is at least" ;
-(* Expression productions describe tokens, not a host-language expression evaluator.
-Spaces separate words; punctuation is recognized only outside strings at its delimiter depth.
-The $ token is adjacent to its value target. JSON owns its internal whitespace and delimiters.
+(* Token grammar, not a host-language evaluator.
+Words need spaces; punctuation is structural only outside strings at its delimiter depth.
+$ adjoins its value target. JSON controls its own whitespace and delimiters.
 One condition grammar serves IF, WHILE, ASSERT, and trigger guards.
 ALL and ANY require at least two conditions; NOT requires exactly one.
 Condition operators preserve the authored tree and left-to-right short-circuit order.
@@ -86,8 +86,8 @@ Canonical expression width is 100 Unicode code points, including indentation, pr
 Flat lists have no trailing comma; expanded lists put one item per line with a trailing comma and two-space indentation.
 Closing delimiters align with their owning line; nested lists apply the same width rule recursively.
 Indivisible values and prose may exceed the soft width; formatting never rewrites their contents.
-Empty explicit EMIT bindings, empty seeds, and source-backed seeds are invalid.
-Trigger events are non-blank single-line strings after decoding; guards must read state.
+Empty EMIT bindings or seeds, and source-backed seeds, are invalid.
+Events decode to non-blank single-line text; guards must read state.
 *)
 constant = inline_constant | text_constant | json_constant | csv_constant | yaml_constant ;
 inline_constant = slug_id, [ as_clause ], ": ", json_value ;

@@ -62,7 +62,7 @@ guide-3-guidance: YAML<<
   result outside the authored document.
 >>
 
-guide-3-identity: {"version": "2.3.0", "validator-revision": "2b542c613c5d1a7e64b597884fae4f444ac34916"}
+guide-3-identity: {"version": "3.0.0", "validator-revision": "dc71e5ec140e1b94351ceabab3a55b9ab8aa9dce"}
 
 guide-3-validation-policy: YAML<<
 - Run programmatic validation only when the user requests it. Authoring and interpretation
@@ -117,10 +117,10 @@ from urllib.request import urlopen
 import venv
 from zipfile import BadZipFile, ZipFile
 
-SKILL_VERSION = "2.3.0"
+SKILL_VERSION = "3.0.0"
 REPOSITORY = "chris-buckley/open-agent-knowledge"
-REVISION = "2b542c613c5d1a7e64b597884fae4f444ac34916"
-SOURCE_SHA256 = "e9c301a254ec8897698816091bac99cc117d8e0fa052192e728d356d19c27bd1"
+REVISION = "dc71e5ec140e1b94351ceabab3a55b9ab8aa9dce"
+SOURCE_SHA256 = "4adedc8035e384d57c2ca7762faadd3b0e5f425f5ece1bf0a95e0be00f7c75f3"
 PROJECT_SHA256 = "2412c436c0ffaa05c604da2d58be4b72c443b37efcaa094380845fd0fe3a3702"
 MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
 
@@ -479,9 +479,9 @@ logical_nl = ? physical LF outside balanced delimiters; blank lines are ignored 
 indent = ? exactly two additional spaces for a suite or MESSAGE metadata; tabs are invalid ? ;
 dedent = ? return to the immediately enclosing suite indentation ? ;
 comparison_operator = "equals" | "does not equal" | "is less than" | "is at most" | "is greater than" | "is at least" ;
-(* Expression productions describe tokens, not a host-language expression evaluator.
-Spaces separate words; punctuation is recognized only outside strings at its delimiter depth.
-The $ token is adjacent to its value target. JSON owns its internal whitespace and delimiters.
+(* Token grammar, not a host-language evaluator.
+Words need spaces; punctuation is structural only outside strings at its delimiter depth.
+$ adjoins its value target. JSON controls its own whitespace and delimiters.
 One condition grammar serves IF, WHILE, ASSERT, and trigger guards.
 ALL and ANY require at least two conditions; NOT requires exactly one.
 Condition operators preserve the authored tree and left-to-right short-circuit order.
@@ -501,8 +501,8 @@ Canonical expression width is 100 Unicode code points, including indentation, pr
 Flat lists have no trailing comma; expanded lists put one item per line with a trailing comma and two-space indentation.
 Closing delimiters align with their owning line; nested lists apply the same width rule recursively.
 Indivisible values and prose may exceed the soft width; formatting never rewrites their contents.
-Empty explicit EMIT bindings, empty seeds, and source-backed seeds are invalid.
-Trigger events are non-blank single-line strings after decoding; guards must read state.
+Empty EMIT bindings or seeds, and source-backed seeds, are invalid.
+Events decode to non-blank single-line text; guards must read state.
 *)
 constant = inline_constant | text_constant | json_constant | csv_constant | yaml_constant ;
 inline_constant = slug_id, [ as_clause ], ": ", json_value ;
