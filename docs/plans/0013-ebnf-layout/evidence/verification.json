@@ -71,13 +71,60 @@
     "conclusion": "success"
   },
   "candidate_ci": {
-    "status": "pending remote candidate execution"
+    "implementation_commit": "d44ba3046eee63e384e8ba2ae7224c640c47f752",
+    "run_id": 34023100501,
+    "job_id": 101459171427,
+    "conclusion": "success",
+    "declared_dependencies": true,
+    "pr_run_id": 34023217133,
+    "pr_job_id": 101459490432,
+    "pr_conclusion": "success",
+    "detached_bootstrap_and_cache_reuse": "passed"
   },
   "environment_limitations": [
-    "Local pydantic-settings 2.14.1 is below the declared >=2.15; baseline Actions installed declared dependencies. Candidate Actions must verify the same declaration."
+    "Historical local pydantic-settings 2.14.1 is below declared >=2.15. Implementation and review-integration Actions passed with declared dependencies.",
+    "Recovery local full-suite retries exceeded execution limits of 45 and 120 seconds; neither is counted as a new pass."
   ],
   "corrected_failure": "The first candidate edited package commentary and failed validator source pin is stale. All oak package bytes were restored; the identity check now passes without weakening it.",
   "independent_review": {
-    "status": "pending"
+    "status": "completed",
+    "verdict": "Approved",
+    "method": "Independent Copilot coding-agent audit; not human merge approval.",
+    "reviewed_commit": "d44ba3046eee63e384e8ba2ae7224c640c47f752",
+    "report": "evidence/independent-review.md",
+    "report_blob": "50cf5a69503fce58a07d42079572c1ea8c4fb7c2",
+    "audit_pr": 21,
+    "integration_commit": "7e4cfe156f7c86dc7547aa1ecdb5dcfdd70f1ae9",
+    "unresolved_in_scope_findings": 0
+  },
+  "delivery": {
+    "pr_number": 19,
+    "branch": "docs/plan-ebnf-layout",
+    "base": "main",
+    "observed_base_sha": "bf0975dd7959320fd6727cee926370eca1808e07",
+    "observed_head_sha": "7e4cfe156f7c86dc7547aa1ecdb5dcfdd70f1ae9",
+    "observed_head_tree": "cca943cbdb2d67190e7774b4b3d27c7dace1ef1e",
+    "run_id": 34024033085,
+    "job_id": 101461709452,
+    "conclusion": "success",
+    "all_workflow_steps": "passed",
+    "merged": false,
+    "temporary_files_absent": true,
+    "ordinary_ci_unchanged": true,
+    "closeout": "Only plan/report/verification are changed. Exact final head and its own subsequent CI are recorded in PR #19 before handoff; no future CI result is asserted in this record."
+  },
+  "recovery": {
+    "artifact_sha256": "a1ae9b7680735a1f7fb5f198aaa1fdc664747f75177b104e02f7fa38745894b6",
+    "restored_tree_matches_remote": true,
+    "product_fingerprint": "cd1dd883722f554c3dc6edf6314a84f219a6b45f7336e89725e411c203397688",
+    "compilation": "passed",
+    "focused_ebnf_and_plan_checks": "passed",
+    "baseline_comparison": "passed",
+    "source_occurrences": 141,
+    "surface_occurrences": 45,
+    "non_grammar_embedding_bytes_preserved": true,
+    "unrelated_paths_unchanged": true,
+    "complete_suite_retries": "execution timeout; not passed",
+    "previous_final_response": "Incorrectly said no changes or PR existed; contradicted by verified remote implementation, PR #19 and audit."
   }
 }
