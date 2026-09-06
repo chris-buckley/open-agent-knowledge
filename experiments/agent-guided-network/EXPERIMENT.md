@@ -1,7 +1,7 @@
 # Agent-guided numerical networks
 
 Prepared: 2026-09-05
-Status: Feasibility, attention, and compression studies are implemented and measured. Agent-free numerical execution and task-specific compression are demonstrated; an advantage attributable to agent judgement is not established. Generalisation and natural-language conversation are the next research direction, not demonstrated results. See LEARNINGS.md for the evidence index.
+Status: Feasibility, attention, compression and wording-versus-meaning studies are measured. The latest study verifies one-token numerical answers and exposes failed unseen-wording transfer. Reliable conversation and broad generalisation remain unproven. See LEARNINGS.md.
 Baseline: OAK `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a`.
 Branch: `experiment/agent-guided-network`.
 
@@ -309,3 +309,7 @@ On 6 September 2026, Brisbane time, the user clarified the intended payoff: a mu
 [The measured compression report](results/compression-run/REPORT.md) records 416-to-144 exact projection folding and a three-shared-gain task replacement. Seven live proposals across three fresh data seeds produced six acceptances and one rejection. Final accuracy was 100% on short, sixteen-entry, and near-key regimes, but 61.78% on harder unseen stress cases. A four-candidate non-agent search selected exactly the same model. A separate zero-learned-parameter task algorithm solved every regime. The three-gain result encodes aligned-key task structure, not general intelligence or demonstrated agent superiority.
 
 Coefficient payload fell from 3,328 to 24 bytes, but the actual complete exported package fell from 18,623 to 10,142 bytes. Runtime, metadata, expanded nonzeros, and different JSON presentation policies are disclosed. The extreme-case loss worsened relative to the teacher despite higher accuracy. Keep those limitations alongside the positive compression result.
+
+## Verified wording-versus-meaning resumption
+
+The [meaning report](results/meaning-run/REPORT.md) records a new execution of the existing committed protocol, not recovery of missing context results. One live teaching choice is followed by numerical replay, independent metric recomputation and model-bound memory-restoration checks. The original scientific source remains unchanged. This model selects a single location word; it is not the proposed conversational world model.

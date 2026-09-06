@@ -22,6 +22,8 @@ D003, 6 September 2026, proposed: frame reusable modules around testable questio
 
 D004, 6 September 2026, proposed: compare the existing message-log design with a learned shared context workspace inside the numerical network. Keep learned update/read parameters distinct from changing episode state, preserve source and temporal distinctions, and compare with equal access to relevant observations. Recover or rebuild and verify the missing world-language baseline before drawing conclusions. The existing frozen STUDY.md remains unchanged; a new architecture needs a separate protocol and fresh held-out evidence.
 
+D005, 6 September 2026: missing context/world-language run files and their quoted scores remain unverified. The committed wording study is re-executed and audited rather than reconstructed from prose. Prior aggregate exposure is disclosed. See the meaning resumption report.
+
 ## Evidence ledger
 
 | ID | Finding | Status and limit | Evidence |
@@ -44,6 +46,12 @@ D004, 6 September 2026, proposed: compare the existing message-log design with a
 | L016 | Coefficient reduction overstates complete deployment reduction here. | 138.67 times fewer coefficients corresponds to 1.84 times smaller actual export; same-runtime comparison is 1.27 times. | [Byte accounting](results/compression-run/REPORT.md#storage-is-not-just-coefficient-count) |
 | L017 | Better stress accuracy can coexist with worse probabilistic loss. | Three gains reach 61.78% on harder stress cases, but loss 2.341369 exceeds the teacher's 1.531828. | [Stress failure](results/compression-run/REPORT.md#results) |
 | L018 | Fresh decisions across data seeds are not independent agent trials. | Seven actual proposals were made in one shared conversation; two later seeds deliberately transfer the first seed's selected gains. | [Live decisions](results/compression-run/REPORT.md#live-proposal-ledger) |
+| L019 | An agent-selected longer-history lesson improves the registered long-history test relative to ordinary continuation. | One live choice plus two numerical replay seeds; extra data differs, so this is participation, not isolated agent superiority. | [Meaning resumption](results/meaning-run/REPORT.md#final-accuracy) |
+| L020 | Strong familiar-wording accuracy does not establish stable meaning across a held-out word arrangement. | Selected model: 99.35% familiar versus 8.07% unseen wording in this re-execution. | [Paired tests](results/meaning-run/REPORT.md#paired-meaning-tests) |
+| L021 | Most unseen-wording errors return the opposite endpoint of the queried move. | 1,340 of 1,536 cases, 87.24%; post-selection diagnostic, not a universal mechanistic explanation. | [Error analysis](results/meaning-run/REPORT.md#error-analysis-and-interpretation) |
+| L022 | The held-out combination score mixes two materially different question types. | Current questions ask an unseen destination association; before questions ask an allowed source. Stratified counts are retained. | [Combination scope](results/meaning-run/REPORT.md#final-accuracy) |
+| L023 | Selected one-token models survive state restoration and agent-free export on tested cases. | 6,144 isolated predictions, 96 OAK samples; not a conversational or universal-equivalence result. | [Verification](results/meaning-run/REPORT.md#verification-and-finalisation) |
+| L024 | More wording variation or agreement training is not uniformly better in this fixed study. | Ordinary repetition is stronger on some paired tests; all controls and losses remain visible. | [Comparisons](results/meaning-run/REPORT.md#paired-meaning-tests) |
 
 ## How to extend this index
 
@@ -53,6 +61,6 @@ Keep parameter counts, active weights, dtype, metadata, code bytes, and complete
 
 ## Questions still open
 
-Can shared concepts support unfamiliar combinations and longer histories without new weight changes? Does joint world-and-language teaching support generated multi-turn conversation rather than selecting prepared replies? Can the model distinguish what happened from what was observed, handle corrections, and ask for missing information? None has been measured here.
+Can shared concepts support unfamiliar combinations and longer histories without new weight changes? Does joint world-and-language teaching support generated multi-turn conversation rather than selecting prepared replies? Can the model distinguish what happened from what was observed, handle corrections, and ask for missing information? The meaning resumption measures a narrow six-choice version, not those broader conversational abilities.
 
 Compactness, less-structured transfer, and superiority to automatic structure selection remain secondary research questions. The compression study confirms a compact task-specific solution but its non-agent control matches it. That is compatible with the demonstrated participation mechanism and does not establish broad intelligence. Keep new direction decisions separate from empirical ledger entries until runs supply evidence.

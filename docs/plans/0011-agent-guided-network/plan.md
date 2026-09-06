@@ -33,7 +33,7 @@ The design starts from `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a` on `experiment
 
 ## 2. Mission
 
-Record and execute the authorised sequential-assistant feasibility, attention, and compression studies, while retaining open tasks for the broader research programme.
+Record and execute the authorised sequential-assistant feasibility, attention, compression, and wording studies, while retaining open tasks for the broader research programme.
 
 Task: Deliver the requested documentation-first commit, an executable numerical prototype, actual assistant decisions, measured comparisons, and agent-free export evidence.
 Purpose: Make the user's learning intent precise, testable, and independent of inference-time agents.
@@ -126,6 +126,15 @@ Objective: Publish the tested experiment and consolidate every supported finding
 - [x] Key task: P11.02 Run full repository and all experiment verification, publish the exact tested tree, inspect CI results, and link final evidence from the learning index and report.
 Success criteria: The source, representative numerical OAK documents, evidence, learning index, and observed verification are delivered without modifying main or claiming agent superiority.
 Transition trigger: Compression delivery passes; broader independent-agent and matched total-cost work remains open.
+
+### Phase 12: Verify and publish wording evidence
+Objective: Deliver the existing wording-versus-meaning experiment without a new architecture or unsupported recovery claims.
+- [x] Key task: P12.01 Recover the checksum-verified committed source and distinguish it from missing context and wording run records.
+- [x] Key task: P12.02 Re-execute the registered comparisons, record one live teaching choice and numerical replays, and close selection before this execution creates final cases.
+- [x] Key task: P12.03 Recompute every saved metric independently, verify model-bound state restoration and OAK/export decisions, and retain raw records and source identities.
+- [x] Key task: P12.04 Publish audited evidence and update the learning index after branch checks pass; disclose pre-existing main integration conflicts separately.
+Success criteria: The meaning report, raw archive, member hashes, live record, reproduction command and verification evidence are present on the same branch. Failed wording transfer is reported rather than relabelled as conversation.
+Transition trigger: The verified research delivery is recorded; broader conversational capability and main integration remain separate work.
 
 ### Coordinating Instructions
 - Timeline: design requested on 5 September 2026; the bounded follow-on run was authorised and executed on that date.
