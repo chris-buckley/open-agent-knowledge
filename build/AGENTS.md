@@ -75,6 +75,8 @@ coding-standard-checks: ["validate the pure OAK entry and every routed Python to
 
 <processes>
 <process id="verify-repository" name="Verify repository">
+ACT Use a Python environment outside the checkout that satisfies pyproject.toml and has no editable repository install; detached checks reject all imports from repository paths. ()
+ACT Use a clean working snapshot when ignored local checkouts affect repository ownership scans; include pending source changes and preserve the local checkouts. ()
 ACT Use <GENERATORS> to regenerate every affected product from its source. (
   GENERATORS=$constant.generator-map,
 )
