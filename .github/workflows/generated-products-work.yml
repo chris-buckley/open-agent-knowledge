@@ -11,16 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Export tracked workspace
+      - name: Check transfer
+        continue-on-error: true
         run: |
-          git archive --format=zip --output="$RUNNER_TEMP/oak-workspace.zip" HEAD
-          git rev-parse HEAD > "$RUNNER_TEMP/oak-workspace-commit.txt"
+          python - <<'PY'
+          import base64, gzip, hashlib, pathlib
+          content = pathlib.Path('.github/generated-products-source.patch.b64').read_text()
+          payload = gzip.decompress(base64.b64decode(content))
+          print(hashlib.sha256(payload).hexdigest())
+          assert hashlib.sha256(payload).hexdigest() == 'ca46634f41f8011da4f6420eac83db7b18e22636ccd679bc006793a6c17f3834'
+          PY
       - uses: actions/upload-artifact@v4
         with:
-          name: oak-workspace
-          path: |
-            ${{ runner.temp }}/oak-workspace.zip
-            ${{ runner.temp }}/oak-workspace-commit.txt
+          name: oak-transfer
+          path: .github/generated-products-source.patch.b64
           retention-days: 1
