@@ -1,0 +1,255 @@
+{
+  "review_method": "Implementing-agent claim-by-claim review; not an independent approval.",
+  "reason": "Preserve the immutable validator pin; original package commentary and all package bytes are unchanged.",
+  "claims": [
+    {
+      "id": "C01",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "One condition grammar serves IF, WHILE, ASSERT, and trigger guards.",
+      "section": "conditions",
+      "delivery": "existing productions",
+      "productions": [
+        "condition",
+        "if_statement",
+        "while_statement",
+        "assert_statement",
+        "trigger_field"
+      ],
+      "coverage": "The same condition nonterminal is used by IF, WHILE, ASSERT and the guard alternative."
+    },
+    {
+      "id": "C02",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "ALL and ANY require at least two conditions; NOT requires exactly one.",
+      "section": "conditions",
+      "delivery": "existing productions",
+      "productions": [
+        "all_condition",
+        "any_condition",
+        "not_condition"
+      ],
+      "coverage": "ALL/ANY each require two conditions before repetition. NOT has exactly one condition."
+    },
+    {
+      "id": "C03",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "Condition operators preserve the authored tree and left-to-right short-circuit order.",
+      "section": "conditions",
+      "delivery": "verbatim source prose (line-wrapped)",
+      "productions": [],
+      "coverage": "The original string appears verbatim after normalising comment line wrapping; focused tests require its section."
+    },
+    {
+      "id": "C04",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "IF and WHILE headers end with a colon; their non-empty action suites indent two spaces.",
+      "section": "processes",
+      "delivery": "existing productions",
+      "productions": [
+        "if_statement",
+        "while_statement",
+        "suite",
+        "indent"
+      ],
+      "coverage": "IF/WHILE contain colon terminals followed by suite. Suite requires a statement; indent adds exactly two spaces."
+    },
+    {
+      "id": "C05",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "ELSE aligns with its IF and immediately follows its suite, allowing blank lines.",
+      "section": "processes",
+      "delivery": "existing productions",
+      "productions": [
+        "if_statement",
+        "suite",
+        "dedent",
+        "logical_nl"
+      ],
+      "coverage": "The optional ELSE immediately follows suite within if_statement. Suite ends at dedent; logical_nl ignores blank lines in process suites."
+    },
+    {
+      "id": "C06",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "WHILE requires LIMIT and one positive decimal integer literal; exhaustion while true fails.",
+      "section": "processes",
+      "delivery": "verbatim source prose (line-wrapped)",
+      "productions": [],
+      "coverage": "The original string appears verbatim after normalising comment line wrapping; focused tests require its section."
+    },
+    {
+      "id": "C07",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "ASSERT has a condition and optional indented MESSAGE metadata, not an action suite.",
+      "section": "processes",
+      "delivery": "existing productions",
+      "productions": [
+        "assert_statement",
+        "indent",
+        "dedent"
+      ],
+      "coverage": "ASSERT has one condition and an optional indented MESSAGE group, with no suite production."
+    },
+    {
+      "id": "C08",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "Balanced parentheses continue one logical statement across physical lines without action scopes.",
+      "section": "lexical",
+      "delivery": "existing productions",
+      "productions": [
+        "logical_nl",
+        "suite",
+        "condition",
+        "binding_list"
+      ],
+      "coverage": "logical_nl is LF outside balanced delimiters. Suite needs that logical newline; condition and binding-list parentheses introduce no suite."
+    },
+    {
+      "id": "C09",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "OAK lists accept a trailing comma; JSON values retain their separate JSON grammar.",
+      "section": "values",
+      "delivery": "existing productions",
+      "productions": [
+        "binding_list",
+        "all_condition",
+        "any_condition",
+        "not_condition",
+        "trigger_declaration",
+        "json_value"
+      ],
+      "coverage": "Parenthesised OAK list productions have an optional trailing comma. json_value and json_string are explicitly separate complete JSON values/tokens."
+    },
+    {
+      "id": "C10",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "Trigger fields are named, unique, and may be authored in any order; event and process are required.",
+      "section": "triggers",
+      "delivery": "verbatim source prose (line-wrapped)",
+      "productions": [],
+      "coverage": "The original string appears verbatim after normalising comment line wrapping; focused tests require its section."
+    },
+    {
+      "id": "C11",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "Canonical trigger field order is event, source, guard, process, seed; absent optionals are omitted.",
+      "section": "triggers",
+      "delivery": "verbatim source prose (line-wrapped)",
+      "productions": [],
+      "coverage": "The original string appears verbatim after normalising comment line wrapping; focused tests require its section."
+    },
+    {
+      "id": "C12",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "Do not author guard=true or an empty seed; a source-backed trigger has no seed field.",
+      "section": "triggers",
+      "delivery": "verbatim source prose (line-wrapped)",
+      "productions": [],
+      "coverage": "The original string appears verbatim after normalising comment line wrapping; focused tests require its section."
+    },
+    {
+      "id": "C13",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "A seed is an ordered named-binding list using the same value grammar as process inputs.",
+      "section": "triggers",
+      "delivery": "verbatim source prose (line-wrapped)",
+      "productions": [],
+      "coverage": "The original string appears verbatim after normalising comment line wrapping; focused tests require its section."
+    },
+    {
+      "id": "C14",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "Strings, JSON literals, and typed targets are consumed as whole tokens before separators or operators.",
+      "section": "lexical",
+      "delivery": "verbatim source prose (line-wrapped)",
+      "productions": [],
+      "coverage": "The original string appears verbatim after normalising comment line wrapping; focused tests require its section."
+    },
+    {
+      "id": "C15",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "Structural tabs, positional fields, truthiness, general calls, comments, infix aliases, and chained comparisons are invalid.",
+      "section": "lexical",
+      "delivery": "verbatim source prose (line-wrapped)",
+      "productions": [],
+      "coverage": "The original string appears verbatim after normalising comment line wrapping; focused tests require its section."
+    },
+    {
+      "id": "C16",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "Canonical expression width is 100 Unicode code points, including indentation, prefixes, and suffixes.",
+      "section": "values",
+      "delivery": "verbatim source prose (line-wrapped)",
+      "productions": [],
+      "coverage": "The original string appears verbatim after normalising comment line wrapping; focused tests require its section."
+    },
+    {
+      "id": "C17",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "Flat lists have no trailing comma; expanded lists put one item per line with a trailing comma and two-space indentation.",
+      "section": "values",
+      "delivery": "verbatim source prose (line-wrapped)",
+      "productions": [],
+      "coverage": "The original string appears verbatim after normalising comment line wrapping; focused tests require its section."
+    },
+    {
+      "id": "C18",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "Closing delimiters align with their owning line; nested lists apply the same width rule recursively.",
+      "section": "values",
+      "delivery": "verbatim source prose (line-wrapped)",
+      "productions": [],
+      "coverage": "The original string appears verbatim after normalising comment line wrapping; focused tests require its section."
+    },
+    {
+      "id": "C19",
+      "owner": "oak/surface/syntax.py:EXPRESSION_CONVENTIONS",
+      "original_claim": "Indivisible values and prose may exceed the soft width; formatting never rewrites their contents.",
+      "section": "values",
+      "delivery": "verbatim source prose (line-wrapped)",
+      "productions": [],
+      "coverage": "The original string appears verbatim after normalising comment line wrapping; focused tests require its section."
+    },
+    {
+      "id": "B01",
+      "owner": "build/ebnf.py:grammar (baseline)",
+      "original_claim": "an empty part is omitted from the render",
+      "delivery": "Omit empty parts.",
+      "section": "06. Complete document"
+    },
+    {
+      "id": "B02",
+      "owner": "build/ebnf.py:grammar (baseline)",
+      "original_claim": "Token grammar, not a host-language evaluator.",
+      "delivery": "Syntax, not validation or host evaluation.",
+      "section": "Scope and notation"
+    },
+    {
+      "id": "B03",
+      "owner": "build/ebnf.py:grammar (baseline)",
+      "original_claim": "Words need spaces; punctuation is structural only outside strings at its delimiter depth.",
+      "delivery": "Space words; punctuation acts unquoted at its depth.",
+      "section": "01. Lexical tokens and whitespace"
+    },
+    {
+      "id": "B04",
+      "owner": "build/ebnf.py:grammar (baseline)",
+      "original_claim": "$ adjoins its value target. JSON controls its own whitespace and delimiters.",
+      "delivery": "$ adjoins targets; JSON owns spacing/delimiters.",
+      "section": "02. Values, targets and bindings"
+    },
+    {
+      "id": "B05",
+      "owner": "build/ebnf.py:grammar (baseline)",
+      "original_claim": "Empty EMIT bindings or seeds, and source-backed seeds, are invalid.",
+      "delivery": "The original package convention rejects empty and source-backed seeds; the build note rejects empty EMIT bindings.",
+      "section": "Triggers"
+    },
+    {
+      "id": "B06",
+      "owner": "build/ebnf.py:grammar (baseline)",
+      "original_claim": "Events decode to non-blank single-line text; guards must read state.",
+      "delivery": "Decode events to nonblank single lines. Guards read state; no empty EMIT bindings.",
+      "section": "Triggers"
+    }
+  ]
+}

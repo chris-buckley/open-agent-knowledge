@@ -1,0 +1,83 @@
+{
+  "recorded_at": "2026-09-06T08:37:41.333419+00:00",
+  "subject_product_fingerprint": "cd1dd883722f554c3dc6edf6314a84f219a6b45f7336e89725e411c203397688",
+  "subject": "Local working tree based on cd648d224510a902acac46c85753ec6e97854195, prior to remote delivery.",
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "commands": [
+    {
+      "command": "python -m build.examples",
+      "exit_code": 0,
+      "seconds": 23.188,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python build/examples.py",
+      "exit_code": 0,
+      "seconds": 23.776,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "additional_checks": [
+    "Python compilation",
+    "focused EBNF layout and preservation checks",
+    "SMEAC plan checks",
+    "scoped AGENTS checks",
+    "baseline comparison script",
+    "repeated generation with no changed bytes",
+    "git diff --check"
+  ],
+  "covered_repository_checks": [
+    "validate_ebnf",
+    "validate_statement_bodies",
+    "validate_compact_specimens",
+    "validate_compact_lexing",
+    "validate_compact_control",
+    "validate_compact_triggers",
+    "validate_compact_layout",
+    "validate_compact_short_circuit",
+    "validate_compact_loop_bounds",
+    "validate_compact_routing",
+    "validate_compact_frames",
+    "validate_compact_relative_targets",
+    "validate_text_examples",
+    "validate_metadata",
+    "validate_resolution",
+    "validate_interfaces",
+    "validate_execution",
+    "validate_interpreter_context",
+    "validate_evidence",
+    "validate_while",
+    "validate_part_omission",
+    "validate_act_authoring",
+    "validate_contract_rules",
+    "validate_source_routing",
+    "validate_json_ld_style_display",
+    "validate_human_examples",
+    "validate_shapes",
+    "validate_authoring_skill",
+    "validate_optional_validator",
+    "validate_plans",
+    "validate_agents",
+    "validate_coding_standards",
+    "validate_surfaces",
+    "validate_outputs",
+    "validate_architecture"
+  ],
+  "baseline_ci": {
+    "run_id": 34020468020,
+    "job_id": 101451979662,
+    "conclusion": "success"
+  },
+  "candidate_ci": {
+    "status": "pending remote candidate execution"
+  },
+  "environment_limitations": [
+    "Local pydantic-settings 2.14.1 is below the declared >=2.15; baseline Actions installed declared dependencies. Candidate Actions must verify the same declaration."
+  ],
+  "corrected_failure": "The first candidate edited package commentary and failed validator source pin is stale. All oak package bytes were restored; the identity check now passes without weakening it.",
+  "independent_review": {
+    "status": "pending"
+  }
+}
