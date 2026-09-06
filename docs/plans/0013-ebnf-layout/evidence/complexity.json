@@ -1,0 +1,67 @@
+{
+  "method": "AST decision count: base one; if/loops/ternaries/except/comprehensions, comprehension filters and boolean operators. Nested functions counted separately. No external complexity tool is configured.",
+  "baseline": {
+    "_document": 3,
+    "_parts": 4,
+    "grammar": 8,
+    "ebnf_text": 1,
+    "write": 1,
+    "build": 1
+  },
+  "candidate": {
+    "build/ebnf.py": {
+      "_document": 3,
+      "_parts": 4,
+      "_records": 2,
+      "_source_productions": 9,
+      "_comment": 2,
+      "_notes": 5,
+      "_arrange": 8,
+      "_grouping_sections": 6,
+      "_join_sections": 5,
+      "grammar": 1,
+      "ebnf_text": 1,
+      "write": 1,
+      "build": 1,
+      "group": 6,
+      "surface": 1,
+      "surfaces": 2,
+      "vocabulary": 1
+    },
+    "build/_ebnf_layout.py": {
+      "_outer_parts": 5,
+      "_update_groups": 6,
+      "_sequence_lines": 6,
+      "_trigger_lines": 2,
+      "_field_columns": 4,
+      "_format_production": 10,
+      "_format_group": 2
+    },
+    "build/checks/ebnf.py": {
+      "_productions": 8,
+      "_fingerprint": 1,
+      "_check_content": 6,
+      "_check_layout": 10,
+      "_check_width": 5,
+      "_check_note_placement": 7,
+      "_check_surface_placement": 6,
+      "_check_sources": 7,
+      "_check_groupings": 10,
+      "_check_grouping_order": 4,
+      "_expect_rejection": 3,
+      "_check_corruptions": 5,
+      "_check_literals": 8,
+      "_check_deliveries": 10,
+      "validate_ebnf": 4
+    },
+    "docs/plans/0013-ebnf-layout/evidence/compare.py": {
+      "_git": 1,
+      "_baseline": 1,
+      "_placements": 9,
+      "_product_fingerprint": 5,
+      "compare": 10,
+      "_check_scope": 4,
+      "_variants": 2
+    }
+  }
+}

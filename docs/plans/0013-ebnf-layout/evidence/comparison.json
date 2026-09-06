@@ -1,0 +1,775 @@
+{
+  "baseline_commit": "7e002d5e8a3632f9f48026c22a5ad0bbec68e77d",
+  "checkout_head": "cd648d224510a902acac46c85753ec6e97854195",
+  "subject": "Working tree at the recorded checkout head; product fingerprint excludes this plan record.",
+  "product_fingerprint": "cd1dd883722f554c3dc6edf6314a84f219a6b45f7336e89725e411c203397688",
+  "source_occurrences": 141,
+  "surface_occurrences": 45,
+  "source_content_preserved": true,
+  "non_grammar_embedding_bytes_preserved": true,
+  "unrelated_paths_unchanged": true,
+  "validator_revision": "dc71e5ec140e1b94351ceabab3a55b9ab8aa9dce",
+  "validator_source_sha256": "4adedc8035e384d57c2ca7762faadd3b0e5f425f5ece1bf0a95e0be00f7c75f3",
+  "variants": [
+    {
+      "groupings": [
+        "xml",
+        "markdown"
+      ],
+      "sha256": "ce419c687b9f4d84f22cef4471ec54e018be1f1222b8aba0d0e93f4fd85350ec",
+      "bytes": 13307,
+      "productions": 141
+    },
+    {
+      "groupings": [
+        "xml"
+      ],
+      "sha256": "a0450b67d8bb989b3f73ad2d05d4e8775415e28614a5e35bcda2e852e2b275d5",
+      "bytes": 11681,
+      "productions": 124
+    },
+    {
+      "groupings": [
+        "markdown"
+      ],
+      "sha256": "2cade5e36290a38f6f87ce5b5547ce5d6664cbc10bc92656bc61016168edc600",
+      "bytes": 11833,
+      "productions": 124
+    },
+    {
+      "groupings": [
+        "markdown",
+        "xml"
+      ],
+      "sha256": "d86fe98687a730684360bf4f42c937707747bcd9111e4233eb202494f8664612",
+      "bytes": 13307,
+      "productions": 141
+    }
+  ],
+  "deliveries": {
+    "outputs/oak.ebnf": {
+      "bytes": 13307,
+      "sha256": "ce419c687b9f4d84f22cef4471ec54e018be1f1222b8aba0d0e93f4fd85350ec"
+    },
+    "skills/oak-authoring/references/oak.ebnf": {
+      "bytes": 13307,
+      "sha256": "ce419c687b9f4d84f22cef4471ec54e018be1f1222b8aba0d0e93f4fd85350ec"
+    },
+    "skills/oak-authoring/references/00-structure.oak.md": {
+      "bytes": 14743,
+      "sha256": "681134610a5f7ba5568f02cf8508b65efdf23db3dda41095eb98641107f8bdf7"
+    },
+    "outputs/oak-authoring.oak.md": {
+      "bytes": 63997,
+      "sha256": "bf2064a60132cf94742f4f512d924444e1b0d72db7a0e4302b52e3afbb429701"
+    }
+  },
+  "skill_entry_bytes": 8022,
+  "placement_inventory": [
+    {
+      "source": "scaffold:oak_document",
+      "section": "06. Complete document",
+      "line": 268
+    },
+    {
+      "source": "scaffold:xml_document",
+      "section": "06. Complete document",
+      "line": 270
+    },
+    {
+      "source": "scaffold:xml_parts_from_instructions",
+      "section": "06. Complete document",
+      "line": 271
+    },
+    {
+      "source": "scaffold:xml_parts_from_constants",
+      "section": "06. Complete document",
+      "line": 274
+    },
+    {
+      "source": "scaffold:xml_parts_from_schemas",
+      "section": "06. Complete document",
+      "line": 277
+    },
+    {
+      "source": "scaffold:xml_parts_from_state",
+      "section": "06. Complete document",
+      "line": 280
+    },
+    {
+      "source": "scaffold:xml_parts_from_triggers",
+      "section": "06. Complete document",
+      "line": 283
+    },
+    {
+      "source": "scaffold:xml_parts_from_processes",
+      "section": "06. Complete document",
+      "line": 286
+    },
+    {
+      "source": "scaffold:xml_parts_from_interfaces",
+      "section": "06. Complete document",
+      "line": 289
+    },
+    {
+      "source": "scaffold:xml_instructions_part",
+      "section": "05. XML and Markdown grouping",
+      "line": 241
+    },
+    {
+      "source": "scaffold:xml_constants_part",
+      "section": "05. XML and Markdown grouping",
+      "line": 242
+    },
+    {
+      "source": "scaffold:xml_schemas_part",
+      "section": "05. XML and Markdown grouping",
+      "line": 243
+    },
+    {
+      "source": "scaffold:xml_state_part",
+      "section": "05. XML and Markdown grouping",
+      "line": 244
+    },
+    {
+      "source": "scaffold:xml_triggers_part",
+      "section": "05. XML and Markdown grouping",
+      "line": 245
+    },
+    {
+      "source": "scaffold:xml_processes_part",
+      "section": "05. XML and Markdown grouping",
+      "line": 246
+    },
+    {
+      "source": "scaffold:xml_interfaces_part",
+      "section": "05. XML and Markdown grouping",
+      "line": 247
+    },
+    {
+      "source": "scaffold:markdown_document",
+      "section": "06. Complete document",
+      "line": 291
+    },
+    {
+      "source": "scaffold:markdown_parts_from_instructions",
+      "section": "06. Complete document",
+      "line": 292
+    },
+    {
+      "source": "scaffold:markdown_parts_from_constants",
+      "section": "06. Complete document",
+      "line": 295
+    },
+    {
+      "source": "scaffold:markdown_parts_from_schemas",
+      "section": "06. Complete document",
+      "line": 298
+    },
+    {
+      "source": "scaffold:markdown_parts_from_state",
+      "section": "06. Complete document",
+      "line": 301
+    },
+    {
+      "source": "scaffold:markdown_parts_from_triggers",
+      "section": "06. Complete document",
+      "line": 304
+    },
+    {
+      "source": "scaffold:markdown_parts_from_processes",
+      "section": "06. Complete document",
+      "line": 307
+    },
+    {
+      "source": "scaffold:markdown_parts_from_interfaces",
+      "section": "06. Complete document",
+      "line": 310
+    },
+    {
+      "source": "scaffold:markdown_instructions_part",
+      "section": "05. XML and Markdown grouping",
+      "line": 253
+    },
+    {
+      "source": "scaffold:markdown_constants_part",
+      "section": "05. XML and Markdown grouping",
+      "line": 254
+    },
+    {
+      "source": "scaffold:markdown_schemas_part",
+      "section": "05. XML and Markdown grouping",
+      "line": 255
+    },
+    {
+      "source": "scaffold:markdown_state_part",
+      "section": "05. XML and Markdown grouping",
+      "line": 256
+    },
+    {
+      "source": "scaffold:markdown_triggers_part",
+      "section": "05. XML and Markdown grouping",
+      "line": 257
+    },
+    {
+      "source": "scaffold:markdown_processes_part",
+      "section": "05. XML and Markdown grouping",
+      "line": 258
+    },
+    {
+      "source": "scaffold:markdown_interfaces_part",
+      "section": "05. XML and Markdown grouping",
+      "line": 259
+    },
+    {
+      "source": "scaffold:xml_body_entry",
+      "section": "05. XML and Markdown grouping",
+      "line": 249
+    },
+    {
+      "source": "scaffold:markdown_body_entry",
+      "section": "05. XML and Markdown grouping",
+      "line": 261
+    },
+    {
+      "source": "scaffold:entry_tag",
+      "section": "05. XML and Markdown grouping",
+      "line": 239
+    },
+    {
+      "source": "scaffold:comparison_operator",
+      "section": "03. Conditions",
+      "line": 87
+    },
+    {
+      "source": "scaffold:constant",
+      "section": "Constants",
+      "line": 107
+    },
+    {
+      "source": "scaffold:inline_constant",
+      "section": "Constants",
+      "line": 108
+    },
+    {
+      "source": "scaffold:text_constant",
+      "section": "Constants",
+      "line": 109
+    },
+    {
+      "source": "scaffold:json_constant",
+      "section": "Constants",
+      "line": 110
+    },
+    {
+      "source": "scaffold:csv_constant",
+      "section": "Constants",
+      "line": 111
+    },
+    {
+      "source": "scaffold:yaml_constant",
+      "section": "Constants",
+      "line": 112
+    },
+    {
+      "source": "scaffold:state_entry",
+      "section": "State",
+      "line": 152
+    },
+    {
+      "source": "scaffold:as_clause",
+      "section": "02. Values, targets and bindings",
+      "line": 70
+    },
+    {
+      "source": "scaffold:schema_placeholder_path",
+      "section": "02. Values, targets and bindings",
+      "line": 71
+    },
+    {
+      "source": "scaffold:json_value",
+      "section": "02. Values, targets and bindings",
+      "line": 33
+    },
+    {
+      "source": "scaffold:csv_body",
+      "section": "Constants",
+      "line": 114
+    },
+    {
+      "source": "scaffold:yaml_body",
+      "section": "Constants",
+      "line": 115
+    },
+    {
+      "source": "scaffold:attributes",
+      "section": "05. XML and Markdown grouping",
+      "line": 251
+    },
+    {
+      "source": "scaffold:markdown_attributes",
+      "section": "05. XML and Markdown grouping",
+      "line": 263
+    },
+    {
+      "source": "scaffold:text_body",
+      "section": "01. Lexical tokens and whitespace",
+      "line": 11
+    },
+    {
+      "source": "scaffold:text_line",
+      "section": "01. Lexical tokens and whitespace",
+      "line": 10
+    },
+    {
+      "source": "scaffold:blank_line",
+      "section": "01. Lexical tokens and whitespace",
+      "line": 9
+    },
+    {
+      "source": "scaffold:lf",
+      "section": "01. Lexical tokens and whitespace",
+      "line": 8
+    },
+    {
+      "source": "expression:condition",
+      "section": "03. Conditions",
+      "line": 81
+    },
+    {
+      "source": "expression:comparison",
+      "section": "03. Conditions",
+      "line": 82
+    },
+    {
+      "source": "expression:all_condition",
+      "section": "03. Conditions",
+      "line": 83
+    },
+    {
+      "source": "expression:any_condition",
+      "section": "03. Conditions",
+      "line": 84
+    },
+    {
+      "source": "expression:not_condition",
+      "section": "03. Conditions",
+      "line": 85
+    },
+    {
+      "source": "expression:process_value",
+      "section": "02. Values, targets and bindings",
+      "line": 35
+    },
+    {
+      "source": "expression:value_target",
+      "section": "02. Values, targets and bindings",
+      "line": 36
+    },
+    {
+      "source": "expression:constant_target",
+      "section": "02. Values, targets and bindings",
+      "line": 51
+    },
+    {
+      "source": "expression:process_target",
+      "section": "02. Values, targets and bindings",
+      "line": 52
+    },
+    {
+      "source": "expression:local_state_target",
+      "section": "02. Values, targets and bindings",
+      "line": 53
+    },
+    {
+      "source": "expression:local_interface_target",
+      "section": "02. Values, targets and bindings",
+      "line": 54
+    },
+    {
+      "source": "expression:value_binding",
+      "section": "02. Values, targets and bindings",
+      "line": 38
+    },
+    {
+      "source": "expression:binding_list",
+      "section": "02. Values, targets and bindings",
+      "line": 39
+    },
+    {
+      "source": "expression:output_bindings",
+      "section": "02. Values, targets and bindings",
+      "line": 40
+    },
+    {
+      "source": "expression:trigger_declaration",
+      "section": "Triggers",
+      "line": 157
+    },
+    {
+      "source": "expression:trigger_field",
+      "section": "Triggers",
+      "line": 162
+    },
+    {
+      "source": "expression:if_statement",
+      "section": "Processes",
+      "line": 198
+    },
+    {
+      "source": "expression:while_statement",
+      "section": "Processes",
+      "line": 201
+    },
+    {
+      "source": "expression:assert_statement",
+      "section": "Processes",
+      "line": 204
+    },
+    {
+      "source": "expression:call_statement",
+      "section": "Processes",
+      "line": 208
+    },
+    {
+      "source": "expression:emit_statement",
+      "section": "Processes",
+      "line": 211
+    },
+    {
+      "source": "expression:set_statement",
+      "section": "Processes",
+      "line": 215
+    },
+    {
+      "source": "expression:fail_statement",
+      "section": "Processes",
+      "line": 218
+    },
+    {
+      "source": "expression:suite",
+      "section": "Processes",
+      "line": 194
+    },
+    {
+      "source": "expression:process_statement",
+      "section": "Processes",
+      "line": 180
+    },
+    {
+      "source": "expression:positive_integer",
+      "section": "01. Lexical tokens and whitespace",
+      "line": 16
+    },
+    {
+      "source": "expression:json_string",
+      "section": "01. Lexical tokens and whitespace",
+      "line": 17
+    },
+    {
+      "source": "expression:logical_nl",
+      "section": "01. Lexical tokens and whitespace",
+      "line": 13
+    },
+    {
+      "source": "expression:indent",
+      "section": "01. Lexical tokens and whitespace",
+      "line": 14
+    },
+    {
+      "source": "expression:dedent",
+      "section": "01. Lexical tokens and whitespace",
+      "line": 15
+    },
+    {
+      "source": "vocabulary.SLUG_ID_SYNTAX:slug_id",
+      "section": "01. Lexical tokens and whitespace",
+      "line": 24
+    },
+    {
+      "source": "vocabulary.NON_BLANK_LINE_SYNTAX:non_blank_line",
+      "section": "01. Lexical tokens and whitespace",
+      "line": 25
+    },
+    {
+      "source": "vocabulary.PROCESS_NAME_SYNTAX:process_name",
+      "section": "01. Lexical tokens and whitespace",
+      "line": 26
+    },
+    {
+      "source": "vocabulary.PLACEHOLDER_SYNTAX:placeholder",
+      "section": "01. Lexical tokens and whitespace",
+      "line": 27
+    },
+    {
+      "source": "vocabulary.REGEX_PATTERN_SYNTAX:regex_pattern",
+      "section": "01. Lexical tokens and whitespace",
+      "line": 28
+    },
+    {
+      "source": "vocabulary.DOTTED_PATH_EBNF:dotted_path",
+      "section": "02. Values, targets and bindings",
+      "line": 56
+    },
+    {
+      "source": "vocabulary.VALUE_REFERENCE_EBNF:value_reference",
+      "section": "02. Values, targets and bindings",
+      "line": 66
+    },
+    {
+      "source": "vocabulary.VALUE_REFERENCE_EBNF:constant_target",
+      "section": "02. Values, targets and bindings",
+      "line": 67
+    },
+    {
+      "source": "vocabulary.VALUE_REFERENCE_EBNF:state_target",
+      "section": "02. Values, targets and bindings",
+      "line": 68
+    },
+    {
+      "source": "vocabulary.ENTRY_PART_EBNF:entry_part",
+      "section": "02. Values, targets and bindings",
+      "line": 58
+    },
+    {
+      "source": "vocabulary.ENTRY_PATH_EBNF:entry_path",
+      "section": "02. Values, targets and bindings",
+      "line": 60
+    },
+    {
+      "source": "vocabulary.RELATIVE_DOCUMENT_PATH_EBNF:relative_document_path",
+      "section": "02. Values, targets and bindings",
+      "line": 62
+    },
+    {
+      "source": "vocabulary.TARGET_PATH_EBNF:target_path",
+      "section": "02. Values, targets and bindings",
+      "line": 64
+    },
+    {
+      "source": "surface.constraint-type:surface_constraint_type",
+      "section": "Schemas",
+      "line": 141
+    },
+    {
+      "source": "surface.constraint-one-of:surface_constraint_one_of",
+      "section": "Schemas",
+      "line": 142
+    },
+    {
+      "source": "surface.constraint-regex:surface_constraint_regex",
+      "section": "Schemas",
+      "line": 143
+    },
+    {
+      "source": "surface.constraint-non-empty:surface_constraint_non_empty",
+      "section": "Schemas",
+      "line": 144
+    },
+    {
+      "source": "surface.constraint-max-chars:surface_constraint_max_chars",
+      "section": "Schemas",
+      "line": 145
+    },
+    {
+      "source": "surface.constraint-lines:surface_constraint_lines",
+      "section": "Schemas",
+      "line": 146
+    },
+    {
+      "source": "surface.constraint-list-of:surface_constraint_list_of",
+      "section": "Schemas",
+      "line": 147
+    },
+    {
+      "source": "surface.constraint-at-least:surface_constraint_at_least",
+      "section": "Schemas",
+      "line": 148
+    },
+    {
+      "source": "surface.constraint-at-most:surface_constraint_at_most",
+      "section": "Schemas",
+      "line": 149
+    },
+    {
+      "source": "surface.where:surface_where",
+      "section": "Schemas",
+      "line": 139
+    },
+    {
+      "source": "surface.instruction:surface_instruction",
+      "section": "Instructions",
+      "line": 104
+    },
+    {
+      "source": "surface.constant-inline:surface_constant_inline",
+      "section": "Constants",
+      "line": 117
+    },
+    {
+      "source": "surface.constant-text:surface_constant_text",
+      "section": "Constants",
+      "line": 118
+    },
+    {
+      "source": "surface.constant-json:surface_constant_json",
+      "section": "Constants",
+      "line": 121
+    },
+    {
+      "source": "surface.constant-csv:surface_constant_csv",
+      "section": "Constants",
+      "line": 124
+    },
+    {
+      "source": "surface.constant-yaml:surface_constant_yaml",
+      "section": "Constants",
+      "line": 127
+    },
+    {
+      "source": "surface.schema:surface_schema",
+      "section": "Schemas",
+      "line": 132
+    },
+    {
+      "source": "surface.state:surface_state",
+      "section": "State",
+      "line": 154
+    },
+    {
+      "source": "surface.value-literal:surface_value_literal",
+      "section": "02. Values, targets and bindings",
+      "line": 74
+    },
+    {
+      "source": "surface.value-constant:surface_value_constant",
+      "section": "02. Values, targets and bindings",
+      "line": 75
+    },
+    {
+      "source": "surface.value-state:surface_value_state",
+      "section": "02. Values, targets and bindings",
+      "line": 76
+    },
+    {
+      "source": "surface.value-binding:surface_value_binding",
+      "section": "02. Values, targets and bindings",
+      "line": 77
+    },
+    {
+      "source": "surface.value-binding-line:surface_value_binding_line",
+      "section": "02. Values, targets and bindings",
+      "line": 78
+    },
+    {
+      "source": "surface.condition-compare:surface_condition_compare",
+      "section": "03. Conditions",
+      "line": 97
+    },
+    {
+      "source": "surface.condition-all:surface_condition_all",
+      "section": "03. Conditions",
+      "line": 98
+    },
+    {
+      "source": "surface.condition-any:surface_condition_any",
+      "section": "03. Conditions",
+      "line": 99
+    },
+    {
+      "source": "surface.condition-not:surface_condition_not",
+      "section": "03. Conditions",
+      "line": 100
+    },
+    {
+      "source": "surface.act-native:surface_act_native",
+      "section": "Processes",
+      "line": 222
+    },
+    {
+      "source": "surface.act-tool:surface_act_tool",
+      "section": "Processes",
+      "line": 223
+    },
+    {
+      "source": "surface.statement-set:surface_statement_set",
+      "section": "Processes",
+      "line": 216
+    },
+    {
+      "source": "surface.statement-emit-inferred:surface_statement_emit_inferred",
+      "section": "Processes",
+      "line": 212
+    },
+    {
+      "source": "surface.statement-emit-explicit:surface_statement_emit_explicit",
+      "section": "Processes",
+      "line": 213
+    },
+    {
+      "source": "surface.statement-if:surface_statement_if",
+      "section": "Processes",
+      "line": 199
+    },
+    {
+      "source": "surface.statement-call:surface_statement_call",
+      "section": "Processes",
+      "line": 209
+    },
+    {
+      "source": "surface.statement-fail:surface_statement_fail",
+      "section": "Processes",
+      "line": 219
+    },
+    {
+      "source": "surface.statement-assert:surface_statement_assert",
+      "section": "Processes",
+      "line": 206
+    },
+    {
+      "source": "surface.statement-foreach:surface_statement_foreach",
+      "section": "Processes",
+      "line": 224
+    },
+    {
+      "source": "surface.statement-while:surface_statement_while",
+      "section": "Processes",
+      "line": 202
+    },
+    {
+      "source": "surface.statement-par:surface_statement_par",
+      "section": "Processes",
+      "line": 226
+    },
+    {
+      "source": "surface.statement-join:surface_statement_join",
+      "section": "Processes",
+      "line": 228
+    },
+    {
+      "source": "surface.process:surface_process",
+      "section": "Processes",
+      "line": 229
+    },
+    {
+      "source": "surface.trigger:surface_trigger",
+      "section": "Triggers",
+      "line": 177
+    },
+    {
+      "source": "surface.interface-receives:surface_interface_receives",
+      "section": "Interfaces",
+      "line": 234
+    },
+    {
+      "source": "surface.interface-emits:surface_interface_emits",
+      "section": "Interfaces",
+      "line": 236
+    },
+    {
+      "source": "surface.node:surface_node",
+      "section": "06. Complete document",
+      "line": 312
+    }
+  ]
+}
