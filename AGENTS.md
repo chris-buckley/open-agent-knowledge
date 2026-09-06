@@ -25,6 +25,7 @@ oak/resolve/AGENTS.md,"target paths, loading, graph resolution, and cross-docume
 oak/execute/AGENTS.md,"arrivals, processes, tools, state, emissions, failures, and transactions"
 build/AGENTS.md,"generators, checks, freshness, generated reference, and authoring prompt"
 examples/AGENTS.md,"practical authoring, naming, decomposition, examples, and sibling renders"
+experiments/AGENTS.md,"experiment containment, design records, evidence status, and promotion boundaries"
 outputs/AGENTS.md,generated artifacts and regeneration ownership
 docs/AGENTS.md,"persistent plan creation, plan storage, and completion reports"
 skills/AGENTS.md,"portable authoring capability, skill packaging, scope-safe fusion, and optional validator identity"

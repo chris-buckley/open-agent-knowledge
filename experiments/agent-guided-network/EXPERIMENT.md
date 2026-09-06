@@ -1,0 +1,315 @@
+# Agent-guided numerical networks
+
+Prepared: 2026-09-05
+Status: Feasibility, attention, compression and wording-versus-meaning studies are measured. The latest study verifies one-token numerical answers and exposes failed unseen-wording transfer. Reliable conversation and broad generalisation remain unproven. See LEARNINGS.md.
+Baseline: OAK `cd1f8aed74b24f8515a3e176972e9f2cbcb53e5a`.
+Branch: `experiment/agent-guided-network`.
+
+## Intent
+
+Build a numerical network whose computational modules are defined by OAK documents. During learning, an agent wraps each module, understands its intended responsibility, examines evidence about its behaviour, and participates in proposing updates to that module's matrices. The network's collective output is evaluated, feedback informs further proposals, and accepted changes become new versions of the node documents.
+
+After learning, remove the agents completely. The remaining matrices, mathematical operations, connections, and input/output transformations must perform inference without external language-model calls, the training agent's conversation history, or agent judgement. A deployed numerical language model may interpret language and maintain its own explicit dialogue state; those capabilities must belong to the exported network.
+
+The user's defining idea is agents participating in the learning journey, not agents remaining responsible for the learned capability. The intended eventual scale is hundreds of connected OAK-defined modules. A small, inspectable experiment comes first to test the mechanism, not to replace that ambition.
+
+The central requirement is that useful agent contributions become concrete numerical changes. A revised prompt, a persuasive explanation, or an agent correcting an answer is not a learned network update.
+
+## Primary goal and ultimate aim
+
+On 6 September 2026, Brisbane time, the user clarified that agent participation itself is the intended mechanism: an agent deliberately shapes a network during learning, then leaves a useful network that operates alone. Outperforming conventional training is a separate question, not a condition for acknowledging that mechanism. Existing control matches remain valid and are not erased or reinterpreted as agent superiority.
+
+The next priority is generalisation: can the same numerical network reuse learned relationships across unfamiliar objects, event combinations, longer histories, and questions? The ultimate aim is natural-language conversation produced by that network without a serving agent. Compactness remains desirable, but a tiny specialised solution is not a substitute for broader capability.
+
+The proposed bridge is a small changing world, with shared representations of objects, relations, events, time, and quantities, paired with language from the beginning. These are useful candidate building blocks, not a claim to have identified the fundamental laws of intelligence, matter, or language. [World and language generalisation](generalisation/WORLD_LANGUAGE.md) defines the proposed scope, non-scripted language criterion, evidence separation, and research connections. No world-language model or new measured result is introduced by this direction update.
+
+A numerical memory of the current world and conversation is allowed and needed by the proposed design. Agent-free means no training-agent reasoning at inference; it does not mean a memoryless network. Learned weights remain fixed during scored dialogue, while declared runtime state changes with observations and turns.
+
+## Execution model: one running agent, many node responsibilities
+
+The agent running this experiment acts on behalf of the logical node agents, including the proposed "100 agents". For the first execution, this is the assistant conducting the work in this conversation. It visits node responsibilities sequentially, examines numerical observations, proposes changes to the selected node's permitted matrices, and asks deterministic tools to fit and evaluate the proposed changes. No autonomous multi-agent framework, background agent fleet, or separate language-model instance per node is required.
+
+"100 agents" describes logical learning responsibilities, not a claim that 100 independent agents have been launched. Report the actual number of numerical nodes, the actual proposer count of one, and the sequential scheduling policy. The initial runnable network may be smaller. Shared conversational context means this treatment is not an independent local-agent population and cannot establish an advantage of distributed agents over a central agent.
+
+The assistant must actually inspect observations and record its chosen proposal and rationale before seeing the candidate's evaluation. A scripted optimiser replaying a recorded proposal is a reproducibility mechanism, not a new agent decision. Do not label hand-coded heuristics, numerical solvers, replay, or fabricated dialogue as autonomous agent activity.
+
+Python performs every scored forward pass and computes the fixed evaluation metrics. The running assistant may choose a behavioural target, preservation examples, a bounded parameter change, or a numerical fitting method, but cannot supply answers during scored inference or rewrite the evaluator after seeing results. Accepted candidates become new immutable OAK node revisions; current constants remain fixed during each run.
+
+The authorised next work is to implement and run a small real feasibility experiment on this same branch, compare initial, numerical-only, and agent-guided networks, and verify a standalone numerical export. Record observed improvements, ties, or regressions without assuming agent benefit. Keep final test examples outside the proposal loop, disclose privileged task knowledge and resource differences, and leave any unperformed broader ablation or scale study explicitly open. The user requested this clarification as the next commit before implementation, with progress updates during execution.
+
+## Decisive architectural choice
+
+Make the network numerical from the beginning. Do not first build an agent conversation graph and assume it can later be converted into matrices.
+
+Every forward pass used to score a candidate already runs without agents. Agents participate between numerical runs by proposing changes. Unwrapping therefore removes training machinery; it does not substitute a different inference system.
+
+```text
+NUMERICAL COMPUTATION, DURING AND AFTER LEARNING
+
+Input -> module A -> module B -> ... -> output
+            |           |                 |
+       observations and diagnostics        |
+            |           |                 v
+TEMPORARY LEARNING SUPPORT          fixed evaluator
+                    |                     |
+        one running assistant <------ feedback
+        acting for node A, then node B, ...
+                    |
+        constrained update proposals
+                    |
+       numerical fitting and candidate tests
+                    |
+       accepted node revisions for the next run
+```
+
+Agent-free does not mean runtime-free. Ordinary numerical software still loads parameters and executes operations. The final artifact must contain every required encoder, numerical routing decision, state initialiser, and decoder, not just the weight matrices.
+
+## Terms and scope
+
+| Term | Meaning in this experiment |
+| --- | --- |
+| OAK node | The canonical knowledge unit described by one document. It remains idless; its document path supplies graph identity. |
+| Computational module | A numerical transformation associated with an OAK node, not necessarily one scalar neuron. |
+| Wrapper agent | Temporary learning responsibility for a module. In the initial execution, the same running assistant assumes each responsibility sequentially. It cannot contribute to scored forward computation. |
+| Network | The explicit composition of numerical modules, connections, and complete input/output processing. |
+| Node revision | An immutable candidate or accepted version of a module document and its parameters. |
+| Network revision | One exact, compatible set of node revisions, topology, operation definitions, and preprocessing. |
+| Evaluator | Host-controlled measurement and acceptance logic, separate from proposing agents. |
+| Unwrapping | Removing agent dependencies and exporting the already-numerical inference graph. |
+
+OAK's node and host boundaries are defined by [the node owner](../../oak/node/AGENTS.md) and [the package owner](../../oak/AGENTS.md). This is an application of those boundaries, not a new definition of OAK.
+
+## Questions the experiment must answer
+
+H01, primary mechanism: can agent-proposed updates produce useful numerical behaviour that persists after the wrappers are removed?
+
+H02, secondary comparative question: does agent-guided numerical fitting outperform strong non-agent alternatives under declared resource budgets? No advantage is a valid result.
+
+H03, meaning: do correct module descriptions and stable semantic interfaces improve proposals relative to missing or shuffled descriptions?
+
+H04, organisation: do local node agents provide an advantage over one central agent with comparable information and budget? Sequential role-taking by one assistant does not answer this question.
+
+H05, scale: does the approach remain useful as the number of modules grows toward hundreds? This is a later measurement target, not an established property.
+
+H07, next capability question: can one agent-shaped numerical model transfer shared object, event, temporal, and quantity representations to held-out combinations and longer histories? This remains untested.
+
+H08, ultimate language question: can that exported network generate grounded, coherent multi-turn language for unfamiliar situations without an agent or a hand-written answer renderer? This remains untested; bounded dialogue is an intermediate target, not open-domain conversation.
+
+Mechanism feasibility, generalisation, conversation, compression, and comparative advantage are separate verdicts. A working export demonstrates the former, not automatically the latter. Modularity, parameter changes, and explanatory labels alone do not establish learning, causality, or interpretability.
+
+## What each node owns
+
+A basic numerical module may compute:
+
+```text
+h_i = activation_i(W_i x_i + b_i)
+```
+
+Other modules may compose relations, combine evidence, or apply numerical gates. Their exact operations must be declared and supported by the runtime. Matrices alone are insufficient to define a network: dimensions, axes, operations, connectivity, and numerical semantics must be explicit.
+
+| OAK part | Responsibility in this application |
+| --- | --- |
+| Schemas | Reusable input/output shapes, parameter descriptions, observations, proposals, and evaluation records. |
+| Constants | A revision's fixed matrices, biases, masks, axis meanings, and other fixed knowledge. |
+| State | Training history or genuinely persistent runtime values when required, never undeclared replacement parameter storage. |
+| Interfaces | Complete boundary payloads for requests, results, observations, or proposals. |
+| Triggers | Outside arrivals that start work, not internal neuron firing or an implicit inter-node message bus. |
+| Processes | Ordered numerical actions and explicit process composition; separately scoped learning work. |
+| Instructions | Irreducible learning policy or explanation, not missing inference-time computation. |
+
+These responsibilities follow [OAK's existing part contracts](../../oak/node/AGENTS.md). Empty parts remain omitted, and documents retain canonical part order. Connections must be represented explicitly; putting several documents in a directory does not connect them.
+
+Small matrices, including 2D and 3D arrays, can be represented as nested JSON values in constants. The [current constant model](../../oak/node/parts/constants.py) permits JSON values; it does not alone establish tensor shape, dtype, arithmetic, or cross-node dimension compatibility. The proposed host adapter must enforce those additional contracts.
+
+Parameters remain literally inside their owning OAK documents for the first experiment. An agent reads that canonical source and proposes its revision; it does not maintain a second authoritative weight store. Within a loaded revision, constants never mutate. An accepted update creates a new revision loaded for the next cycle. Transient candidate tensors are working values, not changes to the currently running document.
+
+If large binary parameter bundles become necessary, their ownership and content identity require a separately evaluated packaging decision. They are not introduced here to quietly replace the inline-matrix requirement.
+
+## How agents participate in learning
+
+The preferred hypothesis is not that a language model can intuit arbitrary millions of floating-point values. It is that the agent can identify a useful behavioural correction and use numerical tools to realise it.
+
+For example: a module mistakes contradictory evidence for additional support. Its agent identifies failing examples, requests a different response on them, and names already-correct behaviour that should be preserved. A solver materialises a candidate matrix update. The network evaluator, not the agent's confidence, determines whether that update survives.
+
+For a linear module, let `W` have shape `[out, in]`, let the columns of `X` contain correction inputs, let `Y_target` contain desired outputs, and let the columns of `P` contain preservation inputs. A proposed fitting objective is:
+
+```text
+min_delta ||(W + delta) X - Y_target||_F^2
+        + lambda ||delta P||_F^2
+        + mu ||delta||_F^2
+```
+
+Here `lambda >= 0` weights preservation and `mu > 0` regularises the change. This is a regularised least-squares construction for the stated linear case. Nonlinear modules require an appropriate numerical optimisation procedure. Protected samples constrain observed behaviour only; they do not prove global preservation.
+
+The preservation-versus-change idea has a precedent in model editing, but this objective and its use by local OAK agents are a proposed adaptation, not a reproduction of ROME or MEMIT. See [R03, R04, and R07](research/SOURCES.md).
+
+The primary method combines agent-guided behavioural proposals, numerical fitting, and independent candidate acceptance. Direct sparse edits, small matrix edits, or low-rank updates remain comparison mechanisms where justified. Gradient information may assist an agent; banning gradients would test a different, unnecessarily restrictive hypothesis.
+
+The first experiment fixes topology and numerical operators. Agents change permitted parameters, not evaluator code, network structure, schemas, operation implementations, or the definition of success. Later architecture search must be reported as a different treatment.
+
+## Why meaningful modules matter
+
+Assign agents coherent responsibilities, not arbitrary scalar neurons. Relation composition, evidence combination, and numerical routing are possible module roles. Give each agent its role, stable tensor-axis meanings, selected input/output traces, failure cases, activation and parameter summaries, and gradients when available.
+
+A channel called `conflict` is not proven to detect conflict. Its semantics need supervision or intervention tests. [Concept bottleneck models, R08](research/SOURCES.md), motivate meaningful intermediate contracts, but their use of concept correction at test time does not satisfy our agent-free inference requirement.
+
+Keep large numerical inspections in numerical tools rather than filling the language-model context with complete matrices. One shared language model may serve many logical wrappers. Separate ownership, evidence, and revision identity matter more than running hundreds of separately hosted models. The first execution uses the running assistant for all of those responsibilities, as specified above.
+
+Agents need not act after every example. Invoke them for persistent failure clusters, stalled improvement, or predeclared review intervals while numerical optimisation performs routine fitting. Count the cost of both activities.
+
+## Coordination and credit assignment
+
+A final network score does not identify which module should change. Use end-to-end gradients where available, replacement tests against a frozen network, local concept checks, and selected counterfactual traces. Local measures diagnose; whole-network measures govern acceptance.
+
+A minimal interference example is `y = w1 * w2` with target `1` and initial `w1 = w2 = 0.5`. Either agent can propose changing its own weight to `2`, which is perfect while the other weight remains `0.5`. Combining both individually successful proposals produces `4`.
+
+Therefore every proposal names its exact baseline network revision. Acceptance initially proceeds sequentially. Future agents may propose in parallel, but combinations must be jointly evaluated. Re-evaluate stale proposals and combinations. Never merge local successes merely because their edited files differ.
+
+Retain the best-known network separately from exploratory candidates. Coordinated improvements may require a bounded search branch, but an exploratory regression must not silently replace the accepted network. The full lifecycle and rejection rules are in [the training protocol](training/PROTOCOL.md).
+
+## Numerical runtime and unwrapping
+
+Use OAK for knowledge, contracts, ownership, and composition. Build a small host-side numerical adapter rather than a new OAK tensor language. [OAK execution](../../oak/execute/AGENTS.md) already distinguishes exact named-tool actions from interpreter-native actions. The adapter must explicitly implement supported numerical actions; existing tool dispatch is not itself a tensor compiler.
+
+Keep tensors and derivatives in the numerical backend during computation. Do not serialise every internal activation through OAK text. A numerical graph built from validated documents remains accountable to their contracts and revisions.
+
+Start with an acyclic graph. [OAK resolution](../../oak/resolve/AGENTS.md) rejects process-call cycles; arbitrary recurrent neural connections cannot be represented by ignoring that rule. Any later recurrence requires explicit state, scheduling, and supported numerical semantics.
+
+Export is a checked property from the start. Every action reachable from inference must have a supported numerical meaning. Reject unresolved free-form actions, agent-dependent routing, unbundled encoders, and hidden external model calls. Never erase instructions that change behaviour merely to make export appear successful.
+
+PyTorch and ONNX provide a possible route for a supported subset, not a universal exporter for OAK. Backend versions, operation coverage, and tolerances must be fixed during implementation. A clean process without credentials or training memory must load the artifact and reproduce reference outputs. See [the export contract](runtime/EXPORT.md) and [R09](research/SOURCES.md).
+
+## First experiment and scientific controls
+
+Begin with a small network, with about 16 meaningful modules as the initial design target, on a synthetic compositional-relation task with deterministic ground truth. The executing assistant may choose a smaller feasibility instance and must record its actual size before running comparisons. Inputs are numerical relation tables; output labels are calculated by an exact reference evaluator. Relation instances are data, not automatically learned parameters. The node matrices parameterise computation across examples.
+
+A small permissions-style composition, such as a person's roles composed with role capabilities, is an understandable smoke test. It is not evidence that learned embeddings prove permissions or that the approach improves training. Real policy enforcement is outside this experiment.
+
+Freeze the exact task, topology, operators, dataset split, acceptance criteria, and budget before scored comparisons. Use held-out entity assignments and relation combinations where meaningful, expose any extra rule knowledge given to agents, and do not let wrappers inspect the final test set.
+
+Compare a strong numerical optimiser, budgeted non-agent proposal search, one central training agent, local agents with direct edits, and local agents with numerical fitting in the full study. Include matched numerical fitting without agents to separate the solver's contribution from the agent's. Test missing or shuffled descriptions and local-only versus whole-network acceptance. The first sequential-assistant run compares initial, numerical-only, and agent-guided networks; it does not claim that all full-study treatments have been run.
+
+Measure held-out predictive performance, compute and language-model cost, candidate evaluation count, update acceptance, regressions, and exported equivalence across independent seeds. Reserve a final test set outside the adaptive improvement loop. Equal candidate count and equal total resource cost are different comparisons; report both rather than hiding the cost of the agents.
+
+[The benchmark protocol](evaluation/BENCHMARK.md) owns the full-study design. The [first measured run](results/first-run/REPORT.md) records the implemented four-module subset and its limitations.
+
+## Research synthesis
+
+| Evidence | Useful connection | Limit of the connection |
+| --- | --- | --- |
+| Tensor Logic, R01 | Logical relations and neural computation can use a tensor-based representation. | Does not establish distributed agent-guided matrix learning. |
+| OPRO, R02 | Language models propose candidates using measured optimisation feedback. | Not evidence for efficiently writing large dense networks' weights. |
+| ROME and MEMIT, R03/R04 | Specific behaviour can be changed through numerical weight edits. | Editing pretrained associations is not training this network from scratch. |
+| AlphaEvolve, R05 | Agent proposals can be selected by external executable evaluation. | Its code evolution does not establish safe composition of local weight updates. |
+| FunL2O, R06 | LLM-proposed feature programs are assessed through retraining and downstream evaluation. | Changes feature functions, not node-owned matrices through distributed wrappers. |
+| Unified model editing, R07 | Formalises the tension between changing and preserving behaviour. | Does not validate our proposed agent/solver allocation of work. |
+| Concept bottlenecks, R08 | Intermediate representations can be organised around meaningful concepts. | Labels alone do not supply meaning or guarantee agent-free inference. |
+| PyTorch export, R09 | Supported numerical graphs can be exported and compared in ONNX Runtime. | Arbitrary OAK actions are not thereby exportable. |
+
+[The source register](research/SOURCES.md) records primary sources, versions or publication dates, and what was checked. These are precedents for ingredients, not a novelty claim or proof that their combination will beat existing methods.
+
+## Risks and design responses
+
+| Risk | Response to test |
+| --- | --- |
+| Persuasive but incorrect agent diagnosis | Independent numerical evaluation and regression cases. |
+| Local improvement damages other modules | Revision-pinned whole-network and joint-candidate evaluation. |
+| Interface semantics drift | Fixed axes, schemas, and topology in the first treatment. |
+| Agent knowledge leaks the answer | Record all extra supervision; equalise it or label the comparison. |
+| Adaptive overfitting to evaluation data | Separate training, development, and sealed final testing. |
+| Gains come only from the numerical solver | Matched solver-only and non-agent proposal baselines. |
+| Explanation is mistaken for causal evidence | Counterfactual tests and explicit uncertainty. |
+| Export depends on hidden reasoning or services | Static operation audit plus clean, offline execution tests. |
+| Dense matrices overwhelm agent context or cost | Semantic modules, summaries, constrained edits, and measured budgets. |
+| Parameter changes erase useful behaviour | Preservation cases, bounded updates, retained incumbent, and rollback. |
+| Scaling fails beyond the small network | Report the measured limit; do not extrapolate to hundreds. |
+| One assistant is mistaken for independent agents | Record one proposer, sequential node roles, shared context, and actual node count. |
+
+## Directory structure and ownership
+
+```text
+experiments/
+  AGENTS.md
+  agent-guided-network/
+    EXPERIMENT.md
+    LEARNINGS.md
+    generalisation/
+      WORLD_LANGUAGE.md
+    compression/
+      COMPRESSION.md
+      study.py and study.oak.md
+      numeric.py, oak_io.py, fit.py, task.py
+      session.py, export.py, replay.py, tests.py, run.py
+    nodes/
+      CONTRACT.md
+      initial/
+      learned/
+      attention-initial/
+      attention-learned/
+      compression-folded/
+      compression-learned/
+    attention/
+      ATTENTION.md
+      study.py and study.oak.md
+      author.py, numeric.py, task.py, learn.py
+      session.py, export.py, tests.py, run.py
+    training/
+      PROTOCOL.md
+    runtime/
+      EXPORT.md
+    evaluation/
+      BENCHMARK.md
+    research/
+      SOURCES.md
+    results/
+      STATUS.md
+      first-run/
+      attention-run/
+      compression-run/
+
+docs/plans/0011-agent-guided-network/
+  plan.md
+  report.md
+```
+
+This file is the complete conceptual synthesis and decision rationale. Supporting files own precise contracts, procedures, research attribution, and evidence status without creating a second architecture. The [SMEAC plan](../../docs/plans/0011-agent-guided-network/plan.md) owns implementation tasks and authorisation gates; the [report](../../docs/plans/0011-agent-guided-network/report.md) records delivery evidence.
+
+During implementation, actual node `.oak.md` documents belong in `nodes/`, training code beside its protocol, numerical adapter/export code in `runtime/`, and the evaluator/tests beside the benchmark. Reusable schemas should be authored as OAK documents when implemented; this design does not introduce a second task-specific configuration language. A distributable training skill belongs in the repository's normal `skills/` product area only when it is genuinely implemented and packaged.
+
+Create per-run result directories only when runs exist. Do not fill the structure with fake weights, sample success numbers, empty Python modules, or placeholder test suites.
+
+## Current decision
+
+Prioritise H01, H07, and H08: use the executing assistant as a training collaborator, test whether useful numerical capability transfers, and work toward agent-free conversation about a shared world. Preserve H06 compression and H02 comparative questions as separate measurements, not replacements for the primary aim.
+
+The three existing studies remain measured evidence with their original limitations. The [world-language design](generalisation/WORLD_LANGUAGE.md) is the next proposed experiment, not a completed study. Freeze its implementation, task generation, language splits, evaluation criteria, and bounded resource settings before scored teaching. Do not reinterpret the earlier retrieval tests as evidence of physical understanding or conversation. This direction update does not authorise a merge into main or paid external training.
+
+## First measured execution
+
+The running assistant made four proposals on seed 7, three accepted and one rejected. Two additional seeds replayed the chosen methods numerically. Across those three seeds, agent-guided final-test accuracy averaged 99.9268%, compared with 99.9430% for numerical-only Adam. All selected agent-free exports reproduced their source outputs exactly on the tested cases. This demonstrates the engineering mechanism, not an advantage over strong optimisation. The [measured report](results/first-run/REPORT.md), [raw results](results/first-run/final.json), and [study record](evaluation/study.oak.md) retain the evidence and resource differences.
+
+Run `python experiments/agent-guided-network/run.py test` for local checks. After installing the repository dependencies and the experiment-local `requirements.txt`, replay the recorded numerical sequence with `python experiments/agent-guided-network/run.py replay /tmp/oak-replay --recorded experiments/agent-guided-network/results/first-run`. Replay is not a new agent session.
+
+For a fresh manual session, use `prepare /tmp/oak-session`, then `observe /tmp/oak-session`. The running agent uses `propose` with `--owner`, `--method`, and `--rationale`, followed by a separate `apply` with `--proposal`. `finish` closes selection before testing and export. Use those subcommands after the same `python experiments/agent-guided-network/run.py` prefix. Never alter the frozen implementation or study during a scored session.
+
+
+## Attention follow-on
+
+The user authorised adding attention and a harder experiment on this same branch on 5 September 2026. [The attention extension](attention/ATTENTION.md) preserves the first-run evidence and introduces two linked single-head cross-attention OAK nodes, inline query/key/value/output matrices, variable-length two-hop retrieval, and held-out longer and near-distractor tests. [Its frozen OAK study](attention/study.oak.md) owns the exact numerical protocol. This is an attention mechanism, not a complete Transformer or an independent-agent population. One running assistant continues to represent the logical learning roles; exported computation remains agent-free.
+
+The [measured attention report](results/attention-run/REPORT.md) records four actual proposals on seed 7: one direct output-calibration edit accepted and three rejected. Two other seeds replayed the methods. Across these seeds, ordinary, longer-table, and near-distractor accuracies were 93.49%, 77.67%, and 38.02%. The actual seed-7 improvement was calibration, not accuracy, and a fixed numerical scaling grid found the same edit. Exports matched on all tested cases. This identifies generalisation and calibration limits, not scientific agent superiority.
+
+
+## Compression hypothesis and learning index
+
+On 6 September 2026, Brisbane time, the user clarified the intended payoff: a much more compressed AI because agents can deliberately place or change its weights. H06 asks whether this produces retained capability at smaller parameter and deployed storage budgets. Direct editing alone does not imply compression. Preserve the distinction between exact functional folding, a smaller task-specific replacement, and an advantage attributable to agent judgement.
+
+[LEARNINGS.md](LEARNINGS.md) consolidates findings with stable IDs, evidence links, uncertainty, and contradictions as studies progress. [The compression protocol](compression/COMPRESSION.md) and [its frozen OAK study](compression/study.oak.md) define the measured compression extension. The shared-context executing assistant continues to act for the logical node roles; prediction remains purely numerical.
+
+[The measured compression report](results/compression-run/REPORT.md) records 416-to-144 exact projection folding and a three-shared-gain task replacement. Seven live proposals across three fresh data seeds produced six acceptances and one rejection. Final accuracy was 100% on short, sixteen-entry, and near-key regimes, but 61.78% on harder unseen stress cases. A four-candidate non-agent search selected exactly the same model. A separate zero-learned-parameter task algorithm solved every regime. The three-gain result encodes aligned-key task structure, not general intelligence or demonstrated agent superiority.
+
+Coefficient payload fell from 3,328 to 24 bytes, but the actual complete exported package fell from 18,623 to 10,142 bytes. Runtime, metadata, expanded nonzeros, and different JSON presentation policies are disclosed. The extreme-case loss worsened relative to the teacher despite higher accuracy. Keep those limitations alongside the positive compression result.
+
+## Verified wording-versus-meaning resumption
+
+The [meaning report](results/meaning-run/REPORT.md) records a new execution of the existing committed protocol, not recovery of missing context results. One live teaching choice is followed by numerical replay, independent metric recomputation and model-bound memory-restoration checks. The original scientific source remains unchanged. This model selects a single location word; it is not the proposed conversational world model.

@@ -1,0 +1,85 @@
+name: Verify and preserve modularity evidence
+on:
+  push:
+    branches: [experiment/agent-guided-network]
+    paths:
+      - experiments/agent-guided-network/modularity/**
+      - experiments/agent-guided-network/results/modularity-run/expected.json
+      - .github/workflows/modularity-evidence.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: modularity-evidence-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  evidence:
+    if: github.ref == 'refs/heads/experiment/agent-guided-network'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install declared dependencies and fixed numerical versions
+        run: |
+          python - <<'PY'
+          import pathlib, subprocess, sys, tomllib
+          requirements = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['dependencies']
+          subprocess.run([sys.executable, '-m', 'pip', 'install', *requirements, 'numpy==2.3.5', 'torch==2.10.0'], check=True)
+          PY
+      - name: Verify branch and all five experiment test suites
+        run: |
+          python -m compileall -q oak build examples experiments/agent-guided-network
+          python -m examples.catalog
+          python -m build.ebnf
+          python -m build.docs
+          python -m build.authoring
+          python -m build.examples
+          python build/examples.py
+          python -m build.authoring
+          git diff --exit-code
+          python experiments/agent-guided-network/run.py test
+          python experiments/agent-guided-network/attention/run.py test
+          python experiments/agent-guided-network/compression/run.py test
+          python experiments/agent-guided-network/meaning/run.py test
+          python experiments/agent-guided-network/modularity/run.py test
+      - name: Reproduce and audit all scoped updates and final predictions
+        run: python experiments/agent-guided-network/modularity/reproduce.py replay /tmp/oak-modularity-replay
+      - name: Prepare audited archive and learning records
+        run: |
+          python experiments/agent-guided-network/modularity/publication.py /tmp/oak-modularity-replay
+          python -m build.examples
+          python build/examples.py
+          git diff --check
+      - name: Commit evidence only to the unchanged experiment branch
+        run: |
+          expected='${{ github.sha }}'
+          actual=$(git ls-remote origin refs/heads/experiment/agent-guided-network | cut -f1)
+          test "$actual" = "$expected"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add experiments/agent-guided-network/results/modularity-run experiments/agent-guided-network/nodes/modularity-learned experiments/agent-guided-network/LEARNINGS.md experiments/agent-guided-network/EXPERIMENT.md docs/plans/0011-agent-guided-network/plan.md docs/plans/0011-agent-guided-network/report.md
+          git commit -m 'test(modularity): publish reproduced ownership and learning evidence'
+          git push origin HEAD:refs/heads/experiment/agent-guided-network
+      - name: Package the exact published source
+        run: |
+          mkdir -p /tmp/modularity-artifact
+          git rev-parse HEAD > /tmp/modularity-artifact/REVISION
+          git archive HEAD -o /tmp/modularity-artifact/source.tar
+          cd /tmp/modularity-artifact
+          sha256sum source.tar REVISION > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oak-modularity-verified-source
+          path: /tmp/modularity-artifact/
+          retention-days: 7

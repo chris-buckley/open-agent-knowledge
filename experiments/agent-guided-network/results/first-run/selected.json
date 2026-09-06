@@ -1,0 +1,80 @@
+{
+  "19": {
+    "agent": {
+      "path": "19/snapshots/agent-replay",
+      "revision": "c0715c9342619fc8cf7826a9d66acf12d5d985b302c912afb9d35bd151b17c5b"
+    },
+    "initial": {
+      "path": "19/snapshots/initial",
+      "revision": "9262fd0a7fb165cf6bbfdc72e98b5533f61fdeafbcd65c1dc16f6508ad8939a2"
+    },
+    "numerical": {
+      "path": "19/snapshots/numerical",
+      "revision": "b6053ab056768caf838cac66eb21856166d4aae60efba93434f9cebbb3cbe7b4"
+    },
+    "random": {
+      "path": "19/snapshots/random",
+      "revision": "c0782fa84360f7b18a1b846d6b832edbb38f3e63ca4194d06c1e111121d80f49"
+    },
+    "solver": {
+      "path": "19/snapshots/solver",
+      "revision": "caae894811b31a8a0e32b34306c2ba1174f572242df5c9689a81b250b320b308"
+    },
+    "warm": {
+      "path": "19/snapshots/warm",
+      "revision": "6e7804a233d10032f5d341dcfd5622fbae79c99092c99e6127b8e62a03fb6983"
+    }
+  },
+  "31": {
+    "agent": {
+      "path": "31/snapshots/agent-replay",
+      "revision": "fa64a2c7100c0b3f54149e8769c34bb8ce0490ed318ca8da9fc68d1a5afaf3b7"
+    },
+    "initial": {
+      "path": "31/snapshots/initial",
+      "revision": "6f06f3fa48e729e11028d3c3bb2d617022ffb9098b36c1610f724630a78d8f92"
+    },
+    "numerical": {
+      "path": "31/snapshots/numerical",
+      "revision": "32563f0472b9ae0f9f0c171a7a8c60106303316be687c079d46d78d0e80de8bd"
+    },
+    "random": {
+      "path": "31/snapshots/random",
+      "revision": "70a9e5d828aa7df9d34b3287cad409e9f09c969e45024fefbf619a6a76d83944"
+    },
+    "solver": {
+      "path": "31/snapshots/solver",
+      "revision": "e2aff9b251d911586644dca9c501ee8bd0803b88435afe2d5b312993894df3c7"
+    },
+    "warm": {
+      "path": "31/snapshots/warm",
+      "revision": "3581196747a72503efd135bc4af18e90761b3c38d90864c6db8150dbf1c83cce"
+    }
+  },
+  "7": {
+    "agent": {
+      "path": "7/snapshots/candidate-004",
+      "revision": "4dfb2378679565d2ae2399ee703caed6867f9985e7a17a4eb4e8d3a2d86cfff1"
+    },
+    "initial": {
+      "path": "7/snapshots/initial",
+      "revision": "9f43cd2d59bba36f9074579fefa9514b97f09abe4f8994b382aca4972bbf2db8"
+    },
+    "numerical": {
+      "path": "7/snapshots/numerical",
+      "revision": "340caeb8b09d6e73adbfead3f086263104b19a990c794f515400cc69fa3d4d71"
+    },
+    "random": {
+      "path": "7/snapshots/random",
+      "revision": "d0d8a69311b2c7f22775abec708c431a5a1ae1f79f1d209b0be4dcf4dc1faef0"
+    },
+    "solver": {
+      "path": "7/snapshots/solver",
+      "revision": "5e3e7f3896a9409ace6b1c807692f322e46d831aeb154c2336a2149bcc26b284"
+    },
+    "warm": {
+      "path": "7/snapshots/warm",
+      "revision": "07d149d935b5ab93ba554a3958933cab08eed2143cb1dbaa1acdf49cb500340f"
+    }
+  }
+}

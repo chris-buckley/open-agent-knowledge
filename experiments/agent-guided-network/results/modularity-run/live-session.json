@@ -1,0 +1,64 @@
+{
+  "source_commit": "0a6f38dbea5b67f8f911ce21b834fbf0b8b061fe",
+  "protocol_commit": "c4d808d5bd89265bc87ac108b67da373268617a2",
+  "kind": "one new live decision, two numerical replays",
+  "source_archive_sha256": "16d3b7cc0bd35b6c746afb282fb740e1ea8f4d0e7da64e419dc157e8af550679",
+  "freeze_sha256": "d33ff5a65d1ff7d7c1caad82e58916a810106350c0d700e0cc28b8f9dc990ef1",
+  "selection_closed_sha256": "9afc98aeca5316194ae841275c1f60e4b79319cef83adbdaf920e8d31e5015c0",
+  "final_cases_exist": false,
+  "proposal": {
+    "allowed_modules": ["encoder"],
+    "baseline": "d04b2d8594ceb5917cea10da3c2a1ebf4e1bd218a9ae6b94ea11eedc0d1b31c4",
+    "created_ns": 1788702920400692166,
+    "observation": "8bbcb7220dbd29b0940705d6730badb9d5a9cbdd35e4179dd469271c5a9fbcae",
+    "origin": "live",
+    "rationale": "The archived network preserves familiar wording but confuses source and destination when their order changes. Test whether varied-wording teaching can repair the shared sentence representation while attention and readout parameters and all other documents remain fixed. The full-network varied control demonstrates that the supplied lessons are learnable, not that the encoder alone is sufficient."
+  },
+  "observation": {
+    "baseline": "d04b2d8594ceb5917cea10da3c2a1ebf4e1bd218a9ae6b94ea11eedc0d1b31c4",
+    "development": {
+      "mean": 0.3671875,
+      "medium": {"accuracy": 0.0625, "loss": 7.858186053403737},
+      "ordinary": {"accuracy": 0.9921875, "loss": 0.021650649094374176},
+      "reordered": {"accuracy": 0.046875, "loss": 8.316770985972035}
+    }
+  },
+  "decision": {
+    "accepted": true,
+    "after": {
+      "mean": 0.9322916666666666,
+      "medium": {"accuracy": 0.9140625, "loss": 0.341674453704153},
+      "ordinary": {"accuracy": 0.9921875, "loss": 0.06347169408642528},
+      "reordered": {"accuracy": 0.890625, "loss": 0.29885737658666334}
+    },
+    "before": {
+      "mean": 0.3671875,
+      "medium": {"accuracy": 0.0625, "loss": 7.858186053403737},
+      "ordinary": {"accuracy": 0.9921875, "loss": 0.021650649094374176},
+      "reordered": {"accuracy": 0.046875, "loss": 8.316770985972035}
+    },
+    "evaluated_ns": 1788702935296486935,
+    "incumbent": "candidate-001",
+    "proposal": "fb84a7aab093f60421d7523782928212c05e884ab4d955f323fbe9c73db55144",
+    "resources": {
+      "batch": 48, "forms": [0, 1, 2, 3], "groups": ["encoder"],
+      "last_loss": 0.06191437970873549, "presentations": 28800,
+      "seconds": 8.375043067999968, "steps": 300,
+      "trainable_coefficients": 3376, "views": 2
+    }
+  },
+  "changed_modules": ["encoder.oak.md"],
+  "replay_acceptance": {"509": true, "521": false},
+  "preflight_tests_passed": 22,
+  "pilot": {
+    "purpose": "seed-zero implementation pilot, not scored study",
+    "fit": {
+      "steps": 300, "batch": 48, "views": 2, "trainable_coefficients": 3376,
+      "presentations": 28800, "groups": ["encoder"], "forms": [0, 1, 2, 3],
+      "seconds": 7.401013196000008, "last_loss": 0.05670915044189584
+    },
+    "roundtrip": true,
+    "reply": ["garden"]
+  },
+  "interruption": "Combined pilot/init/controls command timed out after baseline development was written. That one partial file was preserved outside the run; unchanged controls were restarted before proposals or final cases."
+}

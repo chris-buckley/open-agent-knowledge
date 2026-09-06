@@ -1,0 +1,75 @@
+{
+  "commands": [
+    {
+      "command": "python -m compileall -q oak build examples skills/oak-authoring/scripts experiments/agent-guided-network",
+      "exit_code": 0,
+      "seconds": 0.5907251559999622,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python -m examples.catalog",
+      "exit_code": 0,
+      "seconds": 0.9041130739999517,
+      "stdout": "wrote /mnt/data/oak-work/examples/catalog.oak.md\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m build.ebnf",
+      "exit_code": 0,
+      "seconds": 0.6890863969999828,
+      "stdout": "wrote /mnt/data/oak-work/outputs/oak.ebnf\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m build.docs",
+      "exit_code": 0,
+      "seconds": 0.9069615460000477,
+      "stdout": "wrote /mnt/data/oak-work/outputs/docs\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m build.authoring",
+      "exit_code": 0,
+      "seconds": 0.8300845139999637,
+      "stdout": "wrote /mnt/data/oak-work/outputs/oak-authoring.oak.md\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m build.examples",
+      "exit_code": 0,
+      "seconds": 21.72067597399996,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python build/examples.py",
+      "exit_code": 0,
+      "seconds": 21.94818301600003,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python -m build.authoring",
+      "exit_code": 0,
+      "seconds": 0.8667965699999058,
+      "stdout": "wrote /mnt/data/oak-work/outputs/oak-authoring.oak.md\n",
+      "stderr": ""
+    },
+    {
+      "command": "python experiments/agent-guided-network/run.py test",
+      "exit_code": 0,
+      "seconds": 1.3745903100000305,
+      "stdout": "",
+      "stderr": "test_acceptance_and_interference (test_experiment.ExperimentTests.test_acceptance_and_interference) ... ok\ntest_agent_instruction_rejected (test_experiment.ExperimentTests.test_agent_instruction_rejected) ... ok\ntest_clean_export_and_parameter_identity (test_experiment.ExperimentTests.test_clean_export_and_parameter_identity) ... ok\ntest_concept_fit_ownership (test_experiment.ExperimentTests.test_concept_fit_ownership) ... ok\ntest_frozen_composition (test_experiment.ExperimentTests.test_frozen_composition) ... ok\ntest_gradient_finite_difference (test_experiment.ExperimentTests.test_gradient_finite_difference) ... ok\ntest_inference_does_not_mutate_parameters (test_experiment.ExperimentTests.test_inference_does_not_mutate_parameters) ... ok\ntest_invalid_tensors (test_experiment.ExperimentTests.test_invalid_tensors) ... ok\ntest_missing_document (test_experiment.ExperimentTests.test_missing_document) ... ok\ntest_oak_executor_numerical_parity (test_experiment.ExperimentTests.test_oak_executor_numerical_parity) ... ok\ntest_record_types_and_study_freshness (test_experiment.ExperimentTests.test_record_types_and_study_freshness) ... ok\ntest_roundtrip_and_resolve (test_experiment.ExperimentTests.test_roundtrip_and_resolve) ... ok\ntest_splits (test_experiment.ExperimentTests.test_splits) ... ok\ntest_stale_proposal_and_closed_run (test_experiment.ExperimentTests.test_stale_proposal_and_closed_run) ... ok\ntest_symlink_rejected (test_experiment.ExperimentTests.test_symlink_rejected) ... ok\ntest_unknown_export_operation (test_experiment.ExperimentTests.test_unknown_export_operation) ... ok\ntest_unsupported_tool_rejected (test_experiment.ExperimentTests.test_unsupported_tool_rejected) ... ok\n\n----------------------------------------------------------------------\nRan 17 tests in 0.656s\n\nOK\n"
+    }
+  ],
+  "packages": {
+    "numpy": "2.3.5",
+    "pydantic": "2.13.4",
+    "pydantic-settings": "2.14.1",
+    "pydantic-extra-types": "2.11.1",
+    "PyYAML": "6.0.3"
+  },
+  "note": "The earlier combined verification shell exceeded its 20-second tool limit before saving results; this complete retry records each command. Local pydantic-settings is 2.14.1, below the declared >=2.15; GitHub CI installs declared requirements. No local detached network bootstrap is claimed."
+}

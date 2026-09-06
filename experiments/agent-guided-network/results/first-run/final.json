@@ -1,0 +1,311 @@
+{
+  "actual_assistant_proposals": 4,
+  "actual_assistant_seed": 7,
+  "budgets": {
+    "assistant_max_proposals": 6,
+    "common_warm_steps": 50,
+    "numerical_rates": [
+      0.01,
+      0.03,
+      0.1
+    ],
+    "numerical_steps_after_warm": 1200,
+    "random_candidate_evaluations": 6,
+    "solver_fits": 2,
+    "solver_steps_after_warm": 400
+  },
+  "exports": {
+    "19": {
+      "clean_process_exit": 0,
+      "decision_equivalence": true,
+      "max_absolute_error": 0.0,
+      "network_and_repository_access_blocked": true,
+      "oak_executor_max_error": 0.0,
+      "parameter_identity": true,
+      "worlds": 259
+    },
+    "31": {
+      "clean_process_exit": 0,
+      "decision_equivalence": true,
+      "max_absolute_error": 0.0,
+      "network_and_repository_access_blocked": true,
+      "oak_executor_max_error": 0.0,
+      "parameter_identity": true,
+      "worlds": 259
+    },
+    "7": {
+      "clean_process_exit": 0,
+      "decision_equivalence": true,
+      "max_absolute_error": 0.0,
+      "network_and_repository_access_blocked": true,
+      "oak_executor_max_error": 0.0,
+      "parameter_identity": true,
+      "worlds": 259
+    }
+  },
+  "independent_agent_population": false,
+  "independent_test_rows": false,
+  "replayed_proposals": 0,
+  "results": {
+    "19": {
+      "agent": {
+        "accuracy": 0.9990234375,
+        "balanced_accuracy": 0.9992611747321758,
+        "bce": 0.006102272590121865,
+        "decisions": 4096,
+        "positive_fraction": 0.339111328125,
+        "worlds": 256
+      },
+      "initial": {
+        "accuracy": 0.659912109375,
+        "balanced_accuracy": 0.49926117473217585,
+        "bce": 0.6311516323207942,
+        "decisions": 4096,
+        "positive_fraction": 0.339111328125,
+        "worlds": 256
+      },
+      "numerical": {
+        "accuracy": 0.99951171875,
+        "balanced_accuracy": 0.9996305873660879,
+        "bce": 0.0057889181417237565,
+        "decisions": 4096,
+        "positive_fraction": 0.339111328125,
+        "worlds": 256
+      },
+      "random": {
+        "accuracy": 0.826416015625,
+        "balanced_accuracy": 0.7687728239960234,
+        "bce": 0.47147025506576157,
+        "decisions": 4096,
+        "positive_fraction": 0.339111328125,
+        "worlds": 256
+      },
+      "solver": {
+        "accuracy": 0.9990234375,
+        "balanced_accuracy": 0.9992611747321758,
+        "bce": 0.020808504201966272,
+        "decisions": 4096,
+        "positive_fraction": 0.339111328125,
+        "worlds": 256
+      },
+      "warm": {
+        "accuracy": 0.813720703125,
+        "balanced_accuracy": 0.7530338245271372,
+        "bce": 0.4882100927211268,
+        "decisions": 4096,
+        "positive_fraction": 0.339111328125,
+        "worlds": 256
+      }
+    },
+    "31": {
+      "agent": {
+        "accuracy": 0.999755859375,
+        "balanced_accuracy": 0.9998092331171309,
+        "bce": 0.0052541021611429905,
+        "decisions": 4096,
+        "positive_fraction": 0.360107421875,
+        "worlds": 256
+      },
+      "initial": {
+        "accuracy": 0.6162109375,
+        "balanced_accuracy": 0.4980958231752663,
+        "bce": 0.6350393370606876,
+        "decisions": 4096,
+        "positive_fraction": 0.360107421875,
+        "worlds": 256
+      },
+      "numerical": {
+        "accuracy": 0.999755859375,
+        "balanced_accuracy": 0.9998092331171309,
+        "bce": 0.006115516060174076,
+        "decisions": 4096,
+        "positive_fraction": 0.360107421875,
+        "worlds": 256
+      },
+      "random": {
+        "accuracy": 0.843505859375,
+        "balanced_accuracy": 0.7905673213096308,
+        "bce": 0.4697707744291778,
+        "decisions": 4096,
+        "positive_fraction": 0.360107421875,
+        "worlds": 256
+      },
+      "solver": {
+        "accuracy": 0.999755859375,
+        "balanced_accuracy": 0.9998092331171309,
+        "bce": 0.017201225186940738,
+        "decisions": 4096,
+        "positive_fraction": 0.360107421875,
+        "worlds": 256
+      },
+      "warm": {
+        "accuracy": 0.83544921875,
+        "balanced_accuracy": 0.7774540704479465,
+        "bce": 0.4900555685583541,
+        "decisions": 4096,
+        "positive_fraction": 0.360107421875,
+        "worlds": 256
+      }
+    },
+    "7": {
+      "agent": {
+        "accuracy": 0.9990234375,
+        "balanced_accuracy": 0.9992389649923896,
+        "bce": 0.007956076035293046,
+        "decisions": 4096,
+        "positive_fraction": 0.3583984375,
+        "worlds": 256
+      },
+      "initial": {
+        "accuracy": 0.44482421875,
+        "balanced_accuracy": 0.38393594034480905,
+        "bce": 0.6415771855471175,
+        "decisions": 4096,
+        "positive_fraction": 0.3583984375,
+        "worlds": 256
+      },
+      "numerical": {
+        "accuracy": 0.9990234375,
+        "balanced_accuracy": 0.9992389649923896,
+        "bce": 0.008114244062863261,
+        "decisions": 4096,
+        "positive_fraction": 0.3583984375,
+        "worlds": 256
+      },
+      "random": {
+        "accuracy": 0.812255859375,
+        "balanced_accuracy": 0.7421382180583032,
+        "bce": 0.48914104445355194,
+        "decisions": 4096,
+        "positive_fraction": 0.3583984375,
+        "worlds": 256
+      },
+      "solver": {
+        "accuracy": 0.9990234375,
+        "balanced_accuracy": 0.9992389649923896,
+        "bce": 0.02172414942988838,
+        "decisions": 4096,
+        "positive_fraction": 0.3583984375,
+        "worlds": 256
+      },
+      "warm": {
+        "accuracy": 0.8125,
+        "balanced_accuracy": 0.7508978968890879,
+        "bce": 0.4975723375664196,
+        "decisions": 4096,
+        "positive_fraction": 0.3583984375,
+        "worlds": 256
+      }
+    }
+  },
+  "scope": "small feasibility study; no claim of semantic or distributed-agent superiority",
+  "summary": {
+    "agent": {
+      "accuracy": {
+        "max": 0.999755859375,
+        "mean": 0.999267578125,
+        "min": 0.9990234375
+      },
+      "balanced_accuracy": {
+        "max": 0.9998092331171309,
+        "mean": 0.9994364576138987,
+        "min": 0.9992389649923896
+      },
+      "bce": {
+        "max": 0.007956076035293046,
+        "mean": 0.0064374835955193005,
+        "min": 0.0052541021611429905
+      }
+    },
+    "initial": {
+      "accuracy": {
+        "max": 0.659912109375,
+        "mean": 0.5736490885416666,
+        "min": 0.44482421875
+      },
+      "balanced_accuracy": {
+        "max": 0.49926117473217585,
+        "mean": 0.46043097941741706,
+        "min": 0.38393594034480905
+      },
+      "bce": {
+        "max": 0.6415771855471175,
+        "mean": 0.6359227183095331,
+        "min": 0.6311516323207942
+      }
+    },
+    "numerical": {
+      "accuracy": {
+        "max": 0.999755859375,
+        "mean": 0.9994303385416666,
+        "min": 0.9990234375
+      },
+      "balanced_accuracy": {
+        "max": 0.9998092331171309,
+        "mean": 0.9995595951585362,
+        "min": 0.9992389649923896
+      },
+      "bce": {
+        "max": 0.008114244062863261,
+        "mean": 0.006672892754920365,
+        "min": 0.0057889181417237565
+      }
+    },
+    "random": {
+      "accuracy": {
+        "max": 0.843505859375,
+        "mean": 0.827392578125,
+        "min": 0.812255859375
+      },
+      "balanced_accuracy": {
+        "max": 0.7905673213096308,
+        "mean": 0.7671594544546525,
+        "min": 0.7421382180583032
+      },
+      "bce": {
+        "max": 0.48914104445355194,
+        "mean": 0.47679402464949705,
+        "min": 0.4697707744291778
+      }
+    },
+    "solver": {
+      "accuracy": {
+        "max": 0.999755859375,
+        "mean": 0.999267578125,
+        "min": 0.9990234375
+      },
+      "balanced_accuracy": {
+        "max": 0.9998092331171309,
+        "mean": 0.9994364576138987,
+        "min": 0.9992389649923896
+      },
+      "bce": {
+        "max": 0.02172414942988838,
+        "mean": 0.019911292939598466,
+        "min": 0.017201225186940738
+      }
+    },
+    "warm": {
+      "accuracy": {
+        "max": 0.83544921875,
+        "mean": 0.820556640625,
+        "min": 0.8125
+      },
+      "balanced_accuracy": {
+        "max": 0.7774540704479465,
+        "mean": 0.7604619306213906,
+        "min": 0.7508978968890879
+      },
+      "bce": {
+        "max": 0.4975723375664196,
+        "mean": 0.49194599961530017,
+        "min": 0.4882100927211268
+      }
+    }
+  },
+  "transfer_seeds": [
+    19,
+    31
+  ],
+  "uncertainty": "three-seed descriptive range only, not a confidence interval"
+}

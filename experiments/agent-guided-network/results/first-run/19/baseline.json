@@ -1,0 +1,31 @@
+{
+  "dev": {
+    "initial": {
+      "accuracy": 0.6591796875,
+      "balanced_accuracy": 0.4992603550295858,
+      "bce": 0.6296182355216637,
+      "decisions": 1024,
+      "positive_fraction": 0.33984375,
+      "worlds": 64
+    },
+    "numerical": {
+      "accuracy": 0.9990234375,
+      "balanced_accuracy": 0.9992603550295858,
+      "bce": 0.007364722825271578,
+      "decisions": 1024,
+      "positive_fraction": 0.33984375,
+      "worlds": 64
+    },
+    "warm": {
+      "accuracy": 0.8115234375,
+      "balanced_accuracy": 0.7540722981704414,
+      "bce": 0.4933166596372319,
+      "decisions": 1024,
+      "positive_fraction": 0.33984375,
+      "worlds": 64
+    }
+  },
+  "gradient_steps": 1250,
+  "numerical_selection_evaluations": 54,
+  "preparation_development_metric_calls": 57
+}

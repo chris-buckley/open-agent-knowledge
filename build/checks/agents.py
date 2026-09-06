@@ -22,6 +22,7 @@ AGENT_PATHS = (
     "oak/execute/AGENTS.md",
     "build/AGENTS.md",
     "examples/AGENTS.md",
+    "experiments/AGENTS.md",
     "outputs/AGENTS.md",
     "docs/AGENTS.md",
     "skills/AGENTS.md",

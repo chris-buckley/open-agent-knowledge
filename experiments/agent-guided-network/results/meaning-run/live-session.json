@@ -1,0 +1,321 @@
+{
+  "checks": {
+    "full_direct_verification": true,
+    "full_module_verification": true,
+    "meaning_tests": 18,
+    "prior_study_tests": 59,
+    "repeated_generation_clean": true
+  },
+  "closure_recovery": "The 45-second local close command was interrupted; its partial files were retained, and the unchanged closure restarted before final cases were generated. Exact recovery records remain in the local raw run.",
+  "decision": {
+    "accepted": true,
+    "after": {
+      "mean": 0.9895833333333334,
+      "medium": {
+        "accuracy": 0.9921875,
+        "loss": 0.022085167596155073
+      },
+      "ordinary": {
+        "accuracy": 0.9921875,
+        "loss": 0.049493629739093055
+      },
+      "reworded": {
+        "accuracy": 0.984375,
+        "loss": 0.048867916941671766
+      }
+    },
+    "before": {
+      "mean": 0.9609375,
+      "medium": {
+        "accuracy": 0.9296875,
+        "loss": 0.16216717226516003
+      },
+      "ordinary": {
+        "accuracy": 0.9765625,
+        "loss": 0.08608786151013273
+      },
+      "reworded": {
+        "accuracy": 0.9765625,
+        "loss": 0.07194023333769238
+      }
+    },
+    "incumbent_file": "incumbent-001.json",
+    "proposal_sha256": "4a133f49379b823a94f12fbe7f64216924a205ab4e3206761fc92618ea7160fc",
+    "resources": {
+      "agreement": 0.3,
+      "batch": 48,
+      "forms": [
+        0,
+        1,
+        2
+      ],
+      "last_loss": 0.03541928449671103,
+      "presentations": 38400,
+      "seconds": 8.806827882999983,
+      "steps": 400,
+      "views_per_step": 2
+    },
+    "selected_sha256": "8b9580a9ebc0bb05bffdc67c33c25a5ae221f20962631b979e4cb8965f9fa6f9"
+  },
+  "dependency_limit": "Local pydantic-settings 2.14.1 is below the repository requirement >=2.15. Numerical dependencies satisfy the study requirements; CI installs declared repository dependencies.",
+  "expected_means": {
+    "agent": {
+      "combination": {
+        "accuracy": 0.7174479166666666
+      },
+      "direction": {
+        "both_correct": 0.8776041666666666
+      },
+      "long": {
+        "accuracy": 0.8359375
+      },
+      "order": {
+        "both_correct": 0.8151041666666666
+      },
+      "ordinary": {
+        "accuracy": 0.9934895833333334
+      },
+      "same_meaning": {
+        "both_correct": 0.080078125
+      },
+      "unseen_wording": {
+        "accuracy": 0.08072916666666667
+      }
+    },
+    "agreement": {
+      "combination": {
+        "accuracy": 0.58984375
+      },
+      "direction": {
+        "both_correct": 0.8268229166666666
+      },
+      "long": {
+        "accuracy": 0.7545572916666666
+      },
+      "order": {
+        "both_correct": 0.7473958333333334
+      },
+      "ordinary": {
+        "accuracy": 0.955078125
+      },
+      "same_meaning": {
+        "both_correct": 0.10221354166666667
+      },
+      "unseen_wording": {
+        "accuracy": 0.107421875
+      }
+    },
+    "baseline": {
+      "combination": {
+        "accuracy": 0.5904947916666666
+      },
+      "direction": {
+        "both_correct": 0.8059895833333334
+      },
+      "long": {
+        "accuracy": 0.7356770833333334
+      },
+      "order": {
+        "both_correct": 0.5885416666666666
+      },
+      "ordinary": {
+        "accuracy": 0.8971354166666666
+      },
+      "same_meaning": {
+        "both_correct": 0.10872395833333333
+      },
+      "unseen_wording": {
+        "accuracy": 0.123046875
+      }
+    },
+    "continuation": {
+      "combination": {
+        "accuracy": 0.6705729166666666
+      },
+      "direction": {
+        "both_correct": 0.87109375
+      },
+      "long": {
+        "accuracy": 0.7604166666666666
+      },
+      "order": {
+        "both_correct": 0.828125
+      },
+      "ordinary": {
+        "accuracy": 0.9752604166666666
+      },
+      "same_meaning": {
+        "both_correct": 0.087890625
+      },
+      "unseen_wording": {
+        "accuracy": 0.08854166666666667
+      }
+    },
+    "repeat": {
+      "combination": {
+        "accuracy": 0.7272135416666666
+      },
+      "direction": {
+        "both_correct": 0.9140625
+      },
+      "long": {
+        "accuracy": 0.7727864583333334
+      },
+      "order": {
+        "both_correct": 0.8528645833333334
+      },
+      "ordinary": {
+        "accuracy": 0.9713541666666666
+      },
+      "same_meaning": {
+        "both_correct": 0.06380208333333333
+      },
+      "unseen_wording": {
+        "accuracy": 0.06705729166666667
+      }
+    },
+    "wording": {
+      "combination": {
+        "accuracy": 0.662109375
+      },
+      "direction": {
+        "both_correct": 0.89453125
+      },
+      "long": {
+        "accuracy": 0.75390625
+      },
+      "order": {
+        "both_correct": 0.8072916666666666
+      },
+      "ordinary": {
+        "accuracy": 0.9557291666666666
+      },
+      "same_meaning": {
+        "both_correct": 0.07421875
+      },
+      "unseen_wording": {
+        "accuracy": 0.07747395833333333
+      }
+    }
+  },
+  "local_environment": {
+    "numpy": "2.3.5",
+    "pydantic": "2.13.4",
+    "pydantic-settings": "2.14.1",
+    "torch": "2.10.0+cpu"
+  },
+  "local_verification": {
+    "all_saved_metrics_recomputed": true,
+    "isolated_restored_predictions": 6144,
+    "maximum_torch_numpy_difference": 9.159339953157541e-15,
+    "oak_serialised_state_samples": 96,
+    "stored_coefficients": 6431
+  },
+  "observation": {
+    "development": {
+      "mean": 0.9609375,
+      "medium": {
+        "accuracy": 0.9296875,
+        "loss": 0.16216717226516003
+      },
+      "ordinary": {
+        "accuracy": 0.9765625,
+        "loss": 0.08608786151013273
+      },
+      "reworded": {
+        "accuracy": 0.9765625,
+        "loss": 0.07194023333769238
+      }
+    },
+    "errors": [
+      {
+        "actual": "kitchen",
+        "events": [
+          "from the hall the ring moved to the kitchen",
+          "from the hall the coin moved to the garden",
+          "from the kitchen the ring moved to the office",
+          "from the kitchen the book moved to the office",
+          "from the garden the ball moved to the bedroom",
+          "from the hall the cup moved to the kitchen"
+        ],
+        "expected": "office",
+        "question": "where is the ring now"
+      },
+      {
+        "actual": "garden",
+        "events": [
+          "from the bedroom the ball moved to the shed",
+          "from the office the book moved to the kitchen",
+          "from the hall the coin moved to the office",
+          "from the bedroom the key moved to the garden",
+          "from the kitchen the book moved to the office"
+        ],
+        "expected": "shed",
+        "question": "where is the ball now"
+      },
+      {
+        "actual": "bedroom",
+        "events": [
+          "from the kitchen the book moved to the shed",
+          "from the garden the key moved to the hall",
+          "from the shed the book moved to the garden",
+          "from the bedroom the cup moved to the hall",
+          "from the garden the book moved to the bedroom",
+          "from the bedroom the book moved to the shed"
+        ],
+        "expected": "shed",
+        "question": "where is the book now"
+      },
+      {
+        "actual": "shed",
+        "events": [
+          "from the bedroom the key moved to the kitchen",
+          "from the garden the coin moved to the hall",
+          "from the hall the coin moved to the shed",
+          "from the bedroom the ring moved to the hall",
+          "from the shed the coin moved to the garden",
+          "from the kitchen the book moved to the bedroom"
+        ],
+        "expected": "bedroom",
+        "question": "where was the key before"
+      }
+    ],
+    "model_sha256": "55bbab0cb80d0fd7178b5d8563161052eab76b9bc771f6c86e0d0a2f33c8c9bb"
+  },
+  "proposal": {
+    "before_evaluation_unix_ns": 1788694094605297929,
+    "mode": "longer",
+    "model_sha256": "55bbab0cb80d0fd7178b5d8563161052eab76b9bc771f6c86e0d0a2f33c8c9bb",
+    "observation_sha256": "33e3b4cb5bf5f8259e5defc6c232e5dba6ab229aa96dc076439f7a3cd5067bb2",
+    "origin": "live",
+    "rationale": "Development errors return an earlier room or a distracting object room. Mix five-to-six-event histories with the original histories to teach selection of the latest relevant move while preserving ordinary wording. This is a teaching intervention materialised by numerical fitting, not direct weight placement.",
+    "seed": 401,
+    "steps": 400
+  },
+  "resumption": {
+    "conversation_token_cost": null,
+    "created_unix_ns": 1788694096300257791,
+    "existing_aggregate_scores_in_conversation": true,
+    "interpretation": "re-execution with newly recorded development-guided decisions; not a blinded replication or independent agent trial",
+    "model_id_attestation": "not available",
+    "physical_proposers": 1,
+    "proposer": "current conversation assistant",
+    "source_archive_sha256": "d5b6fce7b24bb57679a03f6b82a40e7102101ce4ccb5f8c96b7145771ed4e93f",
+    "source_commit": "7e2ef857f16978492d00a4790cb960e323b154ff",
+    "source_unchanged": true,
+    "status": "new execution of the existing committed protocol, not recovery of missing run records"
+  },
+  "scientific_sources": {
+    "oak_io.py": "4e70b90955384862d9b039743b1a431dfb637b8395ff2d8be10310f18ec47bcf",
+    "requirements.txt": "36cc9fdbe5ba952760181fb0fba6100a319270fff2ca79a196bd3c37693abff1",
+    "run.py": "f5e61263eb7165a5ef2b5ec991f9d64558ac2e5ae089a33d316a72d34a058712",
+    "runtime.py": "4719dd2a04903bac8ddf0cf12434d5cfd95401ba99ab7be9bc12f8b5053fcd8b",
+    "study.oak.md": "43d0ee801b07c3d610faf84ab7399c7f9797663cca7d609cb16445bb3585dbca",
+    "task.py": "c8e90a75c23273c7e62fef68d378d00a4de00359ca7899c49295628045b7775d",
+    "tests.py": "7b91f01f8b2532ea6ae7d81a52624af5e071b1d6b9b9205f0fba187726e1c8a1",
+    "train.py": "d1c0a62634ca6a8b531d775d4bdbcb6ca9e2f39dbd9e3add75b451d2694c56b3",
+    "verify.py": "a8f18677f838caaee64492c7789dd08f59968a6e1d4cbafdc8fcddb7846ecbba"
+  },
+  "source_archive_sha256": "d5b6fce7b24bb57679a03f6b82a40e7102101ce4ccb5f8c96b7145771ed4e93f",
+  "source_commit": "7e2ef857f16978492d00a4790cb960e323b154ff"
+}

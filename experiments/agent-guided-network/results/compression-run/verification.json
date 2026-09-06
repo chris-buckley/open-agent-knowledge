@@ -1,0 +1,42 @@
+{
+  "recorded-date": "2026-09-06",
+  "baseline-commit": "01093746154ef972842df1c1c0f298101921b579",
+  "protocol-commit": "35317423f42720bfdc50637b3109f80409e07882",
+  "execution": "Actual local execution in a checksum-verified source copy; not execution inferred from reading GitHub.",
+  "checks": {
+    "compilation": true,
+    "generated-products": true,
+    "full-module-entry-point": true,
+    "full-direct-entry-point": true,
+    "first-experiment-tests": 17,
+    "attention-tests": 20,
+    "compression-tests": 22,
+    "first-replay": true,
+    "attention-replay": true,
+    "compression-replay": true,
+    "new-choices-in-replay": 0
+  },
+  "log-sha256": {
+    "attention-replay.txt": "aeeacaec7c91f68406e6048bea33baf4b328947f971b5b0392a372c071f43731",
+    "attention-tests.txt": "4b3f26d00009586270077464ceefd3996f0333ab5243b11556765d4d85e20fef",
+    "compression-tests.txt": "5df10066eb46e5f4e090adb9201c2f44b372a07e6edc9d7ce477b43bfb07fed6",
+    "direct.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "first-replay.txt": "0f1d29e29a4487843fcdf3a1239e991496413f076fe81265d4e48982c4b8484d",
+    "first-tests.txt": "3650140fda5cef6a7f894a77755c72e69ee93f59f6454830ad9ce445241e6e89",
+    "module.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "limitations": [
+    "An initial combined full-verification command exceeded a 30-second tool timeout. Both complete commands were then run separately and returned exit code 0.",
+    "Full verification emitted a nonfatal TERM environment warning.",
+    "Preflight fixes corrected OAK action placeholders, two-word process names, and a one-element list wrapper for kernel descriptors before freeze and scored data.",
+    "No type-checker or total inference-memory, latency, energy, or conversation-cost measurement is claimed."
+  ],
+  "ci": "Remote CI is recorded separately after publication, not inferred from local success.",
+  "evidence-archive": {
+    "file": "records.tar.xz",
+    "sha256": "f0b29f8ef4504906c97d039130b107b4e022a6915ed5a4b7e3d09487aa7edeb7",
+    "members": 34,
+    "lossless-member-check": true,
+    "note": "The archive retains exact final.json, selected.json, controls, source/data hashes and every live evidence record. Readable live records also remain in the tree."
+  }
+}

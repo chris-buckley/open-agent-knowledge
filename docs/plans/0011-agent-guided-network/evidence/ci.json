@@ -1,0 +1,26 @@
+{
+  "verified-commit": "ff3e9bbb2fdee1963ef0a734823adf34c76c1eec",
+  "verified-tree": "3fcfdd57d5c921a8080eccea779fa9abfc8aa7c4",
+  "observed-conclusions": {
+    "33999351173": "success",
+    "33999351078": "success"
+  },
+  "scopes": {
+    "33999351173": "Repository verification against the PR merge candidate, generated-product freshness, and detached bootstrap.",
+    "33999351078": "Branch source: 59 experiment tests and complete numerical replays of all three studies."
+  },
+  "prior-failure": {
+    "run": 33998939472,
+    "error": "RuntimeError: persistent plan check failed: duplicate plan number 0010",
+    "resolution": "Move this experiment plan to unused 0011 and repair navigation; do not weaken validation."
+  },
+  "local-checks": {
+    "full-module": true,
+    "full-direct": true,
+    "relative-links": 117,
+    "frozen-source-identities": 24,
+    "published-tree-equality": true
+  },
+  "scientific-verdict": "Task-specific compression demonstrated; no agent-attributable advantage over the matching four-candidate control.",
+  "final-record-update": "Only report, task state, and this evidence record change after the verified revision; subsequent CI is separate."
+}

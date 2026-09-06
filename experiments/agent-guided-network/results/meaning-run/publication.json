@@ -1,0 +1,14 @@
+{
+  "checked_out_source": "7ca6f9d449ee36e9592b7cc3f15e8588858a209a",
+  "workflow_run_id": "34031379838",
+  "scientific_source_commit": "7e2ef857f16978492d00a4790cb960e323b154ff",
+  "replay_matches_live_run_metrics": true,
+  "fresh_agent_decisions_during_reproduction": 0,
+  "role_diagnostic": {
+    "opposite_endpoint_answers": 1340,
+    "cases": 1536,
+    "fraction": 0.8723958333333334,
+    "status": "post-selection error analysis; no subsequent fitting"
+  },
+  "postprocessor_sha256": "358a50dbe48dcf6a1f3cd7e068b999451db4e2a9419bbb5c78b01ff36416f729"
+}
