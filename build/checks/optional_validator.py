@@ -56,6 +56,11 @@ def validate_optional_validator() -> None:
             require(result.returncode == expected, f"real validator returned the wrong outcome: {result.stdout} {result.stderr}")
             require(json.loads(result.stdout)["status"] == ("valid" if expected == 0 else "invalid"), "incorrect validator result")
         require(not cache.exists(), "reusing an existing validator created a cache")
+        # The delivered location must still find the adjacent checkout without installation.
+        adjacent = subprocess.run([sys.executable, "-I", str(SCRIPT), str(valid), "--cache-dir", str(cache)],
+                                  capture_output=True, text=True, check=False, timeout=60)
+        require(adjacent.returncode == 0, f"relocated helper failed adjacent discovery: {adjacent.stdout} {adjacent.stderr}")
+        require(not cache.exists(), "adjacent reuse unexpectedly created a validator cache")
         # The explicit reuse path is preferred even when installation is permitted.
         fake_python = root / "python"
         with patch.object(module, "discover", return_value=(fake_python, ROOT)), patch.object(module, "install", side_effect=AssertionError("reuse installed again")), patch.object(module.subprocess, "run", return_value=Mock(returncode=0)) as run:

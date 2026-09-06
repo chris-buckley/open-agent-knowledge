@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from build._ebnf_layout import _format_group
+from build.generated import write_generated
 from build.surfaces import surface_grammar
 from oak.node.structure import PART_ORDER
 from oak.surface import SURFACES
@@ -28,7 +29,7 @@ from oak.vocabulary.text.slug_id import SLUG_ID_SYNTAX
 from oak.vocabulary.text.target_path import ENTRY_PART_EBNF, ENTRY_PATH_EBNF, RELATIVE_DOCUMENT_PATH_EBNF, TARGET_PATH_EBNF
 from oak.vocabulary.text.value_reference import VALUE_REFERENCE_EBNF
 
-TARGET = ROOT / "outputs" / "oak.ebnf"
+TARGET = ROOT / "generated" / "oak.ebnf"
 
 
 def _document(prefix: str) -> list[str]:
@@ -282,8 +283,7 @@ def ebnf_text() -> str:
 
 def write() -> Path:
     """Write the generated grammar snapshot."""
-    TARGET.parent.mkdir(parents=True, exist_ok=True)
-    TARGET.write_text(grammar(), encoding="utf-8", newline="\n")
+    write_generated({TARGET: grammar()}, root=ROOT / "generated")
     return TARGET
 
 

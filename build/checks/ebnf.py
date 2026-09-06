@@ -237,16 +237,16 @@ def _check_literals() -> None:
 
 def _check_deliveries() -> None:
     expected = grammar()
-    for path in ('outputs/oak.ebnf', 'skills/oak-authoring/references/oak.ebnf'):
+    for path in ('generated/oak.ebnf', 'generated/oak-authoring.skill/references/oak.ebnf'):
         if (ROOT / path).read_bytes() != expected.encode():
             raise ValueError(f"EBNF delivery differs: {path}")
-    for path in ('skills/oak-authoring/references/00-structure.oak.md', 'outputs/oak-authoring.oak.md'):
+    for path in ('generated/oak-authoring.skill/references/00-structure.oak.md', 'generated/oak-authoring.oak.md'):
         node = parse((ROOT / path).read_text(encoding="utf-8"))
         values = [entry.value for entry in node.constants
                   if entry.id == 'oak-ebnf' or entry.id.endswith('-oak-ebnf')]
         if values != [expected.rstrip('\n')]:
             raise ValueError(f"EBNF embedded delivery differs: {path}")
-    for path, limit in (('skills/oak-authoring/SKILL.md', 10_000), ('outputs/oak-authoring.oak.md', 64_000)):
+    for path, limit in (('generated/oak-authoring.skill/SKILL.md', 10_000), ('generated/oak-authoring.oak.md', 64_000)):
         if len((ROOT / path).read_bytes()) > limit:
             raise ValueError(f"EBNF delivery exceeds existing budget: {path}")
 

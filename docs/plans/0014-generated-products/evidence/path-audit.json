@@ -1,0 +1,156 @@
+{
+  "active_roots": [
+    "oak",
+    "build",
+    "examples",
+    ".github"
+  ],
+  "matches": {
+    "oak/surface/processes.py": [
+      {
+        "line": 113,
+        "text": "            \"outputs\",",
+        "classification": "process output field, not a path"
+      },
+      {
+        "line": 129,
+        "text": "            \"outputs\",",
+        "classification": "process output field, not a path"
+      },
+      {
+        "line": 181,
+        "text": "            \"outputs\",",
+        "classification": "process output field, not a path"
+      }
+    ],
+    "oak/node/parts/processes/model.py": [
+      {
+        "line": 41,
+        "text": "                            \"outputs\": [\"NORMAL_NAME\"],",
+        "classification": "process output field, not a path"
+      },
+      {
+        "line": 57,
+        "text": "                                    \"outputs\": [\"A\"],",
+        "classification": "process output field, not a path"
+      },
+      {
+        "line": 63,
+        "text": "                                    \"outputs\": [\"B\"],",
+        "classification": "process output field, not a path"
+      }
+    ],
+    "oak/node/parts/processes/statements.py": [
+      {
+        "line": 49,
+        "text": "                    \"outputs\": [\"RESULT\"],",
+        "classification": "process output field, not a path"
+      },
+      {
+        "line": 66,
+        "text": "                    \"outputs\": [\"RESULT\"],",
+        "classification": "process output field, not a path"
+      },
+      {
+        "line": 432,
+        "text": "                    \"outputs\": [\"NORMAL_NAME\"],",
+        "classification": "process output field, not a path"
+      },
+      {
+        "line": 576,
+        "text": "                            \"outputs\": [\"RESULT\"],",
+        "classification": "process output field, not a path"
+      },
+      {
+        "line": 707,
+        "text": "                            \"outputs\": [\"A\"],",
+        "classification": "process output field, not a path"
+      },
+      {
+        "line": 713,
+        "text": "                            \"outputs\": [\"B\"],",
+        "classification": "process output field, not a path"
+      },
+      {
+        "line": 734,
+        "text": "                    \"outputs\": [\"A\"],",
+        "classification": "process output field, not a path"
+      },
+      {
+        "line": 769,
+        "text": "                    \"outputs\": \", \".join(",
+        "classification": "process output field, not a path"
+      }
+    ],
+    "oak/render/json_ld/context.py": [
+      {
+        "line": 103,
+        "text": "            \"outputs\",",
+        "classification": "process output field, not a path"
+      }
+    ],
+    "oak/render/json_ld/entries.py": [
+      {
+        "line": 110,
+        "text": "    fields[\"outputs\"] = list(step.outputs)",
+        "classification": "process output field, not a path"
+      },
+      {
+        "line": 164,
+        "text": "                \"outputs\": list(step.outputs),",
+        "classification": "process output field, not a path"
+      }
+    ],
+    "build/checks/compact_runtime.py": [
+      {
+        "line": 160,
+        "text": "    raw['processes'][5]['body'][0]['body'][0]['outputs'] = ['NEXT']",
+        "classification": "process output field, not a path"
+      }
+    ],
+    "build/checks/outputs.py": [
+      {
+        "line": 162,
+        "text": "        if any((root / name).exists() for name in (\"generated\", \"outputs\", \"skills\")):",
+        "classification": "old-root absence assertion"
+      },
+      {
+        "line": 196,
+        "text": "    if any((ROOT / name).exists() for name in (\"outputs\", \"skills\")):",
+        "classification": "old-root absence assertion"
+      }
+    ],
+    "build/checks/rendering.py": [
+      {
+        "line": 264,
+        "text": "        and call[\"outputs\"] == [\"NORMAL_NAME\"]",
+        "classification": "process output field, not a path"
+      }
+    ],
+    "build/checks/statements.py": [
+      {
+        "line": 171,
+        "text": "    action = {\"@type\": \"oak:Act\", \"instruction\": \"Observe.\", \"inputs\": [], \"outputs\": []}",
+        "classification": "process output field, not a path"
+      },
+      {
+        "line": 180,
+        "text": "        {\"@type\": \"oak:Act\", \"tool\": \"first\", \"instruction\": \"Observe first.\", \"inputs\": [], \"outputs\": []},",
+        "classification": "process output field, not a path"
+      },
+      {
+        "line": 181,
+        "text": "        {\"@type\": \"oak:Act\", \"tool\": \"second\", \"instruction\": \"Observe second.\", \"inputs\": [], \"outputs\": []},",
+        "classification": "process output field, not a path"
+      }
+    ]
+  },
+  "classification": "The outputs matches outside build/checks/outputs.py are existing process-model field names, not filesystem paths. The only remaining old-root path uses are explicit absence assertions. Historical specimens and baseline evidence retain original paths.",
+  "unchanged_scopes": [
+    "oak",
+    "pyproject.toml",
+    ".agents",
+    "legacy-snapshot-aps"
+  ],
+  "scope_verification": 0
+}

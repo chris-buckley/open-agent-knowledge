@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from build import authoring as authoring_build
-from build import docs as docs_build
+from build import definitions as definitions_build
 from build.checks.fixtures import normalized
-from build.docs import documents
+from build.definitions import documents
 from build.surfaces import (
     AUTHORABLE_MODELS,
     model_examples,
@@ -31,7 +31,7 @@ def parse_surface(surface: Surface, text: str, *, grouping: str = "xml") -> OakM
 def validate_surfaces() -> None:
     """Validate every generated surface and its downstream document path."""
     expected_names = {
-        slug(model.__name__) + ".md"
+        slug(model.__name__) + ".oak.md"
         for model in AUTHORABLE_MODELS
     }
     if set(documents()) != expected_names:
@@ -86,10 +86,10 @@ def validate_surfaces() -> None:
             )
 
     if not (
-        docs_build.SURFACE_SOURCE
+        definitions_build.SURFACE_SOURCE
         is authoring_build.SURFACE_SOURCE
         is SURFACES
-        and docs_build.RULE_SOURCE is RULES
+        and definitions_build.RULE_SOURCE is RULES
         and authoring_build.GUIDANCE_SOURCE
         is AUTHORING_GUIDANCE
     ):

@@ -45,7 +45,7 @@ def validate_authoring_skill() -> None:
     entry_text = (PACKAGE / "SKILL.md").read_text(encoding="utf-8")
     metadata = yaml.safe_load(entry_text.split("---\n", 2)[1])
     require(set(metadata) == {"name", "description", "metadata"}, "nonstandard skill metadata")
-    require(metadata["name"] == PACKAGE.name and re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", metadata["name"]) is not None, "invalid skill name")
+    require(metadata["name"] == PACKAGE.name.removesuffix(".skill") and re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", metadata["name"]) is not None, "invalid skill name")
     require(0 < len(metadata["description"]) <= 1024, "invalid skill description")
     require(all(isinstance(value, str) for value in metadata["metadata"].values()), "skill metadata must use string values")
     require(metadata["metadata"]["version"] == validator.SKILL_VERSION, "skill version drift")
@@ -58,7 +58,7 @@ def validate_authoring_skill() -> None:
 
     expected = artifacts()
     actual_files = {path for path in PACKAGE.rglob("*") if path.is_file() and "__pycache__" not in path.parts}
-    require(actual_files == {path for path in expected if path.is_relative_to(PACKAGE)} | {SCRIPT}, "skill layout contains missing or unowned files")
+    require(actual_files == {path for path in expected if path.is_relative_to(PACKAGE)}, "skill layout contains missing or unowned files")
     _layout_inventory(PACKAGE)
     actual = {ENTRY: validator.oak_body(entry_text, PACKAGE / "SKILL.md").rstrip("\n")}
     for path in GUIDES:
@@ -209,7 +209,7 @@ def _generation_cleanup() -> None:
     from build.authoring import write
     with TemporaryDirectory(prefix="oak-layout-cleanup-") as temporary:
         root = Path(temporary)
-        package = root / "skills" / "oak-authoring"
+        package = root / "generated" / "oak-authoring.skill"
         expected = {package / path.relative_to(PACKAGE): text for path, text in artifacts().items()
                     if path.is_relative_to(PACKAGE)}
         script = package / "scripts" / "validate.py"
