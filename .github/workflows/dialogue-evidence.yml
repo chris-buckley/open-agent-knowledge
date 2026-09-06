@@ -54,8 +54,8 @@ jobs:
           python experiments/agent-guided-network/meaning/run.py test
           python experiments/agent-guided-network/modularity/tests.py
           python experiments/agent-guided-network/dialogue/tests.py
-      - name: Reproduce recorded teaching and verify paired execution
-        run: python experiments/agent-guided-network/dialogue/reproduce.py /tmp/oak-dialogue-replay
+      - name: Replicate recorded teaching and verify paired execution
+        run: python experiments/agent-guided-network/dialogue/reproduce.py /tmp/oak-dialogue-replay --replication
       - name: Preserve audited records and update learning index
         run: |
           python experiments/agent-guided-network/dialogue/publication.py /tmp/oak-dialogue-replay
@@ -85,3 +85,10 @@ jobs:
           path: /tmp/dialogue-artifact/
           retention-days: 7
           if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: oak-dialogue-incomplete-debug
+          path: /tmp/oak-dialogue-replay/
+          retention-days: 7
+          if-no-files-found: warn

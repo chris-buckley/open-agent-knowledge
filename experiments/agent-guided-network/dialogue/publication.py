@@ -1,4 +1,4 @@
-"""Package audited dialogue evidence and maintain its intent, learning and task records."""
+"""Preserve audited dialogue runs without conflating exact replay and replication."""
 from __future__ import annotations
 
 import argparse
@@ -7,12 +7,15 @@ import json
 from pathlib import Path
 import shutil
 import tarfile
+from typing import Any
 
 from runtime import canonical_bytes
 from run import verify
 
 EXPERIMENT = Path(__file__).resolve().parents[1]
 ROOT = EXPERIMENT.parents[1]
+SOURCE = '5e5c17c9779705a03843f0b63dc832eb4d0ac0cc'
+PROTOCOL = 'b0b89bcc1010a62903230f99036b15ec4fc6098f'
 
 
 def publish(directory: Path) -> None:
@@ -22,12 +25,13 @@ def publish(directory: Path) -> None:
     reproduced = target / 'reproduced'
     reproduced.mkdir(parents=True, exist_ok=False)
     for seed in (601, 607):
-        shutil.copyfile(Path(__file__).with_name('chat.py'), directory / str(seed) / 'export/chat.py')
-        dialogues = json.loads((directory / str(seed) / 'final.json').read_text())['selected']['ordinary']['dialogues']
-        success = next(row for row in dialogues if row['replies'] == row['expected'])
-        failure = next(row for row in dialogues if row['kinds'][-1] == 'missing' and row['replies'][-1] != row['expected'][-1])
-        for name, row in [('success', success), ('failure', failure)]:
-            (directory / str(seed) / 'export' / (name + '.json')).write_bytes(canonical_bytes(row))
+        export = directory / str(seed) / 'export'
+        shutil.copyfile(Path(__file__).with_name('chat.py'), export / 'chat.py')
+        rows = json.loads((directory / str(seed) / 'final.json').read_text())['selected']['ordinary']['dialogues']
+        chosen = {'success': next(row for row in rows if row['replies'] == row['expected']),
+                  'failure': next(row for row in rows if row['kinds'][-1] == 'missing' and row['replies'][-1] != row['expected'][-1])}
+        for name, row in chosen.items():
+            (export / (name + '.json')).write_bytes(canonical_bytes(row))
     manifest = {file.relative_to(directory).as_posix(): hashlib.sha256(file.read_bytes()).hexdigest()
                 for file in sorted(directory.rglob('*')) if file.is_file() and '__pycache__' not in file.parts}
     (reproduced / 'manifest.json').write_bytes(canonical_bytes(manifest))
@@ -39,125 +43,143 @@ def publish(directory: Path) -> None:
             stream = archive.extractfile(name)
             if stream is None or hashlib.sha256(stream.read()).hexdigest() != expected:
                 raise AssertionError('archived member differs')
-    (reproduced / 'archive.json').write_bytes(canonical_bytes({'sha256': hashlib.sha256((reproduced / 'records.tar.xz').read_bytes()).hexdigest(), 'members': len(manifest)}))
-    shutil.copyfile(directory / 'summary.json', reproduced / 'summary.json')
-    source = directory / '601' / 'selected-oak'
-    node_target = EXPERIMENT / 'nodes/dialogue-learned'
-    shutil.copytree(source, node_target, dirs_exist_ok=True)
-    for seed in (601, 607):
-        shutil.copyfile(Path(__file__).with_name('chat.py'), directory / str(seed) / 'export/chat.py')
-    report = _report(summary)
-    (target / 'REPORT.md').write_text(report)
-    learnings = EXPERIMENT / 'LEARNINGS.md'
-    text = learnings.read_text()
-    additions = [
-        ('L025', 'A numerical OAK graph generates multiword replies and consumes its own earlier replies.', 'Demonstrated only on a 47-token, four-object, four-room task; no open-domain competence.'),
-        ('L026', 'Separately fitting the same update from OAK and Python sources produces identical weights and replies.', 'Two seeds, one shared teaching decision; no isolated agent productivity experiment.'),
-        ('L027', 'Equivalent host safeguards reject the same deliberately invalid edits in both representations.', 'One accepted valid edit and six rejected fault classes; scripted checks, not real agent error rates.'),
-        ('L028', 'Correct individual replies substantially overstate complete-conversation success.', 'Scoped model: 55.76% ordinary replies but 11.72% complete four-turn conversations in this execution.'),
-        ('L029', 'The tested networks fail withheld object-destination associations.', 'Scoped model: zero correct first answers in 256 combination dialogues; zero complete dialogues.'),
-        ('L030', 'The scoped model rarely acknowledges missing information.', 'One correct missing-information reply in 85 ordinary cases; fluent invented locations remain a serious failure.'),
-        ('L031', 'OAK compilation adds measured storage and execution overhead in this implementation.', 'Identical numerical model; fixture-specific latency, not a general performance or productivity claim.'),
-        ('L032', 'The new wording test also introduces words unused in teaching.', 'This is a mixed wording/lexical shift, not a clean familiar-word-order experiment.'),
-    ]
-    rows = ''.join(f'| {key} | {finding} | {limit} | [Dialogue evidence](results/dialogue-run/REPORT.md) |\n' for key, finding, limit in additions)
-    if '| L025 |' not in text:
-        text = text.replace('\n## How to extend this index', '\n' + rows + '\n## How to extend this index')
-        text = text.replace('Updated: 6 September 2026.', 'Updated: 7 September 2026.')
-        text = text.replace('The meaning resumption measures a narrow six-choice version, not those broader conversational abilities.',
-                            'The dialogue continuation generates short sentences, but fails reliable four-turn conversation and unfamiliar combinations. This is not broad conversational competence.')
-        learnings.write_text(text)
-    intent = EXPERIMENT / 'EXPERIMENT.md'
-    text = intent.read_text()
-    if '## Measured generated-dialogue comparison' not in text:
-        text += '\n## Measured generated-dialogue comparison\n\nThe [dialogue study](dialogue/PROTOCOL.md) now uses eight executable OAK documents and a 38,519-coefficient word generator. It produces multiword replies without an external agent. Identical OAK/Python training yields identical parameters; equivalent host safeguards reject the same scripted faults. This establishes functional equivalence, not an OAK advantage in language quality or agent productivity. The [report](results/dialogue-run/REPORT.md) preserves severe failures in complete conversations, missing information and unseen combinations. Final weights are frozen; dialogue memory changes during inference. Earlier unverified context studies are not reinstated.\n'
-        intent.write_text(text)
-    plan = ROOT / 'docs/plans/0011-agent-guided-network/plan.md'
-    text = plan.read_text()
-    if 'P13.01' not in text:
-        section = '''\n### Phase 13: Generate dialogue and compare representations
-Objective: Test natural-language generation and a matched OAK/Python update without claiming broad conversation.
-- [x] Key task: P13.01 Commit the protocol, freeze numerical source and data, and implement an eight-document generated-dialogue graph plus the same Python computation.
-- [x] Key task: P13.02 Record one live teaching proposal, fit it separately through both representations, retain controls, and close selection before final cases.
-- [x] Key task: P13.03 Audit all final replies, scoped edits, isolated exports, sampled restored state and native OAK execution; publish raw evidence and update LEARNINGS.md.
-Success criteria: Evidence reproduces the recorded predictions and explicitly reports poor conversational reliability and no representation-specific accuracy advantage. OAK-native and host-added checks are distinguished. Independent agent-productivity and main-integration claims remain open.
-Transition trigger: The audited research artifact is preserved; no reliable conversational deployment or merge into main is authorised.
-'''
-        text = text.replace('\n## 4. Admin and Logistics', section + '\n## 4. Admin and Logistics')
-        if 'P13.01' not in text:
-            raise AssertionError('plan section anchor differs')
-        plan.write_text(text)
-    (target / 'publication.json').write_bytes(canonical_bytes({'scientific_source': '5e5c17c9779705a03843f0b63dc832eb4d0ac0cc',
-        'protocol': 'b0b89bcc1010a62903230f99036b15ec4fc6098f', 'archive_members': len(manifest),
+    (reproduced / 'archive.json').write_bytes(canonical_bytes({
+        'sha256': hashlib.sha256((reproduced / 'records.tar.xz').read_bytes()).hexdigest(), 'members': len(manifest)}))
+    for name in ('summary.json', 'replay.json'):
+        shutil.copyfile(directory / name, reproduced / name)
+    shutil.copytree(directory / '601/selected-oak', EXPERIMENT / 'nodes/dialogue-learned', dirs_exist_ok=True)
+    (target / 'REPORT.md').write_text(_report(summary))
+    _update_owners()
+    (target / 'publication.json').write_bytes(canonical_bytes({
+        'scientific_source': SOURCE, 'protocol': PROTOCOL, 'archive_members': len(manifest),
+        'mode': summary['execution_origin'], 'matches_local_results': summary['reproduction']['matches_live_final_result_hashes'],
         'claimed_ready_for_conversation': False, 'main_merge_authorised': False}))
 
 
-def _report(summary: dict) -> str:
-    table = '| Training arm | Ordinary replies | Complete ordinary dialogues | Long replies | New combinations | New wording |\n| --- | ---: | ---: | ---: | ---: | ---: |\n'
-    for arm, label in [('baseline', 'Initial selected checkpoint'), ('ordinary', 'Full-model ordinary continuation'), ('selected', 'Scoped varied-wording update, OAK = Python')]:
+def _update_owners() -> None:
+    findings = (
+        ('L025', 'An OAK graph generates multiword replies and consumes its own previous replies.', 'Restricted 47-token, four-object, four-room task; no open-domain competence.'),
+        ('L026', 'Separately fitting the same update from OAK and Python sources gives identical weights and replies.', 'Within each paired execution; not independent agent-productivity trials.'),
+        ('L027', 'Equivalent host safeguards accept the same valid edit and reject the same invalid edits.', 'Six fault classes; scripted checks, not measured agent error rates or native OAK tensor checks.'),
+        ('L028', 'Individual-reply accuracy substantially overstates complete-conversation success.', 'Local scoped model: 55.76% ordinary replies but 11.72% complete conversations. Replication is reported separately.'),
+        ('L029', 'The tested networks fail withheld object-destination associations.', 'Local scoped model: zero correct first answers and complete dialogues in 256 combination cases. Replication counts remain separate.'),
+        ('L030', 'The scoped model rarely acknowledges missing information.', 'Local run: one correct reply in 85 ordinary missing-information cases. Replication counts are separate.'),
+        ('L031', 'This OAK execution adapter adds storage and latency overhead.', 'Identical numerical model; fixture-specific timing, not a general performance or productivity verdict.'),
+        ('L032', 'The wording test also introduces vocabulary entries unused in teaching.', 'Mixed wording and lexical shift, not a clean familiar-word-order experiment.'),
+        ('L033', 'Fixed seeds and matching scientific source did not reproduce local checkpoints in another environment.', 'Strict CI replay failed. Replication is labelled separately; its cause is not isolated. Within-run representation equality still holds.'),
+    )
+    index = EXPERIMENT / 'LEARNINGS.md'
+    text = index.read_text()
+    if '| L025 |' not in text:
+        rows = ''.join(f'| {key} | {claim} | {scope} | [Dialogue evidence](results/dialogue-run/REPORT.md) |\n'
+                       for key, claim, scope in findings)
+        text = text.replace('\n## How to extend this index', '\n' + rows + '\n## How to extend this index')
+        text = text.replace('Updated: 6 September 2026.', 'Updated: 7 September 2026.')
+        text = text.replace('The meaning resumption measures a narrow six-choice version, not those broader conversational abilities.',
+                            'The dialogue study generates short sentences, but fails reliable four-turn conversation and unfamiliar combinations.')
+        index.write_text(text)
+    intent = EXPERIMENT / 'EXPERIMENT.md'
+    text = intent.read_text()
+    status = ('Status: Restricted generated dialogue and matched OAK/Python training are measured. Paired representations give identical weights within each run; reliable conversation fails. Cross-environment retraining differs and is reported separately. See LEARNINGS.md and results/dialogue-run/REPORT.md.')
+    text = '\n'.join(status if line.startswith('Status:') else line for line in text.splitlines()) + '\n'
+    if '## Measured generated-dialogue comparison' not in text:
+        text += ('\n## Measured generated-dialogue comparison\n\nThe [dialogue study](dialogue/PROTOCOL.md) uses eight executable OAK documents and 38,519 coefficients to generate words. '
+                 'The [report](results/dialogue-run/REPORT.md) records identical paired OAK/Python updates, equivalent host safeguard checks and severe factual and whole-conversation failures. '
+                 'This is no demonstrated learning-quality or agent-productivity advantage for OAK. Exact cross-environment checkpoint replay failed; a separately labelled replication retains its own weights and predictions. '
+                 'Parameters remain fixed during dialogue, while the exported numerical system updates its own conversation history. Earlier unverified context studies are not reinstated.\n')
+    intent.write_text(text)
+    plan = ROOT / 'docs/plans/0011-agent-guided-network/plan.md'
+    text = plan.read_text()
+    if 'P13.01' not in text:
+        phase = '''\n### Phase 13: Generate dialogue and compare representations
+Objective: Measure generated replies and matched OAK/Python learning without claiming broad conversation.
+- [x] Key task: P13.01 Commit the protocol, freeze numerical source and data, and implement an eight-document generator and the same Python computation.
+- [x] Key task: P13.02 Record one live teaching proposal, fit it separately through both representations, retain controls and close selection before final cases.
+- [x] Key task: P13.03 Audit saved replies, scoped edits, isolated exports and sampled restored/native state; preserve the evidence and update LEARNINGS.md.
+Success criteria: Each frozen-model audit reproduces its own saved predictions. Cross-environment retraining differences are retained rather than claimed to pass exact replay. Scientific capability failure, host versus OAK checks and unmatched agent effort are explicit.
+Transition trigger: The audited research artifact is preserved. No reliable conversational deployment, independent-agent advantage or merge into main is authorised.
+'''
+        text = text.replace('\n## 4. Admin and Logistics', phase + '\n## 4. Admin and Logistics')
+        if 'P13.01' not in text:
+            raise AssertionError('plan section anchor differs')
+        plan.write_text(text)
+
+
+def _report(summary: dict[str, Any]) -> str:
+    table = '| Arm | Ordinary replies | Complete ordinary conversations | Long replies | New combinations | New wording |\n| --- | ---: | ---: | ---: | ---: | ---: |\n'
+    for arm, label in (('baseline', 'Selected baseline'), ('ordinary', 'Full-model ordinary continuation'), ('selected', 'Scoped update: OAK = Python')):
         s = summary['scores'][arm]
-        values = [s['ordinary']['reply_accuracy'], s['ordinary']['dialogue_accuracy'], s['long']['reply_accuracy'], s['combination']['reply_accuracy'], s['wording']['reply_accuracy']]
+        values = (s['ordinary']['reply_accuracy'], s['ordinary']['dialogue_accuracy'], s['long']['reply_accuracy'],
+                  s['combination']['reply_accuracy'], s['wording']['reply_accuracy'])
         table += '| ' + label + ' | ' + ' | '.join(f'{100 * value:.2f}%' for value in values) + ' |\n'
-    timings = summary['timing_seconds_median']
-    sizes = summary['size_bytes']
-    return f'''# Generated dialogue: matched OAK and Python experiment
+    missing = [item['scores']['selected']['ordinary']['per_kind']['missing'] for item in summary['audits']]
+    current = [item['scores']['selected']['combination']['per_kind']['current'] for item in summary['audits']]
+    timings, sizes = summary['timing_seconds_median'], summary['size_bytes']
+    reproduction = summary['reproduction']
+    return f'''# Generated dialogue: OAK versus Python
 
 Recorded: 7 September 2026, Brisbane time.
-Verdict: Restricted multiword generation and agent participation demonstrated. Reliable natural-language conversation failed. Matched OAK/Python training and inference are equivalent; no representation-specific learning advantage was found.
-Scientific source: `5e5c17c9779705a03843f0b63dc832eb4d0ac0cc`. [Protocol](../../dialogue/PROTOCOL.md), [live proposal and freeze](live-session.json), [reproduced records](reproduced/records.tar.xz), [summary](reproduced/summary.json), [archive manifest](reproduced/manifest.json).
+Verdict: Restricted word generation and agent participation demonstrated. Reliable natural-language conversation failed. No representation-specific learning advantage established.
+Source: `{SOURCE}`. [Protocol](../../dialogue/PROTOCOL.md), [live proposal](live-session.json), [local summary](local-summary.json), [this run](reproduced/summary.json), [raw records](reproduced/records.tar.xz).
 
-## What this model does
+## Evidence boundary
 
-Eight OAK documents own the encoder, attention, recurrent decoder, next-word readout, conversation history, generation state, shared contracts and composition. The actual CALL graph is lowered into a numerical program. The same learned operations run at each output position. Matrices are inline constants; the embedding is owned once and shared during generation. There are 38,519 coefficients, 47 vocabulary tokens, a 256-input-token limit, 24-message limit and 14 generated positions. The model is trained from scratch, not a pretrained chatbot.
+This report's table describes {reproduction['mode']}. Exact identity with local final-result hashes: {reproduction['matches_live_final_result_hashes']}. These runs must not be averaged or presented as independent agent trials.
 
-A shared recurrent encoder reads the complete dialogue log. Attention retrieves evidence for each next word, a recurrent decoder updates generation state, and the learned readout selects the word. Only capitalization, spacing, punctuation and stopping at EOS are deterministic text rendering. No sentence template, answer lookup, simulator, external model or teaching agent chooses a serving reply. Teaching examples and expected sentences are templated and explicitly supplied. Inference requires Python and NumPy.
+The first [strict CI replay](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34067276443) failed because retrained checkpoints and final replies differed from the local execution. The error and source identity remain in [strict-replay-failure.json](strict-replay-failure.json). Matching seeds and numerical package versions did not establish cross-environment reproducibility. The specific cause has not been isolated. [PyTorch's guidance](https://docs.pytorch.org/docs/stable/notes/randomness.html) does not guarantee identical results across platforms.
 
-The task consists of four connected turns: current location, a pronoun/past follow-up, a new movement event, and a switch to another object that may be unobserved. All four objects and four rooms are known. The past location is explicitly present as a source in the reported move; this is not learned physics or a general temporal theory. There is no broad vocabulary, open-domain conversation, genuine correction/negation curriculum, causal explanation or autonomous question asking. Unknown words map to a declared unknown token.
+The default replay still requires exact local result identities and fails on a mismatch. The explicit `--replication` delivery mode was added after that failure. It preserves a separately labelled re-execution, all differing hashes and its own model artifacts. No frozen scientific code, data, fitting settings, acceptance rule or final tests changed. All within-run audits and OAK/Python equality checks remain strict. [replay.json](reproduced/replay.json) records the actual identity comparison, environments and zero new agent decisions.
 
-## What was frozen and what was taught
+## Model and task
 
-Two numerical seeds, 601 and 607, each receive 2,048 training episodes, 64 ordinary development episodes and 64 reworded development episodes. Four blocks of 300 Adam steps select the baseline checkpoint on mean development reply accuracy. Optimiser state restarts per block. Batch size is 48 and learning rate is 0.003. Teacher-forced gold replies are used as training context; scored dialogues use only the model's own generated replies. This difference can contribute to inference errors and is not hidden.
+Eight canonical OAK documents own the encoder, attention, recurrent decoder, word readout, conversation memory, generation state, shared contracts and composition. Actual CALL/ACT processes are lowered into numerical instructions. There are 38,519 coefficients, 47 vocabulary tokens, 256 input-token capacity, 24-message capacity and 14 generated positions. Parameters are float32 values stored as JSON, not a packed compressed format.
 
-One live assistant proposal on seed 601 teaches the same histories in original and alternate wording while changing only encoder and attention parameters. Decoder and readout remain frozen. This is lesson selection and numerical fitting, not direct scalar hand-placement. The proposal is recorded before candidate evaluation; seed 607 replays the method, not another agent's reasoning. Both updates pass the frozen development acceptance rule. Only encoder.oak.md and attention.oak.md change; six neighbouring documents remain byte-identical. Frozen decoder/readout weights do not freeze their outputs: they receive changed representations and the shared embedding.
+The learned encoder reads the ordered dialogue. At each word, attention retrieves numerical evidence, the decoder updates generation state and a learned readout selects the next token. Parameters are shared across positions. The embedding has one encoder owner and is also used by generation. Only spacing, punctuation, capitalization and stopping at EOS are deterministic text conversion. There is no serving sentence template, answer lookup, simulator, external model, pretrained chatbot or teaching agent. Standalone inference needs Python and NumPy.
 
-The proposed update is independently fitted from OAK-loaded and Python-loaded copies with identical data, batches, initial weights, optimiser settings and seed. All 38,519 resulting coefficients are identical within each paired run. Final replies are therefore identical too. A full-model ordinary-data continuation is a separate control; its permitted trainable groups and wording differ from the scoped intervention. It is not the OAK-versus-Python comparison. It uses the same 300 added steps but a less restrictive checkpoint rule, retained explicitly.
+Each episode has four connected turns: current location, a pronoun/past follow-up, a newly reported movement and a question about another object that may be unobserved. Four objects and four rooms are known. The source location is explicitly present in the reported movement, so a correct past answer does not establish general temporal reasoning. There is no unrestricted vocabulary, genuine correction/negation curriculum, physical simulation, causal explanation or autonomous question asking. Unknown words map to a declared unknown token. These are restricted generated exchanges, not dependable general conversation.
 
-All selections close before 128 untouched episodes per seed/regime are generated. Episode splits exclude repeated underlying initial move histories across all training, development and final groups and both seeds. New random seeds alone are not counted as generalisation. The combination test excludes specific object-destination pairs during teaching. Long stories have 8-10 initial moves instead of 1-3. New wording changes sentence arrangement and includes question words unused in teaching despite being listed in the vocabulary. It is a mixed wording/lexical shift, not pure word-order transfer. Four-turn histories and output patterns remain strongly structured.
+## Training and selection
+
+Seeds 601 and 607 each use 2,048 teaching episodes, 64 ordinary development episodes and 64 separately worded development episodes. Four 300-step Adam blocks use batch size 48 and learning rate 0.003, restarting optimiser state each block. Select the baseline checkpoint with the highest mean development reply accuracy. Teaching text and answers are templated. Training uses gold previous replies; scored conversations use only the model's own generated replies. This mismatch is disclosed and may contribute to errors.
+
+One assistant proposal on seed 601 adds alternate wording of the same teaching histories and fits only encoder and attention for 300 steps. It is lesson selection and numerical fitting, not direct placement of every scalar. Seed 607 replays the method, not another agent session. Only encoder.oak.md and attention.oak.md change; six neighbouring documents remain byte-identical. Frozen decoder/readout weights do not freeze their behaviour when upstream representations and the shared embedding change.
+
+The update is independently fitted from OAK-loaded and Python-loaded copies with identical initial weights, examples, batches, optimiser settings and seed. All resulting coefficients and acceptance outcomes match within each pair. A separate full-model ordinary continuation uses the same added step count but different allowed parameters, wording and a less restrictive checkpoint selection rule. It is not the OAK-versus-Python comparison. Conversation costs and extra partial fitting compute are unknown; no matched independent-agent effort experiment was run.
+
+Selection closes before 128 final episodes per seed/regime are generated. Initial underlying move histories are disjoint across all teaching, development and final groups and both seeds. The new-combination set requires withheld object-destination pairings. Long stories have 8-10 initial moves rather than 1-3. The wording test also introduces question words unused in teaching despite appearing in the vocabulary: a mixed wording/lexical shift, not pure word-order transfer. The four-turn structure remains strongly templated.
 
 ## Results
 
-Descriptive two-seed means, not independent agent trials. Exact full replies are scored, including the required fact and sentence. Alternative valid paraphrases would fail this narrow exact-match metric. Conversation success requires all four replies correct.
+Descriptive two-seed means. Exact full replies must match the expected sentence and fact. Valid alternative paraphrases would fail this narrow metric. Complete conversation requires all four replies correct.
 
 {table}
-All arms have zero complete-conversation accuracy on the new-combination set. For the scoped model, none of its 256 first current-location answers on that set is correct. Averaging over other turns would hide this failure. The scoped model answers only 1 of 85 ordinary missing-information questions correctly, often inventing a location. There is no reliable abstention mechanism.
+The scoped model gives {sum(row['correct'] for row in current)} correct first answers out of {sum(row['count'] for row in current)} new-combination conversations. Average reply accuracy includes easier later turns and must not conceal this failure. It correctly acknowledges missing information in {sum(row['correct'] for row in missing)} of {sum(row['count'] for row in missing)} ordinary missing-information cases. Fluent invented locations remain a serious weakness.
 
-Readable sentence generation is not the same as reliable conversation. The scoped update helps some longer stories but underperforms ordinary continuation on familiar replies and whole conversations. An accepted development update has no guarantee outside the selection distribution. All controls and every raw dialogue are retained; a good example is not representative of all cases.
+The original local scoped model scored 55.76% ordinary replies and 11.72% complete ordinary conversations; local full-model ordinary continuation scored 67.58% and 22.27%. Those local figures are preserved separately, not described as exactly reproduced by CI. Training trade-offs can differ between executions. No consistent superiority of the scoped lesson is assumed. A selected successful conversation is an illustration, not typical performance; complete failures and every generated reply remain in the archive.
 
-## OAK versus Python
+## Matched representation comparison
 
-The matched representation comparison finds identical learned weights, acceptance outcomes and generated replies. The scripted safeguard comparison accepts one valid edit and rejects six invalid classes in both: wrong owner, stale revision, empty change, invalid shape, nonfinite value and changed vocabulary. These are shared host checks. OAK supplies canonical documents, dependencies, explicit CALL composition and state contracts; the adapter supplies numerical operations, tensor checks, graph lowering and edit-policy enforcement. No independent agent-error, effort or productivity experiment was performed. One shared conversation and reused code cannot establish those benefits.
+OAK and Python yield identical paired trained weights and replies. Both accept the valid scripted edit and reject the same six invalid classes: wrong owner, stale revision, empty change, malformed tensor, nonfinite value and altered vocabulary. These are shared host safeguards, not demonstrated native OAK tensor protections or real agent-error rates. OAK supplies canonical document ownership, dependency resolution, explicit process composition and state contracts. The adapter supplies numerical operations, tensor checks, lowering and edit-policy enforcement.
 
-The measured first ordinary utterance on model 601 took a median {1000 * timings['python_direct']:.2f} ms directly, {1000 * timings['oak_lowered']:.2f} ms through the lowered program, and {1000 * timings['oak_load_resolve_execute']:.2f} ms with OAK loading/resolution/execution included. Compilation alone took {1000 * timings['compile']:.2f} ms. This is one fixture, not a hardware-independent speed ratio, throughput or energy benchmark. Both paths include their respective validation and tensor decoding. Native complete-dialogue sweeps were too slow for several command limits; only explicitly completed samples are reported below.
+For the first ordinary utterance on seed 601, direct Python takes {1000 * timings['python_direct']:.2f} ms, lowered OAK {1000 * timings['oak_lowered']:.2f} ms and OAK including load/resolve/execute {1000 * timings['oak_load_resolve_execute']:.2f} ms. Compilation is {1000 * timings['compile']:.2f} ms. These are warm median timings for one fixture, five repeats except native/compile three, not a general throughput, energy or productivity claim. Paths include their respective validation and parameter decoding; native timing includes loading and resolution.
 
-Using the same runtime file, direct model plus runtime is {sizes['python_runtime_plus_model']:,} bytes and lowered program plus runtime is {sizes['lowered_runtime_plus_program']:,} bytes. Canonical OAK is {sizes['canonical_oak']:,} bytes. JSON floats are not a packed weight format. Python/NumPy installation, state storage, comparison fixtures and developer tools are excluded from these paired payload figures. No model compression or general speed improvement is claimed.
+Model plus shared runtime uses {sizes['python_runtime_plus_model']:,} bytes directly and {sizes['lowered_runtime_plus_program']:,} bytes compiled. Canonical OAK uses {sizes['canonical_oak']:,} bytes. Installed dependencies, state files and testing fixtures are excluded. No model-compression or speed benefit is claimed. Whether OAK helps agents understand or maintain larger systems remains untested by this scripted paired comparison.
 
-## Verified boundaries
+## Verification and use
 
-All 12,288 saved final replies across three arms, four regimes and two seeds are recomputed. Model hashes, unchanged source, disjoint histories, proposal chronology and selected identities are checked. Isolated processes match 4,096 selected-model replies in both direct and lowered engines. Another 256 sampled turns per engine are checked sequentially with model-bound state serialized and restored after every turn. These processes exclude OAK, PyTorch, the simulator, repository reads, credentials and network activity.
+All 12,288 final replies across three arms, four regimes and two seeds are recomputed from their frozen models. Source/data hashes, selected identities, recorded proposal chronology and scoped changes are audited. Each selected model is exported to isolated direct and lowered engines: 4,096 replies per engine in total match this run's saved predictions. A further 256 sampled turns per engine save and restore model-bound state after every turn. These processes exclude OAK, PyTorch, teaching code, simulator access, credentials, repository reads and network activity.
 
-Actual native OAK execution is checked on four connected-turn samples in total, two per model. It agrees with the reference replies. The full native sweep was not completed and is not counted as passing. PyTorch/NumPy probabilities agree within the maximum absolute error recorded for 32 sampled turns, with matching generated tokens on those samples. These are sampled numerical checks, not universal equivalence proofs. Twenty preflight tests cover generation, state, strict profile checks and representation parity. Repository verification is recorded separately.
+Native OAK checks cover four connected turns total, two per model, with serialized state. A complete native sweep was not finished within local command limits and is not claimed. PyTorch/NumPy comparisons cover 32 sampled turns; probability differences and token agreement are recorded per seed. These are sampled checks, not universal equivalence proofs. Twenty new preflight tests and 99 existing tests pass; repository/CI status is separate from a capability verdict.
 
-One combined fitting command was interrupted before a candidate record existed and the same candidate fit was restarted. Additional partial compute is unknown and is not excluded from the cost caveat. Several verification calls timed out before completion; successful final coverage is stated explicitly, not inferred from partial output. The local environment uses pydantic-settings 2.14.1, below the declared minimum 2.15. Any CI validation under declared dependencies is a separate recorded check. Conversation tokens, monetary cost and independent agent effort are unavailable.
+Local pydantic-settings 2.14.1 was below the repository's declared minimum. CI installs declared repository dependencies. One local combined fitting command was interrupted before its candidate record and the same fit was restarted; additional partial compute is unknown. Verification timeouts are disclosed rather than counted as passes. None of this makes the deployed model a reliable information service.
 
-## Using the artifact
+The archive includes initial, candidate and selected weights, training/evaluation cases, proposals, decisions, generated replies, canonical graphs and standalone exports. Every member is SHA-256 checked. Each seed's export contains model.json, program.json, runtime.py, chat.py and selected success/failure examples. Run `python chat.py EXPORT_DIRECTORY --engine oak` or `--engine python`; `/reset`, `/save` and `/load` operate on the model's own episode memory.
 
-The raw archive contains teaching data, source identities, initial and candidate weights, scoped changes, selected OAK graphs, final cases, actual generated conversations and standalone exports. Extraction preserves the run-relative directories. Use `dialogue/chat.py EXPORT_DIRECTORY --engine oak` or `--engine python` with a selected export. Each export contains model.json, program.json and runtime.py. `/reset` clears the conversation and `/save`/`/load` test model-bound state. The model often gives wrong answers and should not be used as an information service.
-
-The replay entry point repeats the committed teaching method and checks result identities, making zero new agent decisions. A new lesson must use a new experiment and untouched tests; this final set must not be relabelled unseen after further training.
+The default `dialogue/reproduce.py NEW_DIRECTORY` is strict replay. `--replication` records a separately labelled environment-specific execution; it must not be reported as reproducing the local checkpoints. Both make zero fresh agent decisions. New teaching requires a new study and untouched tests, not reuse of this final set as unseen evidence.
 
 ## Interpretation
 
-OAK is operationally useful as the explicit numerical-module representation and edit boundary. This paired experiment does not find a learning-quality advantage over equivalent Python, and it measures added overhead. The network has progressed from selecting one location word to generating connected sentences, but has not achieved dependable natural-language conversation. The next capability problem is grounding those sentences in the supplied facts, preserving role meanings and acknowledging absent evidence, not adding more confident-sounding output.
+The experiment advances from one-word classification to generated connected sentences. It also shows that readable language can conceal weak factual tracking and near-total failure to acknowledge absent evidence. OAK is operational as an executable modular representation and revision boundary, but the matched Python system learns the same model and the adapter adds overhead. Reliable general conversation and an OAK-specific agent-productivity advantage remain unestablished.
 '''
 
 
