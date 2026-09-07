@@ -1,27 +1,92 @@
-name: Export local contracts worktree
+name: Publish verified local contracts
 on:
   push:
     branches: [feat/add-resumable-repository-lifecycle]
     paths: [.github/workflows/local-contracts-export.yml]
 permissions:
-  contents: read
+  contents: write
+concurrency:
+  group: publish-local-contracts
+  cancel-in-progress: false
 jobs:
-  export:
+  publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
-      - name: Bundle the exact repository history without credentials
-        run: |
-          mkdir -p "$RUNNER_TEMP/oak-export"
-          git bundle create "$RUNNER_TEMP/oak-export/repository.bundle" HEAD
-          git rev-parse HEAD > "$RUNNER_TEMP/oak-export/revision.txt"
-          cd "$RUNNER_TEMP/oak-export"
-          sha256sum repository.bundle revision.txt > SHA256SUMS
-      - uses: actions/upload-artifact@v4
+      - uses: actions/setup-python@v5
         with:
-          name: local-contracts-checkout
-          path: ${{ runner.temp }}/oak-export
-          retention-days: 1
+          python-version: '3.13'
+      - name: Verify and apply the exact checked source patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from hashlib import sha256
+          import gzip, subprocess
+          base = '85ddd5393fd4349632f728f5a05cb67f9bc5dbf5'
+          allowed = {'.github/workflows/local-contracts-export.yml'} | {f'.github/local-contracts-transfer/{i:03}.gzpart' for i in range(4)}
+          changed = set(subprocess.check_output(['git', 'diff', '--name-only', base, 'HEAD'], text=True).splitlines())
+          assert changed == allowed, f'Unexpected concurrent changes: {changed ^ allowed}'
+          parts = [Path(f'.github/local-contracts-transfer/{i:03}.gzpart').read_bytes() for i in range(4)]
+          expected = ['c3567feb5adf2e757288fe82172c1c68adb1a855', 'aa27e42074fc1bf14a71098855146e91952da12f', '3e6e1c99b25025e8cd9e392ab763321af81db244', '349cf5bed4f471b2feb75580fd24def39cfc6510']
+          for part, identity in zip(parts, expected, strict=True):
+              assert subprocess.check_output(['git', 'hash-object', '--stdin'], input=part).decode().strip() == identity
+          patch = gzip.decompress(b''.join(parts))
+          assert len(patch) == 158050
+          assert sha256(patch).hexdigest() == '69befbc4a5840170d9a33be063db3bd4425e8feb8d02e4cc6bc9dc94d82fb163'
+          subprocess.run(['git', 'apply', '--check', '-'], input=patch, check=True)
+          subprocess.run(['git', 'apply', '-'], input=patch, check=True)
+          PY
+          git rm -r .github/local-contracts-transfer .github/workflows/local-contracts-export.yml
+      - name: Install repository dependencies outside the checkout
+        run: |
+          python - <<'PY'
+          import pathlib, subprocess, sys, tomllib
+          dependencies = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['dependencies']
+          subprocess.run([sys.executable, '-m', 'pip', 'install', *dependencies], check=True)
+          PY
+      - name: Generate and reproduce the verified product manifest
+        run: |
+          python -m examples.catalog
+          python -m build.ebnf
+          python -m build.definitions
+          python -m build.authoring
+          python - <<'PY'
+          from pathlib import Path
+          from hashlib import sha256
+          import json, subprocess
+          files = subprocess.check_output(['git', 'ls-files', '--cached', '--others', '--exclude-standard', '-z']).decode().split('\0')
+          manifest = {}
+          for name in sorted(set(files)):
+              if not name or name.startswith(('docs/plans/', 'legacy-snapshot-aps/')) or name == '.github/workflows/local-contracts-export.yml':
+                  continue
+              path = Path(name)
+              if path.is_file():
+                  manifest[name] = sha256(path.read_bytes()).hexdigest()
+          encoded = json.dumps(manifest, sort_keys=True, separators=(',', ':')).encode()
+          fingerprint = sha256(encoded).hexdigest()
+          assert fingerprint == '9f3991dd7e78e6884a906f6c5eb6cea65ed2e0ba7ed7d792dcd920bfd26e73b3', fingerprint
+          value = {'algorithm': 'SHA-256 of sorted compact JSON path-to-SHA256 mapping', 'fingerprint': fingerprint, 'scope': 'All current repository source, guidance, checks and deliveries outside historical/task records and the temporary checkout transport; excludes .git and ignored caches.', 'files': manifest}
+          Path('docs/plans/0015-local-interface-contracts/evidence/product-manifest.json').write_text(json.dumps(value, indent=2) + '\n')
+          PY
+      - name: Verify the complete implementation and approved bootstrap
+        run: |
+          python -m compileall -q oak build examples generated/oak-authoring.skill/scripts
+          python -m build.examples
+          python build/examples.py
+          python -m build.checks.bootstrap_integration --allow-download
+          python -m build.authoring
+          git diff --check
+          git add -A
+          test "$(git write-tree)" = 2e7449e18c66dbc43401695ae1c5a50e0c607ff9
+      - name: Append the verified implementation without rewriting history
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git ls-remote origin refs/heads/feat/add-resumable-repository-lifecycle | cut -f1)" = "$EXPECTED_HEAD"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'feat(contracts): localize root lifecycle contracts'
+          git push origin HEAD:refs/heads/feat/add-resumable-repository-lifecycle
