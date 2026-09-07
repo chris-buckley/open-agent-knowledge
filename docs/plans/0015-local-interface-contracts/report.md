@@ -1,13 +1,13 @@
 # Local interface contracts completion report
 
-Status: Implementation and local verification complete; final publication pending.
-Verdict: PASS for the implemented product and direct semantic review. PR handoff remains a separate observed step.
+Status: Complete. Implementation, verification, and PR handoff delivered.
+Verdict: PASS. All 31 plan tasks and comparisons E01 through E06 are complete; PR #23 is open and ready for review.
 
 ## Verified subject
 
 Product content fingerprint: `9f3991dd7e78e6884a906f6c5eb6cea65ed2e0ba7ed7d792dcd920bfd26e73b3` (SHA-256).
 
-The complete path-to-content mapping and algorithm are in [product-manifest.json](evidence/product-manifest.json). It covers maintained source, scoped knowledge, checks, examples, and generated products; historical/task records and temporary transport files are explicitly excluded to avoid self-referential evidence. The eventual immutable implementation commit is recorded during publication, without changing the verified product bytes.
+The complete path-to-content mapping and algorithm are in [product-manifest.json](evidence/product-manifest.json). It covers maintained source, scoped knowledge, checks, examples, and generated products; historical/task records and temporary transport files are explicitly excluded to avoid self-referential evidence. Verified implementation commit: `dbdb97a9203b84633e23769594aaef0d1dd7ac93`, with exact Git tree `2e7449e18c66dbc43401695ae1c5a50e0c607ff9`. The final plan/report closeout changes only task records, not these verified product bytes.
 
 Validator source revision: `85ddd5393fd4349632f728f5a05cb67f9bc5dbf5`. The matching package digest is `9bca0d69e12c26aac64d3e7218f4ccfc620e7a7196b569d324ff7ac8197053bc`; the authoring capability is version 3.1.0.
 
@@ -58,7 +58,7 @@ Both complete entry points ran against the same product bytes using Python 3.13.
 
 The complete entry points cover all 36 registered checks, including lifecycle serialization and replay, approval/refusal/cancellation, drift and external-effect failures, malformed receipts and emissions, source/schema identity, public/private adapter input/output rejection, shared external schemas, missing/wrong dependencies, detached examples, consent/caches, cold regeneration, output repair, symlink refusal, graph closure, both groupings, fusion parity, and architectural invariants. New mutation tests detect removed approval/revision gates and silent guard filtering; an exactly 501-line canonical document is rejected by the actual AGENTS line check.
 
-Full command timestamps, versions, sizes, and exact check names are in [verification.json](evidence/verification.json). Earlier tool-call timeouts are recorded as incomplete attempts, not passed tests; the two commands above returned actual exit zero. Live network bootstrap and remote CI results will be recorded during the PR handoff rather than inferred from local fixtures.
+Full command timestamps, versions, sizes, and exact check names are in [verification.json](evidence/verification.json). Earlier tool-call timeouts are recorded as incomplete attempts, not passed tests; the two commands above returned actual exit zero. The remote publication run also passed both complete entry points and live network bootstrap, as recorded below; these results were observed rather than inferred from local fixtures.
 
 ## Required comparisons
 
@@ -75,7 +75,7 @@ Detailed acceptance mapping appears in the boundary review and executable checks
 
 ## Changed paths
 
-The following list describes this implementation relative to the planning checkout; the temporary checkout/transfer workflow is removed before handoff. Completed older plan records are unchanged.
+The following list describes this implementation relative to the planning checkout; the temporary checkout/transfer workflow and payloads are absent from the verified final tree. Completed older plan records are unchanged.
 ```text
 .agents/rules/context.oak.md
 .agents/rules/repository-task.oak.md
@@ -126,4 +126,10 @@ No new runtime syntax, schema alias, completeness flag, universal locality restr
 
 All reported lifecycle effects are deterministic test-host observations. They do not prove production user authentication, durable host storage, delivery, successful real Git operations, or exactly-once external effects. Review was performed directly by the implementing interpreter, without subagents or a claimed independent approval.
 
-The root has zero spare lines and the agent nineteen spare bytes. Both unchanged caps remain enforced. No merge or branch deletion is performed. Final commit, PR, and remote checks are recorded after publication.
+The root has zero spare lines and the agent nineteen spare bytes. Both unchanged caps remain enforced. No merge or branch deletion is performed. The review-ready [PR #23](https://github.com/chris-buckley/open-agent-knowledge/pull/23) targets `main` from the existing branch. All 31 plan tasks are checked against observed evidence. No merge or branch deletion is authorized by this handoff.
+
+## Published verification
+
+[GitHub run 34069485830](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34069485830) succeeded on 2026-09-07 at 00:22:05 UTC. It verified the patch checksum, regenerated the complete product mapping to the exact local fingerprint, ran compilation and both full repository entry points, exercised live pinned download and isolated installation with consent refusal and cache reuse, and required the complete Git tree to equal `2e7449e18c66dbc43401695ae1c5a50e0c607ff9` before appending the implementation commit.
+
+The temporary transfer commit is `f4ac43823172071c46ef746b7dd9dd02b20983aa`; the resulting implementation commit is `dbdb97a9203b84633e23769594aaef0d1dd7ac93`. All transfer files were removed before that final tree was verified and committed. PR #23 was created non-draft on 2026-09-07 at 00:22:50 UTC. Its ordinary verification workflow checks the review head independently of the publication run; the PR check status is the authority for that additional run.

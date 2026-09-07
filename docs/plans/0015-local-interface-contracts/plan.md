@@ -2,7 +2,7 @@
 
 Prepared: 2026-09-07T09:01:19+10:00
 Classification: PUBLIC
-Status: Implementation verified locally; final branch publication and PR handoff pending.
+Status: Complete. All 31 tasks and required comparisons E01 through E06 passed; ready-for-review PR #23 is open.
 Authorization: User continuation received 2026-09-07T09:19:06+10:00.
 Size gate: Passed before product edits; the complete canonical candidate is 500 lines.
 Evidence: [Measured candidate and migration map](evidence/size-gate.json).
@@ -234,8 +234,8 @@ Transition trigger: generated deliveries match maintained sources and both compl
 Objective: demonstrate the full accepted outcome on the existing branch without claiming unobserved results or authorizing a merge.
 - [x] Key task: P06.01 Review the final diff directly without subagents; search current files for retired schema paths, contradictory locality rules, stale closure assumptions, altered safeguards, and unsupported standalone or exactly-once claims.
 - [x] Key task: P06.02 Add `report.md` in this plan directory with the verified revision, changed paths, measured line counts, exact graph closure, E01 through E06 results, test evidence, limitations, and final verdict.
-- [ ] Key task: P06.03 Check off tasks only against observed evidence, reconcile any changed scope with the user, and ensure every applicable task passes before marking the plan complete.
-- [ ] Key task: P06.04 Commit completed work without rewriting history and create or update the branch pull request for review after successful implementation; leave merge and branch deletion to separate explicit authorization.
+- [x] Key task: P06.03 Check off tasks only against observed evidence, reconcile any changed scope with the user, and ensure every applicable task passes before marking the plan complete.
+- [x] Key task: P06.04 Commit completed work without rewriting history and create or update the branch pull request for review after successful implementation; leave merge and branch deletion to separate explicit authorization.
 Success criteria: E01 through E06 have traceable observed results, every applicable checkbox passes, the branch contains the complete change and report, and the review handoff states any remaining uncertainty accurately.
 Transition trigger: mission complete with a review-ready branch and completion report; no automatic merge follows.
 
@@ -281,7 +281,7 @@ Rollback: preserve the reviewed commit and all subsequent history. Correct mista
 | Persistent task record | This plan | Retain scope, gates, unchecked work, and completion criteria | On verified task-state changes |
 | Review evidence | Branch commits and eventual report/PR | Identify exact changed content, observed checks, and verdict | At checkpoints and final handoff |
 
-Reporting: Phase 1 measured the full candidate before product edits. Phases 2 through 5 now pass, including both complete verification entry points; the direct boundary review covers E01 through E06. See the observed evidence and completion report; final publication tasks remain open until performed.
+Reporting: Phase 1 measured the full candidate before product edits. Phases 2 through 5 now pass, including both complete verification entry points; the direct boundary review covers E01 through E06. The exact checked implementation is committed as `dbdb97a9203b84633e23769594aaef0d1dd7ac93`; GitHub verification and live bootstrap passed in run `34069485830`. PR #23 is open for review; all 31 tasks are checked against observed evidence.
 Reporting: the original planning commit contained no product implementation. Later user continuation authorized this implementation, tests, report, and review-ready PR; no merge or branch deletion is authorized.
 Reporting: report any proposed public protocol change, mandatory-root-contract relocation, limit relaxation, schema-language restriction, missing dependency, or unverified test immediately instead of silently changing the plan.
 
