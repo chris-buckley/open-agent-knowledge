@@ -20,6 +20,7 @@ from examples.interpreter_context import example as interpreter_context
 from examples.local_contracts import example as local_contracts, worker as contract_worker
 from examples.implementer import example as implementer
 from examples.delegation import example as delegation, task_reviewer
+from examples.parallel_exploration import example as parallel_exploration, explorer
 from examples.successor import example as successor, amendment_reviewer, successor_verifier
 from examples.schemas import (
     api_coverage_table, code_changes, code_map, docs_index, error,
@@ -78,6 +79,9 @@ SCENARIOS = (
     Scenario("delegation", delegation, "Delegate through an exact tool while retaining the worker document scope.",
              "Included deterministic agent.reviewer fixture; no live delegated model.",
              supporting=(task_reviewer,), bindings=True, detached="example.py"),
+    Scenario("parallel_exploration", parallel_exploration, "Dispatch two independent exact tools, JOIN validated reports, and reconcile evidence.",
+             "Repository-only deterministic fixture workers; native Codex TOML is a separate artifact, not a host adapter or live permission proof.",
+             supporting=(explorer,), sample=parallel_exploration.sample, run=parallel_exploration.run),
     Scenario("successor", successor, "Separate amendment review, compilation, verification, and publication across arrivals.",
              "Included fixed amendment and verification adapters; proof covers the fixture, not arbitrary amendment quality.",
              supporting=(amendment_reviewer, successor_verifier), bindings=True, detached="example.py"),
@@ -125,7 +129,10 @@ def catalog_node(*, teaching: bool = False) -> Node:
         }
         if not teaching:
             row["regenerate"] = f"python -m examples.{scenario.name}.example (repository); python -m examples.catalog refreshes the complete bundle"
-            row["detached"] = f"python {scenario.detached}" if scenario.detached else "OAK interpretation and resolution only; no action host is needed"
+            row["detached"] = (f"python {scenario.detached}" if scenario.detached else
+                               "OAK inspection only; the action demonstration requires repository sources"
+                               if scenario.run is not None else
+                               "OAK interpretation and resolution only; no action host is needed")
             row["documents"] = ", ".join(name for name in generated(scenario) if name.endswith(".oak.md"))
         rows.append(row)
     constants = [

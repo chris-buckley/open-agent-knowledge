@@ -55,7 +55,7 @@ def fuse(documents: Mapping[str, str], *, entry: str) -> Node:
     for index, path in enumerate(order):
         for part in Node.model_fields:
             for item in getattr(nodes[path], part):
-                identifier = item.id if path == entry else f"guide-{index}-{item.id}"
+                identifier = item.id if path == entry else f"g{index}-{item.id}"
                 if identifier in used:
                     raise ValueError(f"fused identifier collision: {identifier}")
                 used.add(identifier)

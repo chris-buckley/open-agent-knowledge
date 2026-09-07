@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from build.checks.agents import validate_agents
+from build.checks.agent_deliveries import validate_agent_deliveries
 from build.checks.authoring import validate_authoring_skill
 from build.checks.architecture import validate_architecture
 from build.checks.compact_syntax import (
@@ -79,6 +80,7 @@ CHECKS: tuple[Check, ...] = (
     validate_json_ld_style_display,
     validate_human_examples,
     validate_shapes,
+    validate_agent_deliveries,
     validate_authoring_skill,
     validate_optional_validator,
     validate_plans,

@@ -11,6 +11,7 @@ generator-map: CSV<<
 source,output
 build/ebnf.py,generated/oak.ebnf
 build/definitions.py,generated/definitions/*.oak.md
+build/agents.py,generated/oak.agents
 build/authoring.py and build/authoring_guides.py,generated/oak-authoring.skill and generated/oak-authoring.oak.md
 examples/catalog.py and registered Python sources,"scenario siblings, local dependency copies, and examples/catalog.oak.md"
 >>
@@ -23,7 +24,7 @@ authoring-product-byte-limits: {"skill-entry": 10000, "standalone-agent": 64000}
 
 agent-graph-checks: ["exact path discovery", "canonical parse and render equality", "500-line maximum", "root router coverage", "one owned concern per file", "structured content before authored instructions", "duplicate authored-claim rejection", "obsolete owner rejection", "root-local public and checkpoint contracts, explicit context and change-module closure", "checkpoint, approval, replay, cancellation and revision checks in build/checks/repository_lifecycle.py", "root contract rejection and lifecycle safeguard mutation checks, including the unchanged 500-line bound"]
 
-plan-checks: ["apply the storage and format policy owned by docs/AGENTS.md", "check unique named plan directories and required plan files", "derive SMEAC section order, phase labels, and comparison fields from the referenced schema", "check populated sections and compact phase checkboxes with unique task identifiers", "validate paired current and desired specimens, comparison authority, unique example identifiers, and required comparison coverage in success criteria", "preserve the named historical format exceptions", "exercise rejected plan structures as well as accepted examples"]
+plan-checks: ["apply the storage and format policy owned by docs/AGENTS.md", "check unique named plan directories and required plan files", "derive SMEAC section order, phase labels, and comparison fields from the referenced schema", "check populated sections and compact phase checkboxes with unique task identifiers", "validate paired current and desired specimens, comparison authority, unique example identifiers, and required comparison coverage in success criteria", "derive Directory Changes fields, legend and paired fences from the SMEAC schema; apply docs-owned prospective and reopened-plan adoption without bypassing older checks", "preserve the named historical format exceptions", "exercise rejected plan structures as well as accepted examples"]
 
 freshness-rules: YAML<<
 - Generate each product once from package sources.
@@ -78,6 +79,7 @@ generated/oak-authoring.oak.md,"standalone authoring agent assembled from the sk
 generated/oak.ebnf,generated grammar reference,build/ebnf.py
 generated/definitions,generated OAK construct definitions,build/definitions.py
 generated/oak-authoring.skill,modular authoring bundle; install as oak-authoring,build/authoring.py
+generated/oak.agents,artifact-only OAK scenarios and native Codex TOML,build/agents.py
 >>
 
 output-rules: ["treat generated products as deliveries, never source authority", "do not edit by hand", "change the owning package or build source", "regenerate through the owner", "require fresh bytes before completion"]
@@ -116,8 +118,9 @@ delivery-contract: YAML<<
   may define constants and schemas only. Refuse authored policy, state, arrivals,
   processes, or interfaces in supporting documents instead of widening their scope.
 - Namespace supporting definitions and rewrite typed targets after explicit resolution.
-  Never rewrite literal payloads, templates, scripts, tool names, or embedded teaching
-  documents.
+  Use gN- prefixes with descriptive entry ids for compact supporting identities; preserve
+  distinct scopes and rewrite only typed references. Never rewrite literal payloads,
+  templates, scripts, tool names, or embedded teaching documents.
 - Check source and dependency fingerprints against the immutable validator revision
   before accepting a new version. A package version string alone is not proof of a
   matching validator.
@@ -126,7 +129,22 @@ delivery-contract: YAML<<
   and honest not-performed results.
 >>
 
-generated-layout: "Deliver only oak.ebnf, definitions/*.oak.md, oak-authoring.oak.md, and the oak-authoring.skill directory under generated. Keep maintained sources and repository guidance outside that tree."
+generated-layout: "Deliver only oak.ebnf, definitions/*.oak.md, oak-authoring.oak.md, the oak-authoring.skill directory, and the oak.agents directory under generated. Keep maintained sources and repository guidance outside that tree."
+
+agent-delivery-contract: YAML<<
+- Deliver agent scenarios as separate canonical OAK documents and native TOML in generated/oak.agents;
+  keep repository demonstration Python outside this bundle.
+- Own each explorer in its example source and native-file knowledge in .agents/adaptors/codex/adaptor.oak.md.
+  The bundle and authoring capability use the same adaptor knowledge; native developer
+  instructions preserve exact explorer bytes.
+- Native artifacts request configuration defaults, not verified permissions or a supplied
+  tool registry. Installation, runtime services, and live-client certification are
+  not part of artifact generation or its offline acceptance.
+- Verify exact file and directory sets, bounded closure, lossless TOML embedding,
+  unsafe-path rejection, cold repair, and synchronized deterministic parallel work.
+- Route identical orchestration and Codex knowledge into both authoring forms while
+  retaining literal teaching, grammar, template, validator safeguards and byte limits.
+>>
 
 skill-installation: "The .skill suffix identifies the repository bundle directory, not an archive or skill metadata name. Install its contents in a directory named oak-authoring to match name: oak-authoring in SKILL.md. The Agent Skills naming contract is https://agentskills.io/specification#name-field."
 
@@ -150,6 +168,9 @@ ACT Use <GENERATORS> to regenerate every affected product from its source. (
 ACT Enforce <PRODUCT_LIMITS> and <AGENT_CHECKS> while validating generated and scoped knowledge products. (
   PRODUCT_LIMITS=$constant.authoring-product-byte-limits,
   AGENT_CHECKS=$constant.agent-graph-checks,
+)
+ACT Apply <AGENT_DELIVERIES> to native artifact generation and its offline evidence. (
+  AGENT_DELIVERIES=$constant.agent-delivery-contract,
 )
 ACT Apply <PLAN_CHECKS> to persistent plan records and their verification examples. (
   PLAN_CHECKS=$constant.plan-checks,

@@ -16,6 +16,8 @@ JSON Schema,.agents/skills/json-schema-2020-12/SKILL.md
 JSON-LD,.agents/skills/json-ld/SKILL.md
 >>
 
+adaptor-router: {"Codex native agent artifacts": ".agents/adaptors/codex/adaptor.oak.md"}
+
 coding-standard: ".agents/rules/coding-standards.oak.md"
 </constants>
 
@@ -47,8 +49,9 @@ ACT For Python work in <PATHS>, read <STANDARD> and its routed topics before imp
 </process>
 
 <process id="read-specialist-skills" name="Read skills" input="schema.context-request">
-ACT Use <SKILLS> to read the matching specialist material before work on formats used by <PATHS>. (
+ACT Use <SKILLS> and <ADAPTORS> to read the matching specialist and native-artifact knowledge before work on <PATHS>; adaptor paths provide knowledge, not executable host capabilities. (
   SKILLS=$constant.skill-router,
+  ADAPTORS=$constant.adaptor-router,
   PATHS=$PATHS,
 )
 </process>

@@ -13,38 +13,36 @@ Each process is the exact ordered way to do one task; follow its typed steps fro
 </instructions>
 
 <constants>
-guide-1-guidance: YAML<<
+g1-guidance: YAML<<
 - Treat the complete supplied host context as the source, regardless of modality.
 - Omit every part and entry that the source does not justify.
 - Do not invent state, triggers, processes, interfaces, tools, or relative paths.
 - Use the shortest unambiguous names and reuse one exact domain noun across parts.
 >>
 
-guide-1-part-authoring-priority: ["schemas", "constants", "state", "interfaces", "triggers", "processes", "instructions"]
+g1-part-authoring-priority: ["schemas", "constants", "state", "interfaces", "triggers", "processes", "instructions"]
 
-guide-1-reading: "Load references and guides in authoring order; select scenarios via assets/examples/catalog.oak.md. Both skill and agent author and interpret without Python, installation, network, or validation."
-
-guide-1-skill-template: JSON<<
+g1-skill-template: JSON<<
 "---\nname: \"<SKILL_NAME>\"\ndescription: \"<SKILL_DESCRIPTION>\"\n---\n\n<INSTRUCTIONS_PART>\n<constants>\npurpose: <PURPOSE_JSON>\n\nlayout: TEXT<<\nSKILL_TREE:\n  SKILL.md→Skill entry point\n  references/→Supporting knowledge\n  assets/\n    constants/→Reusable fixed values\n    schemas/→Reusable information shapes\n  processes/→OAK workflows\n  guides/→Practical guidance\n  scripts/→Executable helpers\n>>\n\n<CONSTANT_ENTRIES>\n</constants>\n<SCHEMAS_PART>\n<STATE_PART>\n<TRIGGERS_PART>\n<PROCESSES_PART>\n<INTERFACES_PART>\n"
 >>
 
-guide-1-template-use: "For new skills, use _template/SKILL.md or verbatim skill-template. Quote metadata as YAML strings and PURPOSE_JSON as a JSON string. Replace PART lines with justified OAK sections and a blank line, or delete them. Fill CONSTANT_ENTRIES or leave empty. Remove markers and unused parts/resources; remove .gitkeep when adding content. Unfilled scaffolding is inert."
+g1-template-use: "For new skills use _template/SKILL.md or verbatim skill-template. Quote metadata as YAML strings, PURPOSE_JSON as a JSON string. Replace PART lines with justified OAK sections plus a blank line, or delete them. Fill CONSTANT_ENTRIES or leave empty. Remove markers, unused parts/resources, and .gitkeep when adding content. Unfilled scaffolding is inert."
 
-guide-2-guidance: YAML<<
+g2-guidance: YAML<<
 - Produce exactly one valid OAK document.
 >>
 
-guide-2-review: YAML<<
-- Check one idless node, unique ids, canonical order, and justified parts.
-- Check targets, complete bindings, lifetimes, and native/named tools.
-- Apply interface guidance to public promises and structure guidance to claimed knowledge
-  closure.
-- 'Inspect populated output: layout, code fences, and cardinality, not just schemas.'
-- Grammar describes syntax, not validation; review is not a programmatic check.
-- Examples are inert teaching, not extra agents or arrivals to execute.
+g2-review: YAML<<
+- Check one idless node, unique ids, canonical order and justified parts;
+- check targets, complete bindings, lifetimes and native/named tools.
+- Review public promises against interface guidance and knowledge closure against
+  structure guidance.
+- Inspect output layout, fences and cardinality, not just schemas.
+- Grammar describes syntax; review is not programmatic validation.
+- Examples are inert teaching, not agents or arrivals to execute.
 >>
 
-guide-2-teaching: JSON<<
+g2-teaching: JSON<<
 {
   "assets/examples/catalog.oak.md": "<instructions>\nConstants hold values that do not change while the knowledge runs.\n</instructions>\n\n<constants>\nscenario-catalog: CSV<<\norder,entry,lesson,omitted,requires\n1,fixed_knowledge/example.oak.md,Two fixed facts need no workflow.,\"authored instructions, schemas, state, triggers, processes, interfaces\",No action host.\n2,shape_gallery/example.oak.md,\"Compare, explain, outline, and present code with populated fixed-cardinality shapes.\",\"authored instructions, state, triggers, processes, interfaces\",No action host; regeneration imports the shared schema library.\n3,shape_writer/example.oak.md,Receive and CALL typed phases; emit four ordered shapes without state.,\"constants, state\",Fixture-only native host; regeneration imports shared shapes and bindings.\n4,compound_growth/example.oak.md,Carry committed state across two arrivals and discard staged writes on failure.,,Exact math.multiply fixture and deterministic reflection; no live model or automatic scheduler.\n>>\n\ndelivery-boundary: \"OAK documents and sample constants are inert teaching data. Read a complete scenario before using it. Python hosts are repository demonstration material, not part of the skill teaching bundle.\"\n</constants>",
   "assets/examples/fixed_knowledge/example.oak.md": "<instructions>\nConstants hold values that do not change while the knowledge runs.\n</instructions>\n\n<constants>\nservice-name: \"Task board\"\n\ntitle-limit: 120\n</constants>",
@@ -57,39 +55,58 @@ guide-2-teaching: JSON<<
 }
 >>
 
-guide-3-guidance: YAML<<
+g3-guidance: YAML<<
+- Use plain `ACT` when the interpreter performs the work with native capabilities.
+- Use `ACT TOOL` only for one exact tool name copied from the supplied registry.
+- Use `PAR` and `JOIN` only for independent exact tool actions.
+- Model a delegated agent as its own typed OAK document and dispatch it through an
+  exact host tool contract.
+>>
+
+g3-orchestration: YAML<<
+- The coordinator owns splitting, dispatch, integration and final claims. Give each
+  leaf a bounded independent task and mapped request/result schemas, not coordinator
+  authority.
+- Give workers one pinned revision, full applicable governing text, scope and evidence
+  requirements. Restore truncation, preserve document scopes and report blocked work.
+- CALL composes processes synchronously, not agents. ACT.tool constructs a tool action,
+  not a capability or permission.
+- PAR outputs stay isolated until immediate JOIN promotes them in authored order.
+  Before synthesis reject blocked, failed, malformed or wrong-revision results; reconcile
+  conflicts and retain gaps.
+- Hosts own concurrency limits, deadlines, cancellation, cleanup and tool/sandbox
+  enforcement. Fixture overlap proves no live subagent behavior.
+>>
+
+g4-guidance: YAML<<
 - Review the draft against the grammar, populated examples, and OAK contracts; run
   programmatic validation only when requested and report whether it actually ran.
 - Return the final OAK document and, when validation is requested, an honest validation
   result outside the authored document.
 >>
 
-guide-3-identity: {"version": "3.1.0", "validator-revision": "85ddd5393fd4349632f728f5a05cb67f9bc5dbf5"}
+g4-identity: {"version": "3.2.0", "validator-revision": "85ddd5393fd4349632f728f5a05cb67f9bc5dbf5"}
 
-guide-3-validation-policy: YAML<<
-- Validate only when requested; authoring and interpretation need no installation.
-- Use Python 3.11+. Reuse matching installed code, --source with optional --python,
-  or retained cache. Match the source fingerprint, not name/version.
-- Use the skill scripts/validate.py. For requested standalone validation, materialize
-  validator-script verbatim as validate.py.
-- Run python validate.py document.oak.md; --root permits larger explicitly allowed
-  graphs.
-- On permission-required, ask to download the identified OAK revision and install
-  its declared dependencies in an isolated cache. Validation requests are not installation
-  consent.
-- After explicit approval, repeat with --allow-install. Reuse the retained installation;
-  no published OAK package is needed.
-- 'If installation is declined, do not install. Continue authoring and report: Programmatic
-  validation was not performed (installation declined).'
-- If Python, network, dependencies, or execution are unavailable, continue authoring
-  and report the actual not-performed reason.
-- 'Exit 0: parse and resolution passed; 1: invalid; 2: not performed. Report checks,
-  revision, and errors, never proof of execution or semantic correctness.'
-- Report validation outside OAK. Repair and recheck under the same permission; never
-  silently switch validator revisions.
+g4-validation-policy: YAML<<
+- Validate only on request; authoring and interpretation need no installation, Python
+  or network.
+- 'Python 3.11+: reuse installed code, --source with optional --python, or retained
+  cache. Match source and dependency fingerprints, never just name/version.'
+- Run skill scripts/validate.py; standalone users save validator-script verbatim as
+  validate.py. Use its documented arguments and exit codes; --root permits only an
+  explicitly allowed graph.
+- Only permission-required prompts consent to download the identified revision and
+  install declared dependencies in an isolated retained cache. Validation requests
+  are not installation consent; explicit consent alone permits --allow-install.
+- Reuse the cache; no published OAK package is needed. On declined installation or
+  unavailable Python, network, dependencies or execution, continue authoring without
+  installing and report the not-performed reason.
+- Report actual checks, revision and errors outside OAK, not proof of execution or
+  semantic correctness. Repair/recheck under the same permission; never silently change
+  the validator revision.
 >>
 
-guide-3-validator-script: TEXT<<
+g4-validator-script: TEXT<<
 """Optional OAK validation; authoring needs no Python.
 
 Run: python scripts/validate.py document.oak.md [--root directory]
@@ -115,7 +132,7 @@ from urllib.request import urlopen
 import venv
 from zipfile import BadZipFile, ZipFile
 
-SKILL_VERSION = "3.1.0"
+SKILL_VERSION = "3.2.0"
 REPOSITORY = "chris-buckley/open-agent-knowledge"
 REVISION = "85ddd5393fd4349632f728f5a05cb67f9bc5dbf5"
 SOURCE_SHA256 = "9bca0d69e12c26aac64d3e7218f4ccfc620e7a7196b569d324ff7ac8197053bc"
@@ -385,7 +402,30 @@ if __name__ == "__main__":
     raise SystemExit(main())
 >>
 
-guide-4-guidance: YAML<<
+g5-owned-concern: "Codex native artifacts, placement, and evidence limits."
+
+g5-native-defaults: {"sandbox_mode": "read-only", "approval_policy": "never", "web_search": "disabled", "agents": {"enabled": false}}
+
+g5-mapping: YAML<<
+- TOML requires name, description and developer_instructions. Embed complete canonical
+  worker OAK verbatim, with no external instruction file.
+- Copy oak-explorer.toml manually to project .codex/agents/ or personal ~/.codex/agents/.
+  Check collisions and project trust. Generation neither installs nor edits client
+  configuration.
+- Use Codex CLI or local Codex in ChatGPT desktop, not hosted Chat/Work. Clients choose
+  models, credentials and omitted settings.
+- Defaults enforce no universal tool allowlist. Parent live sandbox/approval overrides
+  may replace them; inherited connectors remain host-controlled.
+- The parent can request two independent oak-explorer instances and reconcile completed
+  reports. Fixture tool names are not Codex built-ins; native prompting proves no
+  OAK executor PAR/JOIN execution.
+- Artifact checks cover content and closure, not installation, discovery, permissions
+  or live behavior. This bundle supplies no host scripts.
+>>
+
+g5-sources: {"checked": "2026-09-07", "subagents": "https://learn.chatgpt.com/docs/agent-configuration/subagents", "configuration": "https://learn.chatgpt.com/docs/config-file/config-reference"}
+
+g6-guidance: YAML<<
 - Write one idless node using only the seven parts in canonical order.
 - Keep tool implementations, handlers, transport, credentials, model selection, and
   server configuration in the host.
@@ -395,9 +435,9 @@ guide-4-guidance: YAML<<
   implementations.
 >>
 
-guide-4-part-order: ["instructions", "constants", "schemas", "state", "triggers", "processes", "interfaces"]
+g6-part-order: ["instructions", "constants", "schemas", "state", "triggers", "processes", "interfaces"]
 
-guide-4-part-responsibilities: CSV<<
+g6-part-responsibilities: CSV<<
 part,owns,lifetime,excludes
 instructions,irreducible interpreter policy,whole document use,"facts, reusable shapes, mutable values, routing, ordered work, and boundary payloads"
 constants,fixed JSON knowledge,whole document use,mutable values
@@ -408,13 +448,13 @@ processes,ordered local work,one invocation,outside transport
 interfaces,complete boundary schema instances,one receive or emission,information shape definitions
 >>
 
-guide-4-host-boundary: CSV<<
+g6-host-boundary: CSV<<
 owner,responsibility
 OAK,"knowledge, internal contracts, canonical models, authored representations, explicit graph resolution, and execution semantics"
 host,"model selection, credentials, transport, tool implementations, scheduling, persistence mechanism, delivery, and external side effects"
 >>
 
-guide-4-oak-ebnf: TEXT<<
+g6-oak-ebnf: TEXT<<
 (* Scope and notation
 Syntax, not validation or host evaluation.
 ?...? is descriptive; opaque rules may exceed width 100. *)
@@ -755,7 +795,7 @@ surface_node = ? <instructions>
 </interfaces> ? ;
 >>
 
-guide-5-guidance: YAML<<
+g7-guidance: YAML<<
 - Map reusable information shapes and contracts to schemas.
 - 'Choose schema templates by information relationships: tables for comparison, outlines
   for hierarchy, sections for explanation, and fenced blocks for code; use lists only
@@ -770,42 +810,13 @@ guide-5-guidance: YAML<<
   must validate; role names alone are not types.
 >>
 
-guide-5-populated-shapes: TEXT<<
-Option Comparison
-| Criterion | Current | Proposed |
-| --- | --- | --- |
-| Blank title | Accepted | Rejected |
+g7-shape-source: "In the teaching mapping, assets/examples/shape_gallery/example.oak.md pairs complete schemas with populated instances without definition wrappers or WHERE. Its table has one fixed row; extend the template explicitly if justified."
 
-Decision Brief
-## Decision
-Reject blank titles.
-
-### Rationale
-A title must identify the task.
-
-Work Outline
-1. Require meaningful titles.
-   1. Check the stripped title.
-      1. Test empty, whitespace, and valid titles.
-
-Code File
-### title.py
-
-```python
-def valid_title(title: str) -> bool:
-    return bool(title.strip())
-```
->>
-
-guide-5-shape-notes: TEXT<<
-populated-shapes fills these schemas without wrappers or WHERE. The table has one fixed row; extend its template explicitly when justified.
->>
-
-guide-6-guidance: YAML<<
+g8-guidance: YAML<<
 - Map stable values needed during use to constants.
 >>
 
-guide-6-forms: CSV<<
+g8-forms: CSV<<
 form,use
 JSON,"short fixed scalars, arrays, or objects"
 TEXT,verbatim fixed text
@@ -813,7 +824,7 @@ CSV,tabular fixed knowledge
 YAML,readable structured fixed knowledge
 >>
 
-guide-7-guidance: YAML<<
+g9-guidance: YAML<<
 - Map values that persist and can change across arrivals to state.
 - Use constants for fixed values, state for values across arrivals, process bindings
   for local values, and interfaces for boundary instances.
@@ -821,15 +832,7 @@ guide-7-guidance: YAML<<
   survive an arrival.
 >>
 
-guide-7-value-lifetimes: CSV<<
-value,scope
-constant,fixed during document use
-state,persistent across arrivals
-process binding,immutable in one frame or child scope
-interface instance,one complete boundary occurrence
->>
-
-guide-8-guidance: YAML<<
+g10-guidance: YAML<<
 - Map complete document-boundary crossings to one-way interfaces.
 - Emit one complete schema instance and use inferred `EMIT` only when same-named visible
   bindings satisfy it.
@@ -841,9 +844,9 @@ guide-8-guidance: YAML<<
   effects, and failures. Omit redundant prose; its presence does not prove completeness.
 >>
 
-guide-8-boundaries: "Interface instances are not mutable storage."
+g10-boundaries: "Interface instances are not mutable storage."
 
-guide-9-guidance: YAML<<
+g11-guidance: YAML<<
 - Map outside events, receive sources, state guards, and selected work to triggers.
 - Route each receive interface through one source-backed trigger into a process with
   the same resolved input schema.
@@ -851,9 +854,9 @@ guide-9-guidance: YAML<<
   payloads separate from event seeds.
 >>
 
-guide-9-routing: "Source-backed triggers share the receive/process schema and omit seeds. Guards require state reads, may compare literals or constants, and cannot read process bindings. Sequence internal work with CALL."
+g11-routing: "Source triggers share receive/process schemas and omit seeds. Guards read state, may compare literals/constants, never process bindings. CALL sequences internal work."
 
-guide-10-guidance: YAML<<
+g12-guidance: YAML<<
 - Map ordered local work to processes.
 - Start each process id with an exact base-form action verb and name the result it
   establishes.
@@ -867,11 +870,6 @@ guide-10-guidance: YAML<<
   prove delivery. Native ACT can have effects; preserve exact tool names.
 - Keep multi-phase entry processes as orchestrators that compose reusable processes
   with `CALL`.
-- Use plain `ACT` when the interpreter performs the work with native capabilities.
-- Use `ACT TOOL` only for one exact tool name copied from the supplied registry.
-- Use `PAR` and `JOIN` only for independent exact tool actions.
-- Model a delegated agent as its own typed OAK document and dispatch it through an
-  exact host tool contract.
 - Use the same explicit recursive condition structure for branches, loop conditions,
   assertions, and guards; preserve child order and bounded-loop failures.
 - Use delimiter continuation for long expressions and indentation for ordered action
@@ -881,16 +879,16 @@ guide-10-guidance: YAML<<
   and validated local emissions.
 >>
 
-guide-10-scopes: TEXT<<
-Keep bindings immutable per frame; CALL promotes declared outputs. Branches/iterations are local. IF promotes nothing; use EMIT within it or process contracts, not invented state. Justify assertions, conditions, loops, and parallel work from source.
+g12-scopes: TEXT<<
+Bindings are immutable per frame; CALL promotes declared outputs. Branches/iterations are local. IF promotes nothing: use EMIT within it or process contracts, not invented state.
 >>
 
-guide-11-guidance: YAML<<
+g13-guidance: YAML<<
 - Author instructions last; include only meaning that schemas, constants, state, interfaces,
   triggers, and processes cannot express.
 >>
 
-guide-11-last-decision: "Do not copy node-derived interpretation guidance."
+g13-last-decision: "Do not copy node-derived interpretation guidance."
 </constants>
 
 <schemas>
@@ -945,52 +943,6 @@ WHERE:
 - <REPORT> is string; is non-empty.
 - <ALLOW_INSTALL> is boolean.
 </schema>
-
-<schema id="guide-5-option-comparison" name="Option Comparison" purpose="Compare current and proposed behaviour for one criterion.">
-| Criterion | Current | Proposed |
-| --- | --- | --- |
-| <CRITERION> | <CURRENT> | <PROPOSED> |
-
-WHERE:
-- <CRITERION> is string; matches `^[^|\r\n]+$`.
-- <CURRENT> is string; matches `^[^|\r\n]+$`.
-- <PROPOSED> is string; matches `^[^|\r\n]+$`.
-</schema>
-
-<schema id="guide-5-decision-brief" name="Decision Brief" purpose="State one decision and explain its rationale.">
-## Decision
-<DECISION>
-
-### Rationale
-<RATIONALE>
-
-WHERE:
-- <DECISION> is string; is non-empty.
-- <RATIONALE> is string; is non-empty.
-</schema>
-
-<schema id="guide-5-work-outline" name="Work Outline" purpose="Nest one implementation step and its check beneath one goal.">
-1. <GOAL>
-   1. <STEP>
-      1. <CHECK>
-
-WHERE:
-- <GOAL> is string; is non-empty; is one line.
-- <STEP> is string; is non-empty; is one line.
-- <CHECK> is string; is non-empty; is one line.
-</schema>
-
-<schema id="guide-5-code-file" name="Code File" purpose="Present one Python file with its complete source.">
-### <FILE_PATH>
-
-```python
-<CODE>
-```
-
-WHERE:
-- <FILE_PATH> is path; matches `^[A-Za-z0-9_./\-]+$`.
-- <CODE> is string; is non-empty.
-</schema>
 </schemas>
 
 <triggers>
@@ -1012,54 +964,58 @@ CALL process.author-document (SOURCE=$SOURCE, VALIDATE=$VALIDATE)
 </process>
 
 <process id="author-document" name="Author document" input="schema.authoring-request">
-ACT Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> for <SCOPE>. Use <TEMPLATE> under <TEMPLATE_USE> only for new skills; consult other guide knowledge as needed. (
-  AUTHORING=$constant.guide-1-guidance,
-  STRUCTURE=$constant.guide-4-guidance,
+ACT Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> for <SCOPE>. Use <TEMPLATE> under <TEMPLATE_USE> only for new skills; consult needed guides. (
+  AUTHORING=$constant.g1-guidance,
+  STRUCTURE=$constant.g6-guidance,
   SOURCE=$SOURCE,
-  TEMPLATE=$constant.guide-1-skill-template,
-  TEMPLATE_USE=$constant.guide-1-template-use,
+  TEMPLATE=$constant.g1-skill-template,
+  TEMPLATE_USE=$constant.g1-template-use,
 ) -> SCOPE
-ACT Apply <GUIDANCE> to <SCOPE> and <SOURCE>; decide justified schemas as <DESIGN_1>. Preserve the requested shape using the guide schemas and <POPULATED> instances. (
-  GUIDANCE=$constant.guide-5-guidance,
+ACT Design justified schemas as <DESIGN_1> from <SOURCE> and <SCOPE> under <GUIDANCE>. Preserve requested shapes using the complete schemas and populated instances in <TEACHING>. (
+  GUIDANCE=$constant.g7-guidance,
   SCOPE=$SCOPE,
   SOURCE=$SOURCE,
-  POPULATED=$constant.guide-5-populated-shapes,
+  TEACHING=$constant.g2-teaching,
 ) -> DESIGN_1
-ACT Apply <GUIDANCE> to <DESIGN_1> and <SOURCE>; decide justified constants as <DESIGN_2>. (
-  GUIDANCE=$constant.guide-6-guidance,
+ACT Design justified constants as <DESIGN_2> from <SOURCE> and <DESIGN_1> under <GUIDANCE>. (
+  GUIDANCE=$constant.g8-guidance,
   DESIGN_1=$DESIGN_1,
   SOURCE=$SOURCE,
 ) -> DESIGN_2
-ACT Apply <GUIDANCE> to <DESIGN_2> and <SOURCE>; decide justified state as <DESIGN_3>. (
-  GUIDANCE=$constant.guide-7-guidance,
+ACT Design justified state as <DESIGN_3> from <SOURCE> and <DESIGN_2> under <GUIDANCE>. (
+  GUIDANCE=$constant.g9-guidance,
   DESIGN_2=$DESIGN_2,
   SOURCE=$SOURCE,
 ) -> DESIGN_3
-ACT Apply <GUIDANCE> to <DESIGN_3> and <SOURCE>; decide justified interfaces as <DESIGN_4>. (
-  GUIDANCE=$constant.guide-8-guidance,
+ACT Design justified interfaces as <DESIGN_4> from <SOURCE> and <DESIGN_3> under <GUIDANCE>. (
+  GUIDANCE=$constant.g10-guidance,
   DESIGN_3=$DESIGN_3,
   SOURCE=$SOURCE,
 ) -> DESIGN_4
-ACT Apply <GUIDANCE> to <DESIGN_4> and <SOURCE>; decide justified triggers as <DESIGN_5>. (
-  GUIDANCE=$constant.guide-9-guidance,
+ACT Design justified triggers as <DESIGN_5> from <SOURCE> and <DESIGN_4> under <GUIDANCE>. (
+  GUIDANCE=$constant.g11-guidance,
   DESIGN_4=$DESIGN_4,
   SOURCE=$SOURCE,
 ) -> DESIGN_5
-ACT Apply <GUIDANCE> to <DESIGN_5> and <SOURCE>; decide justified processes as <DESIGN_6>. (
-  GUIDANCE=$constant.guide-10-guidance,
+ACT Design justified processes as <DESIGN_6> from <SOURCE> and <DESIGN_5> under <GUIDANCE>. Apply <DELEGATION> and <ORCHESTRATION> to delegation, <CODEX> and <DEFAULTS> to native Codex artifacts. (
+  GUIDANCE=$constant.g12-guidance,
   DESIGN_5=$DESIGN_5,
   SOURCE=$SOURCE,
+  ORCHESTRATION=$constant.g3-orchestration,
+  DELEGATION=$constant.g3-guidance,
+  CODEX=$constant.g5-mapping,
+  DEFAULTS=$constant.g5-native-defaults,
 ) -> DESIGN_6
-ACT Apply <GUIDANCE> to <DESIGN_6> and <SOURCE>; decide justified instructions as <DESIGN_7>. (
-  GUIDANCE=$constant.guide-11-guidance,
+ACT Design justified instructions as <DESIGN_7> from <SOURCE> and <DESIGN_6> under <GUIDANCE>. (
+  GUIDANCE=$constant.g13-guidance,
   DESIGN_6=$DESIGN_6,
   SOURCE=$SOURCE,
 ) -> DESIGN_7
-ACT Review <DESIGN_7> with <REVIEW>, <GRAMMAR>, and complete <TEACHING>. Produce canonical <CANDIDATE>, not a claimed programmatic check. (
+ACT Review <DESIGN_7> with <REVIEW>, <GRAMMAR> and <TEACHING> for canonical <CANDIDATE>, not programmatic validation. Use its catalogue to select complete scenarios. (
   DESIGN_7=$DESIGN_7,
-  REVIEW=$constant.guide-2-review,
-  GRAMMAR=$constant.guide-4-oak-ebnf,
-  TEACHING=$constant.guide-2-teaching,
+  REVIEW=$constant.g2-review,
+  GRAMMAR=$constant.g6-oak-ebnf,
+  TEACHING=$constant.g2-teaching,
 ) -> CANDIDATE
 IF $VALIDATE equals true:
   CALL process.validate-and-deliver (CANDIDATE=$CANDIDATE)
@@ -1071,14 +1027,14 @@ ELSE:
 </process>
 
 <process id="validate-and-deliver" name="Check validator" input="schema.oak-candidate">
-ACT output="schema.validator-check": Apply <POLICY> and exact <HELPER> to <CANDIDATE> without --allow-install. Return actual <REPORT>; <INSTALL_REQUIRED> is true exactly for permission-required, never invalid OAK or unavailable execution. (
-  POLICY=$constant.guide-3-validation-policy,
-  HELPER=$constant.guide-3-validator-script,
+ACT output="schema.validator-check": Apply <POLICY> and exact <HELPER> to <CANDIDATE> without --allow-install. Return observed <REPORT>; <INSTALL_REQUIRED> means permission-required, not invalid OAK or unavailable execution. (
+  POLICY=$constant.g4-validation-policy,
+  HELPER=$constant.g4-validator-script,
   CANDIDATE=$CANDIDATE,
 ) -> INSTALL_REQUIRED, REPORT
 IF $INSTALL_REQUIRED equals true:
-  ACT output="schema.installation-consent": Ask to download <IDENTITY> and install its dependencies in an isolated retained environment. Set <APPROVED> true only for explicit installation consent, not a validation request. (
-    IDENTITY=$constant.guide-3-identity,
+  ACT output="schema.installation-consent": Request consent to download <IDENTITY> and install its dependencies in an isolated retained environment. <APPROVED> requires explicit installation consent, not a validation request. (
+    IDENTITY=$constant.g4-identity,
   ) -> APPROVED
   IF $APPROVED equals true:
     CALL process.finalize-validation (CANDIDATE=$CANDIDATE, REPORT=$REPORT, ALLOW_INSTALL=true)
@@ -1092,12 +1048,12 @@ ELSE:
 </process>
 
 <process id="finalize-validation" name="Report validation" input="schema.validation-context">
-ACT output="schema.authoring-result": Finalize <CANDIDATE> from <REPORT> under <POLICY> using exact <HELPER>. Only <ALLOW_INSTALL> true permits --allow-install, downloads, or installation. Repair and recheck changes under the same permission, not unchanged successes. Return <OAK> and truthful <VALIDATION>. (
+ACT output="schema.authoring-result": Finalize <CANDIDATE> from <REPORT> under <POLICY> with exact <HELPER>. Only <ALLOW_INSTALL> true permits downloads/installation via --allow-install. Repair/recheck changes under the same permission, not unchanged successes. Return <OAK> and truthful <VALIDATION>. (
   REPORT=$REPORT,
   CANDIDATE=$CANDIDATE,
   ALLOW_INSTALL=$ALLOW_INSTALL,
-  POLICY=$constant.guide-3-validation-policy,
-  HELPER=$constant.guide-3-validator-script,
+  POLICY=$constant.g4-validation-policy,
+  HELPER=$constant.g4-validator-script,
 ) -> OAK, VALIDATION
 EMIT interface.authored-document
 </process>

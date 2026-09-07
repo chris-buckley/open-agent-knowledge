@@ -41,6 +41,26 @@ state-comparison-rules: YAML<<
   of implementation or authorisation to perform it.
 >>
 
+directory-change-first-plan: 16
+
+directory-change-reopened-plans: []
+
+directory-change-rules: YAML<<
+- Require Mission's Directory Changes for new plans from directory-change-first-plan
+  and for older plans explicitly named in directory-change-reopened-plans. Preserve
+  historical records and all their existing checks.
+- Use the owning SMEAC template's baseline, current and planned text trees, legend,
+  ownership and verification fields. Place the subsection before State Comparisons.
+- Show affected files with change markers, purposes and source-to-output ownership.
+  Identify move sources, retain removed leaves, and expand affected directories; ellipses
+  must not conceal intended changes.
+- Label an unknown baseline honestly. For no file changes, state the reason and use
+  the template's no-change wording in both views rather than inventing a tree.
+- Check populated fields and paired fences prospectively; independently compare the
+  final diagram with actual changed paths. A valid diagram does not prove delivery.
+- Reject unfilled SMEAC placeholders in prose and fenced directory views.
+>>
+
 history-rules: ["plans are active only while their named change is in progress", "completed plans and reports are historical evidence, not current architecture", "preserve recorded claims and historical path snapshots when moving records, and repair navigational links", "a plan becomes complete only after every applicable checkbox passes"]
 </constants>
 
@@ -59,6 +79,9 @@ ACT Use <FORMAT> and <PLAN_RULES> when preparing a new plan. (
 )
 ACT Apply <COMPARISONS> when recording intended changes and their completion evidence. (
   COMPARISONS=$constant.state-comparison-rules,
+)
+ACT Apply <DIRECTORIES> to applicable plans and their final changed-path review. (
+  DIRECTORIES=$constant.directory-change-rules,
 )
 ACT Apply <RULES> before changing status, checkboxes, evidence, or verdict. (
   RULES=$constant.history-rules,
