@@ -1,7 +1,8 @@
 {
   "base": "88340b4bde9d58295e881884a80a0a99c247e13a",
   "branch": "docs/plan-parallel-codex-exploration",
-  "candidate_commit": null,
+  "candidate_commit": "87f99e3db7fbff0373e5bd68770c0a2766c24aba",
+  "candidate_commit_meaning": "Verified implementation commit; later publication-record commits change only this plan/report/evidence directory.",
   "changed_implementation_files": {
     ".agents/adaptors/codex/adaptor.oak.md": {
       "bytes": 1510,
@@ -184,6 +185,7 @@
     "qualification": "pydantic-settings 2.14.1 is below declared >=2.15. No dependency installation or requirement relaxation."
   },
   "cloud_implementation_manifest_sha256": "800e54813068a395d47973fc9da11e9d3d8b7a39513daf9daec299334270a8e0",
+  "completed_at": "2026-09-07T14:25:08.784130+00:00",
   "complexity": {
     "build/checks/plans.py": {
       "_closes_fence": {
@@ -292,12 +294,119 @@
   },
   "complexity_method": "AST count starts at 1; adds if/if-expression/loop/except, match cases, extra boolean terms, comprehension generators and filters. Nested function bodies counted separately. Local measured convention, not radon.",
   "controller_actions": [
-    "Verify final archive, full manifest and exact base.",
-    "Run both full repository checks and generation freshness in the declared-dependency environment.",
-    "Commit reviewed complete overlay without rewriting history; verify remote paths and bytes.",
-    "Create non-draft PR into main and return actual URL plus checks.",
-    "Close the pending verification/publication tasks only with observed receipts; do not merge."
+    "No remaining action in this plan. Merge requires a later user instruction."
   ],
+  "controller_final_verification": {
+    "commands": [
+      {
+        "command": [
+          "python",
+          "-m",
+          "compileall",
+          "-q",
+          "oak",
+          "build",
+          "examples",
+          "generated/oak-authoring.skill/scripts"
+        ],
+        "elapsed_seconds": 0.328,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "examples.catalog"
+        ],
+        "elapsed_seconds": 0.719,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.ebnf"
+        ],
+        "elapsed_seconds": 0.547,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.definitions"
+        ],
+        "elapsed_seconds": 0.719,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.agents"
+        ],
+        "elapsed_seconds": 0.625,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.authoring"
+        ],
+        "elapsed_seconds": 0.734,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.examples"
+        ],
+        "elapsed_seconds": 48.672,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "build/examples.py"
+        ],
+        "elapsed_seconds": 48.203,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.agents"
+        ],
+        "elapsed_seconds": 0.562,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.authoring"
+        ],
+        "elapsed_seconds": 0.875,
+        "exit_code": 0
+      }
+    ],
+    "finished_at": "2026-09-07T14:16:33.852899+00:00",
+    "packages": {
+      "PyYAML": "6.0.3",
+      "pydantic": "2.13.4",
+      "pydantic-extra-types": "2.11.1",
+      "pydantic-settings": "2.15.0"
+    },
+    "passed": true,
+    "python": "3.11.9",
+    "source_files": 618,
+    "source_manifest_sha256": "e6c5706a62f634d0b22b9746456ba71c7f4f4e74f3e1bff4e788837dc52c1e7c",
+    "source_manifest_unchanged": true,
+    "started_at": "2026-09-07T14:14:51.492420+00:00"
+  },
   "controller_finding": {
     "command": [
       "python",
@@ -429,7 +538,7 @@
     "correction": {
       "correction": "Check the actual SMEAC schema placeholders within all directory fields, preserve rejection of unknown DIRECTORY_ placeholders, and add independent current/planned regression cases plus the owning docs rule.",
       "finding": "The delivered checker accepted an unfilled PLAN_TITLE inside a directory fence because it checked only DIRECTORY_ placeholders there.",
-      "full_corrected_tree_verification": "Pending before publication.",
+      "full_corrected_tree_verification": "Both full entry points and repeat generation passed with declared dependencies; implementation CI also passed.",
       "id": "R06",
       "performed_by": "Codex controller",
       "targeted_checks": "validate_plans and validate_agents passed after the correction."
@@ -498,7 +607,7 @@
       {
         "correction": "Check the actual SMEAC schema placeholders within all directory fields, preserve rejection of unknown DIRECTORY_ placeholders, and add independent current/planned regression cases plus the owning docs rule.",
         "finding": "The delivered checker accepted an unfilled PLAN_TITLE inside a directory fence because it checked only DIRECTORY_ placeholders there.",
-        "full_corrected_tree_verification": "Pending before publication.",
+        "full_corrected_tree_verification": "Both full entry points and repeat generation passed locally; implementation CI passed.",
         "id": "R06",
         "performed_by": "Codex controller",
         "targeted_checks": "validate_plans and validate_agents passed after the correction."
@@ -506,7 +615,7 @@
     ],
     "performed_by": "Implementing assistant, separate final review pass; no subagents or independent reviewer claimed.",
     "unresolved_implementation_findings": [],
-    "verdict": "Ready for controller verification and publication, not final plan or PR completion."
+    "verdict": "Implementation and controller review complete; all 22 tasks evidenced with successful verification and an unmerged non-draft PR."
   },
   "governing_revision": "9956e6998869fcfbd84067eec0d6303273a54174",
   "implementation_manifest_method": "Full source manifest excluding only this Plan 0016 plan/report/evidence directory to avoid evidence self-reference. Complete final files are separately manifested in checkpoint.json and external final receipts.",
@@ -558,12 +667,8 @@
     ]
   },
   "native_runtime_verified": false,
-  "pending_tasks": [
-    "D05.02",
-    "D06.02",
-    "D06.03"
-  ],
-  "pr_url": null,
+  "pending_tasks": [],
+  "pr_url": "https://github.com/chris-buckley/open-agent-knowledge/pull/24",
   "preservation": {
     "all_41_package_rules_retained": true,
     "grammar_byte_identical": true,
@@ -583,6 +688,74 @@
     "teaching_all_eight_byte_identical": true,
     "template_byte_identical": true,
     "validator_only_skill_version_changed": true
+  },
+  "publication": {
+    "auto_merge_enabled": false,
+    "base": "main",
+    "ci": {
+      "conclusion": "success",
+      "head_commit": "87f99e3db7fbff0373e5bd68770c0a2766c24aba",
+      "job_steps": [
+        {
+          "conclusion": "success",
+          "job": "verify",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/setup-python@v5"
+            },
+            {
+              "conclusion": "success",
+              "name": "Install repository dependencies"
+            },
+            {
+              "conclusion": "success",
+              "name": "Verify all products and repeat generation"
+            },
+            {
+              "conclusion": "success",
+              "name": "Verify approved detached bootstrap and cache reuse"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/setup-python@v5"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job"
+            }
+          ]
+        }
+      ],
+      "run_id": 34132479850,
+      "status": "completed",
+      "url": "https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34132479850"
+    },
+    "draft": false,
+    "implementation_commit": "87f99e3db7fbff0373e5bd68770c0a2766c24aba",
+    "merged": false,
+    "pull_request": "https://github.com/chris-buckley/open-agent-knowledge/pull/24",
+    "remote_verification": {
+      "checked_at": "2026-09-07T14:21:02.890360+00:00",
+      "commit": "87f99e3db7fbff0373e5bd68770c0a2766c24aba",
+      "file_set_and_bytes_match_verified_source": true,
+      "files": 618,
+      "method": "Fetched remote ref, verified its exact commit, and compared every file in its Git archive with the tested manifest."
+    },
+    "scope_note": "CI and remote-byte receipts identify the verified implementation commit. Final status-record commits preserve those implementation bytes and receive their own checks.",
+    "state": "OPEN"
   },
   "registered_checks": [
     "validate_ebnf",
@@ -630,7 +803,7 @@
     "standalone_agent": 63844,
     "standalone_limit": 64000
   },
-  "status": "Implementation complete with controller review correction; corrected-tree verification and publication pending.",
+  "status": "Complete: all 22 tasks evidenced, declared-dependency and CI checks passed, PR open and unmerged.",
   "task_id": "82d0f13f-f86a-46bb-9f24-74f5d94bd5dd",
   "verification": [
     {

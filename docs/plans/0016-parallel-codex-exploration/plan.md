@@ -4,9 +4,9 @@ Prepared: 2026-09-07T12:09:23+10:00
 Classification: PUBLIC
 Amendment: The user's 2026-09-07T03:57:06Z instruction removes host implementation and live-client acceptance, authorizes this plan update first, and then authorizes complete implementation and a review PR.
 Readiness: Approved for the artifact-only scope below; no further implementation approval is required for this scope.
-Execution: Implementation and separate technical review are complete; both full cloud entry points passed. Nineteen tasks are evidenced. D05.02 awaits final declared-dependency confirmation; D06.02 and D06.03 await committed remote verification and the actual PR URL/check results. No merge is authorized.
+Execution: Complete. All 22 tasks are evidenced. Both full entry points passed with declared dependencies, remote bytes matched, and [PR #24](https://github.com/chris-buckley/open-agent-knowledge/pull/24) is open with [successful CI](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34132479850). No merge was performed or authorized.
 Recovery: Host task `82d0f13f-f86a-46bb-9f24-74f5d94bd5dd` continues from the verified final 615-file checkpoint 02, SHA-256 `884494e3345ab2eba9aabf4c200562072c5041d2b4cb85396e5af43225368d44`. Original governing authority stays pinned below; changed scoped AGENTS files are task outputs, not substituted governing inputs.
-Evidence: [Final implementation handoff](report.md) and [artifact verification](evidence/artifact-verification.json). The [D03 review](evidence/d03-review.md) and [D03 content preservation](evidence/d03-preservation.json) remain milestone history. Final exact command receipts and full source manifests are included in delivery 03.
+Evidence: [Completion report](report.md) and [artifact verification](evidence/artifact-verification.json). The [D03 review](evidence/d03-review.md) and [D03 content preservation](evidence/d03-preservation.json) remain milestone history. Final exact command receipts and full source manifests are included in delivery 03.
 Branch: `docs/plan-parallel-codex-exploration`
 Artifact-only base: `88340b4bde9d58295e881884a80a0a99c247e13a`. The earlier `7a655da3df59c247d5f626aeb57fcaa7ddbf5d9b` was the pre-amendment planning checkpoint.
 Pinned governing and product baseline: `9956e6998869fcfbd84067eec0d6303273a54174`
@@ -388,7 +388,7 @@ Transition trigger: Schema, policy, examples and structural checks agree with th
 ### Phase 5: Verify the complete artifact change
 Objective: Demonstrate source, delivery and repository consistency.
 - [x] Key task: D05.01 Register all new checks through the existing verification entry points and update complete generated ownership/cold-repair checks.
-- [ ] Key task: D05.02 Run compilation, affected generators, both complete repository check entry points and repeat generation; obtain identified CI results for declared-dependency verification where needed.
+- [x] Key task: D05.02 Run compilation, affected generators, both complete repository check entry points and repeat generation; obtain identified CI results for declared-dependency verification where needed.
 - [x] Key task: D05.03 Compare generated file/byte manifests, retained-content identities, byte sizes, canonical documents and actual changes with E13 through E19 and the annotated tree.
 - [x] Key task: D05.04 Separately review the result against the user's original agent/parallelism intent and the explicit no-host amendment; correct findings and rerun affected checks.
 Success criteria: E13 through E19 have substantive evidence, no required knowledge or safeguards were sacrificed, and repository verification contains no unresolved failure.
@@ -397,8 +397,8 @@ Transition trigger: The reviewed product and exact evidence are ready for delive
 ### Phase 6: Deliver the finished review PR
 Objective: Preserve a truthful completion record and raise the requested PR.
 - [x] Key task: D06.01 Write report.md and artifact-verification.json with actual checked identities, outputs, task evidence, changed paths, limits, source-restoration limitations and final review verdict.
-- [ ] Key task: D06.02 Commit the complete verified source/generated/documentation change without rewriting history; verify the remote file set and bytes.
-- [ ] Key task: D06.03 Open and finalize the authorized review PR into main, check its verification results and report the native TOML path, with no merge or installed/live claim.
+- [x] Key task: D06.02 Commit the complete verified source/generated/documentation change without rewriting history; verify the remote file set and bytes.
+- [x] Key task: D06.03 Open and finalize the authorized review PR into main, check its verification results and report the native TOML path, with no merge or installed/live claim.
 Success criteria: E20 passes and all 22 revised implementation tasks have evidence; withdrawn host tasks remain distinguishable from completed artifact work.
 Transition trigger: The completed artifact-only change is ready for the user's review in its unmerged PR.
 
@@ -422,7 +422,7 @@ Transition trigger: The completed artifact-only change is ready for the user's r
 | Pinned repository knowledge and approved scope | One graph and plan | Existing branch and user amendment | AVAILABLE |
 | Native TOML documentation | Two primary pages | Official OpenAI subagent/configuration references, rechecked 2026-09-07 | AVAILABLE |
 | Exact repository source | Full bundle and verified final overlay | Controller inputs and complete file manifests | AVAILABLE |
-| Final declared-dependency verification | Two complete entry points and freshness | Controller environment; cloud checks passed with noted package mismatch | PENDING |
+| Final declared-dependency verification | Two complete entry points and freshness | Controller environment and successful Verify OAK CI | AVAILABLE |
 | Generated agent bundle | Five text/TOML files | Source-owned build/agents.py | AVAILABLE |
 | Shared authoring knowledge | Orchestration and Codex documents | Existing authoring generator and maintained adaptor | AVAILABLE |
 | Directory-change schema | One SMEAC template and canonical sibling | Existing schema source and plan checker | AVAILABLE |

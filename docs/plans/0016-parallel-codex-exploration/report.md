@@ -1,10 +1,10 @@
-# Plan 0016 implementation and verification handoff
+# Plan 0016 completion report
 
-Status: Implementation complete with one controller review correction. Corrected-tree verification, Git publication and PR completion await the controller. No merge is authorized.
+Status: Complete. All 22 tasks are evidenced; declared-dependency verification and CI passed. [PR #24](https://github.com/chris-buckley/open-agent-knowledge/pull/24) is open and unmerged. No merge is authorized.
 Plan: [Deliver OAK exploration agents as native Codex artifacts](plan.md).
 Base: `88340b4bde9d58295e881884a80a0a99c247e13a` on `docs/plan-parallel-codex-exploration`.
 Governing revision: `9956e6998869fcfbd84067eec0d6303273a54174`.
-Candidate: Uncommitted complete source overlay, preserving the original history.
+Implementation commit: [`87f99e3`](https://github.com/chris-buckley/open-agent-knowledge/commit/87f99e3db7fbff0373e5bd68770c0a2766c24aba), preserving the original history.
 Recovery task: `82d0f13f-f86a-46bb-9f24-74f5d94bd5dd`.
 Evidence: [artifact-verification.json](evidence/artifact-verification.json). Full source manifests, command receipts, logs and the controller review are included in the delivery archive.
 
@@ -51,7 +51,7 @@ D03 removed duplicate shape/lifetime copies, not the original teaching corpus. T
 
 The controller restored the final 618-file delivery and verified its supplied checksum and complete manifest. Both full entry points passed in Python 3.11.9 with pydantic 2.13.4, pydantic-settings 2.15.0, pydantic-extra-types 2.11.1 and PyYAML 6.0.3; the source remained unchanged.
 
-The controller then found one additional E17 gap: an unfilled `<PLAN_TITLE>` inside a directory fence was accepted because the checker searched only `DIRECTORY_` placeholders there. The checker now recognizes every placeholder from the actual SMEAC schema as well as unknown `DIRECTORY_` placeholders. Independent current/planned-view regression cases and the owning docs policy cover the correction. Targeted plan and scoped-knowledge checks passed; the corrected full-tree verification is recorded separately before publication. No other implementation behavior was changed by the controller.
+The controller then found one additional E17 gap: an unfilled `<PLAN_TITLE>` inside a directory fence was accepted because the checker searched only `DIRECTORY_` placeholders there. The checker now recognizes every placeholder from the actual SMEAC schema as well as unknown `DIRECTORY_` placeholders. Independent current/planned-view regression cases and the owning docs policy cover the correction. Targeted plan and scoped-knowledge checks passed, followed by both full entry points and repeat generation against the corrected tree. The source remained unchanged. No other implementation behavior was changed by the controller.
 
 All commands below returned exit code 0 with unchanged source manifests. These are real cloud executions, not inferred passes or controller results for the final candidate.
 
@@ -66,7 +66,7 @@ Both complete entry points execute all 37 registered checks, including shapes, a
 
 The implementation fingerprint, excluding only this plan/report/evidence directory to avoid self-reference, is `d41096a8eeca907d2fff1e557a35e3a3af217e6a93d7496211f7033298ea805b`. The archive contains the complete final file manifest including these records, plus an explicit deletion list. No product file or generated output is omitted from the implementation comparison.
 
-Cloud environment: Python 3.13.5, pydantic 2.13.4, pydantic-settings 2.14.1, pydantic-extra-types 2.11.1 and PyYAML 6.0.3. The settings package is below the declared minimum of 2.15. No package was installed or requirement lowered. The controller's documented environment satisfies that minimum and must verify this final candidate there before completing D05.02. The old controller failure is not reused as a result for this corrected candidate.
+Cloud environment: Python 3.13.5, pydantic 2.13.4, pydantic-settings 2.14.1, pydantic-extra-types 2.11.1 and PyYAML 6.0.3. The settings package is below the declared minimum of 2.15. No package was installed or requirement lowered. The controller's Python 3.11.9 environment with pydantic-settings 2.15.0 passed both complete entry points and repeat generation, completing D05.02. The old controller failure is not reused as a result for this corrected candidate.
 
 ## Separate final technical review
 
@@ -87,10 +87,16 @@ A local AST decision-count report records the touched checker refactoring, not a
 | E17 | Actual five-field SMEAC schema, both groupings, independent positive/negative and prospective/reopened checks pass |
 | E18 | Exact sample request and evidence/coverage/gaps/blocked semantics retained; no live evidence fabricated |
 | E19 | Owning policy updated; root/core/dependencies/workflows/APS/historical records unchanged |
-| E20 | Implementation/review/evidence prepared; final declared-dependency verification and actual PR publication remain pending |
+| E20 | Declared-dependency verification, remote-byte verification and [PR #24](https://github.com/chris-buckley/open-agent-knowledge/pull/24) with successful CI complete |
 
-D01-D04, D05.01, D05.03, D05.04 and D06.01 are evidenced: 19 of 22 tasks. D05.02 remains open only for the controller's declared-dependency verification of the final candidate; its local commands have passed. D06.02 and D06.03 remain open until actual committed remote bytes and the non-draft PR URL/check results are reported. Withdrawn host tasks were never marked passed.
+All 22 D-prefixed tasks are evidenced. D05.02 is complete with declared-dependency verification; D06.02 is complete with the committed implementation and all 618 remote files verified; D06.03 is complete with the open non-draft PR and successful CI. Withdrawn host tasks were never marked passed.
 
-## Controller handoff
+## Publication and final evidence
 
-Restore the delivered original base bundle and complete overlay, verifying its full manifest before execution. Run the two full repository entry points and generation freshness in the declared environment, then review and commit the complete change without amending, rebasing, squashing or force-pushing original history. Verify remote path/byte identities and create the non-draft PR targeting main. Supply the actual URL and check receipts before closing publication tasks. Record subsequent status corrections as new commits and recheck them. No merge, native installation, desktop operation or live Codex check is requested.
+The corrected implementation is commit `87f99e3db7fbff0373e5bd68770c0a2766c24aba`. The controller fetched the published branch and compared all 618 file paths, byte lengths and SHA-256 hashes with the exact locally tested manifest. Every file matched.
+
+The local module and direct entry points returned exit code 0 in 48.672 and 48.203 seconds respectively, with all 37 registered checks active. Compilation and every generator also passed; repeated generation changed no source bytes. The corrected full-source fingerprint was `e6c5706a62f634d0b22b9746456ba71c7f4f4e74f3e1bff4e788837dc52c1e7c`. These results precede only the final publication-record edits in this plan directory.
+
+[Verify OAK run 34132479850](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34132479850) passed for the implementation commit, including dependency installation, all product checks, repeated generation, approved detached bootstrap and cache reuse. [PR #24](https://github.com/chris-buckley/open-agent-knowledge/pull/24) targets `main`, is non-draft and remains unmerged with auto-merge disabled.
+
+This publication record is a subsequent documentation commit. It preserves the implementation fingerprint and is rechecked before delivery; it does not claim the earlier CI run tested a future commit. Any later merge requires a new user instruction. Native installation, desktop operation and live Codex behavior remain outside this artifact-only delivery.
