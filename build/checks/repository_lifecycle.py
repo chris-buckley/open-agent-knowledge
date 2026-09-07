@@ -12,17 +12,20 @@ from typing import cast
 from pydantic import JsonValue
 
 from build.checks.fixtures import ROOT
-from oak import parse, render, resolve
+from build.checks.agents import validate_agent_line_limit
+from build.checks.repository_contracts import validate_root_contracts
+from oak import (Constant, Emit, Instruction, Interface, Node, Process, Schema,
+                 Trigger, Type, parse, render, resolve, task_context, where)
 from oak.execute import Arrival, ExecutionResult, execute
 from oak.node.parts.processes.statements import Act, iter_statements
 
 _SOURCE = "repository/AGENTS.oak.md"
 _MODULE = ".agents/rules/repository-change.oak.md"
 _MODULE_SOURCE = "repository/" + _MODULE
-_CONTRACTS = ".agents/rules/repository-task.oak.md"
-_CONTRACT_SOURCE = "repository/" + _CONTRACTS
+_CONTEXT = ".agents/rules/context.oak.md"
+_CONTEXT_SOURCE = "repository/" + _CONTEXT
 _READERS = frozenset({
-    "read-scoped-knowledge", "read-python-standard", "read-specialist-skills",
+    "read", "read-python-standard", "read-specialist-skills",
     "select-knowledge-parts", "select-dependencies",
 })
 _GIT_ACTIONS = frozenset({"update-branch", "merge-change", "clean-merged-branch"})
@@ -42,7 +45,7 @@ def _require(condition: bool, message: str) -> None:
 
 def _documents() -> dict[str, str]:
     files = {_SOURCE: ROOT / "AGENTS.md", _MODULE_SOURCE: ROOT / _MODULE,
-             _CONTRACT_SOURCE: ROOT / _CONTRACTS}
+             _CONTEXT_SOURCE: ROOT / _CONTEXT}
     if any(path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(ROOT.resolve())
            for path in files.values()):
         raise ValueError("repository lifecycle documents must be regular files")
@@ -183,14 +186,18 @@ def _reject(cycle: _Cycle, operation: Callable[[], object], reason: str) -> None
 def _check_documents() -> None:
     documents = _documents()
     root = parse(documents[_SOURCE])
+    validate_root_contracts(root)
     graph = resolve(root, source=_SOURCE, root="repository", load=documents.get)
-    _require(set(graph.documents) == {_SOURCE, _MODULE_SOURCE, _CONTRACT_SOURCE}, "lifecycle document closure differs")
+    _require(set(graph.documents) == {_SOURCE, _MODULE_SOURCE, _CONTEXT_SOURCE}, "lifecycle document closure differs")
     _require(len(root.state) == 12 and not graph.documents[_MODULE_SOURCE].state
-             and not graph.documents[_CONTRACT_SOURCE].state, "state ownership differs")
+             and not graph.documents[_CONTEXT_SOURCE].state, "state ownership differs")
     _require(
         next(item.value for item in root.constants if item.id == "execution-source") == _SOURCE,
         "the documented execution source differs",
     )
+    context = graph.documents[_CONTEXT_SOURCE]
+    _require(not context.instructions and not context.state and not context.interfaces and not context.triggers,
+             "context preparation gained an operational or policy scope")
     for source, node in graph.documents.items():
         _require(not (_RULE_CONSTANTS & {item.id for item in node.constants}), "procedural rules remain constants")
         _require(documents[source] == render(node), "lifecycle knowledge is noncanonical")
@@ -200,7 +207,7 @@ def _check_documents() -> None:
         for process in node.processes:
             actions = sum(isinstance(step, Act) for step in iter_statements(process.body))
             _require(actions <= 1, "a process owns multiple native actions: " + process.id)
-    for source in (_MODULE_SOURCE, _CONTRACT_SOURCE):
+    for source in (_MODULE_SOURCE, _CONTEXT_SOURCE):
         cycle = _Cycle()
         cycle.documents.pop(source)
         _reject(cycle, cycle.start, "missing explicit dependency")
@@ -374,6 +381,169 @@ def _check_boundaries_and_change_module() -> None:
     _require(not any(actor in _GIT_ACTIONS for actor, _ in active.host.calls), "blocked Git work reached the host")
 
 
+def _replace_document(cycle: _Cycle, source: str, data: dict[str, object]) -> None:
+    cycle.documents[source] = render(Node.model_validate(data))
+
+
+def _name_request(cycle: _Cycle) -> ExecutionResult:
+    return cycle.arrive("name-request", TYPE="fix", SCOPE="agents", SUMMARY="add lifecycle",
+                        BREAKING=False, MIGRATION="")
+
+
+def _check_knowledge_preparation() -> None:
+    cycle = _Cycle()
+    cycle.reach("awaiting-approval")
+    _require([actor for actor, _ in cycle.host.calls[:5]] == [
+        "read", "read-python-standard", "read-specialist-skills", "select-knowledge-parts", "select-dependencies",
+    ], "stateless preparation order changed")
+    values = dict(cycle.host.calls)
+    _require(values["read"]["TASK"] == "Implement an example change"
+             and values["read"]["PATHS"] == "source.py", "read-only context lost the task scope")
+    _require(values["read-python-standard"]["STANDARD"] == ".agents/rules/coding-standards.oak.md",
+             "delegated preparation lost the Python standard")
+    _require(values["select-knowledge-parts"]["PRIORITY"] == [
+        "schemas", "constants", "state", "interfaces", "triggers", "processes", "instructions",
+    ], "delegated preparation lost structured-first authoring")
+    root = parse(cycle.documents[_SOURCE])
+    graph = resolve(root, source=_SOURCE, root="repository", load=cycle.documents.get)
+    view = task_context(graph)
+    _require(set(view) == set(cycle.documents), "context dropped a resolved dependency")
+    _require(parse(view[_SOURCE]).schemas == root.schemas, "interpreter context lost local root contracts")
+    _require(not parse(view[_CONTEXT_SOURCE]).instructions and parse(view[_SOURCE]).instructions == root.instructions,
+             "context transplanted the root policy into its helper")
+
+
+def _check_contract_rejections() -> None:
+    cycle = _Cycle()
+    root = parse(cycle.documents[_SOURCE])
+    external = _MODULE + "#schema.change-description"
+    data = root.model_dump(mode="python", by_alias=True)
+    next(i for i in data["interfaces"] if i["id"] == "name-request")["schema"] = external
+    next(p for p in data["processes"] if p["id"] == "name-change")["input"] = external
+    graph_node = Node.model_validate(data)
+    resolve(graph_node, source=_SOURCE, root="repository", load=cycle.documents.get)
+    _reject(cycle, lambda: validate_root_contracts(graph_node), "externalized root public contract")
+
+    data = root.model_dump(mode="python", by_alias=True)
+    next(p for p in data["processes"] if p["id"] == "name-change")["input"] = external
+    _replace_document(cycle, _SOURCE, data)
+    _reject(cycle, lambda: _name_request(cycle), "equivalent schemas with different source/process identities")
+
+    cycle = _Cycle()
+    data = root.model_dump(mode="python", by_alias=True)
+    checkpoint = next(s for s in data["schemas"] if s["id"] == "task-checkpoint")
+    checkpoint["template"] = checkpoint["template"].replace("<PHASE>", "idle")
+    checkpoint["where"] = [item for item in checkpoint["where"] if item["placeholder"] != "PHASE"]
+    _reject(cycle, lambda: Node.model_validate(data), "missing local checkpoint slot")
+    data = root.model_dump(mode="python", by_alias=True)
+    data["schemas"] = [s for s in data["schemas"] if s["id"] != "approval-decision"]
+    _reject(cycle, lambda: Node.model_validate(data), "missing local boundary schema")
+
+    data = root.model_dump(mode="python", by_alias=True)
+    naming = next(p for p in data["processes"] if p["id"] == "name-change")
+    binding = next(b for b in naming["body"][0]["inputs"] if b["placeholder"] == "TYPE")
+    binding["value"]["binding"] = "SUMMARY"
+    _replace_document(cycle, _SOURCE, data)
+    _reject(cycle, lambda: _name_request(cycle), "valid public input mapped to invalid private input")
+    _require(not cycle.host.calls, "invalid adapter input reached the host")
+
+    cycle = _Cycle()
+    private = parse(cycle.documents[_MODULE_SOURCE]).model_dump(mode="python", by_alias=True)
+    result = next(s for s in private["schemas"] if s["id"] == "change-name")
+    branch = next(f for f in result["where"] if f["placeholder"] == "BRANCH")
+    branch["constraints"] = [{"kind": "type", "of": "string"}]
+    _replace_document(cycle, _MODULE_SOURCE, private)
+    private_schema = next(s for s in parse(cycle.documents[_MODULE_SOURCE]).schemas if s.id == "change-name")
+    private_schema.bind({"BRANCH": "", "SUBJECT": "fix(agents): add lifecycle", "BODY": ""})
+    cycle.host.override["name-change"] = {"BRANCH": ""}
+    _reject(cycle, lambda: _name_request(cycle), "private-valid output rejected by local public contract")
+    _require(cycle.host.calls[-1][0] == "name-change", "private output case never reached the adapter")
+
+    cycle = _Cycle()
+    data = root.model_dump(mode="python", by_alias=True)
+    progress = next(p for p in data["processes"] if p["id"] == "publish-progress")
+    progress["body"][0]["bindings"] = [b for b in progress["body"][0]["bindings"] if b["placeholder"] != "TASK_ID"]
+    _reject(cycle, lambda: Node.model_validate(data), "incomplete emitted instance")
+
+
+def _check_shared_boundary_closure() -> None:
+    shared = Node(schemas=[Schema(id="payload", template="<TEXT>", where=[where("TEXT", Type(of="string"))])])
+    root = Node(
+        interfaces=[Interface(id="echo-request", flow="receives", schema="shared.oak.md#schema.payload"),
+                    Interface(id="echo-output", flow="emits", schema="shared.oak.md#schema.payload")],
+        triggers=[Trigger(id="echo-arrived", event="Text arrives.", source="interface.echo-request", process="process.echo")],
+        processes=[Process(id="echo", name="Echo text", input="shared.oak.md#schema.payload",
+                           body=[Emit(interface="interface.echo-output")])],
+    )
+    documents = {"root.oak.md": render(root), "shared.oak.md": render(shared)}
+    graph = resolve(root, source="root.oak.md", load=documents.get)
+    _require(set(graph.documents) == set(documents), "shared closure differs")
+    result = execute(root, Arrival(interface="interface.echo-request", values={"TEXT": "shared contract"}), {},
+                     source="root.oak.md", load=documents.get)
+    _require(result.emissions[0].values == {"TEXT": "shared contract"}, "valid shared boundary was rejected")
+    for replacement in (None, render(Node(constants=[Constant(id="payload", value="not a schema")]))):
+        loader = lambda path: replacement if path == "shared.oak.md" else None
+        _reject(_Cycle(), lambda: resolve(root, source="root.oak.md", load=loader), "missing or mistyped shared schema")
+
+
+def _detect_accepted_mutation(cycle: _Cycle, operation: Callable[[], object], reason: str) -> None:
+    """Prove the behavioral oracle detects a removed failure, not a prose mutation."""
+    try:
+        _reject(cycle, operation, reason)
+    except RuntimeError as error:
+        _require(str(error).startswith("invalid lifecycle operation was accepted:"),
+                 "mutation failed for an unrelated reason: " + str(error))
+    else:
+        raise RuntimeError("behavioral oracle did not detect mutation: " + reason)
+
+
+def _check_safeguard_mutations() -> None:
+    cycle = _Cycle()
+    cycle.reach("awaiting-approval")
+    data = parse(cycle.documents[_SOURCE]).model_dump(mode="python", by_alias=True)
+    process = next(p for p in data["processes"] if p["id"] == "decide-task")
+    process["body"] = [s for s in process["body"] if s.get("message") != "Approval targets a stale proposal."]
+    _replace_document(cycle, _SOURCE, data)
+    _detect_accepted_mutation(cycle, lambda: cycle.arrive("task-approval", TASK_ID="task-1",
+                              PROPOSAL_REVISION="stale", APPROVED=True), "removed proposal revision assertion")
+
+    cycle = _Cycle()
+    cycle.reach("implement")
+    data = parse(cycle.documents[_SOURCE]).model_dump(mode="python", by_alias=True)
+    process = next(p for p in data["processes"] if p["id"] == "resume-task")
+    branch = next(s for s in process["body"] if s["kind"] == "if")
+    branch["otherwise"] = [s for s in branch["otherwise"] if s.get("process") != "process.require-revision"]
+    _replace_document(cycle, _SOURCE, data)
+    cycle.host.revision = "external-change"
+    _detect_accepted_mutation(cycle, lambda: cycle.resume("implement"), "removed pre-effect revision check")
+
+    cycle = _Cycle()
+    cycle.reach("implement")
+    data = parse(cycle.documents[_SOURCE]).model_dump(mode="python", by_alias=True)
+    process = next(p for p in data["processes"] if p["id"] == "resume-task")
+    branch = next(s for s in process["body"] if s["kind"] == "if")
+    branch["otherwise"] = [s for s in branch["otherwise"] if s["kind"] != "assert"]
+    _replace_document(cycle, _SOURCE, data)
+    cycle.state["state.approved-revision"] = ""
+    _detect_accepted_mutation(cycle, lambda: cycle.resume("implement"), "removed matching approval gate")
+
+    cycle = _Cycle()
+    cycle.reach("prepare")
+    data = parse(cycle.documents[_SOURCE]).model_dump(mode="python", by_alias=True)
+    inactive = next(p for p in data["processes"] if p["id"] == "require-inactive-task")
+    data["triggers"][0]["guard"] = inactive["body"][0]["condition"]
+    _replace_document(cycle, _SOURCE, data)
+    _detect_accepted_mutation(cycle, lambda: cycle.start("task-2"), "silent guard instead of rejected arrival")
+
+    oversized = render(Node(instructions=[
+        Instruction(id="note-" + str(index), body="Demonstration line " + str(index) + ".")
+        for index in range(499)
+    ]))
+    _require(len(oversized.splitlines()) == 501, "line-bound fixture is not exactly 501 lines")
+    _require(render(parse(oversized)) == oversized, "oversized fixture is not canonical")
+    _reject(_Cycle(), lambda: validate_agent_line_limit("oversized AGENTS", oversized), "501-line AGENTS")
+
+
 def validate_repository_lifecycle() -> None:
     """Verify typed arrivals, persisted phases, approval identity, failures and completion evidence."""
     _check_documents()
@@ -381,6 +551,10 @@ def validate_repository_lifecycle() -> None:
     _check_cancellation()
     _check_failures_and_drift()
     _check_boundaries_and_change_module()
+    _check_knowledge_preparation()
+    _check_contract_rejections()
+    _check_shared_boundary_closure()
+    _check_safeguard_mutations()
 
 
 __all__ = ["validate_repository_lifecycle"]

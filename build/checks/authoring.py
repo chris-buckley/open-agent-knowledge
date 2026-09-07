@@ -251,6 +251,13 @@ def _guidance_delivery(documents: dict[str, str], fused: Node) -> None:
     require(len(rules) == len(AUTHORING_GUIDANCE), "duplicate authoring rule id")
     for rule in ("describe-action-roles", "distinguish-action-promises"):
         require(rule in RULE_OWNERS[GUIDES.index("references/06-processes.oak.md")], "statement guidance lost its process guide owner")
+    for rule, owner in (
+        ("own-boundary-contracts", "references/04-interfaces.oak.md"),
+        ("explain-boundary-contracts", "references/04-interfaces.oak.md"),
+        ("disclose-completeness", "references/00-structure.oak.md"),
+        ("adapt-external-contracts", "references/06-processes.oak.md"),
+    ):
+        require(rule in RULE_OWNERS[GUIDES.index(owner)], "contract guidance lost its semantic owner")
     delivered = []
     for guide, keys in sorted(zip(GUIDES, RULE_OWNERS, strict=True)):
         node = parse(documents[guide])

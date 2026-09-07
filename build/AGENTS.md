@@ -21,7 +21,7 @@ direct-verification-command: "python build/examples.py"
 
 authoring-product-byte-limits: {"skill-entry": 10000, "standalone-agent": 64000}
 
-agent-graph-checks: ["exact path discovery", "canonical parse and render equality", "500-line maximum", "root router coverage", "one owned concern per file", "structured content before authored instructions", "duplicate authored-claim rejection", "obsolete owner rejection", "explicit repository contract and change-module closure", "checkpoint, approval, replay, cancellation and revision checks in build/checks/repository_lifecycle.py"]
+agent-graph-checks: ["exact path discovery", "canonical parse and render equality", "500-line maximum", "root router coverage", "one owned concern per file", "structured content before authored instructions", "duplicate authored-claim rejection", "obsolete owner rejection", "root-local public and checkpoint contracts, explicit context and change-module closure", "checkpoint, approval, replay, cancellation and revision checks in build/checks/repository_lifecycle.py", "root contract rejection and lifecycle safeguard mutation checks, including the unchanged 500-line bound"]
 
 plan-checks: ["apply the storage and format policy owned by docs/AGENTS.md", "check unique named plan directories and required plan files", "derive SMEAC section order, phase labels, and comparison fields from the referenced schema", "check populated sections and compact phase checkboxes with unique task identifiers", "validate paired current and desired specimens, comparison authority, unique example identifiers, and required comparison coverage in success criteria", "preserve the named historical format exceptions", "exercise rejected plan structures as well as accepted examples"]
 

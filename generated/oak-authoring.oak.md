@@ -22,23 +22,25 @@ guide-1-guidance: YAML<<
 
 guide-1-part-authoring-priority: ["schemas", "constants", "state", "interfaces", "triggers", "processes", "instructions"]
 
-guide-1-reading: "Load language references and practical guides in authoring order. Select scenarios via assets/examples/catalog.oak.md. The assembled agent has identical knowledge locally. Both forms author and interpret OAK without Python, installation, network, or validation."
+guide-1-reading: "Load references and guides in authoring order; select scenarios via assets/examples/catalog.oak.md. Both skill and agent author and interpret without Python, installation, network, or validation."
 
 guide-1-skill-template: JSON<<
 "---\nname: \"<SKILL_NAME>\"\ndescription: \"<SKILL_DESCRIPTION>\"\n---\n\n<INSTRUCTIONS_PART>\n<constants>\npurpose: <PURPOSE_JSON>\n\nlayout: TEXT<<\nSKILL_TREE:\n  SKILL.md→Skill entry point\n  references/→Supporting knowledge\n  assets/\n    constants/→Reusable fixed values\n    schemas/→Reusable information shapes\n  processes/→OAK workflows\n  guides/→Practical guidance\n  scripts/→Executable helpers\n>>\n\n<CONSTANT_ENTRIES>\n</constants>\n<SCHEMAS_PART>\n<STATE_PART>\n<TRIGGERS_PART>\n<PROCESSES_PART>\n<INTERFACES_PART>\n"
 >>
 
-guide-1-template-use: "For new skills, copy _template/SKILL.md or materialize skill-template verbatim. Quote metadata markers as YAML strings; fill PURPOSE_JSON with a JSON string. Replace each PART line with a justified OAK section and one blank line, or delete the line. CONSTANT_ENTRIES holds fixed values or is empty. Remove all markers, unused parts/resources, and .gitkeep when adding content. Displayed paths are not imports. Unfilled scaffolding is inert."
+guide-1-template-use: "For new skills, use _template/SKILL.md or verbatim skill-template. Quote metadata as YAML strings and PURPOSE_JSON as a JSON string. Replace PART lines with justified OAK sections and a blank line, or delete them. Fill CONSTANT_ENTRIES or leave empty. Remove markers and unused parts/resources; remove .gitkeep when adding content. Unfilled scaffolding is inert."
 
 guide-2-guidance: YAML<<
 - Produce exactly one valid OAK document.
 >>
 
 guide-2-review: YAML<<
-- Check one idless node, unique ids, canonical part order, and justified parts.
-- Check targets, complete bindings, lifetimes, and native versus named tools.
+- Check one idless node, unique ids, canonical order, and justified parts.
+- Check targets, complete bindings, lifetimes, and native/named tools.
+- Apply interface guidance to public promises and structure guidance to claimed knowledge
+  closure.
 - 'Inspect populated output: layout, code fences, and cardinality, not just schemas.'
-- Grammar describes syntax; human review is not programmatic validation.
+- Grammar describes syntax, not validation; review is not a programmatic check.
 - Examples are inert teaching, not extra agents or arrivals to execute.
 >>
 
@@ -62,41 +64,37 @@ guide-3-guidance: YAML<<
   result outside the authored document.
 >>
 
-guide-3-identity: {"version": "3.0.0", "validator-revision": "dc71e5ec140e1b94351ceabab3a55b9ab8aa9dce"}
+guide-3-identity: {"version": "3.1.0", "validator-revision": "85ddd5393fd4349632f728f5a05cb67f9bc5dbf5"}
 
 guide-3-validation-policy: YAML<<
-- Run programmatic validation only when the user requests it. Authoring and interpretation
-  need no installation.
-- The script uses Python 3.11 or newer. Reuse a matching installed validator, an explicit
-  --source and optional --python, or its retained cache. The source fingerprint must
-  match, not just the package name or version.
-- Use scripts/validate.py from the skill. In the standalone agent, materialize validator-script
-  exactly as a local validate.py only when validation is requested.
-- Run python validate.py document.oak.md. Use --root for larger explicitly allowed
+- Validate only when requested; authoring and interpretation need no installation.
+- Use Python 3.11+. Reuse matching installed code, --source with optional --python,
+  or retained cache. Match the source fingerprint, not name/version.
+- Use the skill scripts/validate.py. For requested standalone validation, materialize
+  validator-script verbatim as validate.py.
+- Run python validate.py document.oak.md; --root permits larger explicitly allowed
   graphs.
-- When the result says permission-required, ask permission to download the identified
-  OAK revision and install its declared dependencies in an isolated cached environment.
-  Requesting validation is not installation consent.
-- Only after explicit approval, repeat the command with --allow-install. No published
-  OAK package is needed. Keep the matching installation for future requests.
-- 'When installation is declined, continue authoring and say: Programmatic validation
-  was not performed (installation declined). Do not run the installer.'
-- When Python, network, dependencies, or execution are unavailable, continue authoring
-  and state the actual reason validation was not performed.
-- Exit 0 means parse and resolution checks passed, 1 means invalid, and 2 means not
-  performed. Report the actual checks, revision, and errors; never imply execution
-  or semantic correctness was proved.
-- Keep validation status outside the authored OAK document. Repair reported authoring
-  errors and recheck only under the same user permission. Do not silently switch validator
-  revisions.
+- On permission-required, ask to download the identified OAK revision and install
+  its declared dependencies in an isolated cache. Validation requests are not installation
+  consent.
+- After explicit approval, repeat with --allow-install. Reuse the retained installation;
+  no published OAK package is needed.
+- 'If installation is declined, do not install. Continue authoring and report: Programmatic
+  validation was not performed (installation declined).'
+- If Python, network, dependencies, or execution are unavailable, continue authoring
+  and report the actual not-performed reason.
+- 'Exit 0: parse and resolution passed; 1: invalid; 2: not performed. Report checks,
+  revision, and errors, never proof of execution or semantic correctness.'
+- Report validation outside OAK. Repair and recheck under the same permission; never
+  silently switch validator revisions.
 >>
 
 guide-3-validator-script: TEXT<<
-"""Optional, consent-gated OAK validation. The authoring skill needs no Python.
+"""Optional OAK validation; authoring needs no Python.
 
-Run: python scripts/validate.py document.oak.md [--root document-directory]
-Exit 0: valid; 1: invalid; 2: not performed (including permission required).
-Only --allow-install permits downloads and an isolated dependency installation.
+Run: python scripts/validate.py document.oak.md [--root directory]
+Exits: 0 valid; 1 invalid; 2 not performed or permission required.
+Downloads and isolated installs require --allow-install.
 """
 
 from __future__ import annotations
@@ -117,16 +115,16 @@ from urllib.request import urlopen
 import venv
 from zipfile import BadZipFile, ZipFile
 
-SKILL_VERSION = "3.0.0"
+SKILL_VERSION = "3.1.0"
 REPOSITORY = "chris-buckley/open-agent-knowledge"
-REVISION = "dc71e5ec140e1b94351ceabab3a55b9ab8aa9dce"
-SOURCE_SHA256 = "4adedc8035e384d57c2ca7762faadd3b0e5f425f5ece1bf0a95e0be00f7c75f3"
+REVISION = "85ddd5393fd4349632f728f5a05cb67f9bc5dbf5"
+SOURCE_SHA256 = "9bca0d69e12c26aac64d3e7218f4ccfc620e7a7196b569d324ff7ac8197053bc"
 PROJECT_SHA256 = "2412c436c0ffaa05c604da2d58be4b72c443b37efcaa094380845fd0fe3a3702"
 MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
 
 
 def package_digest(package: Path) -> str:
-    """Identify all validator Python sources, not the project's placeholder version."""
+    """Fingerprint validator sources, not the package version."""
     digest = hashlib.sha256()
     files = sorted(package.rglob("*.py"))
     if not files or not (package / "__init__.py").is_file():
@@ -138,7 +136,7 @@ def package_digest(package: Path) -> str:
 
 
 def activate(source: Path | None) -> None:
-    """Verify matching code before importing it in the selected interpreter."""
+    """Verify source identity before importing."""
     if source is not None:
         package = source.resolve() / "oak"
     else:
@@ -150,7 +148,7 @@ def activate(source: Path | None) -> None:
         raise ValueError("OAK source fingerprint does not match this skill")
     if source is not None:
         sys.path.insert(0, str(source.resolve()))
-    import oak  # Imports and dependency checks happen only after identity verification.
+    import oak  # Import only verified sources.
 
     if Path(oak.__file__).resolve().parent != package.resolve():
         raise ValueError("a different OAK installation was imported")
@@ -197,7 +195,7 @@ def installation_path(cache: Path) -> Path:
 
 
 def discover(args: argparse.Namespace, destination: Path) -> tuple[Path, Path | None] | None:
-    """Check only explicit, adjacent, current-interpreter, and exact-cache locations."""
+    """Check explicit, adjacent, current, and exact-cache locations only."""
     python = Path(args.python or sys.executable)
     candidates: list[tuple[Path, Path | None]] = []
     if args.source is not None:
@@ -217,7 +215,7 @@ def discover(args: argparse.Namespace, destination: Path) -> tuple[Path, Path | 
 
 
 def extract_archive(archive: Path, destination: Path) -> None:
-    """Extract pinned source without traversal, symlinks, or zip-bomb expansion."""
+    """Extract pinned sources; reject traversal, symlinks, and zip bombs."""
     prefix = f"open-agent-knowledge-{REVISION}"
     with ZipFile(archive) as bundle:
         if sum(item.file_size for item in bundle.infolist()) > MAX_ARCHIVE_BYTES:
@@ -229,7 +227,7 @@ def extract_archive(archive: Path, destination: Path) -> None:
                     or stat.S_ISLNK(item.external_attr >> 16)):
                 raise ValueError("unsafe or unexpected OAK source archive entry")
             relative = Path(*path.parts[1:])
-            # Only the validator and its dependency declaration are needed at runtime.
+            # Extract only runtime sources and dependencies.
             if not relative.parts or relative.parts[0] not in {"oak", "pyproject.toml"}:
                 continue
             target = destination / relative
@@ -246,7 +244,7 @@ def extract_archive(archive: Path, destination: Path) -> None:
 
 
 def install(cache: Path) -> tuple[Path, Path]:
-    """Install only after caller consent; keep a ready environment for later calls."""
+    """Install with consent; retain the ready environment."""
     destination = installation_path(cache)
     cache.mkdir(parents=True, exist_ok=True)
     lock = destination.with_name(destination.name + ".lock")
@@ -261,7 +259,7 @@ def install(cache: Path) -> tuple[Path, Path]:
         if matches(python, source):
             return python, source
         if destination.exists():
-            # Never delete an unrecognized user directory or silently repair a broken cache.
+            # Preserve unknown directories and broken caches.
             raise RuntimeError(f"inspect and remove the incomplete cache before retrying: {destination}")
         destination.mkdir()
         created = True
@@ -302,7 +300,7 @@ def install(cache: Path) -> tuple[Path, Path]:
 
 
 def oak_body(text: str, path: Path) -> str:
-    """The standard skill entry may wrap its OAK body in YAML frontmatter."""
+    """Strip standard skill frontmatter, not OAK content."""
     if path.name == "SKILL.md" and text.startswith("---\n"):
         _metadata, separator, body = text[4:].partition("\n---\n")
         if not separator:
@@ -312,7 +310,7 @@ def oak_body(text: str, path: Path) -> str:
 
 
 def validate(paths: list[Path], boundary: Path | None) -> int:
-    """Parse and resolve data only. Never execute an authored process or tool."""
+    """Parse and resolve only; never execute processes or tools."""
     from oak import parse, resolve
 
     results = []
@@ -330,7 +328,7 @@ def validate(paths: list[Path], boundary: Path | None) -> int:
                 return target.read_text(encoding="utf-8") if target.is_file() else None
 
             node = parse(oak_body(path.read_text(encoding="utf-8"), path))
-            # SKILL.md has a virtual OAK identity in the same directory, not an import.
+            # Use a same-directory virtual identity, not an import.
             identity = path if path.name.endswith(".oak.md") else path.with_name(path.stem + ".oak.md")
             graph = resolve(node, source=identity.as_posix(), load=load, root=root.as_posix())
             results.append({"path": str(path), "status": "valid", "documents": len(graph.documents)})
@@ -391,6 +389,10 @@ guide-4-guidance: YAML<<
 - Write one idless node using only the seven parts in canonical order.
 - Keep tool implementations, handlers, transport, credentials, model selection, and
   server configuration in the host.
+- Distinguish boundary completeness, supplied knowledge closure, and host capability.
+  Standalone knowledge contains its required definitions in one document; graph deliveries
+  supply every dependency. Prose paths are not imports; host declarations are not
+  implementations.
 >>
 
 guide-4-part-order: ["instructions", "constants", "schemas", "state", "triggers", "processes", "interfaces"]
@@ -796,7 +798,7 @@ def valid_title(title: str) -> bool:
 >>
 
 guide-5-shape-notes: TEXT<<
-populated-shapes fills these four schemas without wrappers or WHERE. The one-row table has fixed cardinality; extend its template explicitly when justified.
+populated-shapes fills these schemas without wrappers or WHERE. The table has one fixed row; extend its template explicitly when justified.
 >>
 
 guide-6-guidance: YAML<<
@@ -831,9 +833,15 @@ guide-8-guidance: YAML<<
 - Map complete document-boundary crossings to one-way interfaces.
 - Emit one complete schema instance and use inferred `EMIT` only when same-named visible
   bindings satisfy it.
+- Prefer local interface schemas for independently understandable documents; define
+  them in schemas, not interfaces. Deliberately graph-composed documents may share
+  external schemas.
+- Use schema purpose and WHERE descriptions for field meaning, interface descriptions
+  for boundary purpose and authority, and triggers/processes for routing, conditions,
+  effects, and failures. Omit redundant prose; its presence does not prove completeness.
 >>
 
-guide-8-boundaries: "Reuse boundary schemas; never redefine their shapes inside interfaces or treat instances as mutable storage."
+guide-8-boundaries: "Interface instances are not mutable storage."
 
 guide-9-guidance: YAML<<
 - Map outside events, receive sources, state guards, and selected work to triggers.
@@ -843,7 +851,7 @@ guide-9-guidance: YAML<<
   payloads separate from event seeds.
 >>
 
-guide-9-routing: "Sources identify receive interfaces with the same resolved schema as process input and no seeds. Guards require state reads, may compare literals or constants, and never read process bindings. Internal work uses CALL, not triggers."
+guide-9-routing: "Source-backed triggers share the receive/process schema and omit seeds. Guards require state reads, may compare literals or constants, and cannot read process bindings. Sequence internal work with CALL."
 
 guide-10-guidance: YAML<<
 - Map ordered local work to processes.
@@ -868,10 +876,13 @@ guide-10-guidance: YAML<<
   assertions, and guards; preserve child order and bounded-loop failures.
 - Use delimiter continuation for long expressions and indentation for ordered action
   suites; follow the shared grammar instead of inventing another layout dialect.
+- Keep external owners explicit. Source-backed arrivals share exact schema identities,
+  not equivalent copies; adapt distinct public/private contracts with typed CALL bindings
+  and validated local emissions.
 >>
 
 guide-10-scopes: TEXT<<
-Bindings are immutable per frame. CALL promotes declared outputs; branches and iterations are local. IF promotes nothing: EMIT inside it or use process contracts, not invented state. Justify assertions, conditions, loops, and parallel work from the source.
+Keep bindings immutable per frame; CALL promotes declared outputs. Branches/iterations are local. IF promotes nothing; use EMIT within it or process contracts, not invented state. Justify assertions, conditions, loops, and parallel work from source.
 >>
 
 guide-11-guidance: YAML<<
@@ -879,7 +890,7 @@ guide-11-guidance: YAML<<
   triggers, and processes cannot express.
 >>
 
-guide-11-last-decision: "Do not author copies of the node-derived interpretation guidance."
+guide-11-last-decision: "Do not copy node-derived interpretation guidance."
 </constants>
 
 <schemas>
@@ -996,12 +1007,12 @@ request-received(
 
 <processes>
 <process id="capture-request" name="Capture request">
-ACT output="schema.authoring-request": Capture all supplied <SOURCE>; set <VALIDATE> true only for requested programmatic validation, otherwise false. () -> SOURCE, VALIDATE
+ACT output="schema.authoring-request": Capture all <SOURCE>; set <VALIDATE> true only for requested programmatic validation, otherwise false. () -> SOURCE, VALIDATE
 CALL process.author-document (SOURCE=$SOURCE, VALIDATE=$VALIDATE)
 </process>
 
 <process id="author-document" name="Author document" input="schema.authoring-request">
-ACT Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> to define <SCOPE>. For a new skill, use <TEMPLATE> under <TEMPLATE_USE>; otherwise do not add scaffolding. Consult each guide's remaining knowledge as needed. (
+ACT Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> for <SCOPE>. Use <TEMPLATE> under <TEMPLATE_USE> only for new skills; consult other guide knowledge as needed. (
   AUTHORING=$constant.guide-1-guidance,
   STRUCTURE=$constant.guide-4-guidance,
   SOURCE=$SOURCE,
@@ -1044,7 +1055,7 @@ ACT Apply <GUIDANCE> to <DESIGN_6> and <SOURCE>; decide justified instructions a
   DESIGN_6=$DESIGN_6,
   SOURCE=$SOURCE,
 ) -> DESIGN_7
-ACT Review <DESIGN_7> against <REVIEW>, <GRAMMAR>, and complete <TEACHING> scenarios. Produce canonical <CANDIDATE>; do not claim a programmatic check. (
+ACT Review <DESIGN_7> with <REVIEW>, <GRAMMAR>, and complete <TEACHING>. Produce canonical <CANDIDATE>, not a claimed programmatic check. (
   DESIGN_7=$DESIGN_7,
   REVIEW=$constant.guide-2-review,
   GRAMMAR=$constant.guide-4-oak-ebnf,
@@ -1060,13 +1071,13 @@ ELSE:
 </process>
 
 <process id="validate-and-deliver" name="Check validator" input="schema.oak-candidate">
-ACT output="schema.validator-check": Apply <POLICY> with exact <HELPER> to <CANDIDATE> without --allow-install. Return actual <REPORT>; <INSTALL_REQUIRED> is true only for permission-required, not invalid OAK or unavailable execution. (
+ACT output="schema.validator-check": Apply <POLICY> and exact <HELPER> to <CANDIDATE> without --allow-install. Return actual <REPORT>; <INSTALL_REQUIRED> is true exactly for permission-required, never invalid OAK or unavailable execution. (
   POLICY=$constant.guide-3-validation-policy,
   HELPER=$constant.guide-3-validator-script,
   CANDIDATE=$CANDIDATE,
 ) -> INSTALL_REQUIRED, REPORT
 IF $INSTALL_REQUIRED equals true:
-  ACT output="schema.installation-consent": Ask permission to download <IDENTITY> and install its dependencies in an isolated retained environment. Set <APPROVED> true only after explicit installation approval, not merely a validation request. (
+  ACT output="schema.installation-consent": Ask to download <IDENTITY> and install its dependencies in an isolated retained environment. Set <APPROVED> true only for explicit installation consent, not a validation request. (
     IDENTITY=$constant.guide-3-identity,
   ) -> APPROVED
   IF $APPROVED equals true:
@@ -1081,7 +1092,7 @@ ELSE:
 </process>
 
 <process id="finalize-validation" name="Report validation" input="schema.validation-context">
-ACT output="schema.authoring-result": Finalize <CANDIDATE> from <REPORT> under <POLICY>. Run exact <HELPER> with --allow-install only when <ALLOW_INSTALL> is true; otherwise never install or download. Repair errors and recheck changes under the same permission, not unchanged successes. Produce <OAK> and truthful <VALIDATION>. (
+ACT output="schema.authoring-result": Finalize <CANDIDATE> from <REPORT> under <POLICY> using exact <HELPER>. Only <ALLOW_INSTALL> true permits --allow-install, downloads, or installation. Repair and recheck changes under the same permission, not unchanged successes. Return <OAK> and truthful <VALIDATION>. (
   REPORT=$REPORT,
   CANDIDATE=$CANDIDATE,
   ALLOW_INSTALL=$ALLOW_INSTALL,

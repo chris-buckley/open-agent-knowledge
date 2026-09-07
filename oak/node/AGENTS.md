@@ -42,6 +42,8 @@ node-invariants: YAML<<
 - Statement is the tagged recursive process union. Process, Foreach, While, and Par
   use nonempty body fields; If keeps then and otherwise. Construction layout does
   not change binding scope or execution order.
+- Keep schema purpose and boundary descriptions optional in the model; a schema library
+  need not invent interfaces or operational parts.
 >>
 
 validation-ownership: CSV<<
@@ -50,6 +52,8 @@ model,one field or object shape
 node,"same-document ids, targets, contracts, binding flow, local cycles, and interface use"
 resolver,facts that require another document
 executor,supplied and produced runtime values
+authoring review,whether field and boundary descriptions explain intent beyond checked structure
+repository checks,"root-local contracts as an AGENTS policy, not a universal Node restriction"
 >>
 </constants>
 

@@ -67,6 +67,9 @@ scenario-contract: YAML<<
 - Keep small fixtures in their owning Python source and derive sample.oak.md when
   teaching needs them. The selected four-stage core is fixed knowledge, shaped information,
   typed stateless work, and persistent state.
+- Use the local_contracts scenario to demonstrate a locally defined public boundary
+  adapting to a separately typed worker. Preserve graph-composed shared-schema examples
+  and identify the unit that is self-contained.
 >>
 </constants>
 

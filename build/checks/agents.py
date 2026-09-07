@@ -7,6 +7,7 @@ from pathlib import Path
 import unicodedata
 
 from build.checks.fixtures import ROOT
+from build.checks.repository_contracts import validate_root_contracts
 from oak import OneOf, SchemaBindingError
 from oak.node.model import Node
 from oak.node.parts.constants import Constant
@@ -209,6 +210,13 @@ def _validate_instruction_last_policy(name: str, node: Node) -> None:
         raise RuntimeError(f"{name} has an unused instruction justification")
 
 
+def validate_agent_line_limit(name: str, text: str) -> None:
+    """Enforce the same unchanged line bound for every scoped AGENTS document."""
+    line_count = len(text.splitlines())
+    if line_count > MAX_AGENT_LINES:
+        raise RuntimeError(f"{name} has {line_count} lines; maximum is {MAX_AGENT_LINES}")
+
+
 def validate_agents() -> None:
     """Verify scoped ownership, structured-first OAK, routing, and no duplication."""
     discovered = _repository_agent_paths()
@@ -225,11 +233,7 @@ def validate_agents() -> None:
     for name in AGENT_PATHS:
         path = ROOT / name
         text = path.read_text(encoding="utf-8")
-        line_count = len(text.splitlines())
-        if line_count > MAX_AGENT_LINES:
-            raise RuntimeError(
-                f"{name} has {line_count} lines; maximum is {MAX_AGENT_LINES}"
-            )
+        validate_agent_line_limit(name, text)
         if "\N{EM DASH}" in text:
             raise RuntimeError(f"{name} contains an em dash")
         if "**" in text:
@@ -296,8 +300,7 @@ def validate_agents() -> None:
     if len({row["concern"] for row in rows if isinstance(row, dict)}) != len(rows):
         raise RuntimeError("root AGENTS router repeats a concern")
 
-    if root.schemas:
-        raise RuntimeError("root schemas must be owned by the explicit contract modules")
+    validate_root_contracts(root)
     changes = parse((ROOT / ".agents" / "rules" / "repository-change.oak.md").read_text(encoding="utf-8"))
     if [schema.id for schema in changes.schemas] != ["change-description", "change-name", "branch-targets"]:
         raise RuntimeError("repository change schemas are stale")
@@ -336,12 +339,7 @@ def validate_agents() -> None:
         "cancel-task",
         "show-task",
         "publish-progress",
-        "read-scoped-knowledge",
         "prepare-task",
-        "read-python-standard",
-        "read-specialist-skills",
-        "select-knowledge-parts",
-        "select-dependencies",
         "observe-revision",
         "require-revision",
         "implement-repository-task",
