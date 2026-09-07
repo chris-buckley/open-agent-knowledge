@@ -5,7 +5,7 @@ description: Author, review, or revise Open Agent Knowledge (OAK) documents from
   when writing OAK; no installation is needed. Programmatic validation is optional
   and installation requires separate permission.
 metadata:
-  version: 3.1.0
+  version: 3.2.0
   oak-revision: 85ddd5393fd4349632f728f5a05cb67f9bc5dbf5
   validator-sha256: 9bca0d69e12c26aac64d3e7218f4ccfc620e7a7196b569d324ff7ac8197053bc
 ---
@@ -96,50 +96,54 @@ CALL process.author-document (SOURCE=$SOURCE, VALIDATE=$VALIDATE)
 </process>
 
 <process id="author-document" name="Author document" input="schema.authoring-request">
-ACT Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> for <SCOPE>. Use <TEMPLATE> under <TEMPLATE_USE> only for new skills; consult other guide knowledge as needed. (
+ACT Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> for <SCOPE>. Use <TEMPLATE> under <TEMPLATE_USE> only for new skills; consult needed guides. (
   AUTHORING=$guides/authoring.oak.md#constant.guidance,
   STRUCTURE=$references/00-structure.oak.md#constant.guidance,
   SOURCE=$SOURCE,
   TEMPLATE=$guides/authoring.oak.md#constant.skill-template,
   TEMPLATE_USE=$guides/authoring.oak.md#constant.template-use,
 ) -> SCOPE
-ACT Apply <GUIDANCE> to <SCOPE> and <SOURCE>; decide justified schemas as <DESIGN_1>. Preserve the requested shape using the guide schemas and <POPULATED> instances. (
+ACT Design justified schemas as <DESIGN_1> from <SOURCE> and <SCOPE> under <GUIDANCE>. Preserve requested shapes using the complete schemas and populated instances in <TEACHING>. (
   GUIDANCE=$references/01-schemas.oak.md#constant.guidance,
   SCOPE=$SCOPE,
   SOURCE=$SOURCE,
-  POPULATED=$references/01-schemas.oak.md#constant.populated-shapes,
+  TEACHING=$guides/review.oak.md#constant.teaching,
 ) -> DESIGN_1
-ACT Apply <GUIDANCE> to <DESIGN_1> and <SOURCE>; decide justified constants as <DESIGN_2>. (
+ACT Design justified constants as <DESIGN_2> from <SOURCE> and <DESIGN_1> under <GUIDANCE>. (
   GUIDANCE=$references/02-constants.oak.md#constant.guidance,
   DESIGN_1=$DESIGN_1,
   SOURCE=$SOURCE,
 ) -> DESIGN_2
-ACT Apply <GUIDANCE> to <DESIGN_2> and <SOURCE>; decide justified state as <DESIGN_3>. (
+ACT Design justified state as <DESIGN_3> from <SOURCE> and <DESIGN_2> under <GUIDANCE>. (
   GUIDANCE=$references/03-state.oak.md#constant.guidance,
   DESIGN_2=$DESIGN_2,
   SOURCE=$SOURCE,
 ) -> DESIGN_3
-ACT Apply <GUIDANCE> to <DESIGN_3> and <SOURCE>; decide justified interfaces as <DESIGN_4>. (
+ACT Design justified interfaces as <DESIGN_4> from <SOURCE> and <DESIGN_3> under <GUIDANCE>. (
   GUIDANCE=$references/04-interfaces.oak.md#constant.guidance,
   DESIGN_3=$DESIGN_3,
   SOURCE=$SOURCE,
 ) -> DESIGN_4
-ACT Apply <GUIDANCE> to <DESIGN_4> and <SOURCE>; decide justified triggers as <DESIGN_5>. (
+ACT Design justified triggers as <DESIGN_5> from <SOURCE> and <DESIGN_4> under <GUIDANCE>. (
   GUIDANCE=$references/05-triggers.oak.md#constant.guidance,
   DESIGN_4=$DESIGN_4,
   SOURCE=$SOURCE,
 ) -> DESIGN_5
-ACT Apply <GUIDANCE> to <DESIGN_5> and <SOURCE>; decide justified processes as <DESIGN_6>. (
+ACT Design justified processes as <DESIGN_6> from <SOURCE> and <DESIGN_5> under <GUIDANCE>. Apply <DELEGATION> and <ORCHESTRATION> to delegation, <CODEX> and <DEFAULTS> to native Codex artifacts. (
   GUIDANCE=$references/06-processes.oak.md#constant.guidance,
   DESIGN_5=$DESIGN_5,
   SOURCE=$SOURCE,
+  ORCHESTRATION=$guides/subagent-orchestration.oak.md#constant.orchestration,
+  DELEGATION=$guides/subagent-orchestration.oak.md#constant.guidance,
+  CODEX=$platforms/codex/adaptor.oak.md#constant.mapping,
+  DEFAULTS=$platforms/codex/adaptor.oak.md#constant.native-defaults,
 ) -> DESIGN_6
-ACT Apply <GUIDANCE> to <DESIGN_6> and <SOURCE>; decide justified instructions as <DESIGN_7>. (
+ACT Design justified instructions as <DESIGN_7> from <SOURCE> and <DESIGN_6> under <GUIDANCE>. (
   GUIDANCE=$references/07-instructions.oak.md#constant.guidance,
   DESIGN_6=$DESIGN_6,
   SOURCE=$SOURCE,
 ) -> DESIGN_7
-ACT Review <DESIGN_7> with <REVIEW>, <GRAMMAR>, and complete <TEACHING>. Produce canonical <CANDIDATE>, not a claimed programmatic check. (
+ACT Review <DESIGN_7> with <REVIEW>, <GRAMMAR> and <TEACHING> for canonical <CANDIDATE>, not programmatic validation. Use its catalogue to select complete scenarios. (
   DESIGN_7=$DESIGN_7,
   REVIEW=$guides/review.oak.md#constant.review,
   GRAMMAR=$references/00-structure.oak.md#constant.oak-ebnf,
@@ -155,13 +159,13 @@ ELSE:
 </process>
 
 <process id="validate-and-deliver" name="Check validator" input="schema.oak-candidate">
-ACT output="schema.validator-check": Apply <POLICY> and exact <HELPER> to <CANDIDATE> without --allow-install. Return actual <REPORT>; <INSTALL_REQUIRED> is true exactly for permission-required, never invalid OAK or unavailable execution. (
+ACT output="schema.validator-check": Apply <POLICY> and exact <HELPER> to <CANDIDATE> without --allow-install. Return observed <REPORT>; <INSTALL_REQUIRED> means permission-required, not invalid OAK or unavailable execution. (
   POLICY=$guides/validation.oak.md#constant.validation-policy,
   HELPER=$guides/validation.oak.md#constant.validator-script,
   CANDIDATE=$CANDIDATE,
 ) -> INSTALL_REQUIRED, REPORT
 IF $INSTALL_REQUIRED equals true:
-  ACT output="schema.installation-consent": Ask to download <IDENTITY> and install its dependencies in an isolated retained environment. Set <APPROVED> true only for explicit installation consent, not a validation request. (
+  ACT output="schema.installation-consent": Request consent to download <IDENTITY> and install its dependencies in an isolated retained environment. <APPROVED> requires explicit installation consent, not a validation request. (
     IDENTITY=$guides/validation.oak.md#constant.identity,
   ) -> APPROVED
   IF $APPROVED equals true:
@@ -176,7 +180,7 @@ ELSE:
 </process>
 
 <process id="finalize-validation" name="Report validation" input="schema.validation-context">
-ACT output="schema.authoring-result": Finalize <CANDIDATE> from <REPORT> under <POLICY> using exact <HELPER>. Only <ALLOW_INSTALL> true permits --allow-install, downloads, or installation. Repair and recheck changes under the same permission, not unchanged successes. Return <OAK> and truthful <VALIDATION>. (
+ACT output="schema.authoring-result": Finalize <CANDIDATE> from <REPORT> under <POLICY> with exact <HELPER>. Only <ALLOW_INSTALL> true permits downloads/installation via --allow-install. Repair/recheck changes under the same permission, not unchanged successes. Return <OAK> and truthful <VALIDATION>. (
   REPORT=$REPORT,
   CANDIDATE=$CANDIDATE,
   ALLOW_INSTALL=$ALLOW_INSTALL,

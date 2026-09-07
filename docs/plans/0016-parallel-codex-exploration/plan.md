@@ -4,9 +4,11 @@ Prepared: 2026-09-07T12:09:23+10:00
 Classification: PUBLIC
 Amendment: The user's 2026-09-07T03:57:06Z instruction removes host implementation and live-client acceptance, authorizes this plan update first, and then authorizes complete implementation and a review PR.
 Readiness: Approved for the artifact-only scope below; no further implementation approval is required for this scope.
-Execution: Not started against this amended scope. The prior implementation performed preflight only.
+Execution: Implementation and separate technical review are complete; both full cloud entry points passed. Nineteen tasks are evidenced. D05.02 awaits final declared-dependency confirmation; D06.02 and D06.03 await committed remote verification and the actual PR URL/check results. No merge is authorized.
+Recovery: Host task `82d0f13f-f86a-46bb-9f24-74f5d94bd5dd` continues from the verified final 615-file checkpoint 02, SHA-256 `884494e3345ab2eba9aabf4c200562072c5041d2b4cb85396e5af43225368d44`. Original governing authority stays pinned below; changed scoped AGENTS files are task outputs, not substituted governing inputs.
+Evidence: [Final implementation handoff](report.md) and [artifact verification](evidence/artifact-verification.json). The [D03 review](evidence/d03-review.md) and [D03 content preservation](evidence/d03-preservation.json) remain milestone history. Final exact command receipts and full source manifests are included in delivery 03.
 Branch: `docs/plan-parallel-codex-exploration`
-Restored checkpoint: `7a655da3df59c247d5f626aeb57fcaa7ddbf5d9b`
+Artifact-only base: `88340b4bde9d58295e881884a80a0a99c247e13a`. The earlier `7a655da3df59c247d5f626aeb57fcaa7ddbf5d9b` was the pre-amendment planning checkpoint.
 Pinned governing and product baseline: `9956e6998869fcfbd84067eec0d6303273a54174`
 
 ## 1. Situation
@@ -15,7 +17,7 @@ Pinned governing and product baseline: `9956e6998869fcfbd84067eec0d6303273a54174
 OAK defines portable knowledge and ordered work. This change delivers the explorer's native Codex TOML, a portable parallel example, shared adaptor knowledge, and reusable directory-change planning. It does not supply a Codex runtime or execute a model.
 
 ### Current State
-The branch contains the earlier plan, native-client research, and a blocked implementation preflight, but no product implementation. The package already supports `ACT.tool(...)`, `Par(body=[...])`, and `Join()`; its existing delegation example uses a deterministic worker. The generated tree has the authoring skill, standalone authoring agent, grammar, and construct definitions, but no agent bundle or native explorer TOML.
+At the approved baseline, the branch contained the earlier plan, native-client research, and a blocked implementation preflight, but no product implementation. The execution header records current progress. The package already supports `ACT.tool(...)`, `Par(body=[...])`, and `Join()`; its existing delegation example uses a deterministic worker. The generated tree has the authoring skill, standalone authoring agent, grammar, and construct definitions, but no agent bundle or native explorer TOML.
 
 ### Challenges
 - Honest portability: a native agent file is configuration and knowledge, not a supplied exact-tool registry, sandbox implementation, or proof of live concurrency.
@@ -98,9 +100,13 @@ Keep sample request/data and a native-parent invocation example as literal knowl
 | `.agents/adaptors/codex/adaptor.oak.md` | Maintained pure OAK native-file metadata/settings knowledge, dated sources, use and limitations; constants/schemas only for safe authoring fusion. |
 | `build/agents.py` | Deterministic text/TOML bundle generation and complete owned file set through existing safe generation primitives. |
 | `build/authoring_guides.py` and `build/authoring.py` | Portable orchestration guidance, explicit routing, and the identical shared knowledge in skill and standalone agent. |
+| `build/fusion.py` | Compact generated gN- support namespaces; preserve descriptive suffixes, typed targets, collision checks and literal values. |
+| `build/authoring_validator.py` | Skill version metadata refresh only; retain the existing executable helper, immutable runtime revision and fingerprints. |
 | `examples/schemas/smeac_plan.py` | Actual Directory Changes template and WHERE meaning, with regenerated canonical sibling. |
 | `docs/AGENTS.md`, `examples/AGENTS.md`, `build/AGENTS.md` | Prospective plan policy, presentation/source ownership, generated layout and verification respectively. |
 | Existing check registry and new `build/checks/agent_deliveries.py` | Static native metadata, exact embedding, closure, concurrency fixtures, rejected inputs, freshness, and explicit absence of host deliveries. |
+| `build/checks/plans.py` and `build/checks/plan_fixtures.py` | Schema-derived directory checks, prospective adoption and independently populated positive/negative specimens. |
+| `build/checks/shapes.py` | Inspect retained literal teaching against independent shape definitions and populated expectations; preserve existing behavioral checks. |
 
 Bundle the OAK scenario graph and native TOML, not its repository demonstration code. Copying the TOML alone is sufficient for its declared instruction content. Copying a scenario closes its OAK references. The shared adaptor sits at `generated/oak.agents/adaptors/codex/adaptor.oak.md` and is also provided as identical knowledge under the authoring skill's `platforms/codex/` path. Generated duplication has one maintained source. Keep separate operational documents separate; do not fuse worker/coordinator scopes into the authoring agent. Supporting authoring documents remain constants/schemas only; examples are inert teaching.
 
@@ -162,71 +168,85 @@ Planned:
 ```text
 open-agent-knowledge/
 ├── .agents/
-│   ├── rules/context.oak.md                   # [modify] Route Codex knowledge
-│   └── adaptors/codex/adaptor.oak.md           # [add] Maintained knowledge, no host code
-├── examples/
-│   ├── AGENTS.md                             # [modify] Artifact/tree conventions
-│   ├── catalog.py                            # [modify] Register offline scenario
-│   ├── catalog.oak.md                        # [modify] Generated catalogue
-│   ├── parallel_exploration/
-│   │   ├── explorer.py                       # [add] Sole worker authoring source
-│   │   ├── explorer.oak.md                   # [add] Canonical worker
-│   │   ├── example.py                        # [add] Coordinator and repository fixtures
-│   │   ├── example.oak.md                    # [add] Canonical coordinator
-│   │   └── sample.oak.md                     # [add] Complete source-derived sample
-│   └── schemas/
-│       ├── smeac_plan.py                     # [modify] Actual directory-change schema
-│       └── smeac_plan.oak.md                 # [modify] Regenerated sibling
+│   ├── rules/context.oak.md                 # [modify] Route native adaptor knowledge
+│   └── adaptors/codex/adaptor.oak.md         # [add] Sole maintained Codex knowledge
 ├── build/
-│   ├── AGENTS.md                             # [modify] Text/TOML output ownership
-│   ├── agents.py                             # [add] Deterministic bundle generator
-│   ├── authoring.py                          # [check] Shared knowledge delivery
-│   ├── authoring_guides.py                   # [modify] Orchestration/Codex routing
-│   ├── authoring_validator.py                # [check] Required identity/version refresh
-│   ├── generated.py                          # [keep] Reuse safe generation
+│   ├── AGENTS.md                           # [modify] Artifact and verification ownership
+│   ├── agents.py                           # [add] Five-file text/TOML generator
+│   ├── authoring.py                        # [keep] Existing shared delivery entry point
+│   ├── authoring_guides.py                 # [modify] Shared knowledge and action routing
+│   ├── authoring_validator.py              # [modify] Skill version only, same validator
+│   ├── fusion.py                           # [modify] Compact typed support prefixes
+│   ├── generated.py                        # [keep] Existing safe write/prune primitive
 │   └── checks/
-│       ├── __init__.py                       # [modify] Register artifact checks
-│       ├── agent_deliveries.py               # [add] Native/static/parallel rejection checks
-│       ├── authoring.py                      # [modify] Knowledge parity and preservation
-│       ├── human_examples.py                 # [check] Existing catalogue-driven closure
-│       ├── outputs.py                        # [modify] Complete bundle/cold-build ownership
-│       └── plans.py                          # [modify] Schema-derived tree validation
+│       ├── __init__.py                     # [modify] Register artifact verification
+│       ├── agent_deliveries.py             # [add] Artifact and parallel rejection checks
+│       ├── authoring.py                    # [modify] Retention, routing and parity checks
+│       ├── human_examples.py               # [keep] Catalogue-driven scenario checks
+│       ├── outputs.py                      # [modify] Complete cold/repair ownership
+│       ├── plan_fixtures.py                # [add] Independent populated plan specimens
+│       ├── plans.py                        # [modify] Schema-derived directory validation
+│       └── shapes.py                       # [modify] Retained-teaching integration fix
+├── examples/
+│   ├── AGENTS.md                           # [modify] Artifact and tree conventions
+│   ├── catalog.py                          # [modify] Register offline parallel scenario
+│   ├── catalog.oak.md                      # [modify] Source-derived catalogue
+│   ├── parallel_exploration/
+│   │   ├── explorer.py                     # [add] Sole worker authoring source
+│   │   ├── explorer.oak.md                 # [add] Canonical worker from explorer.py
+│   │   ├── example.py                      # [add] Flat coordinator and offline fixtures
+│   │   ├── example.oak.md                  # [add] Canonical coordinator from example.py
+│   │   └── sample.oak.md                   # [add] Request/usage data from example.py
+│   └── schemas/
+│       ├── smeac_plan.py                   # [modify] Five described directory fields
+│       └── smeac_plan.oak.md               # [modify] Canonical schema from smeac_plan.py
 ├── generated/
 │   ├── oak.agents/
 │   │   ├── parallel_exploration/
-│   │   │   ├── coordinator.oak.md            # [add] From example.py, separate scope
-│   │   │   ├── explorer.oak.md               # [add] From explorer.py
-│   │   │   ├── sample.oak.md                 # [add] Requests/native-parent usage
+│   │   │   ├── coordinator.oak.md          # [add] From example.py, separate OAK scope
+│   │   │   ├── explorer.oak.md             # [add] From explorer.py
+│   │   │   ├── sample.oak.md               # [add] From example.py
 │   │   │   └── codex/.codex/agents/
-│   │   │       └── oak-explorer.toml         # [add] Exact worker OAK in native TOML
-│   │   └── adaptors/codex/adaptor.oak.md      # [add] Same maintained adaptor knowledge
-│   ├── oak-authoring.oak.md                  # [modify] Same added authoring knowledge
+│   │   │       └── oak-explorer.toml       # [add] Exact worker in native wrapper
+│   │   └── adaptors/codex/adaptor.oak.md    # [add] Identical maintained adaptor copy
+│   ├── oak-authoring.oak.md                # [modify] Shared knowledge fused by authoring.py
 │   ├── oak-authoring.skill/
-│   │   ├── SKILL.md                          # [modify] Route shared knowledge
+│   │   ├── SKILL.md                        # [modify] Typed shared-knowledge routing
 │   │   ├── guides/
-│   │   │   ├── subagent-orchestration.oak.md # [add] Portable guidance
-│   │   │   ├── authoring.oak.md              # [check] Preserve useful existing knowledge
-│   │   │   ├── review.oak.md                 # [check] Preserve literal teaching
-│   │   │   └── validation.oak.md             # [check] Preserve consent/identity policy
-│   │   ├── platforms/codex/adaptor.oak.md    # [add] Identical shared Codex knowledge
-│   │   ├── references/                      # [check] Preserve language knowledge
-│   │   ├── assets/examples/                 # [keep] Existing four-stage teaching
-│   │   ├── _template/                       # [keep] Existing inert scaffold
-│   │   └── scripts/validate.py              # [check] Existing optional validator only
-│   ├── oak.ebnf                             # [keep] No grammar change
-│   └── definitions/                         # [keep] No core-model change
+│   │   │   ├── subagent-orchestration.oak.md # [add] From authoring_guides.py
+│   │   │   ├── authoring.oak.md            # [modify] Concise template-use guidance
+│   │   │   ├── review.oak.md               # [modify] Same eight literal teaching documents
+│   │   │   └── validation.oak.md           # [modify] Same helper/consent, skill version
+│   │   ├── platforms/codex/adaptor.oak.md  # [add] Same maintained Codex knowledge
+│   │   ├── references/
+│   │   │   ├── 00-structure.oak.md         # [keep] Complete structural knowledge
+│   │   │   ├── 01-schemas.oak.md           # [modify] Route complete literal shape gallery
+│   │   │   ├── 02-constants.oak.md         # [keep] Constant forms and rules
+│   │   │   ├── 03-state.oak.md             # [modify] Remove duplicate lifetime table
+│   │   │   ├── 04-interfaces.oak.md        # [keep] Local boundary knowledge
+│   │   │   ├── 05-triggers.oak.md          # [modify] Concise unchanged routing meaning
+│   │   │   ├── 06-processes.oak.md         # [modify] Delegate rules move to shared guide
+│   │   │   ├── 07-instructions.oak.md      # [keep] Irreducible policy guidance
+│   │   │   └── oak.ebnf                    # [keep] Same complete grammar
+│   │   ├── assets/examples/               # [keep] All original literal teaching files
+│   │   ├── _template/                     # [keep] Entry and empty scaffold directories
+│   │   └── scripts/validate.py            # [modify] Source-derived skill version only
+│   ├── oak.ebnf                           # [keep] No grammar change
+│   └── definitions/                       # [keep] No core-model change
 └── docs/
-    ├── AGENTS.md                            # [modify] Prospective directory-tree policy
+    ├── AGENTS.md                          # [modify] Adoption from 0016 and explicit reopen
     └── plans/0016-parallel-codex-exploration/
-        ├── plan.md                          # [modify] This scope and observed task state
-        ├── report.md                        # [add] Actual completion evidence
+        ├── plan.md                        # [modify] Reconciled paths and evidenced status
+        ├── report.md                      # [add] Actual results and publication handoff
         └── evidence/
-            ├── native-clients-research.md   # [keep] Superseded host design history
-            ├── implementation-preflight.md # [keep] Superseded host blocker history
-            └── artifact-verification.json  # [add] Actual identities, checks and byte sizes
+            ├── native-clients-research.md # [keep] Superseded host design history
+            ├── implementation-preflight.md # [keep] Superseded blocker history
+            ├── d03-review.md              # [add] Preserved checkpoint-02 milestone review
+            ├── d03-preservation.json      # [add] Preserved checkpoint-02 content evidence
+            └── artifact-verification.json # [add] Final check, content and review evidence
 ```
 Ownership: A03 identifies every source and generator. The `.agents` suffix names an OAK bundle directory, not the hidden source directory or an automatic Codex discovery path. No runtime Python is delivered in this new bundle; the existing optional authoring validator remains unchanged in responsibility. No existing product move/removal is required.
-Verification: reconcile this affected-scope view with the final diff and exact generated manifests; expand conditional directory entries to actual changed leaves in the report. Repository-only fixtures may execute Python; native TOML and knowledge remain detached static artifacts. An annotated tree is not proof of completed implementation.
+Verification: compare every added/modified/deleted path with this annotated view and the exact source-derived manifests; unchanged directory context hides no changed leaves. The final report and delivery changes.json record that reconciliation, not a new tree language. Repository-only fixtures may execute Python; native TOML and knowledge remain detached static artifacts. An annotated tree is not proof of completed implementation.
 
 ### State Comparisons
 
@@ -332,51 +352,51 @@ Concept of operations: Commit this amendment first. Restore and inspect exact so
 
 ### Phase 1: Establish the revised artifact scope
 Objective: Restore exact inputs and source owners without requiring a Codex host.
-- [ ] Key task: D01.01 Commit this amended plan before product implementation and retain the prior research/preflight as history.
-- [ ] Key task: D01.02 Restore the pinned governing texts, source/checkpoint identities, applicable Python standards and specialist knowledge; inspect affected source and generation/check paths.
-- [ ] Key task: D01.03 Record the durable artifact-only ownership and prospective tree policy in the owning AGENTS files; retain root lifecycle and limits.
+- [x] Key task: D01.01 Commit this amended plan before product implementation and retain the prior research/preflight as history.
+- [x] Key task: D01.02 Restore the pinned governing texts, source/checkpoint identities, applicable Python standards and specialist knowledge; inspect affected source and generation/check paths.
+- [x] Key task: D01.03 Record the durable artifact-only ownership and prospective tree policy in the owning AGENTS files; retain root lifecycle and limits.
 Success criteria: E19 has explicit authority and owners, no removed host prerequisite remains, and the working source used for implementation is identified accurately.
 Transition trigger: The revised scope and complete applicable knowledge are available for implementation.
 
 ### Phase 2: Implement the worker and parallel example
 Objective: Express the investigation and independent work through current OAK contracts.
-- [ ] Key task: D02.01 Author the reusable worker with complete local schemas, receive/trigger/process identity, native ACT, evidence/gap/blocked meanings and emission.
-- [ ] Key task: D02.02 Complete E14's named flat coordinator, two mappings, immediate JOIN, post-join synthesis and output boundary.
-- [ ] Key task: D02.03 Supply repository-only deterministic worker/ToolContract fixtures, the exact sample request and native-parent usage; register canonical siblings and the scenario without displacing core teaching.
-- [ ] Key task: D02.04 Verify genuine synchronized fixture concurrency, input/revision identity, output isolation and rejection/failure behavior in both groupings.
+- [x] Key task: D02.01 Author the reusable worker with complete local schemas, receive/trigger/process identity, native ACT, evidence/gap/blocked meanings and emission.
+- [x] Key task: D02.02 Complete E14's named flat coordinator, two mappings, immediate JOIN, post-join synthesis and output boundary.
+- [x] Key task: D02.03 Supply repository-only deterministic worker/ToolContract fixtures, the exact sample request and native-parent usage; register canonical siblings and the scenario without displacing core teaching.
+- [x] Key task: D02.04 Verify genuine synchronized fixture concurrency, input/revision identity, output isolation and rejection/failure behavior in both groupings.
 Success criteria: E14 and E18 pass with complete usable artifacts and honestly labelled fixture evidence; no live result or native tool registration is invented.
 Transition trigger: The scenario and its negative tests pass using the current OAK executor.
 
 ### Phase 3: Generate native artifacts and shared guidance
 Objective: Deliver the standalone native leaf and shared knowledge without host scripts.
-- [ ] Key task: D03.01 Author the pure OAK Codex adaptor from the rechecked documented file/settings contract, including inheritance, manual placement and enforcement limitations.
-- [ ] Key task: D03.02 Implement the deterministic five-file bundle generator, metadata/settings ownership and lossless readable TOML serialization; preserve independent operational scopes.
-- [ ] Key task: D03.03 Add portable subagent-orchestration guidance and route it plus identical Codex knowledge through both authoring forms.
-- [ ] Key task: D03.04 Measure and review any size reduction before accepting generated authoring outputs; preserve required knowledge, teaching, template, grammar, validator identity and consent.
-- [ ] Key task: D03.05 Add exact native metadata/embedding, literal-escaping, no-host-files, detached closure, cold-generation, repair and stale/unsafe-path rejection checks.
+- [x] Key task: D03.01 Author the pure OAK Codex adaptor from the rechecked documented file/settings contract, including inheritance, manual placement and enforcement limitations.
+- [x] Key task: D03.02 Implement the deterministic five-file bundle generator, metadata/settings ownership and lossless readable TOML serialization; preserve independent operational scopes.
+- [x] Key task: D03.03 Add portable subagent-orchestration guidance and route it plus identical Codex knowledge through both authoring forms.
+- [x] Key task: D03.04 Measure and review any size reduction before accepting generated authoring outputs; preserve required knowledge, teaching, template, grammar, validator identity and consent.
+- [x] Key task: D03.05 Add exact native metadata/embedding, literal-escaping, no-host-files, detached closure, cold-generation, repair and stale/unsafe-path rejection checks.
 Success criteria: E13, E15 and E16 pass; the native TOML contains no script/bridge dependency, both authoring forms share the new knowledge, and existing byte limits hold.
 Transition trigger: Complete artifact generation and targeted rejection checks pass without Codex, MCP or model access.
 
 ### Phase 4: Implement reusable directory-change planning
 Objective: Make the detailed tree a checked part of the real SMEAC format.
-- [ ] Key task: D04.01 Extend the SMEAC Python template and described placeholders, regenerate its canonical sibling and verify complete populated instances.
-- [ ] Key task: D04.02 Extend the existing plan checker from the schema with independent positive/negative specimens and the prospective adoption boundary; preserve all older checks.
-- [ ] Key task: D04.03 Reconcile this plan's annotated tree and owning guidance with actual implementation paths, including source-to-generated mapping.
+- [x] Key task: D04.01 Extend the SMEAC Python template and described placeholders, regenerate its canonical sibling and verify complete populated instances.
+- [x] Key task: D04.02 Extend the existing plan checker from the schema with independent positive/negative specimens and the prospective adoption boundary; preserve all older checks.
+- [x] Key task: D04.03 Reconcile this plan's annotated tree and owning guidance with actual implementation paths, including source-to-generated mapping.
 Success criteria: E17 and E19 pass for both groupings, applicable plans and rejected malformed views; historical plans and APS remain unchanged.
 Transition trigger: Schema, policy, examples and structural checks agree with the intended directory view.
 
 ### Phase 5: Verify the complete artifact change
 Objective: Demonstrate source, delivery and repository consistency.
-- [ ] Key task: D05.01 Register all new checks through the existing verification entry points and update complete generated ownership/cold-repair checks.
+- [x] Key task: D05.01 Register all new checks through the existing verification entry points and update complete generated ownership/cold-repair checks.
 - [ ] Key task: D05.02 Run compilation, affected generators, both complete repository check entry points and repeat generation; obtain identified CI results for declared-dependency verification where needed.
-- [ ] Key task: D05.03 Compare generated file/byte manifests, retained-content identities, byte sizes, canonical documents and actual changes with E13 through E19 and the annotated tree.
-- [ ] Key task: D05.04 Separately review the result against the user's original agent/parallelism intent and the explicit no-host amendment; correct findings and rerun affected checks.
+- [x] Key task: D05.03 Compare generated file/byte manifests, retained-content identities, byte sizes, canonical documents and actual changes with E13 through E19 and the annotated tree.
+- [x] Key task: D05.04 Separately review the result against the user's original agent/parallelism intent and the explicit no-host amendment; correct findings and rerun affected checks.
 Success criteria: E13 through E19 have substantive evidence, no required knowledge or safeguards were sacrificed, and repository verification contains no unresolved failure.
 Transition trigger: The reviewed product and exact evidence are ready for delivery reporting.
 
 ### Phase 6: Deliver the finished review PR
 Objective: Preserve a truthful completion record and raise the requested PR.
-- [ ] Key task: D06.01 Write report.md and artifact-verification.json with actual checked identities, outputs, task evidence, changed paths, limits, source-restoration limitations and final review verdict.
+- [x] Key task: D06.01 Write report.md and artifact-verification.json with actual checked identities, outputs, task evidence, changed paths, limits, source-restoration limitations and final review verdict.
 - [ ] Key task: D06.02 Commit the complete verified source/generated/documentation change without rewriting history; verify the remote file set and bytes.
 - [ ] Key task: D06.03 Open and finalize the authorized review PR into main, check its verification results and report the native TOML path, with no merge or installed/live claim.
 Success criteria: E20 passes and all 22 revised implementation tasks have evidence; withdrawn host tasks remain distinguishable from completed artifact work.
@@ -401,10 +421,11 @@ Transition trigger: The completed artifact-only change is ready for the user's r
 | --- | --- | --- | --- |
 | Pinned repository knowledge and approved scope | One graph and plan | Existing branch and user amendment | AVAILABLE |
 | Native TOML documentation | Two primary pages | Official OpenAI subagent/configuration references, rechecked 2026-09-07 | AVAILABLE |
-| Repository source and verification environment | Exact relevant source and full-check evidence | GitHub connector, verified source artifacts and existing CI | PENDING |
-| Generated agent bundle | Five text/TOML files | Source-owned build/agents.py | PENDING |
-| Shared authoring knowledge | Orchestration and Codex documents | Existing authoring generator and maintained adaptor | PENDING |
-| Directory-change schema | One SMEAC template and canonical sibling | Existing schema source and plan checker | PENDING |
+| Exact repository source | Full bundle and verified final overlay | Controller inputs and complete file manifests | AVAILABLE |
+| Final declared-dependency verification | Two complete entry points and freshness | Controller environment; cloud checks passed with noted package mismatch | PENDING |
+| Generated agent bundle | Five text/TOML files | Source-owned build/agents.py | AVAILABLE |
+| Shared authoring knowledge | Orchestration and Codex documents | Existing authoring generator and maintained adaptor | AVAILABLE |
+| Directory-change schema | One SMEAC template and canonical sibling | Existing schema source and plan checker | AVAILABLE |
 
 Supply: reuse existing dependencies and standard-library TOML parsing; add no runtime dependency or Codex/MCP requirement. Build verification remains separate from removed live-host provisioning.
 Transportation: generate source-owned OAK and native TOML bytes, commit them to the existing branch, and expose the actual native file in the PR. Generation never installs files into a user's project or home.
@@ -414,7 +435,7 @@ Rollback: corrections are new commits. The prior plan and preflight remain in hi
 ## 5. Command and Signal
 
 1. The user owns scope, authorization and any later merge or runtime deployment decision.
-2. The implementing assistant owns direct implementation, verification, evidence and the authorized PR; no subagents are used.
+2. The implementing assistant owns direct implementation, technical review and evidence; the authorized local controller supplies final declared-environment verification and Git/GitHub publication. No subagents are used.
 
 | Channel | Medium | Purpose | Cadence |
 | --- | --- | --- | --- |

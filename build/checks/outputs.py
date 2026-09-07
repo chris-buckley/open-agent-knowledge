@@ -11,7 +11,7 @@ from tempfile import TemporaryDirectory
 
 from build.checks.fixtures import ROOT
 
-_ROOT_ENTRIES = {"oak.ebnf", "definitions", "oak-authoring.oak.md", "oak-authoring.skill"}
+_ROOT_ENTRIES = {"oak.ebnf", "definitions", "oak-authoring.oak.md", "oak-authoring.skill", "oak.agents"}
 _GENERATE = """
 import socket, sys
 sys.path.insert(0, sys.argv[1])
@@ -30,9 +30,11 @@ else:
 from build.ebnf import write as write_grammar
 from build.definitions import write as write_definitions
 from build.authoring import write as write_authoring
+from build.agents import write as write_agents
 write_grammar()
 write_definitions()
 write_authoring()
+write_agents()
 """
 _DETACHED = """
 import importlib.abc, importlib.util, pathlib, socket, sys, yaml
@@ -103,7 +105,7 @@ def _run_isolated(script: str, root: Path) -> None:
 
 
 def _copy_sources(root: Path) -> None:
-    for name in ("oak", "build", "examples"):
+    for name in ("oak", "build", "examples", ".agents/adaptors"):
         shutil.copytree(ROOT / name, root / name, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
     for name in ("pyproject.toml", "AGENTS.md"):
         shutil.copyfile(ROOT / name, root / name)
@@ -120,13 +122,19 @@ def _reject_stale(root: Path, expected: Mapping[str, bytes]) -> None:
 def _repair_products(root: Path, expected: Mapping[str, bytes]) -> None:
     generated = root / "generated"
     helper = generated / "oak-authoring.skill" / "scripts" / "validate.py"
-    for mutation in ("missing helper", "edited helper", "missing grammar", "stale definition", "stale markdown"):
+    for mutation in ("missing helper", "edited helper", "missing grammar", "stale definition", "stale markdown", "missing native", "edited native"):
         if mutation == "missing helper":
             helper.unlink()
         elif mutation == "edited helper":
             helper.write_text("raise RuntimeError('generated helper must not be build input')\n")
         elif mutation == "missing grammar":
             (generated / "oak.ebnf").unlink()
+        elif mutation in ("missing native", "edited native"):
+            native = generated / "oak.agents/parallel_exploration/codex/.codex/agents/oak-explorer.toml"
+            if mutation == "missing native":
+                native.unlink()
+            else:
+                native.write_text("stale native artifact")
         else:
             suffix = ".md" if mutation == "stale markdown" else ".oak.md"
             (generated / "definitions" / ("stale" + suffix)).write_text("stale")
@@ -142,7 +150,7 @@ def _reject_link_writes(root: Path, expected: Mapping[str, bytes]) -> None:
     generated = root / "generated"
     sentinel = root / "sentinel.txt"
     sentinel.write_text("preserve")
-    for name in ("oak.ebnf", "oak-authoring.skill/scripts/validate.py", "definitions/act.oak.md"):
+    for name in ("oak.ebnf", "oak-authoring.skill/scripts/validate.py", "definitions/act.oak.md", "oak.agents/parallel_exploration/explorer.oak.md"):
         link = generated / name
         original = link.read_bytes()
         link.unlink()
@@ -206,9 +214,11 @@ def validate_outputs() -> None:
     from build.authoring import SCRIPT, VALIDATOR_SOURCE, artifacts
     from build.definitions import documents
     from build.ebnf import grammar
+    from build.agents import artifacts as agent_artifacts
 
     root = ROOT / "generated"
     expected = {"oak.ebnf": grammar().encode(),
+                **{path.relative_to(root).as_posix(): text.encode() for path, text in agent_artifacts().items()},
                 **{path.relative_to(root).as_posix(): text.encode() for path, text in artifacts().items()},
                 **{"definitions/" + name: text.encode() for name, text in documents().items()}}
     if any((ROOT / name).exists() for name in ("outputs", "skills")):

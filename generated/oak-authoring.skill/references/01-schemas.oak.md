@@ -1,6 +1,5 @@
 <instructions>
 Constants hold values that do not change while the knowledge runs.
-Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 </instructions>
 
 <constants>
@@ -19,82 +18,5 @@ guidance: YAML<<
   must validate; role names alone are not types.
 >>
 
-populated-shapes: TEXT<<
-Option Comparison
-| Criterion | Current | Proposed |
-| --- | --- | --- |
-| Blank title | Accepted | Rejected |
-
-Decision Brief
-## Decision
-Reject blank titles.
-
-### Rationale
-A title must identify the task.
-
-Work Outline
-1. Require meaningful titles.
-   1. Check the stripped title.
-      1. Test empty, whitespace, and valid titles.
-
-Code File
-### title.py
-
-```python
-def valid_title(title: str) -> bool:
-    return bool(title.strip())
-```
->>
-
-shape-notes: TEXT<<
-populated-shapes fills these schemas without wrappers or WHERE. The table has one fixed row; extend its template explicitly when justified.
->>
+shape-source: "In the teaching mapping, assets/examples/shape_gallery/example.oak.md pairs complete schemas with populated instances without definition wrappers or WHERE. Its table has one fixed row; extend the template explicitly if justified."
 </constants>
-
-<schemas>
-<schema id="option-comparison" name="Option Comparison" purpose="Compare current and proposed behaviour for one criterion.">
-| Criterion | Current | Proposed |
-| --- | --- | --- |
-| <CRITERION> | <CURRENT> | <PROPOSED> |
-
-WHERE:
-- <CRITERION> is string; matches `^[^|\r\n]+$`.
-- <CURRENT> is string; matches `^[^|\r\n]+$`.
-- <PROPOSED> is string; matches `^[^|\r\n]+$`.
-</schema>
-
-<schema id="decision-brief" name="Decision Brief" purpose="State one decision and explain its rationale.">
-## Decision
-<DECISION>
-
-### Rationale
-<RATIONALE>
-
-WHERE:
-- <DECISION> is string; is non-empty.
-- <RATIONALE> is string; is non-empty.
-</schema>
-
-<schema id="work-outline" name="Work Outline" purpose="Nest one implementation step and its check beneath one goal.">
-1. <GOAL>
-   1. <STEP>
-      1. <CHECK>
-
-WHERE:
-- <GOAL> is string; is non-empty; is one line.
-- <STEP> is string; is non-empty; is one line.
-- <CHECK> is string; is non-empty; is one line.
-</schema>
-
-<schema id="code-file" name="Code File" purpose="Present one Python file with its complete source.">
-### <FILE_PATH>
-
-```python
-<CODE>
-```
-
-WHERE:
-- <FILE_PATH> is path; matches `^[A-Za-z0-9_./\-]+$`.
-- <CODE> is string; is non-empty.
-</schema>
-</schemas>

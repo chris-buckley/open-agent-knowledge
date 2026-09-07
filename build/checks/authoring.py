@@ -16,7 +16,7 @@ from oak import (ACT, Act, Arrival, Constant, ConstantValue, Emit, Instruction,
                  Interface, Node, Process, Schema, State, Trigger, ValueBinding,
                  execute, parse, render, resolve, Type, where)
 from build.authoring import ENTRY, PACKAGE, SCRIPT, TARGET, artifacts, skill_documents, tree, validator_module
-from build.authoring_guides import GUIDES, RULE_OWNERS, populated_examples, teaching_examples
+from build.authoring_guides import GUIDES, RULE_OWNERS, teaching_examples
 from build.fusion import fuse
 from build.checks.fixtures import ROOT
 from examples.schemas.shape_gallery import EXPECTED_INSTANCES, SHAPES
@@ -78,14 +78,14 @@ def validate_authoring_skill() -> None:
     owners = [key for group in RULE_OWNERS for key in group]
     require(len(set(owners)) == len(owners) and set(owners) == {r.id for r in AUTHORING_GUIDANCE}, "authoring rules lost their single guide owner")
     schema_guide = parse(actual["references/01-schemas.oak.md"])
-    require(schema_guide.schemas == list(SHAPES), "shape definitions drifted")
-    require(next(c.value for c in schema_guide.constants if c.id == "populated-shapes") == populated_examples(), "populated examples drifted")
+    require(not schema_guide.schemas, "schema guidance duplicated the complete literal teaching definitions")
     teaching = teaching_examples()
     require(next(c.value for c in fused.constants if c.id.endswith("-teaching")) == teaching,
             "assembled agent lost or changed inert teaching documents")
     for path, example in teaching.items():
         require((PACKAGE / path).read_text() == example + "\n", "teaching example is stale")
         resolve(parse(example), source=path, root=str(PurePosixPath(path).parent), load=teaching.get)
+    _retained_teaching(actual, fused, teaching)
     _template_delivery(actual, fused)
     _generation_cleanup()
     _guidance_delivery(actual, fused)
@@ -103,6 +103,7 @@ EXPECTED_SKILL_FILES = {
     "references/04-interfaces.oak.md", "references/05-triggers.oak.md",
     "references/06-processes.oak.md", "references/07-instructions.oak.md",
     "guides/authoring.oak.md", "guides/review.oak.md", "guides/validation.oak.md",
+    "guides/subagent-orchestration.oak.md", "platforms/codex/adaptor.oak.md",
     "assets/examples/catalog.oak.md", "assets/examples/fixed_knowledge/example.oak.md",
     "assets/examples/shape_gallery/example.oak.md", "assets/examples/shape_writer/example.oak.md",
     "assets/examples/shape_writer/sample.oak.md", "assets/examples/shape_writer/shape_gallery.oak.md",
@@ -124,6 +125,58 @@ TEMPLATE_MARKERS = {
     "SKILL_NAME", "SKILL_DESCRIPTION", "PURPOSE_JSON", "CONSTANT_ENTRIES",
     "INSTRUCTIONS_PART", "SCHEMAS_PART", "STATE_PART", "TRIGGERS_PART", "PROCESSES_PART", "INTERFACES_PART",
 }
+
+
+# Fixed literal identities inspected at Plan 0016's 9956e69 baseline.
+_TEACHING_SHA256 = {
+    "assets/examples/catalog.oak.md": "013f63280cd38e140bdea3ff6c5f470c568659a56ff4220953ca59834cd5812f",
+    "assets/examples/fixed_knowledge/example.oak.md": "9c4b8ca07a8d2dcc8c18d808402517ca9d11e905d18c6e99532f194427f2c337",
+    "assets/examples/shape_gallery/example.oak.md": "f8b549a2c1c8f891e43bc976789d514d7f5f147167cded03edb824d53afbbd03",
+    "assets/examples/shape_writer/example.oak.md": "aa325263cbf957cc4f7547a4e364c209a870b21d6d0990ec4911b7ce14b817ef",
+    "assets/examples/shape_writer/shape_gallery.oak.md": "f8b549a2c1c8f891e43bc976789d514d7f5f147167cded03edb824d53afbbd03",
+    "assets/examples/shape_writer/sample.oak.md": "659c5588b290e02ab44477bc0bfa831c9967d576d44251f4a522efdbe47acd32",
+    "assets/examples/compound_growth/example.oak.md": "0b0ca898c0ee875b712b674670f09ddb762ce66ee068c823524d79381353809a",
+    "assets/examples/compound_growth/sample.oak.md": "ad5fd8853028db0e7bb8e2343dd8c620b996a884c86fb2e903a9c800a5e0010b"
+}
+_TEMPLATE_SHA256 = "6c5e706344aef4c649256cf57a6842761a7aa3491b4efe5a190fa2e681169c17"
+
+
+def _retained_teaching(documents: dict[str, str], fused: Node, teaching: dict[str, str]) -> None:
+    """Deduplicate delivery knowledge without deleting its complete teaching content."""
+    require({name: hashlib.sha256(text.encode()).hexdigest() for name, text in teaching.items()} == _TEACHING_SHA256,
+            "complete literal teaching changed from the reviewed corpus")
+    gallery = parse(teaching["assets/examples/shape_gallery/example.oak.md"])
+    require(gallery.schemas == list(SHAPES), "teaching lost full shape definitions")
+    instances = {c.id.removesuffix("-instance"): c.value for c in gallery.constants}
+    require(instances == EXPECTED_INSTANCES, "teaching lost populated shape instances")
+    require(hashlib.sha256((PACKAGE / "_template/SKILL.md").read_bytes()).hexdigest() == _TEMPLATE_SHA256,
+            "literal template changed from the reviewed scaffold")
+    for guide in GUIDES:
+        node = parse(documents[guide])
+        require(not any((node.instructions, node.state, node.triggers, node.processes, node.interfaces)),
+                f"supporting knowledge widened operational scope: {guide}")
+    from build.agents import ADAPTOR_SOURCE, PACKAGE as AGENT_PACKAGE
+    adaptor = ADAPTOR_SOURCE.read_bytes()
+    require((PACKAGE / "platforms/codex/adaptor.oak.md").read_bytes() == adaptor,
+            "authoring Codex knowledge is not the maintained adaptor")
+    require((AGENT_PACKAGE / "adaptors/codex/adaptor.oak.md").read_bytes() == adaptor,
+            "agent bundle uses different Codex knowledge")
+    source = parse(adaptor.decode())
+    for entry in source.constants:
+        assembled = [c for c in fused.constants if c.id.endswith("-" + entry.id) and c.value == entry.value]
+        require(len(assembled) == 1, f"assembled Codex knowledge lost its single source: {entry.id}")
+    structure = parse(documents["references/00-structure.oak.md"])
+    parts = next(c.value for c in structure.constants if c.id == "part-responsibilities")
+    lifetimes = {row["part"]: row["lifetime"] for row in parts}
+    require(lifetimes["constants"] == "whole document use" and lifetimes["state"] == "across arrivals"
+            and lifetimes["interfaces"] == "one receive or emission", "part lifetime knowledge changed")
+    scopes = next(c.value for c in parse(documents["references/06-processes.oak.md"]).constants if c.id == "scopes")
+    require("immutable per frame" in scopes and "Branches/iterations are local." in scopes,
+            "deduplication lost frame or child lifetime knowledge")
+    # The package lifetime rule stays verbatim in the state guide as well as the assembled agent.
+    state_guidance = next(c.value for c in parse(documents["references/03-state.oak.md"]).constants if c.id == "guidance")
+    require(next(r.instruction for r in AUTHORING_GUIDANCE if r.id == "separate-lifetimes") in state_guidance,
+            "lifetime deduplication lost the state guide's rule")
 
 
 def _layout_inventory(package: Path) -> None:
@@ -215,7 +268,7 @@ def _generation_cleanup() -> None:
         script = package / "scripts" / "validate.py"
         script.parent.mkdir(parents=True)
         script.write_bytes(SCRIPT.read_bytes())
-        for directory in ("references", "guides", "assets", "_template"):
+        for directory in ("references", "guides", "assets", "_template", "platforms"):
             obsolete = package / directory / "obsolete" / "stale.txt"
             obsolete.parent.mkdir(parents=True)
             obsolete.write_text("stale")
@@ -261,7 +314,10 @@ def _guidance_delivery(documents: dict[str, str], fused: Node) -> None:
     delivered = []
     for guide, keys in sorted(zip(GUIDES, RULE_OWNERS, strict=True)):
         node = parse(documents[guide])
-        guidance = next(c.value for c in node.constants if c.id == "guidance")
+        guidance = next((c.value for c in node.constants if c.id == "guidance"), None)
+        if not keys:
+            require(guidance is None, f"{guide} acquired redundant package guidance")
+            continue
         require(guidance == [rules[key] for key in keys], f"{guide} guidance differs from its source")
         delivered.extend(guidance)
     assembled = [text for c in fused.constants if c.id.endswith("-guidance") for text in c.value]
@@ -316,6 +372,16 @@ def _execution_parity(documents: dict[str, str], fused: Node) -> None:
                 if "TEMPLATE" in values:
                     require(values["TEMPLATE"] == (PACKAGE / "_template" / "SKILL.md").read_text(), "template routing changed literal knowledge")
                     require("Unfilled scaffolding is inert." in values["TEMPLATE_USE"], "template routing lost its inert boundary")
+                if action.outputs == ["DESIGN_1"]:
+                    require(values["TEACHING"] == teaching_examples(), "schema design lost complete literal teaching")
+                if action.outputs == ["DESIGN_6"]:
+                    orchestration = parse(documents["guides/subagent-orchestration.oak.md"])
+                    codex = parse(documents["platforms/codex/adaptor.oak.md"])
+                    expected = {"ORCHESTRATION": next(c.value for c in orchestration.constants if c.id == "orchestration"),
+                                "DELEGATION": next(c.value for c in orchestration.constants if c.id == "guidance"),
+                                "CODEX": next(c.value for c in codex.constants if c.id == "mapping"),
+                                "DEFAULTS": next(c.value for c in codex.constants if c.id == "native-defaults")}
+                    require({key: values[key] for key in expected} == expected, "delegation or native configuration routing changed")
                 if action.outputs == ["SOURCE", "VALIDATE"]:
                     return {"SOURCE": "The service is Task board; the title limit is 120.", "VALIDATE": requested}
                 if action.outputs == ["INSTALL_REQUIRED", "REPORT"]:
@@ -331,6 +397,8 @@ def _execution_parity(documents: dict[str, str], fused: Node) -> None:
             result = execute(node, Arrival(event="OAK authoring is requested for supplied source material."), {}, act=host, source=source, load=load)
             require(len(result.emissions) == 1 and result.emissions[0].values["OAK"] == candidate, "authoring fixture did not deliver one document")
             require(sum("TEMPLATE" in values for _, values, _ in trace) == 1, "template use was not routed exactly once")
+            require(sum("TEACHING" in values for _, values, _ in trace) == 2, "teaching must reach schema design and review")
+            require(sum("ORCHESTRATION" in values for _, values, _ in trace) == 1, "orchestration must reach process design once")
             require(any("HELPER" in values for _, values, _ in trace) == requested, "unrequested validation work ran")
             require(any(outputs == ("APPROVED",) for _, _, outputs in trace) == (requested and installation_required), "consent was not requested at the right boundary")
             if requested and installation_required and not approved:
@@ -378,5 +446,5 @@ def _fusion_rejections() -> None:
         rejects(lambda: fuse({**docs, "shared.oak.md": render(unsafe)}, entry="entry.oak.md"), f"supporting {field} scope was widened")
     rejects(lambda: fuse({"../entry.oak.md": render(root)}, entry="../entry.oak.md"), "path escape accepted")
     collision = root.model_dump(by_alias=True)
-    collision["constants"].append(Constant(id="guide-1-rules", value="collision").model_dump(by_alias=True))
+    collision["constants"].append(Constant(id="g1-rules", value="collision").model_dump(by_alias=True))
     rejects(lambda: fuse({**docs, "entry.oak.md": render(Node.model_validate(collision))}, entry="entry.oak.md"), "namespace collision accepted")

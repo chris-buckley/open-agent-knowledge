@@ -10,29 +10,25 @@ guidance: YAML<<
   result outside the authored document.
 >>
 
-identity: {"version": "3.1.0", "validator-revision": "85ddd5393fd4349632f728f5a05cb67f9bc5dbf5"}
+identity: {"version": "3.2.0", "validator-revision": "85ddd5393fd4349632f728f5a05cb67f9bc5dbf5"}
 
 validation-policy: YAML<<
-- Validate only when requested; authoring and interpretation need no installation.
-- Use Python 3.11+. Reuse matching installed code, --source with optional --python,
-  or retained cache. Match the source fingerprint, not name/version.
-- Use the skill scripts/validate.py. For requested standalone validation, materialize
-  validator-script verbatim as validate.py.
-- Run python validate.py document.oak.md; --root permits larger explicitly allowed
-  graphs.
-- On permission-required, ask to download the identified OAK revision and install
-  its declared dependencies in an isolated cache. Validation requests are not installation
-  consent.
-- After explicit approval, repeat with --allow-install. Reuse the retained installation;
-  no published OAK package is needed.
-- 'If installation is declined, do not install. Continue authoring and report: Programmatic
-  validation was not performed (installation declined).'
-- If Python, network, dependencies, or execution are unavailable, continue authoring
-  and report the actual not-performed reason.
-- 'Exit 0: parse and resolution passed; 1: invalid; 2: not performed. Report checks,
-  revision, and errors, never proof of execution or semantic correctness.'
-- Report validation outside OAK. Repair and recheck under the same permission; never
-  silently switch validator revisions.
+- Validate only on request; authoring and interpretation need no installation, Python
+  or network.
+- 'Python 3.11+: reuse installed code, --source with optional --python, or retained
+  cache. Match source and dependency fingerprints, never just name/version.'
+- Run skill scripts/validate.py; standalone users save validator-script verbatim as
+  validate.py. Use its documented arguments and exit codes; --root permits only an
+  explicitly allowed graph.
+- Only permission-required prompts consent to download the identified revision and
+  install declared dependencies in an isolated retained cache. Validation requests
+  are not installation consent; explicit consent alone permits --allow-install.
+- Reuse the cache; no published OAK package is needed. On declined installation or
+  unavailable Python, network, dependencies or execution, continue authoring without
+  installing and report the not-performed reason.
+- Report actual checks, revision and errors outside OAK, not proof of execution or
+  semantic correctness. Repair/recheck under the same permission; never silently change
+  the validator revision.
 >>
 
 validator-script: TEXT<<
@@ -61,7 +57,7 @@ from urllib.request import urlopen
 import venv
 from zipfile import BadZipFile, ZipFile
 
-SKILL_VERSION = "3.1.0"
+SKILL_VERSION = "3.2.0"
 REPOSITORY = "chris-buckley/open-agent-knowledge"
 REVISION = "85ddd5393fd4349632f728f5a05cb67f9bc5dbf5"
 SOURCE_SHA256 = "9bca0d69e12c26aac64d3e7218f4ccfc620e7a7196b569d324ff7ac8197053bc"

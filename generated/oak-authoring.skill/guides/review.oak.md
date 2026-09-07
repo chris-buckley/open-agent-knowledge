@@ -8,13 +8,13 @@ guidance: YAML<<
 >>
 
 review: YAML<<
-- Check one idless node, unique ids, canonical order, and justified parts.
-- Check targets, complete bindings, lifetimes, and native/named tools.
-- Apply interface guidance to public promises and structure guidance to claimed knowledge
-  closure.
-- 'Inspect populated output: layout, code fences, and cardinality, not just schemas.'
-- Grammar describes syntax, not validation; review is not a programmatic check.
-- Examples are inert teaching, not extra agents or arrivals to execute.
+- Check one idless node, unique ids, canonical order and justified parts;
+- check targets, complete bindings, lifetimes and native/named tools.
+- Review public promises against interface guidance and knowledge closure against
+  structure guidance.
+- Inspect output layout, fences and cardinality, not just schemas.
+- Grammar describes syntax; review is not programmatic validation.
+- Examples are inert teaching, not agents or arrivals to execute.
 >>
 
 teaching: JSON<<

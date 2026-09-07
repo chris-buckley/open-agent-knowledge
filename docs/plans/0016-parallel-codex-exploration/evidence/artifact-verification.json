@@ -1,0 +1,791 @@
+{
+  "base": "88340b4bde9d58295e881884a80a0a99c247e13a",
+  "branch": "docs/plan-parallel-codex-exploration",
+  "candidate_commit": null,
+  "changed_implementation_files": {
+    ".agents/adaptors/codex/adaptor.oak.md": {
+      "bytes": 1510,
+      "sha256": "1a76ff0a85e4949292dd7fcb55b38485471f1cf43007a7b5c8ac7a190ffb4323"
+    },
+    ".agents/rules/context.oak.md": {
+      "bytes": 3490,
+      "sha256": "24387d115c8d1dee5b75fa1b7108fcdb30ededde9a4058727bfb069949697fec"
+    },
+    "build/AGENTS.md": {
+      "bytes": 13679,
+      "sha256": "9ba84b6ceceba47366708eccfb1e839eae02d1409f23c77f07f05bf863e18a2d"
+    },
+    "build/agents.py": {
+      "bytes": 4128,
+      "sha256": "9b65ef8f9580cc1813347f9f475b6888bfb14c8de25738df7d6e03de2cacaec6"
+    },
+    "build/authoring_guides.py": {
+      "bytes": 16494,
+      "sha256": "a0183156d7b25e58757f9359e9039af9adaf15f14735f062852372374e40fd0b"
+    },
+    "build/authoring_validator.py": {
+      "bytes": 13197,
+      "sha256": "0eef3148d275b0cd4cafede4dd6488c1aff8683cee6de372dd8c90848d570c3f"
+    },
+    "build/checks/__init__.py": {
+      "bytes": 3160,
+      "sha256": "3c4e702bddabba3f6d68596749d5250f96a6c5756dd125cb3f25e7a14a77cacb"
+    },
+    "build/checks/agent_deliveries.py": {
+      "bytes": 19758,
+      "sha256": "da4e7dd5492347ec910860e147f5497daded49709097687871854af2c5614017"
+    },
+    "build/checks/authoring.py": {
+      "bytes": 30016,
+      "sha256": "85d74ba62a38f8072e397af3449bec35358ae14338a24bb29167fffc88a47d03"
+    },
+    "build/checks/outputs.py": {
+      "bytes": 10406,
+      "sha256": "97b065b041d6003995ed18ce85e55e47ae9987572f0cff25ad0fd5c8f9306f2d"
+    },
+    "build/checks/plan_fixtures.py": {
+      "bytes": 6709,
+      "sha256": "367d177abe48a12fbc8dec33e7e57ad7bc9998be7e7c3880a83885e9de61d976"
+    },
+    "build/checks/plans.py": {
+      "bytes": 37158,
+      "sha256": "f18d3ca40bd2d267b8760bcabca2dcfb40081b84bff5f9057aecbd19d3185738"
+    },
+    "build/checks/shapes.py": {
+      "bytes": 13508,
+      "sha256": "83680c709ad53c562466a9696175d4d014e33c441187a8283f87065319d12c74"
+    },
+    "build/fusion.py": {
+      "bytes": 4940,
+      "sha256": "cffbefc70af03adadbe2c92e5e3096696049cdeb6ec40b6de4a3e69caefffac5"
+    },
+    "docs/AGENTS.md": {
+      "bytes": 5735,
+      "sha256": "49b926904921ac6ee3a50825d72e989541e557fe536f1c3d25d204ef6b59974a"
+    },
+    "examples/AGENTS.md": {
+      "bytes": 6808,
+      "sha256": "096396b4bc39aa5ed848d92dfedb0527f5b9ff3848983ddae3156cfe33f9564b"
+    },
+    "examples/catalog.oak.md": {
+      "bytes": 5366,
+      "sha256": "97bf81a5244a05b15cb3873ac1d67373784166d612c9320b8a3d3347b8a56e76"
+    },
+    "examples/catalog.py": {
+      "bytes": 10228,
+      "sha256": "07e55d8cc39dc3280fc05fb6722cce7090ff1d19899e8529b78983e5e4484333"
+    },
+    "examples/parallel_exploration/example.oak.md": {
+      "bytes": 4850,
+      "sha256": "4cbc4334dab2291a9f5e265cedfb8ff4b1a90b097f1a1d04c474b591d60e7261"
+    },
+    "examples/parallel_exploration/example.py": {
+      "bytes": 14272,
+      "sha256": "cd51e0772bbf0cc1e317ea43b98449bad91abf8196248eee4130ceba752e7198"
+    },
+    "examples/parallel_exploration/explorer.oak.md": {
+      "bytes": 7878,
+      "sha256": "4c0de50e286cd38b8e154a286b28ae7c5e34b0dd29a4533538ff0a6715114eb1"
+    },
+    "examples/parallel_exploration/explorer.py": {
+      "bytes": 9165,
+      "sha256": "c530dec2bcbe5b604d8888082ec84ab0131a5a7955b21ae5cd1077663ab32031"
+    },
+    "examples/parallel_exploration/sample.oak.md": {
+      "bytes": 2131,
+      "sha256": "e4b9aefa8c68f7ea6c70fd8a7ff83002f53bc5457d40ba0822981ac5fb7ea4df"
+    },
+    "examples/schemas/smeac_plan.oak.md": {
+      "bytes": 9327,
+      "sha256": "52f3608c8df399328e83b1601eab5e1908b788acca7aa147e042d507f59f8715"
+    },
+    "examples/schemas/smeac_plan.py": {
+      "bytes": 13946,
+      "sha256": "627f22bdba4cf5a9da7fbca41078485dd1c6117331fae2bf7cf7c83013ae4f13"
+    },
+    "generated/oak-authoring.oak.md": {
+      "bytes": 63844,
+      "sha256": "4c3efd2c61d1c33bc08e245b6d05e51637588cf938dd120a22d44f971f0de79b"
+    },
+    "generated/oak-authoring.skill/SKILL.md": {
+      "bytes": 8373,
+      "sha256": "9c2656b5ee609911cad232d608882b02149152f5308a5b7186bb620dfaa9e642"
+    },
+    "generated/oak-authoring.skill/guides/authoring.oak.md": {
+      "bytes": 1517,
+      "sha256": "374984e8082db8a927b05aa34e0d17a18b6fae84d5000c87a3f0544027e53ef4"
+    },
+    "generated/oak-authoring.skill/guides/review.oak.md": {
+      "bytes": 18051,
+      "sha256": "d6baa18a96cb6c680d546f7d479a35dd68c3a6eca28787824bb4c1ddd28eb515"
+    },
+    "generated/oak-authoring.skill/guides/subagent-orchestration.oak.md": {
+      "bytes": 1334,
+      "sha256": "2fb12b72096aab8067b7c5edab835933a4ea3da8097023c45f12afd02e6526a5"
+    },
+    "generated/oak-authoring.skill/guides/validation.oak.md": {
+      "bytes": 14908,
+      "sha256": "af632af2af19bba1cdef8dbe4227fe31c19e2770eb38d827500203eb0c0651f9"
+    },
+    "generated/oak-authoring.skill/platforms/codex/adaptor.oak.md": {
+      "bytes": 1510,
+      "sha256": "1a76ff0a85e4949292dd7fcb55b38485471f1cf43007a7b5c8ac7a190ffb4323"
+    },
+    "generated/oak-authoring.skill/references/01-schemas.oak.md": {
+      "bytes": 1239,
+      "sha256": "15639c8981abaf5c8d3fe894f90b69f36301426334d29e80170b3403708824a8"
+    },
+    "generated/oak-authoring.skill/references/03-state.oak.md": {
+      "bytes": 460,
+      "sha256": "2734ccbc7303c76a8e529d7056ec1f9735e4bbe00788366132324457bd3a5b83"
+    },
+    "generated/oak-authoring.skill/references/05-triggers.oak.md": {
+      "bytes": 646,
+      "sha256": "9f5538004d456b6b416ff091423d2f9f5af1b3cba305d45383335867efd15444"
+    },
+    "generated/oak-authoring.skill/references/06-processes.oak.md": {
+      "bytes": 1723,
+      "sha256": "e1e4db4d11a93decc820103df1f39e397c79d35cd2d9fc45e74abc34a7fdef6f"
+    },
+    "generated/oak-authoring.skill/scripts/validate.py": {
+      "bytes": 13197,
+      "sha256": "0eef3148d275b0cd4cafede4dd6488c1aff8683cee6de372dd8c90848d570c3f"
+    },
+    "generated/oak.agents/adaptors/codex/adaptor.oak.md": {
+      "bytes": 1510,
+      "sha256": "1a76ff0a85e4949292dd7fcb55b38485471f1cf43007a7b5c8ac7a190ffb4323"
+    },
+    "generated/oak.agents/parallel_exploration/codex/.codex/agents/oak-explorer.toml": {
+      "bytes": 8224,
+      "sha256": "245617494904708d000aef096bcd6ef1cd4454f4fbc84e3cb63a63d6b27c6152"
+    },
+    "generated/oak.agents/parallel_exploration/coordinator.oak.md": {
+      "bytes": 4850,
+      "sha256": "4cbc4334dab2291a9f5e265cedfb8ff4b1a90b097f1a1d04c474b591d60e7261"
+    },
+    "generated/oak.agents/parallel_exploration/explorer.oak.md": {
+      "bytes": 7878,
+      "sha256": "4c0de50e286cd38b8e154a286b28ae7c5e34b0dd29a4533538ff0a6715114eb1"
+    },
+    "generated/oak.agents/parallel_exploration/sample.oak.md": {
+      "bytes": 2131,
+      "sha256": "e4b9aefa8c68f7ea6c70fd8a7ff83002f53bc5457d40ba0822981ac5fb7ea4df"
+    }
+  },
+  "cloud_environment": {
+    "executable": "/opt/pyvenv/bin/python",
+    "packages": {
+      "PyYAML": "6.0.3",
+      "pydantic": "2.13.4",
+      "pydantic-extra-types": "2.11.1",
+      "pydantic-settings": "2.14.1"
+    },
+    "python": "3.13.5",
+    "qualification": "pydantic-settings 2.14.1 is below declared >=2.15. No dependency installation or requirement relaxation."
+  },
+  "cloud_implementation_manifest_sha256": "800e54813068a395d47973fc9da11e9d3d8b7a39513daf9daec299334270a8e0",
+  "complexity": {
+    "build/checks/plans.py": {
+      "_closes_fence": {
+        "baseline": null,
+        "candidate": 4
+      },
+      "_comparison_authority": {
+        "baseline": 10,
+        "candidate": 2
+      },
+      "_directory_adoption_examples": {
+        "baseline": null,
+        "candidate": 5
+      },
+      "_directory_annotations": {
+        "baseline": null,
+        "candidate": 10
+      },
+      "_directory_bounds": {
+        "baseline": null,
+        "candidate": 9
+      },
+      "_directory_examples": {
+        "baseline": null,
+        "candidate": 3
+      },
+      "_directory_format": {
+        "baseline": null,
+        "candidate": 9
+      },
+      "_directory_grouping_examples": {
+        "baseline": null,
+        "candidate": 7
+      },
+      "_directory_policy": {
+        "baseline": null,
+        "candidate": 7
+      },
+      "_directory_schema_examples": {
+        "baseline": null,
+        "candidate": 7
+      },
+      "_directory_view": {
+        "baseline": null,
+        "candidate": 8
+      },
+      "_field_content": {
+        "baseline": null,
+        "candidate": 4
+      },
+      "_field_contents": {
+        "baseline": null,
+        "candidate": 9
+      },
+      "_mission_bounds": {
+        "baseline": null,
+        "candidate": 3
+      },
+      "_prose_lines": {
+        "baseline": 9,
+        "candidate": 6
+      },
+      "_reject_directory_bindings": {
+        "baseline": null,
+        "candidate": 6
+      },
+      "_require_directory_position": {
+        "baseline": null,
+        "candidate": 4
+      },
+      "_require_evidence_files": {
+        "baseline": null,
+        "candidate": 4
+      },
+      "_require_plan_rejection": {
+        "baseline": null,
+        "candidate": 3
+      },
+      "_validate_directory_changes": {
+        "baseline": null,
+        "candidate": 7
+      },
+      "_validate_record_files": {
+        "baseline": null,
+        "candidate": 8
+      },
+      "_validate_record_plan": {
+        "baseline": null,
+        "candidate": 4
+      },
+      "validate_plan_directory": {
+        "baseline": 18,
+        "candidate": 9
+      }
+    },
+    "build/checks/shapes.py": {
+      "_prompt_gallery": {
+        "baseline": null,
+        "candidate": 8
+      },
+      "validate_shapes": {
+        "baseline": 27,
+        "candidate": 23
+      }
+    }
+  },
+  "complexity_method": "AST count starts at 1; adds if/if-expression/loop/except, match cases, extra boolean terms, comprehension generators and filters. Nested function bodies counted separately. Local measured convention, not radon.",
+  "controller_actions": [
+    "Verify final archive, full manifest and exact base.",
+    "Run both full repository checks and generation freshness in the declared-dependency environment.",
+    "Commit reviewed complete overlay without rewriting history; verify remote paths and bytes.",
+    "Create non-draft PR into main and return actual URL plus checks.",
+    "Close the pending verification/publication tasks only with observed receipts; do not merge."
+  ],
+  "controller_finding": {
+    "command": [
+      "python",
+      "-m",
+      "build.examples"
+    ],
+    "elapsed_seconds": 8.266,
+    "environment": {
+      "PyYAML": "6.0.3",
+      "pydantic": "2.13.4",
+      "pydantic-extra-types": "2.11.1",
+      "pydantic-settings": "2.15.0",
+      "python": "3.11.9"
+    },
+    "exit_code": 1,
+    "finding": {
+      "correction": "Inspect the complete retained shape-gallery teaching document against independent SHAPES and EXPECTED_INSTANCES. Keep all original binding, presentation, code, execution and rejection assertions. No missing helper shim or weakened check.",
+      "evidence": [
+        "build/checks/shapes.py",
+        "candidate-module",
+        "candidate-direct"
+      ],
+      "finding": "Checkpoint-02 shape verification imported the removed populated_examples helper and expected duplicated top-level schemas/instances.",
+      "id": "R01"
+    },
+    "log": "checkpoint-02-final-local-07.log",
+    "source_checkpoint": "1b6f2771f56b4bfdcf00f21ce916fd0c3318dfad5049346baec36a55e292343f"
+  },
+  "controller_review": {
+    "as_received_archive_sha256": "ec29968b5a4c0ad6a59efc51f65618144e57466bc3066b81c4d4c9ee7ae4f346",
+    "as_received_checks": [
+      {
+        "command": [
+          "python",
+          "-m",
+          "compileall",
+          "-q",
+          "oak",
+          "build",
+          "examples",
+          "generated/oak-authoring.skill/scripts"
+        ],
+        "elapsed_seconds": 0.734,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "examples.catalog"
+        ],
+        "elapsed_seconds": 1.875,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.ebnf"
+        ],
+        "elapsed_seconds": 0.5,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.definitions"
+        ],
+        "elapsed_seconds": 0.782,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.agents"
+        ],
+        "elapsed_seconds": 0.531,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.authoring"
+        ],
+        "elapsed_seconds": 0.766,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.examples"
+        ],
+        "elapsed_seconds": 49.515,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "build/examples.py"
+        ],
+        "elapsed_seconds": 47.875,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.agents"
+        ],
+        "elapsed_seconds": 0.563,
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.authoring"
+        ],
+        "elapsed_seconds": 0.718,
+        "exit_code": 0
+      }
+    ],
+    "as_received_files": 618,
+    "as_received_manifest_sha256": "b6abc53f3e050c874bb570ce32c9dc0502b1c2b43042c76d1eae984ed156e79d",
+    "correction": {
+      "correction": "Check the actual SMEAC schema placeholders within all directory fields, preserve rejection of unknown DIRECTORY_ placeholders, and add independent current/planned regression cases plus the owning docs rule.",
+      "finding": "The delivered checker accepted an unfilled PLAN_TITLE inside a directory fence because it checked only DIRECTORY_ placeholders there.",
+      "full_corrected_tree_verification": "Pending before publication.",
+      "id": "R06",
+      "performed_by": "Codex controller",
+      "targeted_checks": "validate_plans and validate_agents passed after the correction."
+    },
+    "environment": {
+      "PyYAML": "6.0.3",
+      "pydantic": "2.13.4",
+      "pydantic-extra-types": "2.11.1",
+      "pydantic-settings": "2.15.0",
+      "python": "3.11.9"
+    },
+    "files_unchanged": true
+  },
+  "created_at": "2026-09-07T13:49:48.865967+00:00",
+  "final_technical_review": {
+    "findings": [
+      {
+        "correction": "Inspect the complete retained shape-gallery teaching document against independent SHAPES and EXPECTED_INSTANCES. Keep all original binding, presentation, code, execution and rejection assertions. No missing helper shim or weakened check.",
+        "evidence": [
+          "build/checks/shapes.py",
+          "candidate-module",
+          "candidate-direct"
+        ],
+        "finding": "Checkpoint-02 shape verification imported the removed populated_examples helper and expected duplicated top-level schemas/instances.",
+        "id": "R01"
+      },
+      {
+        "correction": "Share field extraction, fence closing and Mission bounds with the existing comparison checker. Limit new checks to the five populated fields, fixed legend, paired fences, obvious incomplete annotations and prospective adoption. Reconcile actual paths separately.",
+        "evidence": [
+          "build/checks/plans.py",
+          "build/checks/plan_fixtures.py",
+          "final-targeted-plans-shapes"
+        ],
+        "finding": "Directory-check implementation must not duplicate existing Markdown field/fence machinery or become a tree/diff parser.",
+        "id": "R02"
+      },
+      {
+        "correction": "Expand every changed generated leaf, name the corrected shape check and plan fixture source, and distinguish unchanged context from changes. Report and manifest identify every actual path; no files were added merely to match the old tree.",
+        "evidence": [
+          "docs/plans/0016-parallel-codex-exploration/plan.md",
+          "changes.json"
+        ],
+        "finding": "The inherited planned tree left conditional directories and omitted the affected shape consumer and new plan specimen owner.",
+        "id": "R03"
+      },
+      {
+        "correction": "Keep native defaults, parent overrides, fixture exact-tool names, native-parent interpretation and OAK execution separate. No host machinery or native runtime result is supplied or claimed.",
+        "evidence": [
+          ".agents/adaptors/codex/adaptor.oak.md",
+          "examples/parallel_exploration/explorer.py",
+          "examples/parallel_exploration/example.py",
+          "build/checks/agent_deliveries.py"
+        ],
+        "finding": "Static artifact tests could be misrepresented as native permission or live model evidence.",
+        "id": "R04"
+      },
+      {
+        "correction": "Keep D05.02 pending final declared-dependency confirmation and D06.02-D06.03 pending actual commit/remote verification and PR checks. Hand off complete source to the authorized controller without inventing results.",
+        "evidence": [
+          "artifact-verification.json",
+          "report.md"
+        ],
+        "finding": "Passing cloud commands do not satisfy the declared dependency floor or establish a published PR.",
+        "id": "R05"
+      },
+      {
+        "correction": "Check the actual SMEAC schema placeholders within all directory fields, preserve rejection of unknown DIRECTORY_ placeholders, and add independent current/planned regression cases plus the owning docs rule.",
+        "finding": "The delivered checker accepted an unfilled PLAN_TITLE inside a directory fence because it checked only DIRECTORY_ placeholders there.",
+        "full_corrected_tree_verification": "Pending before publication.",
+        "id": "R06",
+        "performed_by": "Codex controller",
+        "targeted_checks": "validate_plans and validate_agents passed after the correction."
+      }
+    ],
+    "performed_by": "Implementing assistant, separate final review pass; no subagents or independent reviewer claimed.",
+    "unresolved_implementation_findings": [],
+    "verdict": "Ready for controller verification and publication, not final plan or PR completion."
+  },
+  "governing_revision": "9956e6998869fcfbd84067eec0d6303273a54174",
+  "implementation_manifest_method": "Full source manifest excluding only this Plan 0016 plan/report/evidence directory to avoid evidence self-reference. Complete final files are separately manifested in checkpoint.json and external final receipts.",
+  "implementation_manifest_sha256": "d41096a8eeca907d2fff1e557a35e3a3af217e6a93d7496211f7033298ea805b",
+  "inputs": {
+    "checkpoint_02": {
+      "bytes": 4029557,
+      "file_manifest_sha256": "1b6f2771f56b4bfdcf00f21ce916fd0c3318dfad5049346baec36a55e292343f",
+      "files": 615,
+      "sha256": "884494e3345ab2eba9aabf4c200562072c5041d2b4cb85396e5af43225368d44"
+    },
+    "controller_review": {
+      "bytes": 36234,
+      "internal_manifest_verified": true,
+      "sha256": "d423b4045db5114bc829dc49ea569d52393ee627a1b606757a1bba24e6d90ffc"
+    },
+    "fresh_bundle_clone_and_overlay_verified": true,
+    "loose_candidates_used": false
+  },
+  "merged": false,
+  "native_bundle": {
+    "adaptors/codex/adaptor.oak.md": {
+      "bytes": 1510,
+      "sha256": "1a76ff0a85e4949292dd7fcb55b38485471f1cf43007a7b5c8ac7a190ffb4323"
+    },
+    "parallel_exploration/codex/.codex/agents/oak-explorer.toml": {
+      "bytes": 8224,
+      "sha256": "245617494904708d000aef096bcd6ef1cd4454f4fbc84e3cb63a63d6b27c6152"
+    },
+    "parallel_exploration/coordinator.oak.md": {
+      "bytes": 4850,
+      "sha256": "4cbc4334dab2291a9f5e265cedfb8ff4b1a90b097f1a1d04c474b591d60e7261"
+    },
+    "parallel_exploration/explorer.oak.md": {
+      "bytes": 7878,
+      "sha256": "4c0de50e286cd38b8e154a286b28ae7c5e34b0dd29a4533538ff0a6715114eb1"
+    },
+    "parallel_exploration/sample.oak.md": {
+      "bytes": 2131,
+      "sha256": "e4b9aefa8c68f7ea6c70fd8a7ff83002f53bc5457d40ba0822981ac5fb7ea4df"
+    }
+  },
+  "native_documentation_review": {
+    "date": "2026-09-07",
+    "finding": "Required metadata, native default fields and parent-override qualifications remain documented. Source review only; no installed runtime discovery, permissions or client behavior is certified.",
+    "sources": [
+      "https://learn.chatgpt.com/docs/agent-configuration/subagents",
+      "https://learn.chatgpt.com/docs/config-file/config-reference"
+    ]
+  },
+  "native_runtime_verified": false,
+  "pending_tasks": [
+    "D05.02",
+    "D06.02",
+    "D06.03"
+  ],
+  "pr_url": null,
+  "preservation": {
+    "all_41_package_rules_retained": true,
+    "grammar_byte_identical": true,
+    "native_toml_exact_worker": true,
+    "native_worker_local_closure": true,
+    "protected_paths_changed": [],
+    "teaching": {
+      "assets/examples/catalog.oak.md": "013f63280cd38e140bdea3ff6c5f470c568659a56ff4220953ca59834cd5812f",
+      "assets/examples/compound_growth/example.oak.md": "0b0ca898c0ee875b712b674670f09ddb762ce66ee068c823524d79381353809a",
+      "assets/examples/compound_growth/sample.oak.md": "ad5fd8853028db0e7bb8e2343dd8c620b996a884c86fb2e903a9c800a5e0010b",
+      "assets/examples/fixed_knowledge/example.oak.md": "9c4b8ca07a8d2dcc8c18d808402517ca9d11e905d18c6e99532f194427f2c337",
+      "assets/examples/shape_gallery/example.oak.md": "f8b549a2c1c8f891e43bc976789d514d7f5f147167cded03edb824d53afbbd03",
+      "assets/examples/shape_writer/example.oak.md": "aa325263cbf957cc4f7547a4e364c209a870b21d6d0990ec4911b7ce14b817ef",
+      "assets/examples/shape_writer/sample.oak.md": "659c5588b290e02ab44477bc0bfa831c9967d576d44251f4a522efdbe47acd32",
+      "assets/examples/shape_writer/shape_gallery.oak.md": "f8b549a2c1c8f891e43bc976789d514d7f5f147167cded03edb824d53afbbd03"
+    },
+    "teaching_all_eight_byte_identical": true,
+    "template_byte_identical": true,
+    "validator_only_skill_version_changed": true
+  },
+  "registered_checks": [
+    "validate_ebnf",
+    "validate_statement_bodies",
+    "validate_compact_specimens",
+    "validate_compact_lexing",
+    "validate_compact_control",
+    "validate_compact_triggers",
+    "validate_compact_layout",
+    "validate_compact_short_circuit",
+    "validate_compact_loop_bounds",
+    "validate_compact_routing",
+    "validate_compact_frames",
+    "validate_compact_relative_targets",
+    "validate_text_examples",
+    "validate_metadata",
+    "validate_resolution",
+    "validate_interfaces",
+    "validate_execution",
+    "validate_interpreter_context",
+    "validate_evidence",
+    "validate_while",
+    "validate_part_omission",
+    "validate_act_authoring",
+    "validate_contract_rules",
+    "validate_source_routing",
+    "validate_json_ld_style_display",
+    "validate_human_examples",
+    "validate_shapes",
+    "validate_agent_deliveries",
+    "validate_authoring_skill",
+    "validate_optional_validator",
+    "validate_plans",
+    "validate_agents",
+    "validate_repository_lifecycle",
+    "validate_coding_standards",
+    "validate_surfaces",
+    "validate_outputs",
+    "validate_architecture"
+  ],
+  "repository": "chris-buckley/open-agent-knowledge",
+  "sizes": {
+    "skill_entry": 8373,
+    "skill_limit": 10000,
+    "standalone_agent": 63844,
+    "standalone_limit": 64000
+  },
+  "status": "Implementation complete with controller review correction; corrected-tree verification and publication pending.",
+  "task_id": "82d0f13f-f86a-46bb-9f24-74f5d94bd5dd",
+  "verification": [
+    {
+      "base": "88340b4bde9d58295e881884a80a0a99c247e13a",
+      "command": [
+        "python",
+        "-c",
+        "from build.checks.plans import validate_plans; from build.checks.shapes import validate_shapes; validate_plans(); validate_shapes()"
+      ],
+      "cwd": "/mnt/data/plan-0016-delivery-work-03",
+      "elapsed_seconds": 1.147,
+      "environment": {
+        "executable": "/opt/pyvenv/bin/python",
+        "packages": {
+          "PyYAML": "6.0.3",
+          "pydantic": "2.13.4",
+          "pydantic-extra-types": "2.11.1",
+          "pydantic-settings": "2.14.1"
+        },
+        "python": "3.13.5",
+        "qualification": "pydantic-settings 2.14.1 is below declared >=2.15. No dependency installation or requirement relaxation."
+      },
+      "exit_code": 0,
+      "files_after_sha256": "49887ab7227fef87be240fb857b0507852b2f79cf9b64c86b729d34be0be6ffc",
+      "files_before_sha256": "49887ab7227fef87be240fb857b0507852b2f79cf9b64c86b729d34be0be6ffc",
+      "files_unchanged": true,
+      "finished_at": "2026-09-07T13:38:54.712276+00:00",
+      "log": "final-targeted-plans-shapes.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-targeted-plans-shapes",
+      "started_at": "2026-09-07T13:38:53.566570+00:00",
+      "timeout_note": null
+    },
+    {
+      "base": "88340b4bde9d58295e881884a80a0a99c247e13a",
+      "command": [
+        "python",
+        "-c",
+        "import compileall; from examples.catalog import write as examples; from build.ebnf import write as ebnf; from build.definitions import write as definitions; from build.agents import write as agents; from build.authoring import write as authoring; from build.checks.plans import validate_plans; assert all(compileall.compile_dir(p,quiet=1) for p in ('oak','build','examples')); [f() for f in (examples,ebnf,definitions,agents,authoring)]; validate_plans(); [f() for f in (examples,ebnf,definitions,agents,authoring)]"
+      ],
+      "cwd": "/mnt/data/plan-0016-delivery-work-03",
+      "elapsed_seconds": 2.042,
+      "environment": {
+        "executable": "/opt/pyvenv/bin/python",
+        "packages": {
+          "PyYAML": "6.0.3",
+          "pydantic": "2.13.4",
+          "pydantic-extra-types": "2.11.1",
+          "pydantic-settings": "2.14.1"
+        },
+        "python": "3.13.5",
+        "qualification": "pydantic-settings 2.14.1 is below declared >=2.15. No dependency installation or requirement relaxation."
+      },
+      "exit_code": 0,
+      "files_after_sha256": "935212ab13b7b374fd3b730a084c93882890c9fb76aaf2e5b8a4e9411886e255",
+      "files_before_sha256": "935212ab13b7b374fd3b730a084c93882890c9fb76aaf2e5b8a4e9411886e255",
+      "files_unchanged": true,
+      "finished_at": "2026-09-07T13:45:04.340676+00:00",
+      "log": "reconciled-generation.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "reconciled-generation",
+      "started_at": "2026-09-07T13:45:02.300165+00:00",
+      "timeout_note": null
+    },
+    {
+      "base": "88340b4bde9d58295e881884a80a0a99c247e13a",
+      "command": [
+        "python",
+        "-m",
+        "build.examples"
+      ],
+      "cwd": "/mnt/data/plan-0016-delivery-work-03",
+      "elapsed_seconds": 52.157,
+      "environment": {
+        "executable": "/opt/pyvenv/bin/python",
+        "packages": {
+          "PyYAML": "6.0.3",
+          "pydantic": "2.13.4",
+          "pydantic-extra-types": "2.11.1",
+          "pydantic-settings": "2.14.1"
+        },
+        "python": "3.13.5",
+        "qualification": "pydantic-settings 2.14.1 is below declared >=2.15. No dependency installation or requirement relaxation."
+      },
+      "exit_code": 0,
+      "files_after_sha256": "935212ab13b7b374fd3b730a084c93882890c9fb76aaf2e5b8a4e9411886e255",
+      "files_before_sha256": "935212ab13b7b374fd3b730a084c93882890c9fb76aaf2e5b8a4e9411886e255",
+      "files_unchanged": true,
+      "finished_at": "2026-09-07T13:46:13.382045+00:00",
+      "log": "candidate-module.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "candidate-module",
+      "started_at": "2026-09-07T13:45:21.226518+00:00",
+      "timeout_note": null
+    },
+    {
+      "base": "88340b4bde9d58295e881884a80a0a99c247e13a",
+      "command": [
+        "python",
+        "build/examples.py"
+      ],
+      "cwd": "/mnt/data/plan-0016-delivery-work-03",
+      "elapsed_seconds": 52.653,
+      "environment": {
+        "executable": "/opt/pyvenv/bin/python",
+        "packages": {
+          "PyYAML": "6.0.3",
+          "pydantic": "2.13.4",
+          "pydantic-extra-types": "2.11.1",
+          "pydantic-settings": "2.14.1"
+        },
+        "python": "3.13.5",
+        "qualification": "pydantic-settings 2.14.1 is below declared >=2.15. No dependency installation or requirement relaxation."
+      },
+      "exit_code": 0,
+      "files_after_sha256": "935212ab13b7b374fd3b730a084c93882890c9fb76aaf2e5b8a4e9411886e255",
+      "files_before_sha256": "935212ab13b7b374fd3b730a084c93882890c9fb76aaf2e5b8a4e9411886e255",
+      "files_unchanged": true,
+      "finished_at": "2026-09-07T13:47:06.768070+00:00",
+      "log": "candidate-direct.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "candidate-direct",
+      "started_at": "2026-09-07T13:46:14.116986+00:00",
+      "timeout_note": null
+    },
+    {
+      "base": "88340b4bde9d58295e881884a80a0a99c247e13a",
+      "command": [
+        "python",
+        "/mnt/data/plan-0016-session-03/content_audit.py"
+      ],
+      "cwd": "/mnt/data/plan-0016-delivery-work-03",
+      "elapsed_seconds": 2.107,
+      "environment": {
+        "executable": "/opt/pyvenv/bin/python",
+        "packages": {
+          "PyYAML": "6.0.3",
+          "pydantic": "2.13.4",
+          "pydantic-extra-types": "2.11.1",
+          "pydantic-settings": "2.14.1"
+        },
+        "python": "3.13.5",
+        "qualification": "pydantic-settings 2.14.1 is below declared >=2.15. No dependency installation or requirement relaxation."
+      },
+      "exit_code": 0,
+      "files_after_sha256": "935212ab13b7b374fd3b730a084c93882890c9fb76aaf2e5b8a4e9411886e255",
+      "files_before_sha256": "935212ab13b7b374fd3b730a084c93882890c9fb76aaf2e5b8a4e9411886e255",
+      "files_unchanged": true,
+      "finished_at": "2026-09-07T13:46:43.036158+00:00",
+      "log": "candidate-content-audit.log",
+      "log_sha256": "0872ee4242597ebadf194bf2491f620b6253ec8075e5a87285b592ff72d38ef7",
+      "name": "candidate-content-audit",
+      "started_at": "2026-09-07T13:46:40.931055+00:00",
+      "timeout_note": null
+    }
+  ],
+  "verification_identity_note": "Recorded commands cover the exact full manifests in evidence/checks of the delivery archive. The final reporting edits change only this plan/report/evidence directory; final post-report receipts are stored externally in the archive, not claimed as future results here."
+}

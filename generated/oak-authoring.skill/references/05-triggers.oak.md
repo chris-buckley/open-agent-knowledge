@@ -11,5 +11,5 @@ guidance: YAML<<
   payloads separate from event seeds.
 >>
 
-routing: "Source-backed triggers share the receive/process schema and omit seeds. Guards require state reads, may compare literals or constants, and cannot read process bindings. Sequence internal work with CALL."
+routing: "Source triggers share receive/process schemas and omit seeds. Guards read state, may compare literals/constants, never process bindings. CALL sequences internal work."
 </constants>

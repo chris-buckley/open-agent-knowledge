@@ -17,11 +17,6 @@ guidance: YAML<<
   prove delivery. Native ACT can have effects; preserve exact tool names.
 - Keep multi-phase entry processes as orchestrators that compose reusable processes
   with `CALL`.
-- Use plain `ACT` when the interpreter performs the work with native capabilities.
-- Use `ACT TOOL` only for one exact tool name copied from the supplied registry.
-- Use `PAR` and `JOIN` only for independent exact tool actions.
-- Model a delegated agent as its own typed OAK document and dispatch it through an
-  exact host tool contract.
 - Use the same explicit recursive condition structure for branches, loop conditions,
   assertions, and guards; preserve child order and bounded-loop failures.
 - Use delimiter continuation for long expressions and indentation for ordered action
@@ -32,6 +27,6 @@ guidance: YAML<<
 >>
 
 scopes: TEXT<<
-Keep bindings immutable per frame; CALL promotes declared outputs. Branches/iterations are local. IF promotes nothing; use EMIT within it or process contracts, not invented state. Justify assertions, conditions, loops, and parallel work from source.
+Bindings are immutable per frame; CALL promotes declared outputs. Branches/iterations are local. IF promotes nothing: use EMIT within it or process contracts, not invented state.
 >>
 </constants>

@@ -1,0 +1,960 @@
+{
+  "all_package_rules_unique_and_verbatim": 41,
+  "authoring_local_schemas_and_control_flow_retained": "Six original local schemas remain. Existing validation/consent execution-parity checks cover ordered control flow in both deliveries.",
+  "base": "88340b4bde9d58295e881884a80a0a99c247e13a",
+  "embedded_grammar_unchanged": {
+    "bytes": 13306,
+    "sha256": "949069f97bbf009f74ea1a57e85ae2372665e4d14f04f6061ab7eed237c3c4d6"
+  },
+  "external_grammar_files_unchanged": true,
+  "four_complete_shape_schemas_and_instances_retained": true,
+  "fusion_change_only": {
+    "after": {
+      "bytes": 4940,
+      "sha256": "cffbefc70af03adadbe2c92e5e3096696049cdeb6ec40b6de4a3e69caefffac5"
+    },
+    "before": {
+      "bytes": 4945,
+      "sha256": "391bec4022a9a6432dd35be48c443bac807ba6a14628888f475839178369fb8d"
+    },
+    "change": "Typed support namespaces guide-N- become gN-. Descriptive suffixes, ordering, collision rejection and literal payloads are unchanged."
+  },
+  "governing_revision": "9956e6998869fcfbd84067eec0d6303273a54174",
+  "literal_teaching_unchanged": {
+    "assets/examples/catalog.oak.md": {
+      "bytes": 1208,
+      "sha256": "013f63280cd38e140bdea3ff6c5f470c568659a56ff4220953ca59834cd5812f"
+    },
+    "assets/examples/compound_growth/example.oak.md": {
+      "bytes": 4379,
+      "sha256": "0b0ca898c0ee875b712b674670f09ddb762ce66ee068c823524d79381353809a"
+    },
+    "assets/examples/compound_growth/sample.oak.md": {
+      "bytes": 869,
+      "sha256": "ad5fd8853028db0e7bb8e2343dd8c620b996a884c86fb2e903a9c800a5e0010b"
+    },
+    "assets/examples/fixed_knowledge/example.oak.md": {
+      "bytes": 168,
+      "sha256": "9c4b8ca07a8d2dcc8c18d808402517ca9d11e905d18c6e99532f194427f2c337"
+    },
+    "assets/examples/shape_gallery/example.oak.md": {
+      "bytes": 1980,
+      "sha256": "f8b549a2c1c8f891e43bc976789d514d7f5f147167cded03edb824d53afbbd03"
+    },
+    "assets/examples/shape_writer/example.oak.md": {
+      "bytes": 4108,
+      "sha256": "aa325263cbf957cc4f7547a4e364c209a870b21d6d0990ec4911b7ce14b817ef"
+    },
+    "assets/examples/shape_writer/sample.oak.md": {
+      "bytes": 1515,
+      "sha256": "659c5588b290e02ab44477bc0bfa831c9967d576d44251f4a522efdbe47acd32"
+    },
+    "assets/examples/shape_writer/shape_gallery.oak.md": {
+      "bytes": 1980,
+      "sha256": "f8b549a2c1c8f891e43bc976789d514d7f5f147167cded03edb824d53afbbd03"
+    }
+  },
+  "literal_template_unchanged": {
+    "bytes": 516,
+    "sha256": "6c5e706344aef4c649256cf57a6842761a7aa3491b4efe5a190fa2e681169c17"
+  },
+  "method": "Read exact baseline blobs with git show; compare current bytes and parsed OAK meaning. No network, installation or native Codex run.",
+  "protected_paths": {
+    ".github/workflows/statement-closeout.yml": {
+      "bytes": 6864,
+      "sha256": "f63043270414e7786e75b42d71c5ef1a1307d57a1ac7a7ee422aaab2af1ee572"
+    },
+    ".github/workflows/verify.yml": {
+      "bytes": 1205,
+      "sha256": "cc31bb98aee241ce57fa8c115f56f24878a87a1eb25380bfaa76b92d5debf925"
+    },
+    "AGENTS.md": {
+      "bytes": 25995,
+      "sha256": "30cb4732c1c52a208f58efbe2b8187052166d42038136c5921ad3ba44b9215d4"
+    },
+    "generated/definitions/act.oak.md": {
+      "bytes": 2700,
+      "sha256": "98fb2c085d6f8fd9fc110ff040376795bd7d2e753848e17ad7cca92118a26627"
+    },
+    "generated/definitions/all.oak.md": {
+      "bytes": 777,
+      "sha256": "00643be9a2fb5df2b7cdfad0d7052e1e9df4c24103054b551aa3bcb8f1fbdae5"
+    },
+    "generated/definitions/any.oak.md": {
+      "bytes": 788,
+      "sha256": "42ee84fd15770a6007a3c3626ae6321598f57a9740cbd9e0012d312c1fe51a07"
+    },
+    "generated/definitions/assert.oak.md": {
+      "bytes": 947,
+      "sha256": "c3ad7ce13ddbd35ab90aa81233756a27d1f29580b78fe8268fd03996626418e3"
+    },
+    "generated/definitions/at-least.oak.md": {
+      "bytes": 728,
+      "sha256": "dfd488897f7fd4c00b33946bf52eb616e3193b93293ab3661d455ff4e5645ac9"
+    },
+    "generated/definitions/at-most.oak.md": {
+      "bytes": 721,
+      "sha256": "2befa2878533084e387359cee31a2e9109f896b44219c62d4e210e778484515a"
+    },
+    "generated/definitions/binding-value.oak.md": {
+      "bytes": 673,
+      "sha256": "57471cc5891a06b4f539091185f6cd5034964cb7434b46520f5bf5dfff78ec15"
+    },
+    "generated/definitions/call.oak.md": {
+      "bytes": 1093,
+      "sha256": "b30ac097882cee5afc4363e407d5d1f5307105faef6d56f7c8b60b3f7f786a0c"
+    },
+    "generated/definitions/compare.oak.md": {
+      "bytes": 889,
+      "sha256": "a48e53b8622f4012d808a5e6a6fa77e554d14f02bf6a09c7d5b7dd88d70a5730"
+    },
+    "generated/definitions/constant-value.oak.md": {
+      "bytes": 699,
+      "sha256": "9fad51d8ca9a0ea96952598fe3472556bc3a3f50002bf567b52939a8695b807b"
+    },
+    "generated/definitions/constant.oak.md": {
+      "bytes": 4086,
+      "sha256": "85d387f5f072e32fdfead97ef90b6376607170def18fc8e81ca789596440cba2"
+    },
+    "generated/definitions/emit.oak.md": {
+      "bytes": 1614,
+      "sha256": "51e133e3f4f26b93a74fba9c405df318a871f059c6c63ddea586c1165f9e1c13"
+    },
+    "generated/definitions/fail.oak.md": {
+      "bytes": 617,
+      "sha256": "7d93cd0626c1236f207a208dcbde96a9ec52a4b20e46e635a10062c96d794387"
+    },
+    "generated/definitions/foreach.oak.md": {
+      "bytes": 1074,
+      "sha256": "e78dc75bb9bea72162f0842697104c91537e6fbef7d016a9b68202a8c8808c7f"
+    },
+    "generated/definitions/if.oak.md": {
+      "bytes": 1025,
+      "sha256": "fe8fa50d627ae7db769e5c8118c0f5b77d1915c9234d7e2c4a04f7af0feefcd4"
+    },
+    "generated/definitions/instruction.oak.md": {
+      "bytes": 654,
+      "sha256": "5147ece73ae1612e432195d5807bfc451fc1e6fcf8aae51eb7f9b218183760df"
+    },
+    "generated/definitions/interface.oak.md": {
+      "bytes": 1863,
+      "sha256": "dad3d953e9bf570da2ccd8dbf3eecdca8787f6552557a003ad82f78e9fdba5ae"
+    },
+    "generated/definitions/join.oak.md": {
+      "bytes": 627,
+      "sha256": "068e87038c08b18427f449d9804fadd2005932b03993effdb85e152ca4d91a8b"
+    },
+    "generated/definitions/lines.oak.md": {
+      "bytes": 795,
+      "sha256": "bf6c1928940824ca6c77e0238dad9a8c1c6f3fbaddb49eaeaded0e4db458cdd0"
+    },
+    "generated/definitions/list-of.oak.md": {
+      "bytes": 837,
+      "sha256": "3585e0bb01904bcd6e12455fa0bbff794b90dce65b7ae2ff2c3b032b8e12dc23"
+    },
+    "generated/definitions/literal-value.oak.md": {
+      "bytes": 596,
+      "sha256": "1372595ca2f8b1e91f70db2fc044f7bb3e887eb90149dd235c2719ae8917fb96"
+    },
+    "generated/definitions/max-chars.oak.md": {
+      "bytes": 677,
+      "sha256": "051718bbfea207b5f8f51390a4006a6ab06b81b892fbd179204493b16961b3fd"
+    },
+    "generated/definitions/node.oak.md": {
+      "bytes": 1693,
+      "sha256": "2c884243299a82040d676f341460f4ea822212585d31b75511d2d6a7650d8d6a"
+    },
+    "generated/definitions/non-empty.oak.md": {
+      "bytes": 605,
+      "sha256": "d89b3ccdcad4df1b4ed6dd5e88bb44aa4bc5384764777970ba65cf78f2339798"
+    },
+    "generated/definitions/not.oak.md": {
+      "bytes": 665,
+      "sha256": "0162b036aa81207e0825b1a016004b703b42bc9877d1c23ddd690a113c9aa1c6"
+    },
+    "generated/definitions/one-of.oak.md": {
+      "bytes": 662,
+      "sha256": "6e94c09c9115fb1a8d710fd0671dde73965393e70ddf2e975320fbb47c153dca"
+    },
+    "generated/definitions/par.oak.md": {
+      "bytes": 978,
+      "sha256": "01e1dc331b9846e2ef043b6891afd027f92f4dabacbc4f9dc7d8cc599eaa2bef"
+    },
+    "generated/definitions/process.oak.md": {
+      "bytes": 2528,
+      "sha256": "f1c9cc4871a2b4498e021179d19ec1beb17a7e231888026c259d5d496d29dca9"
+    },
+    "generated/definitions/regex.oak.md": {
+      "bytes": 711,
+      "sha256": "54b1b3667c48c6fbb77169e5e49422de984148a8864f79d6b770fd38e6030a8c"
+    },
+    "generated/definitions/schema.oak.md": {
+      "bytes": 1419,
+      "sha256": "a70c35513aa5937446f06d88623ef643f32480578098ce54544b6ed4b3309bee"
+    },
+    "generated/definitions/set.oak.md": {
+      "bytes": 743,
+      "sha256": "37f88e0b9bdb7bbe42fba4eaa7575ec7b9aa234da95aa364b75f2500e1527fd5"
+    },
+    "generated/definitions/state-value.oak.md": {
+      "bytes": 668,
+      "sha256": "6e1bfe8517eed11a624fe0f03c261506de8230eaf3e70f1b95c7f52175285bc6"
+    },
+    "generated/definitions/state.oak.md": {
+      "bytes": 1224,
+      "sha256": "a1bd2529807a0bb8d0b43dc7a758b89d223ec6b2ffaa348752468f1be2fff26f"
+    },
+    "generated/definitions/trigger.oak.md": {
+      "bytes": 1865,
+      "sha256": "4646bfce799a045eb71640e5ee0f34f5f56f6f91da2f2373607ffc6e62f2cf3f"
+    },
+    "generated/definitions/type.oak.md": {
+      "bytes": 646,
+      "sha256": "14abb267cf76dfc4085b0bce57f7d369c8ce2d3a8b80b11c56e74e2f287b11ff"
+    },
+    "generated/definitions/value-binding.oak.md": {
+      "bytes": 770,
+      "sha256": "0ad719734bb3d85a71fe392697be0570dc092533f83ec9644a2f6bd75cf815a7"
+    },
+    "generated/definitions/where.oak.md": {
+      "bytes": 1148,
+      "sha256": "24cca20afcc38cf5b6971ecc7207a431548e42f4f75a82820f655a184be7e2e7"
+    },
+    "generated/definitions/while.oak.md": {
+      "bytes": 1014,
+      "sha256": "ab5a4b97bd03ade6277ed6c5ee423ae67074b122d845d7e945ea1657b80cfdf7"
+    },
+    "legacy-snapshot-aps/SKILL.md": {
+      "bytes": 4555,
+      "sha256": "aab6e8ce459e9eec17767770e55d93d83e37ec50b13c9551ed214bb382a70eb3"
+    },
+    "legacy-snapshot-aps/_template/SKILL.md": {
+      "bytes": 795,
+      "sha256": "bb2effe2af50d3c6346b431d9caa2d4c8b17d5a7c061d687a8fb935afc970741"
+    },
+    "legacy-snapshot-aps/_template/assets/constants/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "legacy-snapshot-aps/_template/assets/formats/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "legacy-snapshot-aps/_template/guides/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "legacy-snapshot-aps/_template/processes/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "legacy-snapshot-aps/_template/references/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "legacy-snapshot-aps/_template/scripts/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "legacy-snapshot-aps/aps-single-shot.md": {
+      "bytes": 61476,
+      "sha256": "67d9c09eb664c26bae8b2702ecccd12e9aa9968af97961c0416af6a390371c1b"
+    },
+    "legacy-snapshot-aps/assets/composites/gui-component-spec-v1.0.0.example.md": {
+      "bytes": 11822,
+      "sha256": "73df0e14070141a50f9a60f30a420b1b379bd43daf040c046b01e3f9fa2bd6fe"
+    },
+    "legacy-snapshot-aps/assets/composites/mcp-tool-bridge-v1.0.0.example.md": {
+      "bytes": 2369,
+      "sha256": "90a4828d780de0f1ffbe281bc7d02fa0bbe0242128fad343b5fb14d4a5984f43"
+    },
+    "legacy-snapshot-aps/assets/constants/constants-csv-block-v1.0.0.example.md": {
+      "bytes": 464,
+      "sha256": "11cce4af5e4338d9548d483675b5f1fc364918e60a88ee8203c88699b651115b"
+    },
+    "legacy-snapshot-aps/assets/constants/constants-json-block-v1.0.0.example.md": {
+      "bytes": 322,
+      "sha256": "735668a5367108e1cff0e95e54b8443ce23b5dd0928dc293fbf6f60d2c592882"
+    },
+    "legacy-snapshot-aps/assets/constants/constants-text-block-v1.0.0.example.md": {
+      "bytes": 462,
+      "sha256": "50817245b9ee2f8419fba916b99c08e0903d502af8a169dcf56b14b960b34cb8"
+    },
+    "legacy-snapshot-aps/assets/formats/format-code-changes-full-v1.0.0.example.md": {
+      "bytes": 754,
+      "sha256": "093b74092d192f2de936373ec31c46f24219bccf0a38421a5edccd2701d27350"
+    },
+    "legacy-snapshot-aps/assets/formats/format-code-map-v1.0.0.example.md": {
+      "bytes": 646,
+      "sha256": "cc51c7361b514bd0d6d4405c6e7724a30c20a2f95f6b86105fb6d56ed6a00b03"
+    },
+    "legacy-snapshot-aps/assets/formats/format-docs-index-v1.0.0.example.md": {
+      "bytes": 919,
+      "sha256": "7baf35cf2543334c8d51aafa1a597195ddafeac48f2f8aa0c6d296ce7284def5"
+    },
+    "legacy-snapshot-aps/assets/formats/format-error-v1.0.0.example.md": {
+      "bytes": 435,
+      "sha256": "d01c45d593475cc0cfb761d1dc7684b4cf745c77cbd7925738d57d9de43c2a68"
+    },
+    "legacy-snapshot-aps/assets/formats/format-hierarchical-outline-v1.0.0.example.md": {
+      "bytes": 700,
+      "sha256": "71b6cd3acdc2e92bf29d5e2adbd692f210381ab5569a6da211c444eee5658488"
+    },
+    "legacy-snapshot-aps/assets/formats/format-ideation-list-v1.0.0.example.md": {
+      "bytes": 766,
+      "sha256": "f0f20716db279a987b685ca25c3610aaef73cee4446fbb43ccd98e5c0f2235e0"
+    },
+    "legacy-snapshot-aps/assets/formats/format-link-manifest-v1.0.0.example.md": {
+      "bytes": 560,
+      "sha256": "5c01b6a6ae93db159639a998d71e560f69d79beff2c39034467b5ffe28c88c95"
+    },
+    "legacy-snapshot-aps/assets/formats/format-markdown-table-v1.0.0.example.md": {
+      "bytes": 790,
+      "sha256": "a7cfe6f316bf0a026a3bfb38c91362dfe926c55d9f74f9705adef14a64648484"
+    },
+    "legacy-snapshot-aps/assets/formats/format-smeac-plan-v1.0.0.example.md": {
+      "bytes": 7267,
+      "sha256": "0a86e305b198fde41ac61a7d51f448cdb0cc13019981ad1e6f33d36e5747257e"
+    },
+    "legacy-snapshot-aps/assets/formats/format-table-api-coverage-v1.0.0.example.md": {
+      "bytes": 805,
+      "sha256": "1f989f14c1a979bee5666c31ac3effd7610bc11b0f38c04a9f13e0b29bab7505"
+    },
+    "legacy-snapshot-aps/guides/skill-authoring-v1.0.0.guide.md": {
+      "bytes": 9046,
+      "sha256": "7ddb06d180eabdea02c7389d8443fae5da4efff44fbb90cfca5c0540d60364a3"
+    },
+    "legacy-snapshot-aps/guides/subagent-architecture-v1.0.0.guide.md": {
+      "bytes": 7051,
+      "sha256": "040ae48c90d0a07597a161304442ba0e9d1dd95e00c7aa12d02a146a2a93e752"
+    },
+    "legacy-snapshot-aps/platforms/README.md": {
+      "bytes": 4300,
+      "sha256": "a3cffddd0a63f5d9d66299688b90b802f094b9e819704bdf1e251a954e85a41b"
+    },
+    "legacy-snapshot-aps/platforms/_template/adaptor.md": {
+      "bytes": 1552,
+      "sha256": "7d3f5756641afae69fd9b04544055a33885bc65c98af0351757facb94780cf01"
+    },
+    "legacy-snapshot-aps/platforms/_template/templates/.github/agents/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "legacy-snapshot-aps/platforms/claude-code/adaptor.md": {
+      "bytes": 12892,
+      "sha256": "7e8469d97d43c6f9cfe03074a2090332b899da4b73ddacce992b9cde77146b94"
+    },
+    "legacy-snapshot-aps/platforms/copilot-cli/adaptor.md": {
+      "bytes": 33575,
+      "sha256": "f960b06259f6d3ffd3264124c9f6c912876bace0186edd4721c78a6571e14038"
+    },
+    "legacy-snapshot-aps/platforms/copilot-cli/templates/.github/agents/aps-v1.2.2.agent.md": {
+      "bytes": 25104,
+      "sha256": "a89d61fae22f4d17511de94d5dbd503df50a2d0408d599f10aec2960bab2e677"
+    },
+    "legacy-snapshot-aps/platforms/generic/adaptor.md": {
+      "bytes": 3291,
+      "sha256": "9a8a34a3d270c0b3da94c510abf13608554a837c9aa618302f7a8b192168efa2"
+    },
+    "legacy-snapshot-aps/platforms/opencode/adaptor.md": {
+      "bytes": 7150,
+      "sha256": "a8e9223f82d03d6bb5e966e1fe68fd11a8b4c00419d5787d8867b3ab0d685c55"
+    },
+    "legacy-snapshot-aps/platforms/vscode-copilot/adaptor.md": {
+      "bytes": 14356,
+      "sha256": "f93e006845ec011671e198ce066543294a0acc33256c441009bb1ba69dd57c09"
+    },
+    "legacy-snapshot-aps/platforms/vscode-copilot/templates/.github/agents/aps-v1.2.2.agent.md": {
+      "bytes": 21737,
+      "sha256": "db8abc6197c9ebddd4959ca7db9129d835b17c99f9bfcab7c94d32fed05a76fb"
+    },
+    "legacy-snapshot-aps/processes/build-skill.md": {
+      "bytes": 10269,
+      "sha256": "db0b3c1d27b430d8f71eb781db65308bda4eccd637d180aae7b279f0a30a9455"
+    },
+    "legacy-snapshot-aps/references/00-structure.md": {
+      "bytes": 6017,
+      "sha256": "ab9da17501740ce57d379c6788d8792a9f8f4ac49385156396117ef6618358d0"
+    },
+    "legacy-snapshot-aps/references/01-vocabulary.md": {
+      "bytes": 2680,
+      "sha256": "2bec040c4ab86561a7894e087477a708105a1ac61bc75fa076267ece64f329aa"
+    },
+    "legacy-snapshot-aps/references/02-linting-and-formatting.md": {
+      "bytes": 5484,
+      "sha256": "6315f0dbd9c76289762d8f4fa25980f299e7d525448bd8cc64c3c76297db1f26"
+    },
+    "legacy-snapshot-aps/references/03-agentic-control.md": {
+      "bytes": 7948,
+      "sha256": "ed4913a6312573e6eae1dcdadedf5f2e11dc8560ca98f3c918a6fa302c1ad31a"
+    },
+    "legacy-snapshot-aps/references/04-schemas-and-types.md": {
+      "bytes": 8633,
+      "sha256": "221d7d9c8f5522e0c43f9cfb713df963354aeb248c399be331d2bf81aa6a6d1b"
+    },
+    "legacy-snapshot-aps/references/05-grammar.md": {
+      "bytes": 5074,
+      "sha256": "3e7167a93445db68c3d92e0687ded464eee3734d3bc46ba0ccd9bf8f503519a5"
+    },
+    "legacy-snapshot-aps/references/06-logging-and-privacy.md": {
+      "bytes": 753,
+      "sha256": "dfc8ead8a88968cc5b6109796fafba71dfbd9fdbb7d03a7d5e9742bc9d347009"
+    },
+    "legacy-snapshot-aps/references/07-error-taxonomy.md": {
+      "bytes": 5491,
+      "sha256": "8b723759faa91132cb9311758cb05b99f132c104409b56215ffd640ae6824c98"
+    },
+    "legacy-snapshot-aps/scripts/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "oak/AGENTS.md": {
+      "bytes": 3665,
+      "sha256": "81a0aea64c2e18c6261014f67ab3854f75d8cf5747cf8f7cc5396db37d2e3135"
+    },
+    "oak/__init__.py": {
+      "bytes": 4192,
+      "sha256": "d607deef5eda919b13914474067be2b7942d2d20a4e4fb8468f9fe555ca4cb5b"
+    },
+    "oak/authoring.py": {
+      "bytes": 1613,
+      "sha256": "fae74e9aed265519ae3fafade1974183f8e0f6fc6d56edede0b744c66eebad13"
+    },
+    "oak/base.py": {
+      "bytes": 1277,
+      "sha256": "5ed074dec3a979677e8978a430491f2460e27aaf0a028fd9ff9dfbdb120ce3f1"
+    },
+    "oak/context.py": {
+      "bytes": 7649,
+      "sha256": "8712f2c30eb9bf51e790b06c8148e79bd537ee9c7b5bbf0d912be02694ae3372"
+    },
+    "oak/defaults.py": {
+      "bytes": 110,
+      "sha256": "8c1ac639655aeb51b1e7d8b8b7a1225b78657ad1284843bf04d411880d887995"
+    },
+    "oak/execute/AGENTS.md": {
+      "bytes": 3728,
+      "sha256": "f45b5089b85bbb1a94ae6d0b2660e9c31ec91ca5b4afd090ef572976200c426a"
+    },
+    "oak/execute/__init__.py": {
+      "bytes": 552,
+      "sha256": "3806607f5233c9d4b0eb4fc1255a34575b646090f8c359e0eb2fbf84d9b2b611"
+    },
+    "oak/execute/actions.py": {
+      "bytes": 5309,
+      "sha256": "3f202d9fb592ac08258c29a7abefd17fc5e46c384c13797d813917b8284912d5"
+    },
+    "oak/execute/context.py": {
+      "bytes": 1083,
+      "sha256": "c6c1dbe42e85892210ab9e394fde7a931fb8846c7253ba25df7d142b650827bf"
+    },
+    "oak/execute/executor.py": {
+      "bytes": 6057,
+      "sha256": "c8d0e4b9899a5e678ae591eefaba0c2397aa85d533e5bec993b49e4b604ebcf4"
+    },
+    "oak/execute/models.py": {
+      "bytes": 6271,
+      "sha256": "af8b2f2217c0c77186a51265448084633e59bfa2d13e0ee90cd54f80f018f5f2"
+    },
+    "oak/execute/statements.py": {
+      "bytes": 9251,
+      "sha256": "50293c21451f7cd2cab905cdd203e084de3fe9b46b4a0d0b752ed88d500d97dc"
+    },
+    "oak/execute/values.py": {
+      "bytes": 4835,
+      "sha256": "6d2eaee0c8bf5c26351a50848ba400b9ddb89137a9bcba7e68eedfef58c33c1b"
+    },
+    "oak/node/AGENTS.md": {
+      "bytes": 3757,
+      "sha256": "3d6bf2732ddc43fee21b078345333e73a9093865a390f8600c42f7bfd08fd920"
+    },
+    "oak/node/__init__.py": {
+      "bytes": 112,
+      "sha256": "db768a0717019b5f7eaa56d1f8a54b172164e75c12515e94addbb76c82cdd69e"
+    },
+    "oak/node/dump.py": {
+      "bytes": 542,
+      "sha256": "8a1550dacfbb3334f5e586c1ad31f6f62e4aa342d69a893bd621edeed86f481c"
+    },
+    "oak/node/index.py": {
+      "bytes": 3116,
+      "sha256": "b4c6d540e773b9ee4a3e5aee7fb581ccb4186254f4edd385af9c767c3080bb70"
+    },
+    "oak/node/interpretation.py": {
+      "bytes": 3235,
+      "sha256": "353715db69cebf922ade36ed44905806277d21f6e246d8fa4d1959b60f39e09e"
+    },
+    "oak/node/model.py": {
+      "bytes": 2125,
+      "sha256": "9f16cae402d3ba2cc75e6000f0398868659d0d65f4202a774bfc1329fc0eb358"
+    },
+    "oak/node/parts/__init__.py": {
+      "bytes": 2315,
+      "sha256": "4142e8020efb1f853ef180ddea5be0e4b0621092b7518e46e3ef479923d024bf"
+    },
+    "oak/node/parts/constants.py": {
+      "bytes": 5065,
+      "sha256": "5a676ea32773a5e1d16e68094f3b13fd1993b8e212e2629a11cabefabf32c3d7"
+    },
+    "oak/node/parts/entry.py": {
+      "bytes": 408,
+      "sha256": "dd6f3c2aee0ea92ecb579efc7f98a652f40c0d6dfe74f893e4037d5b490634ad"
+    },
+    "oak/node/parts/instructions.py": {
+      "bytes": 923,
+      "sha256": "175141032d7aebd6b713a66ff8bc9eaf78a7e2145a64645b6eb31d66a59f267d"
+    },
+    "oak/node/parts/interfaces.py": {
+      "bytes": 2933,
+      "sha256": "9e2f9ac50bac981830da921cc5ef97d5594326dbfca39bcc6b408bb86281da51"
+    },
+    "oak/node/parts/part.py": {
+      "bytes": 603,
+      "sha256": "e07d78ffea674318dfc9336eb0bab7acd66ad45b21a2a8698969acf281283dd2"
+    },
+    "oak/node/parts/processes/__init__.py": {
+      "bytes": 1401,
+      "sha256": "a3ba3caf694dd124cbf6626c466fcc977aab4ceb918501e40fd6372318ed3c81"
+    },
+    "oak/node/parts/processes/conditions.py": {
+      "bytes": 7986,
+      "sha256": "65a4bc1c8249a0f4998da2047b759451ea3a081ff4c0ae92e9ca170dc0bb9b0f"
+    },
+    "oak/node/parts/processes/model.py": {
+      "bytes": 3846,
+      "sha256": "67f7812c98683639e6dc2358f593eb13f6c99f1c9bd9c714b70aca781e0c8291"
+    },
+    "oak/node/parts/processes/operators.py": {
+      "bytes": 4203,
+      "sha256": "177c168f61c664c37d87454a4b34ed7a44558849b50ced93e059a593b23246c8"
+    },
+    "oak/node/parts/processes/statements.py": {
+      "bytes": 25873,
+      "sha256": "5bf75b853c304673f1b63392a1d39e321c861ade0b1f3e1f0a74b27ed6795531"
+    },
+    "oak/node/parts/processes/targets.py": {
+      "bytes": 774,
+      "sha256": "933f10fa44fa5d9a15041d5c864d26d62de87b8ec948967be706d31512550de3"
+    },
+    "oak/node/parts/processes/values.py": {
+      "bytes": 3533,
+      "sha256": "b9ed78ad9e2cf2ceae6ee798eb9cfccbabab88c57cf9fc9fff89f650e2dd1f0d"
+    },
+    "oak/node/parts/schemas/__init__.py": {
+      "bytes": 828,
+      "sha256": "4f0b24a9ea44aae21c668839defe9574c905212247ff8fbbf791593cfbaf79b1"
+    },
+    "oak/node/parts/schemas/binding.py": {
+      "bytes": 6206,
+      "sha256": "49b8bdd75f7bccab845d5000b14abb230ba6a2be585e8f2f669b206faa794f0f"
+    },
+    "oak/node/parts/schemas/constraints.py": {
+      "bytes": 12656,
+      "sha256": "66d898257bf1d64bd17ad7fb285e4b4b5bf21de0aeeaabbbfa62ebab45a59de2"
+    },
+    "oak/node/parts/schemas/model.py": {
+      "bytes": 9967,
+      "sha256": "b9b1b9f933165b81110f544b743dd23e110da5f8fcbc037b3e7161708601cfd1"
+    },
+    "oak/node/parts/state.py": {
+      "bytes": 1733,
+      "sha256": "398772763206992311230d83e37c9b6b9b1057a2bfab11dadfe15b37196148eb"
+    },
+    "oak/node/parts/triggers.py": {
+      "bytes": 4855,
+      "sha256": "38b835ca59b1c232219d0a765cea1b94edb8a595c1fe324fa8b48ee4573c8fd6"
+    },
+    "oak/node/structure.py": {
+      "bytes": 223,
+      "sha256": "6161b9cfca2f6df481d5d0694893634a612434c0493a8dd6f049c2c417c36af5"
+    },
+    "oak/node/validation/__init__.py": {
+      "bytes": 89,
+      "sha256": "cc5f013c51165c8be7744824cecc8988493deeccecd432427236d06e854b135b"
+    },
+    "oak/node/validation/conditions.py": {
+      "bytes": 4413,
+      "sha256": "bcaa01e2dc122eb205722272e8ef02bd1fa128b5bd55f4644e9b6ccc1f742107"
+    },
+    "oak/node/validation/contracts.py": {
+      "bytes": 2664,
+      "sha256": "edb2685d0272b32d7de295093a94c0f03d1a01f27bc56f486a01aede08db8aa5"
+    },
+    "oak/node/validation/flow.py": {
+      "bytes": 5753,
+      "sha256": "ad23f7ec61b38a01fccae8aa4798e21c374386955e641cd628762699952fe247"
+    },
+    "oak/node/validation/node.py": {
+      "bytes": 1287,
+      "sha256": "75f5b94ff6393fe0cc699aa146a6ec09154d2c48a46e14720e9c8b37b15a0444"
+    },
+    "oak/node/validation/processes.py": {
+      "bytes": 14782,
+      "sha256": "46fbfc61b6e2d3a4d5fd0c890d6bc776be75fa147d17e811e5a9f3f8303dcfd1"
+    },
+    "oak/node/validation/tools.py": {
+      "bytes": 3545,
+      "sha256": "d194c6c763c2f2e883efb3dd5f646ebb6ec5509b464e7498a29dd318446d65db"
+    },
+    "oak/node/validation/triggers.py": {
+      "bytes": 12102,
+      "sha256": "478df22a90ccb88e7fa235400c2cfeb89960ea636d6f71203519946372364013"
+    },
+    "oak/node/validation/values.py": {
+      "bytes": 4556,
+      "sha256": "1a282fb8cea506edd7f4244069697435548c346e9272b9969678199f312b0081"
+    },
+    "oak/parse/__init__.py": {
+      "bytes": 295,
+      "sha256": "29231ef58ad912835a95765de443374021a794eb93e2c36700d5c15099c80c42"
+    },
+    "oak/parse/conditions.py": {
+      "bytes": 1138,
+      "sha256": "dd7e81b83f49478923e9c610d925b899738c15d9304034800a6f72ba27021ef2"
+    },
+    "oak/parse/cursor.py": {
+      "bytes": 2073,
+      "sha256": "77befdaf5b7c3e4db4c3ee3205fc9f94744e6f25e549de866faa5e093ae71fd5"
+    },
+    "oak/parse/data.py": {
+      "bytes": 7693,
+      "sha256": "c7741b51cc16baab0fc510e490d38be2560822424908ad1faf5cd0f6277ef899"
+    },
+    "oak/parse/document.py": {
+      "bytes": 4173,
+      "sha256": "d01ad3d52e51883c84f5711416eba88ef8a9951dc2d1139712f0f1b40fb990d2"
+    },
+    "oak/parse/errors.py": {
+      "bytes": 1589,
+      "sha256": "ed3ddf35ead994c3c0aef4bdcae33b58c4c540bf935894845445d3c7be7ee407"
+    },
+    "oak/parse/expressions.py": {
+      "bytes": 9136,
+      "sha256": "811457440d2d7d6c637c67f7c58ee157383d0be7ae32b3c019556ac78d73d89d"
+    },
+    "oak/parse/fragments.py": {
+      "bytes": 4749,
+      "sha256": "c7cf8c615c70bdd326aa2654811bb2f06832c2b9f6c31e3b71ed49f1b0f27307"
+    },
+    "oak/parse/grouping.py": {
+      "bytes": 7510,
+      "sha256": "3b3735b4d3cb06add880f6ca03094d261b169aa3d55b79dd9a3c93ba622a83bd"
+    },
+    "oak/parse/interfaces.py": {
+      "bytes": 2668,
+      "sha256": "08c89a7318ba06908287c35d41b9959023609ec06c6ae140a1f9792f639586fb"
+    },
+    "oak/parse/processes.py": {
+      "bytes": 1719,
+      "sha256": "37d808ad1540911ac5fdef5f60625be42389434b6d9c35d31f31fb09aaa72037"
+    },
+    "oak/parse/schemas.py": {
+      "bytes": 6825,
+      "sha256": "32e25179acdf50891c68be5b0894645fa81ff4a57c0bd9b940fa3d85664d24d5"
+    },
+    "oak/parse/statements.py": {
+      "bytes": 7679,
+      "sha256": "9f2f747958e290dddea5f95c0b907ba77e0953461ce8757c4923ad96a57bd2d8"
+    },
+    "oak/parse/triggers.py": {
+      "bytes": 3117,
+      "sha256": "40a6b1efc95eb6ac5b76d8edf53fc4ae894823ea44942f630cadec4fd04a1345"
+    },
+    "oak/parse/values.py": {
+      "bytes": 1619,
+      "sha256": "f30a8de6dbf31379e931b628b79e392be162d1788a161e50d876c04cadcb023a"
+    },
+    "oak/render/__init__.py": {
+      "bytes": 603,
+      "sha256": "c928f4055edf20efe8ffdd058bf8db4086bff5d4678c1fb55f209997697008ec"
+    },
+    "oak/render/json_ld/__init__.py": {
+      "bytes": 437,
+      "sha256": "ec3aec37f5276e6d54aec49118e5a49106aa12827c81fcd9b0e0685e65b52785"
+    },
+    "oak/render/json_ld/context.py": {
+      "bytes": 4082,
+      "sha256": "5f0adc8909ce1c700e389213ede9bb813000b0b0660009842b36ab16b0a78dda"
+    },
+    "oak/render/json_ld/document.py": {
+      "bytes": 1714,
+      "sha256": "71cd09c1135e315197ca7d442753944cb87fea11c036d523ad54537d3a366140"
+    },
+    "oak/render/json_ld/entries.py": {
+      "bytes": 8827,
+      "sha256": "c9363b34a410a8cbde66be1790bc6b8fa16908e1783f3c739398e993a10119c8"
+    },
+    "oak/render/json_ld/identifiers.py": {
+      "bytes": 1212,
+      "sha256": "6675f274ce59d0a7658b40700cbaf3c7bafa53ed633ae2b9810febb3d8826bb9"
+    },
+    "oak/render/json_ld/values.py": {
+      "bytes": 3641,
+      "sha256": "a221e78cd42a344ef221dbfb475d50cc47fdd99730ea8c13df7604acf29f8d62"
+    },
+    "oak/render/oak/__init__.py": {
+      "bytes": 500,
+      "sha256": "fa08984222e1ca8c35102b835c81b8476754342d4630faff134dfb3ed220f324"
+    },
+    "oak/render/oak/arrangement.py": {
+      "bytes": 2497,
+      "sha256": "ada96c2c0db5ed4d9a5b7c45eeb24868b6144108421f4ccaaeda2d08fd673872"
+    },
+    "oak/render/oak/data.py": {
+      "bytes": 7471,
+      "sha256": "9006347f4aa7ad555a3db0282cb5c159aee43400bdb5baf61e6c402fc9e6e80c"
+    },
+    "oak/render/oak/expressions.py": {
+      "bytes": 1568,
+      "sha256": "e16dc80eaaddc24222b5e128608cd3eadf78a6df776d9b972b7e3e52b5dee5ce"
+    },
+    "oak/render/oak/groupings.py": {
+      "bytes": 4531,
+      "sha256": "fdb59696482ca42c7b7cd4cec9347eef4c1e136770719cfc532a08070cd483c7"
+    },
+    "oak/render/oak/instructions.py": {
+      "bytes": 2844,
+      "sha256": "ee06e962044d7422aee6ed64840e90b2218eb4d6a273a3576d7005e877f767a3"
+    },
+    "oak/render/oak/interfaces.py": {
+      "bytes": 634,
+      "sha256": "07a36c5667334e86896ea2439ad5457de396195f6f271664307ac81ae8fe869b"
+    },
+    "oak/render/oak/processes.py": {
+      "bytes": 7737,
+      "sha256": "53f944a2c12cea88a54161debec5456b00ea243cac86ddde1a237450aa98a44b"
+    },
+    "oak/render/oak/styles.py": {
+      "bytes": 6271,
+      "sha256": "fef77266505948a363bb7dd55eaaafd1e0a075e12676417ea9e95538c9c6ed27"
+    },
+    "oak/render/oak/triggers.py": {
+      "bytes": 1394,
+      "sha256": "8b45ac3118f62d3351860f7dea9e7d2323b885d1d27a97f0929a568d860b9980"
+    },
+    "oak/render/selection.py": {
+      "bytes": 2327,
+      "sha256": "b84e0b8746e1068710a6d8471e07c08a7f925ce2512f80ba55be6fcc321d6d52"
+    },
+    "oak/resolve/AGENTS.md": {
+      "bytes": 2592,
+      "sha256": "33d7b50a2ac1a2e4d309168107a06e9428dd8cd003a09174cea0289ce55493b9"
+    },
+    "oak/resolve/__init__.py": {
+      "bytes": 470,
+      "sha256": "df6ef5f851fe5001b94e7ce03588d0e199d03af619e0bc39f89cbf84bb3deb9a"
+    },
+    "oak/resolve/contracts.py": {
+      "bytes": 10720,
+      "sha256": "db9b45a83611a542d5881a7d76d6b9793ae74197f584e15bd05ce48b580d7da7"
+    },
+    "oak/resolve/errors.py": {
+      "bytes": 1137,
+      "sha256": "15163ced0a4657f0b98d48c47268c7b71ca78cc6b8be300cfb1e93e09e1dbbb1"
+    },
+    "oak/resolve/graph.py": {
+      "bytes": 2436,
+      "sha256": "35dfc829d4373bbc63471ef6a66c197136cbf6d5b8b99567eb395bf379193728"
+    },
+    "oak/resolve/paths.py": {
+      "bytes": 2776,
+      "sha256": "b8df49fd8c832d3c31296e6fd429b6920d6e161e84c7e5d73340ce20bf1b9403"
+    },
+    "oak/resolve/references.py": {
+      "bytes": 3612,
+      "sha256": "f766bc43952b5e68cfdca7e56203194dfddcd9d8b4ec24bcb60dd164b2812651"
+    },
+    "oak/resolve/resolver.py": {
+      "bytes": 3963,
+      "sha256": "adcabbc528b0066a8eba674114f53cca9e29248afdfe8d614aaddb4c7502b4b3"
+    },
+    "oak/rules/__init__.py": {
+      "bytes": 369,
+      "sha256": "663faf2b2d6236536f215306b71eff998df3f7d034de43d2037e6ccdac2b4715"
+    },
+    "oak/rules/guidance.py": {
+      "bytes": 7790,
+      "sha256": "d75bc30d5cd1bd12f848a8730a7e698d947eb0f3d5748ed583b90bf1c9837369"
+    },
+    "oak/rules/model.py": {
+      "bytes": 477,
+      "sha256": "bd3038475f83f9fd7194ca6d3dd0dd980d13fccc3ea622423b1fa2ce0e80ae75"
+    },
+    "oak/rules/validation.py": {
+      "bytes": 10797,
+      "sha256": "ba29bf5ec342fcaabc09af3a74b963191cb6c49a0b4a72ecb83c602cd9798bb8"
+    },
+    "oak/surface/__init__.py": {
+      "bytes": 471,
+      "sha256": "01f5ec2b7ded2af7ed69811f65b99252567a5fb3317eef90dfd112fdd344e47c"
+    },
+    "oak/surface/constraints.py": {
+      "bytes": 2094,
+      "sha256": "0639750688b2dbab7a2f2841157eecaca721bcafbd2e5b96cafa62a2e823fcd4"
+    },
+    "oak/surface/entries.py": {
+      "bytes": 5049,
+      "sha256": "a7217170e6d6102f62a2addf4430b18ec45ebbae4e5324854c666ecbc49ddf40"
+    },
+    "oak/surface/model.py": {
+      "bytes": 3374,
+      "sha256": "2212cb9163cf87e9524795f980d2513a928e78c17214401491f5ecc7247abc05"
+    },
+    "oak/surface/processes.py": {
+      "bytes": 5420,
+      "sha256": "72bf34f6c42ade1fc6453488e556e8a6035c3b65048d4981605737ffd0ee9c74"
+    },
+    "oak/surface/registry.py": {
+      "bytes": 1915,
+      "sha256": "d2fc88068e94b57a8d0eb13ff964b8d0b79df6ac9169a6b9e186e688eea3a11c"
+    },
+    "oak/surface/syntax.py": {
+      "bytes": 5782,
+      "sha256": "00a8ee0881fdda9e9cd9ee1217fe49692d6b6498bcd615d05dcb4ea94ef29916"
+    },
+    "oak/vocabulary/__init__.py": {
+      "bytes": 1317,
+      "sha256": "42a8fabe205037a51b6311158a4c55324ff4777479818d356f22439e82b2cce7"
+    },
+    "oak/vocabulary/datatypes/__init__.py": {
+      "bytes": 320,
+      "sha256": "2acca51109c988b63cc0e1f91866e216bdf08dccd4dd51f56bfff2ba79ec47a1"
+    },
+    "oak/vocabulary/datatypes/datetime.py": {
+      "bytes": 1027,
+      "sha256": "712abeed1ee050b530d8a5738e49d530a22a7cb25a36a92f52f62a9641a7b947"
+    },
+    "oak/vocabulary/datatypes/names.py": {
+      "bytes": 2035,
+      "sha256": "bfa326b4c8b0fee2d16a3318b89460dbf1adbd57319f00c12c2e03256b5079cc"
+    },
+    "oak/vocabulary/datatypes/quantity.py": {
+      "bytes": 776,
+      "sha256": "214642bcdfcffc1c88fe6c61391951f88d672ee7b80f07558bec2b08507f003c"
+    },
+    "oak/vocabulary/display/__init__.py": {
+      "bytes": 382,
+      "sha256": "d1a3da3780a87d0f0c3e44379ea3c721511d71ade4b32d65b7e6ac4a4e8fe18b"
+    },
+    "oak/vocabulary/display/datetime.py": {
+      "bytes": 381,
+      "sha256": "b6c8a94616b3fc5d947252c481b36ec6ec53e6dd273f5240df777ff5500b02bf"
+    },
+    "oak/vocabulary/display/number.py": {
+      "bytes": 827,
+      "sha256": "d4d7e46188c387c4a3f3f74d35897128bb7fb588b97157bfdbe128685baa9ade"
+    },
+    "oak/vocabulary/display/quantity.py": {
+      "bytes": 321,
+      "sha256": "b4c1e757bae069e7b3702d3cc91335cdb6cc5f1b1f5896109d902c2125bea589"
+    },
+    "oak/vocabulary/syntax.py": {
+      "bytes": 4545,
+      "sha256": "a8777cd5a88d3ce6be80071a488aaa3a947b12a9836ce8e5cfe0cb9667f06ba4"
+    },
+    "oak/vocabulary/text/__init__.py": {
+      "bytes": 654,
+      "sha256": "dc9630a39ef5ae2bbba859abef75051ca582d2dbf6b555ba7e836fc9f5101ce8"
+    },
+    "oak/vocabulary/text/dotted_path.py": {
+      "bytes": 537,
+      "sha256": "9642cfbb0e87b53e83ec3177936b272dde0f51028d66f7d83e07156bea5669d6"
+    },
+    "oak/vocabulary/text/non_blank_line.py": {
+      "bytes": 536,
+      "sha256": "695d8cfbc2e307ee63fafe7ce990dd7eb41e4eaa98e24eadeade78389f22dcc4"
+    },
+    "oak/vocabulary/text/placeholder.py": {
+      "bytes": 1109,
+      "sha256": "14935c01738cc425c1f8c71f68eaaf17db3ddbebba59747e423bee5a58064a9b"
+    },
+    "oak/vocabulary/text/process_name.py": {
+      "bytes": 1214,
+      "sha256": "400f92923acc2c8e872b4f431ee3b8c0123fefe521d9164526248efbeaddf1d5"
+    },
+    "oak/vocabulary/text/regex_pattern.py": {
+      "bytes": 2564,
+      "sha256": "690207941075f46e7fce3a5f788157cff9ab9937a6c879306bedc67a7bb07b6f"
+    },
+    "oak/vocabulary/text/slug_id.py": {
+      "bytes": 710,
+      "sha256": "486a33e984ac973534c917fae37dfa66a8cd0aa235cfbc9781a6ef9fd4209d63"
+    },
+    "oak/vocabulary/text/target_path.py": {
+      "bytes": 4451,
+      "sha256": "6d4db37ea70b8e8ab5db05419fa0d91af17a0188bf53e10fab917f1c5175b98f"
+    },
+    "oak/vocabulary/text/value_reference.py": {
+      "bytes": 1945,
+      "sha256": "aca552bbfc34dbc0ceecadd7843d93b96b712b1bf948b7c51ce6d295dcaf84c8"
+    },
+    "oak/vocabulary/units.py": {
+      "bytes": 221,
+      "sha256": "3a9c3f3b9dd67d09808f18c5e1b5256555a3cbcda71e781c9eb2ddc2d5ed30af"
+    },
+    "pyproject.toml": {
+      "bytes": 312,
+      "sha256": "2412c436c0ffaa05c604da2d58be4b72c443b37efcaa094380845fd0fe3a3702"
+    }
+  },
+  "sizes": {
+    "skill_entry": {
+      "bytes": 8373,
+      "limit_bytes": 10000,
+      "sha256": "9c2656b5ee609911cad232d608882b02149152f5308a5b7186bb620dfaa9e642"
+    },
+    "standalone": {
+      "bytes": 63844,
+      "limit_bytes": 64000,
+      "sha256": "4c3efd2c61d1c33bc08e245b6d05e51637588cf938dd120a22d44f971f0de79b"
+    }
+  },
+  "supporting_docs_declarative_only": 13,
+  "validator_change_only": {
+    "after": {
+      "bytes": 13197,
+      "sha256": "0eef3148d275b0cd4cafede4dd6488c1aff8683cee6de372dd8c90848d570c3f"
+    },
+    "before": {
+      "bytes": 13197,
+      "sha256": "bf03a8c14b407a072c57a2f9818de835f63523675654c08eeef3a8ffa922b842"
+    },
+    "change": "Skill version 3.1.0 to 3.2.0 only; runtime/helper logic and immutable source/dependency identity are unchanged."
+  },
+  "validator_identity": {
+    "project_sha256": "2412c436c0ffaa05c604da2d58be4b72c443b37efcaa094380845fd0fe3a3702",
+    "revision": "85ddd5393fd4349632f728f5a05cb67f9bc5dbf5",
+    "skill_version": "3.2.0",
+    "source_sha256": "9bca0d69e12c26aac64d3e7218f4ccfc620e7a7196b569d324ff7ac8197053bc"
+  },
+  "worker_milestone_unchanged_from_checkpoint_01": {
+    "examples/parallel_exploration/example.oak.md": {
+      "bytes": 4850,
+      "sha256": "4cbc4334dab2291a9f5e265cedfb8ff4b1a90b097f1a1d04c474b591d60e7261"
+    },
+    "examples/parallel_exploration/example.py": {
+      "bytes": 14272,
+      "sha256": "cd51e0772bbf0cc1e317ea43b98449bad91abf8196248eee4130ceba752e7198"
+    },
+    "examples/parallel_exploration/explorer.oak.md": {
+      "bytes": 7878,
+      "sha256": "4c0de50e286cd38b8e154a286b28ae7c5e34b0dd29a4533538ff0a6715114eb1"
+    },
+    "examples/parallel_exploration/sample.oak.md": {
+      "bytes": 2131,
+      "sha256": "e4b9aefa8c68f7ea6c70fd8a7ff83002f53bc5457d40ba0822981ac5fb7ea4df"
+    }
+  },
+  "worker_source_layout_correction": {
+    "after": {
+      "bytes": 9165,
+      "sha256": "c530dec2bcbe5b604d8888082ec84ab0131a5a7955b21ae5cd1077663ab32031"
+    },
+    "before": {
+      "bytes": 8833,
+      "sha256": "ceaec5af24d6d0a2eaea2b11af658535781c21fa0b7e567f7c6528ca43aeb4ee"
+    },
+    "change": "Name findings/evidence/coverage assertions separately and assemble those names directly in If.then. Canonical explorer, coordinator and sample bytes are unchanged; existing flat-authoring and behavior checks pass.",
+    "path": "examples/parallel_exploration/explorer.py"
+  }
+}

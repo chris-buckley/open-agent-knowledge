@@ -12,11 +12,9 @@ guidance: YAML<<
 
 part-authoring-priority: ["schemas", "constants", "state", "interfaces", "triggers", "processes", "instructions"]
 
-reading: "Load references and guides in authoring order; select scenarios via assets/examples/catalog.oak.md. Both skill and agent author and interpret without Python, installation, network, or validation."
-
 skill-template: JSON<<
 "---\nname: \"<SKILL_NAME>\"\ndescription: \"<SKILL_DESCRIPTION>\"\n---\n\n<INSTRUCTIONS_PART>\n<constants>\npurpose: <PURPOSE_JSON>\n\nlayout: TEXT<<\nSKILL_TREE:\n  SKILL.md→Skill entry point\n  references/→Supporting knowledge\n  assets/\n    constants/→Reusable fixed values\n    schemas/→Reusable information shapes\n  processes/→OAK workflows\n  guides/→Practical guidance\n  scripts/→Executable helpers\n>>\n\n<CONSTANT_ENTRIES>\n</constants>\n<SCHEMAS_PART>\n<STATE_PART>\n<TRIGGERS_PART>\n<PROCESSES_PART>\n<INTERFACES_PART>\n"
 >>
 
-template-use: "For new skills, use _template/SKILL.md or verbatim skill-template. Quote metadata as YAML strings and PURPOSE_JSON as a JSON string. Replace PART lines with justified OAK sections and a blank line, or delete them. Fill CONSTANT_ENTRIES or leave empty. Remove markers and unused parts/resources; remove .gitkeep when adding content. Unfilled scaffolding is inert."
+template-use: "For new skills use _template/SKILL.md or verbatim skill-template. Quote metadata as YAML strings, PURPOSE_JSON as a JSON string. Replace PART lines with justified OAK sections plus a blank line, or delete them. Fill CONSTANT_ENTRIES or leave empty. Remove markers, unused parts/resources, and .gitkeep when adding content. Unfilled scaffolding is inert."
 </constants>

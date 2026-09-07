@@ -11,8 +11,8 @@ from oak import (ACT, BindingValue, Call, Compare, Constant, ConstantValue, Emit
                  Schema, Trigger, Type, ValueBinding, parse, render, where)
 from oak.rules import AUTHORING_GUIDANCE
 from examples.catalog import teaching_examples
-from examples.schemas.shape_gallery import EXPECTED_INSTANCES, SHAPES, shape_gallery_node
 from build.ebnf import grammar
+from build.agents import adaptor_node
 
 ROOT = Path(__file__).resolve().parents[1]
 GUIDES = (
@@ -21,6 +21,7 @@ GUIDES = (
     "references/04-interfaces.oak.md", "references/05-triggers.oak.md",
     "references/06-processes.oak.md", "references/07-instructions.oak.md",
     "guides/review.oak.md", "guides/validation.oak.md", "guides/authoring.oak.md",
+    "guides/subagent-orchestration.oak.md", "platforms/codex/adaptor.oak.md",
 )
 # Each package authoring rule has one guide owner, not an instruction copy.
 RULE_OWNERS = (
@@ -30,11 +31,12 @@ RULE_OWNERS = (
     ("map-state", "separate-lifetimes", "keep-local-values"),
     ("map-interfaces", "emit-complete", "own-boundary-contracts", "explain-boundary-contracts"),
     ("map-triggers", "route-receive", "declare-triggers"),
-    ("map-processes", "name-process", "contract-work", "describe-action-roles", "distinguish-action-promises", "compose-work", "use-native-act", "use-exact-tool", "parallelize-tools", "delegate-document", "compose-conditions", "separate-layout", "adapt-external-contracts"),
+    ("map-processes", "name-process", "contract-work", "describe-action-roles", "distinguish-action-promises", "compose-work", "compose-conditions", "separate-layout", "adapt-external-contracts"),
     ("map-instructions",),
     ("write-document",),
     ("validate-draft", "emit-document"),
     ("treat-context", "omit-unjustified", "avoid-invention", "reuse-domain"),
+    ("use-native-act", "use-exact-tool", "parallelize-tools", "delegate-document"), (),
 )
 
 TEMPLATE_DIRECTORIES = ("references", "assets/constants", "assets/schemas", "guides", "processes", "scripts")
@@ -75,11 +77,6 @@ def owned_constant(path: str, identifier: str) -> Constant:
     return next(item for item in node.constants if item.id == identifier)
 
 
-def populated_examples() -> str:
-    """Keep table, hierarchy, sections, and code visible instead of YAML-escaped."""
-    return "\n\n".join(f"{schema.name}\n{EXPECTED_INSTANCES[schema.id]}" for schema in SHAPES)
-
-
 def knowledge_nodes(script: str, version: str, revision: str) -> dict[str, Node]:
     """Build focused OAK guides with no operational or authored policy scope."""
     rules = {item.id: item.instruction for item in AUTHORING_GUIDANCE}
@@ -90,10 +87,9 @@ def knowledge_nodes(script: str, version: str, revision: str) -> dict[str, Node]
         owned_constant("oak/AGENTS.md", "host-boundary"),
         Constant(id="oak-ebnf", form="text", value=grammar().rstrip("\n")),
     ]
-    constants[1] += [Constant(id="populated-shapes", form="text", value=populated_examples()),
-                     Constant(id="shape-notes", form="text", value=(
-                         "populated-shapes fills these schemas without wrappers or WHERE. "
-                         "The table has one fixed row; extend its template explicitly when justified."))]
+    constants[1].append(Constant(id="shape-source", value=(
+        "In the teaching mapping, assets/examples/shape_gallery/example.oak.md pairs complete schemas with populated "
+        "instances without definition wrappers or WHERE. Its table has one fixed row; extend the template explicitly if justified.")))
     constants[2].append(Constant(id="forms", form="csv", value=[
         {"form": form, "use": use} for form, use in (
             ("JSON", "short fixed scalars, arrays, or objects"),
@@ -101,23 +97,21 @@ def knowledge_nodes(script: str, version: str, revision: str) -> dict[str, Node]
             ("YAML", "readable structured fixed knowledge"),
         )
     ]))
-    constants[3].append(owned_constant("oak/node/AGENTS.md", "value-lifetimes"))
     constants[4].append(Constant(id="boundaries", value="Interface instances are not mutable storage."))
-    constants[5].append(Constant(id="routing", value="Source-backed triggers share the receive/process schema and omit seeds. Guards require state reads, may compare literals or constants, and cannot read process bindings. Sequence internal work with CALL."))
+    constants[5].append(Constant(id="routing", value="Source triggers share receive/process schemas and omit seeds. Guards read state, may compare literals/constants, never process bindings. CALL sequences internal work."))
     constants[6].append(Constant(id="scopes", form="text", value=(
-        "Keep bindings immutable per frame; CALL promotes declared outputs. Branches/iterations are local. "
-        "IF promotes nothing; use EMIT within it or process contracts, not invented state. "
-        "Justify assertions, conditions, loops, and parallel work from source.")))
+        "Bindings are immutable per frame; CALL promotes declared outputs. Branches/iterations are local. "
+        "IF promotes nothing: use EMIT within it or process contracts, not invented state.")))
     constants[7].append(Constant(id="last-decision", value="Do not copy node-derived interpretation guidance."))
     examples = teaching_examples()
     constants[8] += [
         Constant(id="review", form="yaml", value=[
-            "Check one idless node, unique ids, canonical order, and justified parts.",
-            "Check targets, complete bindings, lifetimes, and native/named tools.",
-            "Apply interface guidance to public promises and structure guidance to claimed knowledge closure.",
-            "Inspect populated output: layout, code fences, and cardinality, not just schemas.",
-            "Grammar describes syntax, not validation; review is not a programmatic check.",
-            "Examples are inert teaching, not extra agents or arrivals to execute.",
+            "Check one idless node, unique ids, canonical order and justified parts;",
+            "check targets, complete bindings, lifetimes and native/named tools.",
+            "Review public promises against interface guidance and knowledge closure against structure guidance.",
+            "Inspect output layout, fences and cardinality, not just schemas.",
+            "Grammar describes syntax; review is not programmatic validation.",
+            "Examples are inert teaching, not agents or arrivals to execute.",
         ]),
         # JSON strings preserve nested OAK block delimiters verbatim as inert data.
         Constant(id="teaching", form="json", value=examples),
@@ -125,34 +119,35 @@ def knowledge_nodes(script: str, version: str, revision: str) -> dict[str, Node]
     constants[9] += [
         Constant(id="identity", value={"version": version, "validator-revision": revision}),
         Constant(id="validation-policy", form="yaml", value=[
-            "Validate only when requested; authoring and interpretation need no installation.",
-            "Use Python 3.11+. Reuse matching installed code, --source with optional --python, or retained cache. Match the source fingerprint, not name/version.",
-            "Use the skill scripts/validate.py. For requested standalone validation, materialize validator-script verbatim as validate.py.",
-            "Run python validate.py document.oak.md; --root permits larger explicitly allowed graphs.",
-            "On permission-required, ask to download the identified OAK revision and install its declared dependencies in an isolated cache. Validation requests are not installation consent.",
-            "After explicit approval, repeat with --allow-install. Reuse the retained installation; no published OAK package is needed.",
-            "If installation is declined, do not install. Continue authoring and report: Programmatic validation was not performed (installation declined).",
-            "If Python, network, dependencies, or execution are unavailable, continue authoring and report the actual not-performed reason.",
-            "Exit 0: parse and resolution passed; 1: invalid; 2: not performed. Report checks, revision, and errors, never proof of execution or semantic correctness.",
-            "Report validation outside OAK. Repair and recheck under the same permission; never silently switch validator revisions.",
+            "Validate only on request; authoring and interpretation need no installation, Python or network.",
+            "Python 3.11+: reuse installed code, --source with optional --python, or retained cache. Match source and dependency fingerprints, never just name/version.",
+            "Run skill scripts/validate.py; standalone users save validator-script verbatim as validate.py. Use its documented arguments and exit codes; --root permits only an explicitly allowed graph.",
+            "Only permission-required prompts consent to download the identified revision and install declared dependencies in an isolated retained cache. Validation requests are not installation consent; explicit consent alone permits --allow-install.",
+            "Reuse the cache; no published OAK package is needed. On declined installation or unavailable Python, network, dependencies or execution, continue authoring without installing and report the not-performed reason.",
+            "Report actual checks, revision and errors outside OAK, not proof of execution or semantic correctness. Repair/recheck under the same permission; never silently change the validator revision.",
         ]),
         Constant(id="validator-script", form="text", value=script.rstrip("\n")),
     ]
     constants[10] += [
         owned_constant("AGENTS.md", "part-authoring-priority"),
-        Constant(id="reading", value=(
-            "Load references and guides in authoring order; select scenarios via assets/examples/catalog.oak.md. "
-            "Both skill and agent author and interpret without Python, installation, network, or validation.")),
         Constant(id="skill-template", form="json", value=TEMPLATE_ENTRY),
         Constant(id="template-use", value=(
-            "For new skills, use _template/SKILL.md or verbatim skill-template. "
-            "Quote metadata as YAML strings and PURPOSE_JSON as a JSON string. "
-            "Replace PART lines with justified OAK sections and a blank line, or delete them. Fill CONSTANT_ENTRIES or leave empty. "
-            "Remove markers and unused parts/resources; remove .gitkeep when adding content. "
+            "For new skills use _template/SKILL.md or verbatim skill-template. "
+            "Quote metadata as YAML strings, PURPOSE_JSON as a JSON string. "
+            "Replace PART lines with justified OAK sections plus a blank line, or delete them. Fill CONSTANT_ENTRIES or leave empty. "
+            "Remove markers, unused parts/resources, and .gitkeep when adding content. "
             "Unfilled scaffolding is inert.")),
     ]
-    return {name: Node(constants=items, schemas=list(SHAPES) if index == 1 else [])
-            for index, (name, items) in enumerate(zip(GUIDES, constants, strict=True))}
+    constants[11] += [Constant(id="orchestration", form="yaml", value=[
+        "The coordinator owns splitting, dispatch, integration and final claims. Give each leaf a bounded independent task and mapped request/result schemas, not coordinator authority.",
+        "Give workers one pinned revision, full applicable governing text, scope and evidence requirements. Restore truncation, preserve document scopes and report blocked work.",
+        "CALL composes processes synchronously, not agents. ACT.tool constructs a tool action, not a capability or permission.",
+        "PAR outputs stay isolated until immediate JOIN promotes them in authored order. Before synthesis reject blocked, failed, malformed or wrong-revision results; reconcile conflicts and retain gaps.",
+        "Hosts own concurrency limits, deadlines, cancellation, cleanup and tool/sandbox enforcement. Fixture overlap proves no live subagent behavior.",
+    ])]
+    nodes = {name: Node(constants=items) for name, items in zip(GUIDES, constants, strict=True)}
+    nodes[GUIDES[12]] = adaptor_node()
+    return nodes
 
 
 def local(name: str) -> ValueBinding:
@@ -179,22 +174,25 @@ def finish_validation(approved: bool) -> Call:
 def entry_node() -> Node:
     """One operational scope for progressive loading and standalone assembly."""
     body = [ACT(
-        "Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> for <SCOPE>. Use <TEMPLATE> under <TEMPLATE_USE> only for new skills; consult other guide knowledge as needed.",
+        "Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> for <SCOPE>. Use <TEMPLATE> under <TEMPLATE_USE> only for new skills; consult needed guides.",
         inputs=[knowledge("AUTHORING", 10), knowledge("STRUCTURE", 0), local("SOURCE"),
                 knowledge("TEMPLATE", 10, "skill-template"), knowledge("TEMPLATE_USE", 10, "template-use")], outputs=["SCOPE"],
     )]
     previous = "SCOPE"
     for index, (part, guide) in enumerate((("schemas", 1), ("constants", 2), ("state", 3), ("interfaces", 4), ("triggers", 5), ("processes", 6), ("instructions", 7))):
         result = f"DESIGN_{index + 1}"
-        text = f"Apply <GUIDANCE> to <{previous}> and <SOURCE>; decide justified {part} as <{result}>."
+        text = f"Design justified {part} as <{result}> from <SOURCE> and <{previous}> under <GUIDANCE>."
         bindings = [knowledge("GUIDANCE", guide), local(previous), local("SOURCE")]
         if guide == 1:
-            text += " Preserve the requested shape using the guide schemas and <POPULATED> instances."
-            bindings.append(knowledge("POPULATED", 1, "populated-shapes"))
+            text += " Preserve requested shapes using the complete schemas and populated instances in <TEACHING>."
+            bindings.append(knowledge("TEACHING", 8, "teaching"))
+        if guide == 6:
+            text += " Apply <DELEGATION> and <ORCHESTRATION> to delegation, <CODEX> and <DEFAULTS> to native Codex artifacts."
+            bindings.extend((knowledge("ORCHESTRATION", 11, "orchestration"), knowledge("DELEGATION", 11), knowledge("CODEX", 12, "mapping"), knowledge("DEFAULTS", 12, "native-defaults")))
         body.append(ACT(text, inputs=bindings, outputs=[result]))
         previous = result
     body += [
-        ACT("Review <DESIGN_7> with <REVIEW>, <GRAMMAR>, and complete <TEACHING>. Produce canonical <CANDIDATE>, not a claimed programmatic check.",
+        ACT("Review <DESIGN_7> with <REVIEW>, <GRAMMAR> and <TEACHING> for canonical <CANDIDATE>, not programmatic validation. Use its catalogue to select complete scenarios.",
             inputs=[local("DESIGN_7"), knowledge("REVIEW", 8, "review"), knowledge("GRAMMAR", 0, "oak-ebnf"), knowledge("TEACHING", 8, "teaching")], outputs=["CANDIDATE"]),
         If(condition=Compare(left=BindingValue(binding="VALIDATE"), operator="equals", right=LiteralValue(value=True)),
            then=[Call(process="process.validate-and-deliver", inputs=[local("CANDIDATE")])],
@@ -221,11 +219,11 @@ def entry_node() -> Node:
             ]),
             Process(id="author-document", name="Author document", input="schema.authoring-request", body=body),
             Process(id="validate-and-deliver", name="Check validator", input="schema.oak-candidate", body=[
-                ACT("Apply <POLICY> and exact <HELPER> to <CANDIDATE> without --allow-install. Return actual <REPORT>; <INSTALL_REQUIRED> is true exactly for permission-required, never invalid OAK or unavailable execution.",
+                ACT("Apply <POLICY> and exact <HELPER> to <CANDIDATE> without --allow-install. Return observed <REPORT>; <INSTALL_REQUIRED> means permission-required, not invalid OAK or unavailable execution.",
                     output="schema.validator-check", inputs=[knowledge("POLICY", 9, "validation-policy"), knowledge("HELPER", 9, "validator-script"), local("CANDIDATE")], outputs=["INSTALL_REQUIRED", "REPORT"]),
                 If(condition=Compare(left=BindingValue(binding="INSTALL_REQUIRED"), operator="equals", right=LiteralValue(value=True)),
                    then=[
-                       ACT("Ask to download <IDENTITY> and install its dependencies in an isolated retained environment. Set <APPROVED> true only for explicit installation consent, not a validation request.",
+                       ACT("Request consent to download <IDENTITY> and install its dependencies in an isolated retained environment. <APPROVED> requires explicit installation consent, not a validation request.",
                            output="schema.installation-consent", inputs=[knowledge("IDENTITY", 9, "identity")], outputs=["APPROVED"]),
                        If(condition=Compare(left=BindingValue(binding="APPROVED"), operator="equals", right=LiteralValue(value=True)),
                           then=[finish_validation(True)],
@@ -236,7 +234,7 @@ def entry_node() -> Node:
                    ], otherwise=[finish_validation(False)]),
             ]),
             Process(id="finalize-validation", name="Report validation", input="schema.validation-context", body=[
-                ACT("Finalize <CANDIDATE> from <REPORT> under <POLICY> using exact <HELPER>. Only <ALLOW_INSTALL> true permits --allow-install, downloads, or installation. Repair and recheck changes under the same permission, not unchanged successes. Return <OAK> and truthful <VALIDATION>.",
+                ACT("Finalize <CANDIDATE> from <REPORT> under <POLICY> with exact <HELPER>. Only <ALLOW_INSTALL> true permits downloads/installation via --allow-install. Repair/recheck changes under the same permission, not unchanged successes. Return <OAK> and truthful <VALIDATION>.",
                     output="schema.authoring-result", inputs=[local("REPORT"), local("CANDIDATE"), local("ALLOW_INSTALL"), knowledge("POLICY", 9, "validation-policy"), knowledge("HELPER", 9, "validator-script")], outputs=["OAK", "VALIDATION"]),
                 Emit(interface="interface.authored-document"),
             ]),

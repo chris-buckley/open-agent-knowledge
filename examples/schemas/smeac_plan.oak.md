@@ -45,6 +45,21 @@ Task: <TASK>
 Purpose: <PURPOSE>
 End state: <END_STATE>
 
+### Directory Changes
+
+Baseline: <DIRECTORY_BASELINE>
+Legend: [add] new; [modify] changed; [move from PATH] relocated; [remove] deleted; [keep] unchanged context; [check] verify and change only if needed.
+Current:
+```text
+<DIRECTORY_CURRENT>
+```
+Planned:
+```text
+<DIRECTORY_PLANNED>
+```
+Ownership: <DIRECTORY_OWNERSHIP>
+Verification: <DIRECTORY_VERIFICATION>
+
 ### State Comparisons
 
 #### <COMPARISON_ID>: <COMPARISON_NAME>
@@ -131,6 +146,11 @@ WHERE:
 - <TASK> is string; is non-empty; the specific measurable time-bound action.
 - <PURPOSE> is string; is non-empty; why the task matters and its link to higher intent.
 - <END_STATE> is string; is non-empty; the desired conditions when the mission is complete.
+- <DIRECTORY_BASELINE> is string; is non-empty; the inspected revision or an explicitly unknown baseline, explaining why when no file changes are planned.
+- <DIRECTORY_CURRENT> is string; is non-empty; the current affected-file tree with purpose notes, or an explicit unknown-baseline explanation. use exactly 'No directory or file changes.' for a no-file-change plan.
+- <DIRECTORY_PLANNED> is string; is non-empty; the planned affected-file tree with purposes and legend markers. Name move sources, retain removed leaves, expand affected directories and do not hide changes with ellipses. use exactly 'No directory or file changes.' for a no-file-change plan.
+- <DIRECTORY_OWNERSHIP> is string; is non-empty; the maintained source and generator owners mapped to each affected delivery. State no changed ownership when applicable.
+- <DIRECTORY_VERIFICATION> is string; is non-empty; how the diagram and source-to-output mapping will be checked against actual changes. Formatting alone is not completion evidence.
 - <COMPARISON_ID> is string; is non-empty; a unique stable example identifier such as E01.
 - <COMPARISON_NAME> is string; is non-empty; the change illustrated by the paired states.
 - <COMPARISON_AUTHORITY> is string; is one of `required`, `illustrative`; required means an accepted completion criterion, illustrative means guidance only.

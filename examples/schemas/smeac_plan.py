@@ -19,6 +19,8 @@ class ComparisonAuthority(StrEnum):
     ILLUSTRATIVE = "illustrative"
 
 
+NO_DIRECTORY_CHANGES = "No directory or file changes."
+
 plan_template = (
     "# <PLAN_TITLE>\n"
     "\n"
@@ -58,6 +60,22 @@ plan_template = (
     "Task: <TASK>\n"
     "Purpose: <PURPOSE>\n"
     "End state: <END_STATE>\n"
+    "\n"
+    "### Directory Changes\n"
+    "\n"
+    "Baseline: <DIRECTORY_BASELINE>\n"
+    "Legend: [add] new; [modify] changed; [move from PATH] relocated; [remove] deleted; "
+    "[keep] unchanged context; [check] verify and change only if needed.\n"
+    "Current:\n"
+    "```text\n"
+    "<DIRECTORY_CURRENT>\n"
+    "```\n"
+    "Planned:\n"
+    "```text\n"
+    "<DIRECTORY_PLANNED>\n"
+    "```\n"
+    "Ownership: <DIRECTORY_OWNERSHIP>\n"
+    "Verification: <DIRECTORY_VERIFICATION>\n"
     "\n"
     "### State Comparisons\n"
     "\n"
@@ -164,6 +182,19 @@ mission_clauses = [
     where("PURPOSE", Type(of='string'), NonEmpty(), description="why the task matters and its link to higher intent"),
     where("END_STATE", Type(of='string'), NonEmpty(),
           description="the desired conditions when the mission is complete"),
+    where("DIRECTORY_BASELINE", Type(of='string'), NonEmpty(),
+          description="the inspected revision or an explicitly unknown baseline, explaining why when no file changes are planned"),
+    where("DIRECTORY_CURRENT", Type(of='string'), NonEmpty(),
+          description=("the current affected-file tree with purpose notes, or an explicit unknown-baseline explanation. "
+                       f"use exactly {NO_DIRECTORY_CHANGES!r} for a no-file-change plan")),
+    where("DIRECTORY_PLANNED", Type(of='string'), NonEmpty(),
+          description=("the planned affected-file tree with purposes and legend markers. Name move sources, retain removed "
+                       "leaves, expand affected directories and do not hide changes with ellipses. "
+                       f"use exactly {NO_DIRECTORY_CHANGES!r} for a no-file-change plan")),
+    where("DIRECTORY_OWNERSHIP", Type(of='string'), NonEmpty(),
+          description="the maintained source and generator owners mapped to each affected delivery. State no changed ownership when applicable"),
+    where("DIRECTORY_VERIFICATION", Type(of='string'), NonEmpty(),
+          description="how the diagram and source-to-output mapping will be checked against actual changes. Formatting alone is not completion evidence"),
     where("COMPARISON_ID", Type(of='string'), NonEmpty(), description="a unique stable example identifier such as E01"),
     where("COMPARISON_NAME", Type(of='string'), NonEmpty(), description="the change illustrated by the paired states"),
     where("COMPARISON_AUTHORITY", Type(of='string'), OneOf(values=list(ComparisonAuthority)),

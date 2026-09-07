@@ -57,21 +57,35 @@ def _python_file(text: str) -> str:
     return code
 
 
-def validate_shapes() -> None:
-    """Check bindings, populated layouts, host boundaries, and prompt exposure."""
+def _prompt_gallery() -> Node:
+    """Inspect complete inert teaching against independently authored shape fixtures."""
     from build.authoring import tree
-    from build.authoring_guides import populated_examples
 
     prompt = tree()
-    examples = next(item.value for item in prompt.constants if item.id.endswith("-populated-shapes"))
-    if examples != populated_examples():
-        raise RuntimeError("the authoring capability lost its populated schema examples")
+    teaching = next(item.value for item in prompt.constants if item.id.endswith("-teaching"))
+    if not isinstance(teaching, dict):
+        raise RuntimeError("the authoring capability lost its literal teaching mapping")
+    gallery_text = teaching.get("assets/examples/shape_gallery/example.oak.md")
+    if not isinstance(gallery_text, str):
+        raise RuntimeError("the authoring capability lost its complete shape teaching document")
+    gallery = parse(gallery_text)
+    examples = {item.id.removesuffix("-instance"): item.value for item in gallery.constants}
+    if gallery.schemas != list(SHAPES) or examples != EXPECTED_INSTANCES:
+        raise RuntimeError("the authoring capability changed its shape definitions or populated specimens")
+
+    return gallery
+
+
+def validate_shapes() -> None:
+    """Check bindings, populated layouts, host boundaries, and prompt exposure."""
+    gallery = _prompt_gallery()
+    examples = {item.id.removesuffix("-instance"): item.value for item in gallery.constants}
 
     for schema in SHAPES:
         values = SAMPLE_BINDINGS[schema.id]
         expected = EXPECTED_INSTANCES[schema.id]
         compact = Schema(id=schema.id, template=schema.template, where=schema.where)
-        if expected not in examples or not any(item.template == schema.template and item.where == schema.where for item in prompt.schemas):
+        if examples.get(schema.id) != expected or schema not in gallery.schemas:
             raise RuntimeError(f"the capability lost the complete {schema.id} example")
         if compact.placeholders != schema.placeholders or compact.where != schema.where:
             raise RuntimeError("compact examples changed the binding contract")
