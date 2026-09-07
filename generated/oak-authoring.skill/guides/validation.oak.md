@@ -10,41 +10,37 @@ guidance: YAML<<
   result outside the authored document.
 >>
 
-identity: {"version": "3.0.0", "validator-revision": "dc71e5ec140e1b94351ceabab3a55b9ab8aa9dce"}
+identity: {"version": "3.1.0", "validator-revision": "85ddd5393fd4349632f728f5a05cb67f9bc5dbf5"}
 
 validation-policy: YAML<<
-- Run programmatic validation only when the user requests it. Authoring and interpretation
-  need no installation.
-- The script uses Python 3.11 or newer. Reuse a matching installed validator, an explicit
-  --source and optional --python, or its retained cache. The source fingerprint must
-  match, not just the package name or version.
-- Use scripts/validate.py from the skill. In the standalone agent, materialize validator-script
-  exactly as a local validate.py only when validation is requested.
-- Run python validate.py document.oak.md. Use --root for larger explicitly allowed
+- Validate only when requested; authoring and interpretation need no installation.
+- Use Python 3.11+. Reuse matching installed code, --source with optional --python,
+  or retained cache. Match the source fingerprint, not name/version.
+- Use the skill scripts/validate.py. For requested standalone validation, materialize
+  validator-script verbatim as validate.py.
+- Run python validate.py document.oak.md; --root permits larger explicitly allowed
   graphs.
-- When the result says permission-required, ask permission to download the identified
-  OAK revision and install its declared dependencies in an isolated cached environment.
-  Requesting validation is not installation consent.
-- Only after explicit approval, repeat the command with --allow-install. No published
-  OAK package is needed. Keep the matching installation for future requests.
-- 'When installation is declined, continue authoring and say: Programmatic validation
-  was not performed (installation declined). Do not run the installer.'
-- When Python, network, dependencies, or execution are unavailable, continue authoring
-  and state the actual reason validation was not performed.
-- Exit 0 means parse and resolution checks passed, 1 means invalid, and 2 means not
-  performed. Report the actual checks, revision, and errors; never imply execution
-  or semantic correctness was proved.
-- Keep validation status outside the authored OAK document. Repair reported authoring
-  errors and recheck only under the same user permission. Do not silently switch validator
-  revisions.
+- On permission-required, ask to download the identified OAK revision and install
+  its declared dependencies in an isolated cache. Validation requests are not installation
+  consent.
+- After explicit approval, repeat with --allow-install. Reuse the retained installation;
+  no published OAK package is needed.
+- 'If installation is declined, do not install. Continue authoring and report: Programmatic
+  validation was not performed (installation declined).'
+- If Python, network, dependencies, or execution are unavailable, continue authoring
+  and report the actual not-performed reason.
+- 'Exit 0: parse and resolution passed; 1: invalid; 2: not performed. Report checks,
+  revision, and errors, never proof of execution or semantic correctness.'
+- Report validation outside OAK. Repair and recheck under the same permission; never
+  silently switch validator revisions.
 >>
 
 validator-script: TEXT<<
-"""Optional, consent-gated OAK validation. The authoring skill needs no Python.
+"""Optional OAK validation; authoring needs no Python.
 
-Run: python scripts/validate.py document.oak.md [--root document-directory]
-Exit 0: valid; 1: invalid; 2: not performed (including permission required).
-Only --allow-install permits downloads and an isolated dependency installation.
+Run: python scripts/validate.py document.oak.md [--root directory]
+Exits: 0 valid; 1 invalid; 2 not performed or permission required.
+Downloads and isolated installs require --allow-install.
 """
 
 from __future__ import annotations
@@ -65,16 +61,16 @@ from urllib.request import urlopen
 import venv
 from zipfile import BadZipFile, ZipFile
 
-SKILL_VERSION = "3.0.0"
+SKILL_VERSION = "3.1.0"
 REPOSITORY = "chris-buckley/open-agent-knowledge"
-REVISION = "dc71e5ec140e1b94351ceabab3a55b9ab8aa9dce"
-SOURCE_SHA256 = "4adedc8035e384d57c2ca7762faadd3b0e5f425f5ece1bf0a95e0be00f7c75f3"
+REVISION = "85ddd5393fd4349632f728f5a05cb67f9bc5dbf5"
+SOURCE_SHA256 = "9bca0d69e12c26aac64d3e7218f4ccfc620e7a7196b569d324ff7ac8197053bc"
 PROJECT_SHA256 = "2412c436c0ffaa05c604da2d58be4b72c443b37efcaa094380845fd0fe3a3702"
 MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
 
 
 def package_digest(package: Path) -> str:
-    """Identify all validator Python sources, not the project's placeholder version."""
+    """Fingerprint validator sources, not the package version."""
     digest = hashlib.sha256()
     files = sorted(package.rglob("*.py"))
     if not files or not (package / "__init__.py").is_file():
@@ -86,7 +82,7 @@ def package_digest(package: Path) -> str:
 
 
 def activate(source: Path | None) -> None:
-    """Verify matching code before importing it in the selected interpreter."""
+    """Verify source identity before importing."""
     if source is not None:
         package = source.resolve() / "oak"
     else:
@@ -98,7 +94,7 @@ def activate(source: Path | None) -> None:
         raise ValueError("OAK source fingerprint does not match this skill")
     if source is not None:
         sys.path.insert(0, str(source.resolve()))
-    import oak  # Imports and dependency checks happen only after identity verification.
+    import oak  # Import only verified sources.
 
     if Path(oak.__file__).resolve().parent != package.resolve():
         raise ValueError("a different OAK installation was imported")
@@ -145,7 +141,7 @@ def installation_path(cache: Path) -> Path:
 
 
 def discover(args: argparse.Namespace, destination: Path) -> tuple[Path, Path | None] | None:
-    """Check only explicit, adjacent, current-interpreter, and exact-cache locations."""
+    """Check explicit, adjacent, current, and exact-cache locations only."""
     python = Path(args.python or sys.executable)
     candidates: list[tuple[Path, Path | None]] = []
     if args.source is not None:
@@ -165,7 +161,7 @@ def discover(args: argparse.Namespace, destination: Path) -> tuple[Path, Path | 
 
 
 def extract_archive(archive: Path, destination: Path) -> None:
-    """Extract pinned source without traversal, symlinks, or zip-bomb expansion."""
+    """Extract pinned sources; reject traversal, symlinks, and zip bombs."""
     prefix = f"open-agent-knowledge-{REVISION}"
     with ZipFile(archive) as bundle:
         if sum(item.file_size for item in bundle.infolist()) > MAX_ARCHIVE_BYTES:
@@ -177,7 +173,7 @@ def extract_archive(archive: Path, destination: Path) -> None:
                     or stat.S_ISLNK(item.external_attr >> 16)):
                 raise ValueError("unsafe or unexpected OAK source archive entry")
             relative = Path(*path.parts[1:])
-            # Only the validator and its dependency declaration are needed at runtime.
+            # Extract only runtime sources and dependencies.
             if not relative.parts or relative.parts[0] not in {"oak", "pyproject.toml"}:
                 continue
             target = destination / relative
@@ -194,7 +190,7 @@ def extract_archive(archive: Path, destination: Path) -> None:
 
 
 def install(cache: Path) -> tuple[Path, Path]:
-    """Install only after caller consent; keep a ready environment for later calls."""
+    """Install with consent; retain the ready environment."""
     destination = installation_path(cache)
     cache.mkdir(parents=True, exist_ok=True)
     lock = destination.with_name(destination.name + ".lock")
@@ -209,7 +205,7 @@ def install(cache: Path) -> tuple[Path, Path]:
         if matches(python, source):
             return python, source
         if destination.exists():
-            # Never delete an unrecognized user directory or silently repair a broken cache.
+            # Preserve unknown directories and broken caches.
             raise RuntimeError(f"inspect and remove the incomplete cache before retrying: {destination}")
         destination.mkdir()
         created = True
@@ -250,7 +246,7 @@ def install(cache: Path) -> tuple[Path, Path]:
 
 
 def oak_body(text: str, path: Path) -> str:
-    """The standard skill entry may wrap its OAK body in YAML frontmatter."""
+    """Strip standard skill frontmatter, not OAK content."""
     if path.name == "SKILL.md" and text.startswith("---\n"):
         _metadata, separator, body = text[4:].partition("\n---\n")
         if not separator:
@@ -260,7 +256,7 @@ def oak_body(text: str, path: Path) -> str:
 
 
 def validate(paths: list[Path], boundary: Path | None) -> int:
-    """Parse and resolve data only. Never execute an authored process or tool."""
+    """Parse and resolve only; never execute processes or tools."""
     from oak import parse, resolve
 
     results = []
@@ -278,7 +274,7 @@ def validate(paths: list[Path], boundary: Path | None) -> int:
                 return target.read_text(encoding="utf-8") if target.is_file() else None
 
             node = parse(oak_body(path.read_text(encoding="utf-8"), path))
-            # SKILL.md has a virtual OAK identity in the same directory, not an import.
+            # Use a same-directory virtual identity, not an import.
             identity = path if path.name.endswith(".oak.md") else path.with_name(path.stem + ".oak.md")
             graph = resolve(node, source=identity.as_posix(), load=load, root=root.as_posix())
             results.append({"path": str(path), "status": "valid", "documents": len(graph.documents)})

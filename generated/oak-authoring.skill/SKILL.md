@@ -5,9 +5,9 @@ description: Author, review, or revise Open Agent Knowledge (OAK) documents from
   when writing OAK; no installation is needed. Programmatic validation is optional
   and installation requires separate permission.
 metadata:
-  version: 3.0.0
-  oak-revision: dc71e5ec140e1b94351ceabab3a55b9ab8aa9dce
-  validator-sha256: 4adedc8035e384d57c2ca7762faadd3b0e5f425f5ece1bf0a95e0be00f7c75f3
+  version: 3.1.0
+  oak-revision: 85ddd5393fd4349632f728f5a05cb67f9bc5dbf5
+  validator-sha256: 9bca0d69e12c26aac64d3e7218f4ccfc620e7a7196b569d324ff7ac8197053bc
 ---
 
 <instructions>
@@ -91,12 +91,12 @@ request-received(
 
 <processes>
 <process id="capture-request" name="Capture request">
-ACT output="schema.authoring-request": Capture all supplied <SOURCE>; set <VALIDATE> true only for requested programmatic validation, otherwise false. () -> SOURCE, VALIDATE
+ACT output="schema.authoring-request": Capture all <SOURCE>; set <VALIDATE> true only for requested programmatic validation, otherwise false. () -> SOURCE, VALIDATE
 CALL process.author-document (SOURCE=$SOURCE, VALIDATE=$VALIDATE)
 </process>
 
 <process id="author-document" name="Author document" input="schema.authoring-request">
-ACT Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> to define <SCOPE>. For a new skill, use <TEMPLATE> under <TEMPLATE_USE>; otherwise do not add scaffolding. Consult each guide's remaining knowledge as needed. (
+ACT Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> for <SCOPE>. Use <TEMPLATE> under <TEMPLATE_USE> only for new skills; consult other guide knowledge as needed. (
   AUTHORING=$guides/authoring.oak.md#constant.guidance,
   STRUCTURE=$references/00-structure.oak.md#constant.guidance,
   SOURCE=$SOURCE,
@@ -139,7 +139,7 @@ ACT Apply <GUIDANCE> to <DESIGN_6> and <SOURCE>; decide justified instructions a
   DESIGN_6=$DESIGN_6,
   SOURCE=$SOURCE,
 ) -> DESIGN_7
-ACT Review <DESIGN_7> against <REVIEW>, <GRAMMAR>, and complete <TEACHING> scenarios. Produce canonical <CANDIDATE>; do not claim a programmatic check. (
+ACT Review <DESIGN_7> with <REVIEW>, <GRAMMAR>, and complete <TEACHING>. Produce canonical <CANDIDATE>, not a claimed programmatic check. (
   DESIGN_7=$DESIGN_7,
   REVIEW=$guides/review.oak.md#constant.review,
   GRAMMAR=$references/00-structure.oak.md#constant.oak-ebnf,
@@ -155,13 +155,13 @@ ELSE:
 </process>
 
 <process id="validate-and-deliver" name="Check validator" input="schema.oak-candidate">
-ACT output="schema.validator-check": Apply <POLICY> with exact <HELPER> to <CANDIDATE> without --allow-install. Return actual <REPORT>; <INSTALL_REQUIRED> is true only for permission-required, not invalid OAK or unavailable execution. (
+ACT output="schema.validator-check": Apply <POLICY> and exact <HELPER> to <CANDIDATE> without --allow-install. Return actual <REPORT>; <INSTALL_REQUIRED> is true exactly for permission-required, never invalid OAK or unavailable execution. (
   POLICY=$guides/validation.oak.md#constant.validation-policy,
   HELPER=$guides/validation.oak.md#constant.validator-script,
   CANDIDATE=$CANDIDATE,
 ) -> INSTALL_REQUIRED, REPORT
 IF $INSTALL_REQUIRED equals true:
-  ACT output="schema.installation-consent": Ask permission to download <IDENTITY> and install its dependencies in an isolated retained environment. Set <APPROVED> true only after explicit installation approval, not merely a validation request. (
+  ACT output="schema.installation-consent": Ask to download <IDENTITY> and install its dependencies in an isolated retained environment. Set <APPROVED> true only for explicit installation consent, not a validation request. (
     IDENTITY=$guides/validation.oak.md#constant.identity,
   ) -> APPROVED
   IF $APPROVED equals true:
@@ -176,7 +176,7 @@ ELSE:
 </process>
 
 <process id="finalize-validation" name="Report validation" input="schema.validation-context">
-ACT output="schema.authoring-result": Finalize <CANDIDATE> from <REPORT> under <POLICY>. Run exact <HELPER> with --allow-install only when <ALLOW_INSTALL> is true; otherwise never install or download. Repair errors and recheck changes under the same permission, not unchanged successes. Produce <OAK> and truthful <VALIDATION>. (
+ACT output="schema.authoring-result": Finalize <CANDIDATE> from <REPORT> under <POLICY> using exact <HELPER>. Only <ALLOW_INSTALL> true permits --allow-install, downloads, or installation. Repair and recheck changes under the same permission, not unchanged successes. Return <OAK> and truthful <VALIDATION>. (
   REPORT=$REPORT,
   CANDIDATE=$CANDIDATE,
   ALLOW_INSTALL=$ALLOW_INSTALL,

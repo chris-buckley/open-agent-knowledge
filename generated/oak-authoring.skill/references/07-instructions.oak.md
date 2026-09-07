@@ -8,5 +8,5 @@ guidance: YAML<<
   triggers, and processes cannot express.
 >>
 
-last-decision: "Do not author copies of the node-derived interpretation guidance."
+last-decision: "Do not copy node-derived interpretation guidance."
 </constants>

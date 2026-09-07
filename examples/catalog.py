@@ -17,6 +17,7 @@ from examples.shape_gallery import example as shape_gallery
 from examples.shape_writer import example as shape_writer
 from examples.compound_growth import example as compound_growth
 from examples.interpreter_context import example as interpreter_context
+from examples.local_contracts import example as local_contracts, worker as contract_worker
 from examples.implementer import example as implementer
 from examples.delegation import example as delegation, task_reviewer
 from examples.successor import example as successor, amendment_reviewer, successor_verifier
@@ -68,6 +69,9 @@ SCENARIOS = (
              stage=4, detached="example.py", sample=compound_growth.sample),
     Scenario("interpreter_context", interpreter_context, "Compare direct and OAK-context interpretation of one title policy.",
              "Two deterministic adapters, not live model inference.", detached="example.py", run=interpreter_context.run),
+    Scenario("local_contracts", local_contracts, "Explain public boundaries locally and adapt a separately typed private worker.",
+             "The complete scenario supplies its graph and a deterministic trimming host; the entry alone is boundary-complete, not execution-complete. No external effects or live model.",
+             supporting=(contract_worker,), detached="example.py", sample=local_contracts.sample, run=local_contracts.run),
     Scenario("implementer", implementer, "Bind acceptance to the exact verified revision before a host effect.",
              "Detached script validates structure only. Execution needs native actions and the declared snapshot, verification, and commit tools; repository checks use a simulated commit sink.",
              dependencies=(verification,), bindings=True, detached="example.py"),

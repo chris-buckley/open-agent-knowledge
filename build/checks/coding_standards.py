@@ -28,9 +28,9 @@ def validate_coding_standards() -> None:
     _validate_documents(documents)
     _validate_rejections(documents)
     _validate_shapes(documents)
-    root_node = parse((ROOT / "AGENTS.md").read_text(encoding="utf-8"))
-    if _constant(root_node, "coding-standard").value != f"{_SOURCE_ROOT}/{_ENTRY}":
-        raise ValueError("root coding-standard route is stale")
+    context_node = parse((rule_directory / "context.oak.md").read_text(encoding="utf-8"))
+    if _constant(context_node, "coding-standard").value != f"{_SOURCE_ROOT}/{_ENTRY}":
+        raise ValueError("context coding-standard route is stale")
     if (rule_directory / "coding-standards.md").exists():
         raise ValueError("the obsolete Markdown standard remains")
 

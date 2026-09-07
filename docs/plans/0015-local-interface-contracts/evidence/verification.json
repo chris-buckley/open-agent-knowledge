@@ -1,0 +1,155 @@
+{
+  "recorded_at": "2026-09-06T23:58:33.969639+00:00",
+  "reviewed_snapshot": "bb3a44d1c99e29fb5be99f42af0bb487a2cc2a87",
+  "plan_commit": "16becfd663076a58d8f18b97565c651a92102699",
+  "checkout_commit": "1cbdb29db39a7769df89fa15759634e20cfe27a6",
+  "reconciled_remote_commit": "c42c526df6baeab916ec2d389e8ac990b6edcf16",
+  "identical_checkout_tree": "142fa5f707ff3c12c536ba00532101e3aab89fa3",
+  "validator_source_commit": "85ddd5393fd4349632f728f5a05cb67f9bc5dbf5",
+  "validator_source_sha256": "9bca0d69e12c26aac64d3e7218f4ccfc620e7a7196b569d324ff7ac8197053bc",
+  "product_fingerprint": "9f3991dd7e78e6884a906f6c5eb6cea65ed2e0ba7ed7d792dcd920bfd26e73b3",
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "full_checks": [
+    {
+      "command": [
+        "python",
+        "-m",
+        "build.examples"
+      ],
+      "started": "2026-09-06T23:56:24.880640+00:00",
+      "exit_code": 0,
+      "seconds": 42.374,
+      "log": "full-1.log"
+    },
+    {
+      "command": [
+        "python",
+        "build/examples.py"
+      ],
+      "started": "2026-09-06T23:57:07.254620+00:00",
+      "exit_code": 0,
+      "seconds": 42.514,
+      "log": "full-2.log"
+    }
+  ],
+  "registered_checks": [
+    "validate_ebnf",
+    "validate_statement_bodies",
+    "validate_compact_specimens",
+    "validate_compact_lexing",
+    "validate_compact_control",
+    "validate_compact_triggers",
+    "validate_compact_layout",
+    "validate_compact_short_circuit",
+    "validate_compact_loop_bounds",
+    "validate_compact_routing",
+    "validate_compact_frames",
+    "validate_compact_relative_targets",
+    "validate_text_examples",
+    "validate_metadata",
+    "validate_resolution",
+    "validate_interfaces",
+    "validate_execution",
+    "validate_interpreter_context",
+    "validate_evidence",
+    "validate_while",
+    "validate_part_omission",
+    "validate_act_authoring",
+    "validate_contract_rules",
+    "validate_source_routing",
+    "validate_json_ld_style_display",
+    "validate_human_examples",
+    "validate_shapes",
+    "validate_authoring_skill",
+    "validate_optional_validator",
+    "validate_plans",
+    "validate_agents",
+    "validate_repository_lifecycle",
+    "validate_coding_standards",
+    "validate_surfaces",
+    "validate_outputs",
+    "validate_architecture"
+  ],
+  "repeat_generation": {
+    "commands": [
+      {
+        "command": [
+          "python",
+          "-m",
+          "compileall",
+          "-q",
+          "oak",
+          "build",
+          "examples",
+          "generated/oak-authoring.skill/scripts"
+        ],
+        "exit_code": 0,
+        "seconds": 0.626
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "examples.catalog"
+        ],
+        "exit_code": 0,
+        "seconds": 0.939
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.ebnf"
+        ],
+        "exit_code": 0,
+        "seconds": 0.711
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.definitions"
+        ],
+        "exit_code": 0,
+        "seconds": 0.965
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "build.authoring"
+        ],
+        "exit_code": 0,
+        "seconds": 0.831
+      }
+    ],
+    "unchanged_paths_and_bytes": true,
+    "generated_files": 100
+  },
+  "root": {
+    "lines": 500,
+    "bytes": 25995,
+    "schemas": 16,
+    "interfaces": 12,
+    "state_values": 12,
+    "triggers": 9,
+    "processes": 18
+  },
+  "execution_graph": [
+    "repository/.agents/rules/context.oak.md",
+    "repository/.agents/rules/repository-change.oak.md",
+    "repository/AGENTS.oak.md"
+  ],
+  "authoring_delivery_bytes": {
+    "skill_entry": 7999,
+    "standalone_agent": 63981
+  },
+  "unchanged_limits": {
+    "AGENTS_lines": 500,
+    "skill_entry_bytes": 10000,
+    "standalone_agent_bytes": 64000
+  },
+  "helper_ast_behavior_unchanged": true,
+  "host_disclosure": "Lifecycle and title-worker hosts are deterministic demonstrations. Passing checks do not authenticate users, prove live Git effects, durable host storage, delivery, or exactly-once external execution.",
+  "initial_timeouts": "Three complete-suite attempts were cut off by the container per-call wall limit before a result. The two recorded complete commands ran without this tool-call limit and returned exit 0; no product or test timeout was relaxed."
+}

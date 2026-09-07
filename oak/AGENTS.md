@@ -44,7 +44,7 @@ representation-contracts: YAML<<
   OAK documents rather than introducing task-specific YAML or another authored format.
 >>
 
-context-selection-contract: ["default to the complete resolved graph when prose dependencies are uncertain", "an explicit task process selects its whole owning document and transitive document dependencies", "retain additional host-known prose dependencies by exact document path", "never merge document identities or prune individual entries for a task view", "keep the complete execution graph authoritative"]
+context-selection-contract: ["default to the complete resolved graph when prose dependencies are uncertain", "an explicit task process selects its whole owning document and transitive document dependencies", "retain additional host-known prose dependencies by exact document path", "never merge document identities or prune individual entries for a task view", "keep the complete execution graph authoritative", "render only already resolved documents; context construction cannot supply unloaded knowledge or host capabilities"]
 </constants>
 
 <processes>

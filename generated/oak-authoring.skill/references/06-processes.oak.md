@@ -26,9 +26,12 @@ guidance: YAML<<
   assertions, and guards; preserve child order and bounded-loop failures.
 - Use delimiter continuation for long expressions and indentation for ordered action
   suites; follow the shared grammar instead of inventing another layout dialect.
+- Keep external owners explicit. Source-backed arrivals share exact schema identities,
+  not equivalent copies; adapt distinct public/private contracts with typed CALL bindings
+  and validated local emissions.
 >>
 
 scopes: TEXT<<
-Bindings are immutable per frame. CALL promotes declared outputs; branches and iterations are local. IF promotes nothing: EMIT inside it or use process contracts, not invented state. Justify assertions, conditions, loops, and parallel work from the source.
+Keep bindings immutable per frame; CALL promotes declared outputs. Branches/iterations are local. IF promotes nothing; use EMIT within it or process contracts, not invented state. Justify assertions, conditions, loops, and parallel work from source.
 >>
 </constants>

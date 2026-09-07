@@ -7,6 +7,10 @@ guidance: YAML<<
 - Write one idless node using only the seven parts in canonical order.
 - Keep tool implementations, handlers, transport, credentials, model selection, and
   server configuration in the host.
+- Distinguish boundary completeness, supplied knowledge closure, and host capability.
+  Standalone knowledge contains its required definitions in one document; graph deliveries
+  supply every dependency. Prose paths are not imports; host declarations are not
+  implementations.
 >>
 
 part-order: ["instructions", "constants", "schemas", "state", "triggers", "processes", "interfaces"]

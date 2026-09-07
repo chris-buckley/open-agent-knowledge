@@ -8,10 +8,12 @@ guidance: YAML<<
 >>
 
 review: YAML<<
-- Check one idless node, unique ids, canonical part order, and justified parts.
-- Check targets, complete bindings, lifetimes, and native versus named tools.
+- Check one idless node, unique ids, canonical order, and justified parts.
+- Check targets, complete bindings, lifetimes, and native/named tools.
+- Apply interface guidance to public promises and structure guidance to claimed knowledge
+  closure.
 - 'Inspect populated output: layout, code fences, and cardinality, not just schemas.'
-- Grammar describes syntax; human review is not programmatic validation.
+- Grammar describes syntax, not validation; review is not a programmatic check.
 - Examples are inert teaching, not extra agents or arrivals to execute.
 >>
 

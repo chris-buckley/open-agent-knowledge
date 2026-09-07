@@ -1,0 +1,274 @@
+{
+  "baseline": "bb3a44d1c99e29fb5be99f42af0bb487a2cc2a87",
+  "plan_revision": "16becfd663076a58d8f18b97565c651a92102699",
+  "checkout_revision": "1cbdb29db39a7769df89fa15759634e20cfe27a6",
+  "phase": "complete candidate checked before product edits",
+  "baseline_lines": 384,
+  "naive_local_lines": 569,
+  "candidate_lines": 500,
+  "limit": 500,
+  "root_public_interfaces": [
+    [
+      "task-request",
+      "receives",
+      "schema.repository-task"
+    ],
+    [
+      "task-resume",
+      "receives",
+      "schema.resume-request"
+    ],
+    [
+      "task-approval",
+      "receives",
+      "schema.approval-decision"
+    ],
+    [
+      "task-cancel",
+      "receives",
+      "schema.task-handle"
+    ],
+    [
+      "status-request",
+      "receives",
+      "schema.task-handle"
+    ],
+    [
+      "progress",
+      "emits",
+      "schema.task-progress"
+    ],
+    [
+      "task-result",
+      "emits",
+      "schema.repository-result"
+    ],
+    [
+      "name-request",
+      "receives",
+      "schema.change-description"
+    ],
+    [
+      "name-result",
+      "emits",
+      "schema.change-name"
+    ],
+    [
+      "branch-update",
+      "receives",
+      "schema.branch-targets"
+    ],
+    [
+      "merge-request",
+      "receives",
+      "schema.branch-targets"
+    ],
+    [
+      "merge-receipt",
+      "receives",
+      "schema.branch-targets"
+    ]
+  ],
+  "schema_migration": {
+    "repository-task": {
+      "from": ".agents/rules/repository-task.oak.md#schema.repository-task",
+      "to": "AGENTS.md#schema.repository-task",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "task-handle": {
+      "from": ".agents/rules/repository-task.oak.md#schema.task-handle",
+      "to": "AGENTS.md#schema.task-handle",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "resume-request": {
+      "from": ".agents/rules/repository-task.oak.md#schema.resume-request",
+      "to": "AGENTS.md#schema.resume-request",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "approval-decision": {
+      "from": ".agents/rules/repository-task.oak.md#schema.approval-decision",
+      "to": "AGENTS.md#schema.approval-decision",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "task-checkpoint": {
+      "from": ".agents/rules/repository-task.oak.md#schema.task-checkpoint",
+      "to": "AGENTS.md#schema.task-checkpoint",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "task-progress": {
+      "from": ".agents/rules/repository-task.oak.md#schema.task-progress",
+      "to": "AGENTS.md#schema.task-progress",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "task-proposal": {
+      "from": ".agents/rules/repository-task.oak.md#schema.task-proposal",
+      "to": "AGENTS.md#schema.task-proposal",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "revision-reading": {
+      "from": ".agents/rules/repository-task.oak.md#schema.revision-reading",
+      "to": "AGENTS.md#schema.revision-reading",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "expected-revision": {
+      "from": ".agents/rules/repository-task.oak.md#schema.expected-revision",
+      "to": "AGENTS.md#schema.expected-revision",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "change-receipt": {
+      "from": ".agents/rules/repository-task.oak.md#schema.change-receipt",
+      "to": "AGENTS.md#schema.change-receipt",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "verification-receipt": {
+      "from": ".agents/rules/repository-task.oak.md#schema.verification-receipt",
+      "to": "AGENTS.md#schema.verification-receipt",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "task-outcome": {
+      "from": ".agents/rules/repository-task.oak.md#schema.task-outcome",
+      "to": "AGENTS.md#schema.task-outcome",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "repository-result": {
+      "from": ".agents/rules/repository-task.oak.md#schema.repository-result",
+      "to": "AGENTS.md#schema.repository-result",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "change-description": {
+      "from": ".agents/rules/repository-change.oak.md#schema.change-description",
+      "to": "AGENTS.md#schema.change-description",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "change-name": {
+      "from": ".agents/rules/repository-change.oak.md#schema.change-name",
+      "to": "AGENTS.md#schema.change-name",
+      "constraints_and_placeholders_unchanged": true
+    },
+    "branch-targets": {
+      "from": ".agents/rules/repository-change.oak.md#schema.branch-targets",
+      "to": "AGENTS.md#schema.branch-targets",
+      "constraints_and_placeholders_unchanged": true
+    }
+  },
+  "state_entries": [
+    [
+      "task-id",
+      "schema.task-checkpoint",
+      "TASK_ID",
+      ""
+    ],
+    [
+      "task",
+      "schema.task-checkpoint",
+      "TASK",
+      ""
+    ],
+    [
+      "paths",
+      "schema.task-checkpoint",
+      "PATHS",
+      ""
+    ],
+    [
+      "constraints",
+      "schema.task-checkpoint",
+      "CONSTRAINTS",
+      ""
+    ],
+    [
+      "phase",
+      "schema.task-checkpoint",
+      "PHASE",
+      "idle"
+    ],
+    [
+      "proposal",
+      "schema.task-checkpoint",
+      "PROPOSAL",
+      ""
+    ],
+    [
+      "proposal-revision",
+      "schema.task-checkpoint",
+      "PROPOSAL_REVISION",
+      ""
+    ],
+    [
+      "working-revision",
+      "schema.task-checkpoint",
+      "WORKING_REVISION",
+      ""
+    ],
+    [
+      "approved-revision",
+      "schema.task-checkpoint",
+      "APPROVED_REVISION",
+      ""
+    ],
+    [
+      "verified-revision",
+      "schema.task-checkpoint",
+      "VERIFIED_REVISION",
+      ""
+    ],
+    [
+      "evidence",
+      "schema.task-checkpoint",
+      "EVIDENCE",
+      ""
+    ],
+    [
+      "changed-paths",
+      "schema.task-checkpoint",
+      "CHANGED_PATHS",
+      ""
+    ]
+  ],
+  "external_ownership": {
+    ".agents/rules/repository-change.oak.md": "Retain stateless naming and authorized Git work, private input/output schemas and policy. Root adapters validate local public contracts.",
+    ".agents/rules/context.oak.md": "Move five read-only knowledge preparation actions and two routed constants, with an explicit TASK/PATHS input contract and typed references to root fixed routing. No state, interfaces, triggers, or authored policy.",
+    ".agents/rules/repository-task.oak.md": "Remove after migrating its only current consumers: root AGENTS and lifecycle fixture. Historical plan excerpts remain inert evidence."
+  },
+  "size_decisions": [
+    "Move stateless knowledge preparation with explicit bindings",
+    "Group related schema template fields without changing placeholder bindings or constraints",
+    "Split two conjunctive assertions into equivalent ordered assertions with specific failure messages"
+  ],
+  "preserved": [
+    "all nine trigger declarations",
+    "all twelve public payload contracts",
+    "all twelve state initial values and slot constraints",
+    "all sixteen schema constraint sets",
+    "one native action per process",
+    "host trust and persistence instructions",
+    "existing successful and rejection lifecycle behaviors"
+  ],
+  "checks": [
+    "canonical XML equality",
+    "XML and Markdown parse/render equality",
+    "exact graph resolution",
+    "unique scoped claims",
+    "line limit",
+    "schema and route preservation",
+    "_check_success_and_replay",
+    "_check_cancellation",
+    "_check_failures_and_drift",
+    "_check_boundaries_and_change_module"
+  ],
+  "documents": {
+    "repository/AGENTS.oak.md": {
+      "sha256": "30cb4732c1c52a208f58efbe2b8187052166d42038136c5921ad3ba44b9215d4",
+      "lines": 500
+    },
+    "repository/.agents/rules/context.oak.md": {
+      "sha256": "ce6c5c7a94f5d7a1bfab33405b30497f9c5dc85caab038f15d170f80cfbcf992",
+      "lines": 75
+    },
+    "repository/.agents/rules/repository-change.oak.md": {
+      "sha256": "6a8602af35bb59c3765da2ea37ce355c6d11b65c228f8cf4530cf71a9d1a5a2d",
+      "lines": 114
+    }
+  },
+  "host_effects": "Deterministic test adapters only. No real Git effects, user authentication, delivery or external exactly-once guarantee."
+}

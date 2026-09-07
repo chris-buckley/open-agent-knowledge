@@ -28,6 +28,10 @@ graph-rules: YAML<<
 - Treat schema contracts as identical only when document and schema id both resolve
   identically.
 - Permit document-reference cycles but reject process-call cycles.
+- Validate an explicitly supplied graph even when its boundary schemas are shared
+  externally; repository-specific locality checks do not replace resolution.
+- A string containing a path is not a typed dependency; host-known prose dependencies
+  need explicit loading and retention.
 >>
 </constants>
 
