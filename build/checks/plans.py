@@ -9,7 +9,8 @@ from tempfile import TemporaryDirectory
 from urllib.parse import unquote, urlsplit
 
 from build.checks.fixtures import ROOT
-from examples.schemas.smeac_plan import ComparisonAuthority, NO_DIRECTORY_CHANGES
+from build.checks.plan_preamble import read_plan_opening, validate_plan_opening
+from examples.schemas.smeac_plan import ComparisonAuthority, INTENT_HEADING, NO_DIRECTORY_CHANGES
 from oak import Node, Schema, SchemaBindingError, parse, render
 
 _DIRECTORY = re.compile(r"([0-9]{4})-[a-z][a-z0-9]*(?:-[a-z0-9]+)*")
@@ -45,7 +46,7 @@ def _prose_lines(text: str) -> list[str]:
 
 
 def _format_parts(template: str) -> tuple[list[str], list[str]]:
-    sections = [line for line in template.splitlines() if line.startswith("## ")]
+    sections = [line for line in template.splitlines() if line.startswith("## ") and line != INTENT_HEADING]
     phase = template.split("### Phase ", 1)[1].split("\n...\n", 1)[0]
     labels = [line.split(":", 1)[0] + ":" for line in phase.splitlines()[1:]
               if line and not line.startswith(("-", " ", "."))]
@@ -238,14 +239,21 @@ def _validate_directory_changes(text: str, prose: list[str], template: str, *, r
     _directory_annotations(current, planned)
 
 
-def validate_plan_text(text: str, template: str, *, require_directories: bool = False) -> None:
+def validate_plan_text(
+    text: str, template: str, *, require_directories: bool = False, require_preamble: bool = False,
+) -> None:
     """Check a populated plan's structure, execution phases, and paired examples."""
+    if require_preamble:
+        text = validate_plan_opening(text, template).body
     lines = _prose_lines(text)
     sections, labels = _format_parts(template)
     headings = [(index, line) for index, line in enumerate(lines) if line.startswith("## ")]
-    if [line for _, line in headings] != sections:
+    expected = [INTENT_HEADING, *sections] if require_preamble else sections
+    if [line for _, line in headings] != expected:
         raise ValueError("plan must contain the five SMEAC sections once, in schema order")
-    if not any(re.fullmatch(r"# \S.*", line) for line in lines):
+    if require_preamble and any(line.startswith(("# ", "Intent:")) for line in lines):
+        raise ValueError("plan title belongs in metadata and intent belongs only under Intent")
+    if not require_preamble and not any(re.fullmatch(r"# \S.*", line) for line in lines):
         raise ValueError("plan needs a populated title")
     slots = set(re.findall(r"<([A-Z][A-Z0-9_]*)>", template))
     if slots.intersection(re.findall(r"<([A-Z][A-Z0-9_]*)>", "\n".join(lines))):
@@ -255,7 +263,7 @@ def validate_plan_text(text: str, template: str, *, require_directories: bool = 
         if not any(line.strip() and not line.startswith("#") for line in lines[start + 1:end]):
             raise ValueError("SMEAC sections must contain populated content")
 
-    execution = lines[headings[2][0] + 1:headings[3][0]]
+    execution = lines[lines.index(sections[2]) + 1:lines.index(sections[3])]
     phase_count = 0
     identifiers: set[str] = set()
     for start, line in enumerate(execution):
@@ -288,8 +296,11 @@ def validate_plan_text(text: str, template: str, *, require_directories: bool = 
     _validate_comparisons(text, lines, template)
 
 
-def _validate_navigation(path: Path, root: Path) -> None:
-    lines = _prose_lines(path.read_text(encoding="utf-8"))
+def _validate_navigation(path: Path, root: Path, *, preamble: bool = False) -> None:
+    text = path.read_text(encoding="utf-8")
+    if preamble:
+        text = read_plan_opening(text).body
+    lines = _prose_lines(text)
     targets = [match[1] for match in _LINK.finditer("\n".join(lines))]
     targets.extend(line.split(": ", 1)[1] for line in lines
                    if line.startswith(("plan: ", "target_path: ")))
@@ -303,7 +314,7 @@ def _validate_navigation(path: Path, root: Path) -> None:
             raise ValueError(f"broken navigational reference in {path.name}: {target}")
 
 
-def _validate_record_files(directory: Path, repository: Path) -> None:
+def _validate_record_files(directory: Path, repository: Path, *, preamble: bool = False) -> None:
     entries = {path.name for path in directory.iterdir()}
     if "plan.md" not in entries:
         raise ValueError(f"{directory.name} needs plan.md")
@@ -313,7 +324,7 @@ def _validate_record_files(directory: Path, repository: Path) -> None:
         path = directory / filename
         if not path.is_file() or not path.read_text(encoding="utf-8").strip():
             raise ValueError(f"{directory.name}/{filename} must be a non-empty file")
-        _validate_navigation(path, repository)
+        _validate_navigation(path, repository, preamble=preamble and filename == "plan.md")
     if "evidence" in entries:
         _require_evidence_files(directory / "evidence")
 
@@ -323,13 +334,18 @@ def _require_evidence_files(evidence: Path) -> None:
         raise ValueError(f"{evidence.parent.name}/evidence must contain supporting files")
 
 
-def _validate_record_plan(directory: Path, template: str, *, historical: bool, required: bool) -> None:
+def _validate_record_plan(
+    directory: Path, template: str, *, historical: bool, required: bool, preamble: bool = False,
+) -> None:
     text = (directory / "plan.md").read_text(encoding="utf-8")
     try:
         if not historical:
-            validate_plan_text(text, template, require_directories=required)
-        elif required:
-            _validate_directory_changes(text, _prose_lines(text), template, required=True)
+            validate_plan_text(text, template, require_directories=required, require_preamble=preamble)
+        else:
+            if preamble:
+                text = validate_plan_opening(text, template).body
+            if required:
+                _validate_directory_changes(text, _prose_lines(text), template, required=True)
     except ValueError as error:
         raise ValueError(f"{directory.name}/plan.md: {error}") from None
 
@@ -337,6 +353,7 @@ def _validate_record_plan(directory: Path, template: str, *, historical: bool, r
 def validate_plan_directory(
     root: Path, template: str, historical: set[str], *,
     directory_first: int | None = None, reopened: frozenset[str] = frozenset(),
+    preamble_first: int | None = None,
 ) -> None:
     """Require one stable named directory for each plan and its optional evidence."""
     identifiers: set[str] = set()
@@ -349,9 +366,11 @@ def validate_plan_directory(
             raise ValueError(f"duplicate plan number {name[1]}")
         identifiers.add(name[1])
         discovered.add(directory.name)
-        _validate_record_files(directory, root.parent.parent)
+        preamble = preamble_first is not None and int(name[1]) >= preamble_first
+        _validate_record_files(directory, root.parent.parent, preamble=preamble)
         required = directory.name in reopened or directory_first is not None and int(name[1]) >= directory_first
-        _validate_record_plan(directory, template, historical=directory.name in historical, required=required)
+        _validate_record_plan(directory, template, historical=directory.name in historical,
+                              required=required, preamble=preamble)
     if historical - discovered:
         raise ValueError("historical format exceptions refer to missing plan directories")
     if reopened - discovered:
@@ -653,7 +672,7 @@ def _directory_grouping_examples(schema: Schema) -> None:
         populated = "\n".join(line for line in populated.splitlines() if line.strip() != "...")
         if DIRECTORY_EXAMPLE.strip() not in populated:
             raise RuntimeError("populated directory view differs from the independent specimen")
-        validate_plan_text(populated, recovered.schemas[0].template, require_directories=True)
+        validate_plan_text(populated, recovered.schemas[0].template, require_directories=True, require_preamble=True)
 
 
 def _directory_policy(policy: dict[str, object]) -> tuple[int, frozenset[str]]:
@@ -678,11 +697,17 @@ def validate_plans() -> None:
     template = schema[0].template
     _rejection_examples(template)
     _directory_schema_examples(schema[0])
+    from build.checks.plan_preamble_fixtures import validate_preamble_examples
+
+    validate_preamble_examples(template)
+    preamble_first = policy["preamble-first-plan"]
+    if type(preamble_first) is not int or not 0 <= preamble_first <= 9999:
+        raise RuntimeError("preamble-first-plan must be a four-digit plan number")
     first, reopened = _directory_policy(policy)
     try:
         validate_plan_directory(ROOT / policy["plan-root"], template,
                                 set(policy["historical-plan-formats"]),
-                                directory_first=first, reopened=reopened)
+                                directory_first=first, reopened=reopened, preamble_first=preamble_first)
     except ValueError as error:
         raise RuntimeError(f"persistent plan check failed: {error}") from None
 

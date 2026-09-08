@@ -10,8 +10,15 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from oak import AtLeast, Lines, Node, NonEmpty, OneOf, Schema, Type, parse, render, resolve, where
+from oak import AtLeast, Constant, Lines, Node, NonEmpty, OneOf, Schema, Type, parse, render, resolve, where
 from examples.schemas.repeat_marker import repeat_marker_instruction
+
+
+class PlanClassification(StrEnum):
+    PUBLIC = "PUBLIC"
+    INTERNAL = "INTERNAL"
+    CONFIDENTIAL = "CONFIDENTIAL"
+    RESTRICTED = "RESTRICTED"
 
 
 class ComparisonAuthority(StrEnum):
@@ -19,13 +26,20 @@ class ComparisonAuthority(StrEnum):
     ILLUSTRATIVE = "illustrative"
 
 
+INTENT_HEADING = "## Intent"
+
 NO_DIRECTORY_CHANGES = "No directory or file changes."
 
 plan_template = (
-    "# <PLAN_TITLE>\n"
+    "---\n"
+    "title: <PLAN_TITLE>\n"
+    "prepared: <TIMESTAMP>\n"
+    "classification: <CLASSIFICATION>\n"
+    "---\n"
     "\n"
-    "Prepared: <TIMESTAMP>\n"
-    "Classification: <CLASSIFICATION>\n"
+    f"{INTENT_HEADING}\n"
+    "\n"
+    "<LEADERS_INTENT>\n"
     "\n"
     "## 1. Situation\n"
     "\n"
@@ -90,7 +104,6 @@ plan_template = (
     "\n"
     "## 3. Execution\n"
     "\n"
-    "Intent: <LEADERS_INTENT>\n"
     "Concept of operations: <CONCEPT_OF_OPERATIONS>\n"
     "\n"
     "### Phase <PHASE_NUMBER>: <PHASE_NAME>\n"
@@ -147,10 +160,15 @@ plan_template = (
 )
 
 identity_clauses = [
-    where("PLAN_TITLE", Type(of='string'), NonEmpty(), description="one concise name for the plan or operation"),
-    where("TIMESTAMP", Type(of='datetime'), description="when the plan was prepared"),
-    where("CLASSIFICATION", Type(of='string'), OneOf(values=['PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'RESTRICTED']),
+    where("PLAN_TITLE", Type(of='string'), NonEmpty(), description="one concise plan title, safely serialized as a YAML scalar without changing its decoded value"),
+    where("TIMESTAMP", Type(of='datetime'), description="when the plan was prepared, as an ISO datetime with an explicit timezone"),
+    where("CLASSIFICATION", Type(of='string'), OneOf(values=list(PlanClassification)),
           description="the handling classification"),
+]
+
+intent_clauses = [
+    where("LEADERS_INTENT", Type(of='string'), NonEmpty(),
+          description="two to four sentences on purpose, key tasks, and end state in the leader's own framing"),
 ]
 
 situation_clauses = [
@@ -208,8 +226,6 @@ mission_clauses = [
 ]
 
 execution_clauses = [
-    where("LEADERS_INTENT", Type(of='string'), NonEmpty(),
-          description="two to four sentences on purpose, key tasks, and end state in the leader's own framing"),
     where("CONCEPT_OF_OPERATIONS", Type(of='string'), NonEmpty(),
           description="two to five sentences on how the phases combine"),
     where("PHASE_NUMBER", Type(of='integer'), AtLeast(value=1), description="the sequential phase number"),
@@ -264,13 +280,29 @@ command_clauses = [
 smeac_plan_schema = Schema(
     id="smeac-plan",
     name="SMEAC Plan",
-    purpose="Structure a planning brief covering situation, mission, execution phases, logistics, and command.",
+    purpose="Structure an Intent-first planning brief with metadata frontmatter, situation, mission, execution phases, logistics, and command.",
     template=plan_template,
-    where=[*identity_clauses, *situation_clauses, *mission_clauses, *execution_clauses, *logistics_clauses, *command_clauses],
+    where=[*identity_clauses, *intent_clauses, *situation_clauses, *mission_clauses, *execution_clauses, *logistics_clauses, *command_clauses],
+)
+
+metadata_conventions_constant = Constant(
+    id="metadata-conventions",
+    value={
+        "serialization": "Use one leading YAML mapping. Quote and escape scalar values when needed; preserve decoded values. Binding validation does not serialize YAML or prove presentation validity.",
+        "required": "title, prepared and classification use the SMEAC identity clauses.",
+        "plan": "The stable numbered plan identity, not a filesystem navigation target.",
+        "readiness": "Whether the proposal is ready for its next decision; not implementation approval.",
+        "authorisation": "The recorded scope of actual user approval; metadata itself grants no permission.",
+        "execution": "Observed task progress, not a claim inferred from a prepared plan.",
+        "publication": "Observed branch and review-delivery status, distinct from execution.",
+        "baseline": "The inspected source revision or an explicit unknown baseline.",
+        "omission": "Omit optional metadata without a meaningful value. Keep all metadata before Intent; keep detailed domain evidence in its SMEAC section.",
+    },
 )
 
 smeac_plan_node = Node(
     instructions=[repeat_marker_instruction],
+    constants=[metadata_conventions_constant],
     schemas=[smeac_plan_schema],
 )
 

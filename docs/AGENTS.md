@@ -27,6 +27,8 @@ preamble-first-plan: 18
 
 preamble-rules: ["for plans from preamble-first-plan, put all plan metadata in one leading YAML frontmatter mapping", "use the SMEAC title, prepared and classification fields; quote and escape scalar values when YAML requires it", "keep plan identity, readiness, publication, authorisation and execution status in frontmatter when relevant", "start the body with one populated Intent section before Situation, preserving the five numbered SMEAC sections", "keep intent substantive and distinct from metadata or implementation approval", "preserve older plan formats and all their existing verification gates"]
 
+public-plan-rules: ["review the complete plan and any supporting artifacts before publication for personal identifiers, local workspace paths and unrelated private project context", "preserve accepted technical requirements while making them self-contained in repository terms", "keep private source material and its identifying provenance outside the repository"]
+
 phase-maintenance-rules: YAML<<
 - When an active plan's scope, architecture, deliverables or verification changes,
   update its phases, objectives, key tasks, dependencies, success criteria and transition
@@ -91,6 +93,9 @@ ACT Use <FORMAT> and <PLAN_RULES> when preparing a new plan. (
 )
 ACT Apply <PREAMBLE> to new plans under the prospective plan-number boundary. (
   PREAMBLE=$constant.preamble-rules,
+)
+ACT Apply <PRIVACY> before publishing a public plan or its supporting artifacts. (
+  PRIVACY=$constant.public-plan-rules,
 )
 ACT Apply <PHASES> as an active plan evolves and before declaring it implementation-ready. (
   PHASES=$constant.phase-maintenance-rules,
