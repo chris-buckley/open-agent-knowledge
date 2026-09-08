@@ -100,6 +100,8 @@ delivery-contract: YAML<<
   optional. Do not add provider-specific metadata or directory README indexes.'
 - Treat generated knowledge guides as the identical input documents for the skill
   and agent, not independently maintained prompts. Keep grammar material in EBNF.
+- Own artifact-kind guidance in one extensible constant catalogue. Keep its values
+  fixed during a run and update the maintained catalogue between releases.
 - Use the default OAK render for the skill entry, shared knowledge documents, and
   standalone agent. The representation defaults are owned by oak/AGENTS.md.
 - Deliver the registered core under assets/examples with its generated catalogue.
@@ -134,9 +136,10 @@ generated-layout: "Deliver only oak.ebnf, definitions/*.oak.md, oak-authoring.oa
 agent-delivery-contract: YAML<<
 - Deliver agent scenarios as separate canonical OAK documents and native TOML in generated/oak.agents;
   keep repository demonstration Python outside this bundle.
-- Own each explorer in its example source and native-file knowledge in .agents/adaptors/codex/adaptor.oak.md.
-  The bundle and authoring capability use the same adaptor knowledge; native developer
-  instructions preserve exact explorer bytes.
+- Own each explorer in its example source. Native-file knowledge belongs to the authoring
+  skill as separate platforms/<platform>/adaptor.oak.md resources, with maintained
+  inputs under build ownership. Derive all delivered copies from the same source and
+  preserve exact explorer bytes in native developer instructions.
 - Native artifacts request configuration defaults, not verified permissions or a supplied
   tool registry. Installation, runtime services, and live-client certification are
   not part of artifact generation or its offline acceptance.

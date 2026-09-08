@@ -21,7 +21,15 @@ plan-storage-rules: ["use one directory named with a unique four-digit numeric i
 
 historical-plan-formats: ["0000-repository-refactor", "0001-interface-flow", "0002-architecture-documentation", "0003-scoped-oak-agents", "0004-native-interpreter-context", "0005-shape-first-schemas"]
 
-plan-authoring-rules: ["use the referenced SMEAC schema as the default for every new saved plan", "populate the format as a Markdown planning brief rather than copying its schema definition", "retain Situation, Mission, Execution, Admin and Logistics, and Command and Signal in that order", "give execution tasks unique stable identifiers such as P01.01 and explicit success criteria, evidence requirements, and transition gates", "record any user authorisation gate separately from plan readiness", "apply the phase layout owned by examples/AGENTS.md", "preserve the original formats of the named historical plans and do not extend that exception to new plans"]
+plan-authoring-rules: ["use the referenced SMEAC schema as the default for every new saved plan", "populate the format as a Markdown planning brief rather than copying its schema definition", "retain Situation, Mission, Execution, Admin and Logistics, and Command and Signal in that order", "give execution tasks unique stable identifiers such as P01.01 and explicit success criteria, evidence requirements, and transition gates", "record any user authorisation gate separately from plan readiness", "keep each plan focused on its named change, omitting completed preparatory housekeeping from its narrative, task list, and directory views", "apply the phase layout owned by examples/AGENTS.md", "preserve the original formats of the named historical plans and do not extend that exception to new plans"]
+
+phase-maintenance-rules: YAML<<
+- When an active plan's scope, architecture, deliverables or verification changes,
+  update its phases, objectives, key tasks, dependencies, success criteria and transition
+  triggers to cover the complete current plan.
+- Preserve stable task identifiers and evidence-backed completion status. Add or revise
+  pending work, and check phase coverage before calling the plan implementation-ready.
+>>
 
 state-comparison-rules: YAML<<
 - Use the State Comparisons subsection of Mission when supplied examples or a visible
@@ -76,6 +84,9 @@ ACT Use <ROOT> and <STORAGE> to place each persistent plan and its supporting re
 ACT Use <FORMAT> and <PLAN_RULES> when preparing a new plan. (
   FORMAT=$constant.plan-format,
   PLAN_RULES=$constant.plan-authoring-rules,
+)
+ACT Apply <PHASES> as an active plan evolves and before declaring it implementation-ready. (
+  PHASES=$constant.phase-maintenance-rules,
 )
 ACT Apply <COMPARISONS> when recording intended changes and their completion evidence. (
   COMPARISONS=$constant.state-comparison-rules,
