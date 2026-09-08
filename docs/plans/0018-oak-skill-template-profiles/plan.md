@@ -3,11 +3,11 @@ title: Prepare reusable OAK skill templates with optional state
 prepared: '2026-09-08T11:06:16+00:00'
 classification: PUBLIC
 plan: 0018-oak-skill-template-profiles
-readiness: Contracts settled under the approved implementation scope. Final acceptance remains pending.
+readiness: Product acceptance passed. The completion report records evidence and the PR retains final-head CI.
 authorisation: End-to-end implementation, verification, commits, pushes and review delivery on
   docs/prepare-skill-template-profiles are authorised. Installation, live-instance changes,
   unrelated deployment work and merging are not authorised.
-execution: Planning format is delivered. Profile sources and fixtures are implemented; complete delivery verification is in progress.
+execution: The planning format and all skill-template product phases are implemented and locally verified.
 publication: Continue on docs/prepare-skill-template-profiles through draft PR 26.
   Publication is not product completion; final-head verification and human review remain required.
 baseline: 1e21b227faae9a4f5ead997047af718db84ffd8d
@@ -72,7 +72,7 @@ The selected minimal CSV header `id,name,reference`, reference resolution from t
 
 ### Challenges
 
-- Size: the pinned [build owner](../../../build/AGENTS.md) sets repository byte budgets of 24,000 for the skill entry and 128,000 for the standalone authoring agent. The baseline measured 22,256 and 95,579 bytes respectively. The selected complete profile delivery measured 22,518 and 122,175 bytes before final verification. Add complete guidance and examples through source factoring and concise expression without losing required knowledge or silently changing the budgets.
+- Size: the pinned [build owner](../../../build/AGENTS.md) sets repository byte budgets of 24,000 for the skill entry and 128,000 for the standalone authoring agent. The baseline measured 22,256 and 95,579 bytes respectively. The selected complete profile delivery measured 22,518 and 122,744 bytes at final local verification. Add complete guidance and examples through source factoring and concise expression without losing required knowledge or silently changing the budgets.
 
 - Presentation: the desired role sequence must remain navigable while the OAK document preserves its canonical part order and one owner per instruction or contract.
 
@@ -413,40 +413,40 @@ Transition trigger: The user has authorised the exact implementation scope and t
 
 ### Phase 2: Implement the shared template and authoring route
 Objective: Select both variants from one source with accurate presentation and resources.
-- [ ] Key task: P02.01 Record the approved durable template convention in build/AGENTS.md and reference other semantic owners instead of copying them.
-- [ ] Key task: P02.02 Implement one base and optional selected extension with canonical part assembly, complete static-resource declarations and no compulsory consumer runtime.
-- [ ] Key task: P02.03 Update authoring guidance and request routing to select a profile, preserve contracts, omit unused parts and derive the selected INDEX/MAP and observable postconditions.
-- [ ] Key task: P02.04 Preserve template inertness, shared guide/standalone identity and scope-safe fusion; implement focused positive and rejection checks alongside the source.
+- [x] Key task: P02.01 Record the approved durable template convention in build/AGENTS.md and reference other semantic owners instead of copying them.
+- [x] Key task: P02.02 Implement one base and optional selected extension with canonical part assembly, complete static-resource declarations and no compulsory consumer runtime.
+- [x] Key task: P02.03 Update authoring guidance and request routing to select a profile, preserve contracts, omit unused parts and derive the selected INDEX/MAP and observable postconditions.
+- [x] Key task: P02.04 Preserve template inertness, shared guide/standalone identity and scope-safe fusion; implement focused positive and rejection checks alongside the source.
 Success criteria: E01 and E04 pass with source-derived artifacts and independent manifest expectations; shared authoring remains stateless and no state-only content enters the produced stateless selection.
 Transition trigger: Both profile selections and their presentation are represented once, and the targeted assembly/inertness checks pass.
 
 
 ### Phase 3: Complete worked variants and memory behaviour
 Objective: Demonstrate practical composition and state ownership with synthetic local data.
-- [ ] Key task: P03.01 Register the populated stateless capability and stateful consumer under the existing catalogue with canonical siblings, complete sample data and explicit fixture-host disclosures.
-- [ ] Key task: P03.02 Demonstrate calls to the same stateless export through a bounded dependency graph; retain document-local state and contract ownership.
-- [ ] Key task: P03.03 Implement the stateful knowledge for owner binding, saved retention choice, bounded index-first loading, permitted file edits, read-back checks and interrupted-update recovery.
-- [ ] Key task: P03.04 Add deterministic fixtures for owner isolation, renamed exposure, compatible source updates, pending-work preservation, writer conflicts and protected tool-owned records; add no generic state subsystem.
+- [x] Key task: P03.01 Register the populated stateless capability and stateful consumer under the existing catalogue with canonical siblings, complete sample data and explicit fixture-host disclosures.
+- [x] Key task: P03.02 Demonstrate calls to the same stateless export through a bounded dependency graph; retain document-local state and contract ownership.
+- [x] Key task: P03.03 Implement the stateful knowledge for owner binding, saved retention choice, bounded index-first loading, permitted file edits, read-back checks and interrupted-update recovery.
+- [x] Key task: P03.04 Add deterministic fixtures for owner isolation, renamed exposure, compatible source updates, pending-work preservation, writer conflicts and protected tool-owned records; add no generic state subsystem.
 Success criteria: E02, E03 and E05 pass for complete selected packages, with records and command traces showing what ran and what remains host guidance.
 Transition trigger: Both variants work in disposable fixtures and every demonstrated recovery path preserves the intended records and authority boundaries.
 
 
 ### Phase 4: Generate and verify the deliveries
 Objective: Deliver the identical complete capability through the existing build pipeline.
-- [ ] Key task: P04.01 Integrate the selected template recipes, guides and inert examples into authoring artifacts and the existing exact file/directory expectations.
-- [ ] Key task: P04.02 Reconcile skill version and immutable validator fingerprints with the selected source/dependency baseline; preserve parse/resolve reporting and all no-install/consent cases.
-- [ ] Key task: P04.03 Regenerate affected examples and authoring outputs from their owners; extend cold-generation, repair, detached installed-name and standalone checks.
-- [ ] Key task: P04.04 Measure final bytes and preserve literal specimens, complete teaching, grammar, optional validator and fusion safeguards in both authoring forms.
+- [x] Key task: P04.01 Integrate the selected template recipes, guides and inert examples into authoring artifacts and the existing exact file/directory expectations.
+- [x] Key task: P04.02 Reconcile skill version and immutable validator fingerprints with the selected source/dependency baseline; preserve parse/resolve reporting and all no-install/consent cases.
+- [x] Key task: P04.03 Regenerate affected examples and authoring outputs from their owners; extend cold-generation, repair, detached installed-name and standalone checks.
+- [x] Key task: P04.04 Measure final bytes and preserve literal specimens, complete teaching, grammar, optional validator and fusion safeguards in both authoring forms.
 Success criteria: E01-E05 pass in the delivered artifacts, complete manifests match fresh generation, both byte limits hold and no proposed helper or profile file is missing from its declared MAP.
 Transition trigger: Targeted profile checks, delivery closure, identity and regeneration checks pass for the exact candidate revision.
 
 
 ### Phase 5: Verify and deliver the reusable capability
 Objective: Establish an evidenced completion point for OAK authors and consuming hosts.
-- [ ] Key task: P05.01 Run `python -m compileall oak build examples`, regenerate through the current owners, and run the complete build/AGENTS.md verification process, including `python -m build.examples` and `python build/examples.py`; then confirm repeat generation leaves no diff.
-- [ ] Key task: P05.02 Review the actual diff, replaced scaffold markers and contracts, source ownership, original intent, required comparisons, all scoped AGENTS line bounds and integration with the selected baseline.
-- [ ] Key task: P05.03 Write report.md with observed commands, revisions, selected file sets, state-preservation evidence, size results, limitations and each completed task's evidence.
-- [ ] Key task: P05.04 Deliver the verified OAK source/validator identities, template selection instructions, examples and checks through PR 26 on the same branch for human review. Verify its final head and existing CI before marking it ready; do not merge. Identify remaining installation, visibility, linking and host acceptance work without executing it.
+- [x] Key task: P05.01 Run `python -m compileall oak build examples`, regenerate through the current owners, and run the complete build/AGENTS.md verification process, including `python -m build.examples` and `python build/examples.py`; then confirm repeat generation leaves no diff.
+- [x] Key task: P05.02 Review the actual diff, replaced scaffold markers and contracts, source ownership, original intent, required comparisons, all scoped AGENTS line bounds and integration with the selected baseline.
+- [x] Key task: P05.03 Write report.md with observed commands, revisions, selected file sets, state-preservation evidence, size results, limitations and each completed task's evidence.
+- [x] Key task: P05.04 Deliver the verified OAK source/validator identities, template selection instructions, examples and checks through PR 26 on the same branch for human review. Verify its final head and existing CI before marking it ready; do not merge. Identify remaining installation, visibility, linking and host acceptance work without executing it.
 Success criteria: E01-E05 have observed evidence for the final candidate, every applicable implementation checkbox passes, and the handoff claims only tested OAK/template capabilities.
 Transition trigger: The reusable OAK template capability is complete at the verified revision. Any deployment or live-host acceptance remains separately authorised.
 
@@ -530,7 +530,7 @@ Reporting: distinguish confirmed requirements, proposed filenames, inspected sou
 | D02 | Role presentation | Metadata plus title, purpose and principle define the skill. A roles constant presents DEFINE, optional ROUTE, LOOP, INDEX, MAP and ASSERT in that order, pointing to actual OAK definitions. The resource declarations derive INDEX and the complete SKILL_TREE. | Concrete rendered package specimens are in examples/skill_profiles/packages.oak.md; canonical OAK part order is preserved. |
 | D03 | Dependency and instance identity | review-items calls the separate classify-item/processes/classify-item.oak.md export within an explicitly selected root. The stable capability is review-items/v1; the host separately binds owner and instance root and retains the complete pending checkpoint. Display names and compatible shared updates do not change ownership. | Host tools, source/dependency pinning and durable checkpoint storage remain explicit obligations. No global discovery, copied dependency or CALL-to-SKILL.md is introduced. |
 | D04 | Memory, retention and recovery | Exact UTF-8 CSV id,name,reference columns, containing-index-relative references, JSON records and one active writer. First use requires a retention decision if none is saved. Full retains future source text; summary retains its digest, result and policy evidence. Pending work keeps its prepared mode. Existing records are preserved. Record-before-index publication reconciles exact orphans or completed pairs and rejects unknown conflicts. | Retention is a user choice when an instance is used. Git defaults to verified exclusions, with separately explicit bounded opt-in; loading, tracking and backup remain distinct. Tool-owned records are preserved. These tests use synthetic local data only. |
-| D05 | Package leaves and size | The stateless package has SKILL.md and processes/classify-item.oak.md. The stateful shared package has SKILL.md and references/memory.oak.md. Its fixed local scaffold is .gitignore, state/configuration.json, policy/index.csv and priority.json, history/index.csv and runs/index.csv. Policy, history records and run contents are generated locally. Runtime and raw directories are omitted because this example does not need them. The inert package mapping preserves the complete graph without nested installed skills. | Baseline 1e21b227faae9a4f5ead997047af718db84ffd8d. Measured selected outputs fit the unchanged 24,000/128,000-byte budgets. Final acceptance rechecks sizes and manifests. |
+| D05 | Package leaves and size | The stateless package has SKILL.md and processes/classify-item.oak.md. The stateful shared package has SKILL.md and references/memory.oak.md. Its fixed local scaffold is .gitignore, state/configuration.json, policy/index.csv and priority.json, history/index.csv and runs/index.csv. Policy, history records and run contents are generated locally. Runtime and raw directories are omitted because this example does not need them. The inert package mapping preserves the complete graph without nested installed skills. | Baseline 1e21b227faae9a4f5ead997047af718db84ffd8d. Final local verification measured 22,518 and 122,744 bytes within the unchanged 24,000/128,000-byte budgets, with complete manifests checked. |
 | D06 | Host deployment outside this change | Storage/discovery, link mechanisms, update adoption, naming qualifiers, promotion and cross-repository permissions belong to the consuming host. No live installation, provider configuration or integration is included. | Separately authorised host work; not a prerequisite for this product delivery. |
 
 ### Public Design References
@@ -541,4 +541,4 @@ The proposal also cites public [Codex](https://learn.chatgpt.com/docs/build-skil
 
 ### Acknowledgement
 
-This plan retains the reusable technical requirements and explicit open decisions. The user has authorised preparation, publication, the complete skill-template implementation, verification and review delivery. Earlier preparation-only wording is superseded; no merge or installation is authorised. The current root and scoped planning owners were read, but full source regeneration, repository checks and live-host acceptance are not established by this document. Do not mark any implementation task complete without revision-matched evidence.
+This plan retains the reusable technical requirements and explicit open decisions. The authorised product scope is implemented. [The completion report](report.md) records source and validator identities, executed checks, complete file sets and remaining host boundaries. All twenty implementation tasks have evidence. No merge or installation is authorised; final published-head CI remains the review handoff gate.
