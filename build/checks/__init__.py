@@ -7,6 +7,7 @@ from collections.abc import Callable
 from build.checks.agents import validate_agents
 from build.checks.agent_deliveries import validate_agent_deliveries
 from build.checks.authoring import validate_authoring_skill
+from build.checks.authoring_agent import validate_authoring_agent
 from build.checks.architecture import validate_architecture
 from build.checks.compact_syntax import (
     validate_compact_specimens,
@@ -82,6 +83,7 @@ CHECKS: tuple[Check, ...] = (
     validate_shapes,
     validate_agent_deliveries,
     validate_authoring_skill,
+    validate_authoring_agent,
     validate_optional_validator,
     validate_plans,
     validate_agents,

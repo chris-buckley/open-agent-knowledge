@@ -16,7 +16,7 @@ JSON Schema,.agents/skills/json-schema-2020-12/SKILL.md
 JSON-LD,.agents/skills/json-ld/SKILL.md
 >>
 
-adaptor-router: {"Codex native agent artifacts": ".agents/adaptors/codex/adaptor.oak.md"}
+adaptor-router: {"Codex native agent artifacts": "build/authoring_resources/platforms/codex/adaptor.oak.md", "Claude native agent artifacts": "build/authoring_resources/platforms/claude/adaptor.oak.md"}
 
 coding-standard: ".agents/rules/coding-standards.oak.md"
 </constants>

@@ -37,7 +37,7 @@ write_authoring()
 write_agents()
 """
 _DETACHED = """
-import importlib.abc, importlib.util, pathlib, socket, sys, yaml
+import importlib.abc, importlib.util, pathlib, socket, sys, tomllib, yaml
 root = pathlib.Path(sys.argv[1])
 sys.path.insert(0, str(root / 'runtime'))
 class RejectBuildImports(importlib.abc.MetaPathFinder):
@@ -69,6 +69,12 @@ assert module.validate([skill / 'SKILL.md'], skill) == 0
 agent = root / 'standalone' / 'oak-authoring.oak.md'
 assert len(resolve(parse(agent.read_text())).documents) == 1
 assert {p.name for p in agent.parent.iterdir()} == {'oak-authoring.oak.md'}
+native = root / 'native-only'
+codex = tomllib.loads((native / 'oak-authoring.toml').read_text())
+claude = (native / 'oak-authoring.md').read_text()[4:].split('---\\n\\n', 1)[1]
+assert codex['developer_instructions'] == claude == agent.read_text()
+assert len(resolve(parse(claude)).documents) == 1
+assert {p.name for p in native.iterdir()} == {'oak-authoring.toml', 'oak-authoring.md'}
 assert not (root / 'definitions').exists()
 assert not any(name == 'build' or name.startswith('build.') for name in sys.modules)
 """
@@ -105,7 +111,7 @@ def _run_isolated(script: str, root: Path) -> None:
 
 
 def _copy_sources(root: Path) -> None:
-    for name in ("oak", "build", "examples", ".agents/adaptors"):
+    for name in ("oak", "build", "examples"):
         shutil.copytree(ROOT / name, root / name, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
     for name in ("pyproject.toml", "AGENTS.md"):
         shutil.copyfile(ROOT / name, root / name)
@@ -121,23 +127,24 @@ def _reject_stale(root: Path, expected: Mapping[str, bytes]) -> None:
 
 def _repair_products(root: Path, expected: Mapping[str, bytes]) -> None:
     generated = root / "generated"
-    helper = generated / "oak-authoring.skill" / "scripts" / "validate.py"
-    for mutation in ("missing helper", "edited helper", "missing grammar", "stale definition", "stale markdown", "missing native", "edited native"):
-        if mutation == "missing helper":
-            helper.unlink()
-        elif mutation == "edited helper":
-            helper.write_text("raise RuntimeError('generated helper must not be build input')\n")
-        elif mutation == "missing grammar":
-            (generated / "oak.ebnf").unlink()
-        elif mutation in ("missing native", "edited native"):
-            native = generated / "oak.agents/parallel_exploration/codex/.codex/agents/oak-explorer.toml"
-            if mutation == "missing native":
-                native.unlink()
-            else:
-                native.write_text("stale native artifact")
+    mutations = (
+        ("oak-authoring.skill/scripts/validate.py", None),
+        ("oak-authoring.skill/scripts/validate.py", b"raise RuntimeError('generated helper must not be build input')\n"),
+        ("oak.ebnf", None),
+        ("definitions/stale.oak.md", b"stale definition"),
+        ("definitions/stale.md", b"stale markdown"),
+        ("oak.agents/parallel_exploration/codex/.codex/agents/oak-explorer.toml", None),
+        ("oak.agents/parallel_exploration/codex/.codex/agents/oak-explorer.toml", b"stale native artifact"),
+        ("oak-authoring.skill/platforms/codex/templates/.codex/agents/oak-authoring.toml", None),
+        ("oak-authoring.skill/platforms/claude/templates/.claude/agents/oak-authoring.md", b"stale authoring body"),
+        ("oak-authoring.skill/assets/constants/artifact-kinds.oak.md", None),
+    )
+    for relative, content in mutations:
+        path = generated / relative
+        if content is None:
+            path.unlink()
         else:
-            suffix = ".md" if mutation == "stale markdown" else ".oak.md"
-            (generated / "definitions" / ("stale" + suffix)).write_text("stale")
+            path.write_bytes(content)
         _reject_stale(generated, expected)
         _run_isolated(_GENERATE, root)
         _verify_outputs(generated, expected)
@@ -150,7 +157,9 @@ def _reject_link_writes(root: Path, expected: Mapping[str, bytes]) -> None:
     generated = root / "generated"
     sentinel = root / "sentinel.txt"
     sentinel.write_text("preserve")
-    for name in ("oak.ebnf", "oak-authoring.skill/scripts/validate.py", "definitions/act.oak.md", "oak.agents/parallel_exploration/explorer.oak.md"):
+    for name in ("oak.ebnf", "oak-authoring.skill/scripts/validate.py", "definitions/act.oak.md", "oak.agents/parallel_exploration/explorer.oak.md",
+                 "oak-authoring.skill/platforms/codex/templates/.codex/agents/oak-authoring.toml",
+                 "oak-authoring.skill/platforms/claude/templates/.claude/agents/oak-authoring.md"):
         link = generated / name
         original = link.read_bytes()
         link.unlink()
@@ -206,6 +215,10 @@ def _detached_delivery() -> None:
         shutil.copytree(PACKAGE, root / "oak-authoring", ignore=shutil.ignore_patterns("__pycache__"))
         (root / "standalone").mkdir()
         shutil.copyfile(TARGET, root / "standalone" / TARGET.name)
+        (root / "native-only").mkdir()
+        for relative in ("platforms/codex/templates/.codex/agents/oak-authoring.toml",
+                         "platforms/claude/templates/.claude/agents/oak-authoring.md"):
+            shutil.copyfile(PACKAGE / relative, root / "native-only" / Path(relative).name)
         _run_isolated(_DETACHED, root)
 
 

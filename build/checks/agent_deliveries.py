@@ -327,19 +327,18 @@ assert not (root / 'build').exists()
 def _adaptor_rejections() -> None:
     from tempfile import TemporaryDirectory
     from unittest.mock import patch
-    from build.agents import ADAPTOR_SOURCE, adaptor_node
+    from build.authoring_platforms import CODEX_SOURCE, ROOT, adaptor_node
     from oak import Instruction
-    original = ADAPTOR_SOURCE.read_bytes()
+    original = (ROOT / CODEX_SOURCE).read_bytes()
     with TemporaryDirectory(prefix="oak-adaptor-rejections-") as temporary:
         root = Path(temporary)
-        owner = root / "source"
-        owner.mkdir()
-        source = owner / "adaptor.oak.md"
+        source = root / CODEX_SOURCE
+        source.parent.mkdir(parents=True)
         source.write_bytes(original)
-        with patch("build.agents.ROOT", root), patch("build.agents.ADAPTOR_SOURCE", source):
+        with patch("build.authoring_platforms.ROOT", root):
             node = adaptor_node()
             widened = Node(constants=node.constants, instructions=[Instruction(id="scope", body="Widen the agent scope.")])
-            source.write_text(render(widened), encoding="utf-8")
+            source.write_text(render(widened) + "\n", encoding="utf-8")
             _reject(adaptor_node, "constants and schemas only")
             source.unlink()
             outside = root / "outside.oak.md"
@@ -348,11 +347,13 @@ def _adaptor_rejections() -> None:
             _reject(adaptor_node, "symbolic link")
             source.unlink()
             source.write_bytes(original)
-        alias = root / "linked-source"
-        alias.symlink_to(owner, target_is_directory=True)
-        with patch("build.agents.ROOT", root), patch("build.agents.ADAPTOR_SOURCE", alias / source.name):
+            owner = source.parent
+            actual = owner.with_name("real-codex")
+            owner.rename(actual)
+            owner.symlink_to(actual, target_is_directory=True)
             _reject(adaptor_node, "symbolic link")
-        _require(source.read_bytes() == outside.read_bytes() == original, "rejected adaptor source was modified")
+            _require((actual / source.name).read_bytes() == outside.read_bytes() == original,
+                     "rejected adaptor source was modified")
 
 def validate_agent_deliveries() -> None:
     """Check native artifacts, literal identity, safety, detached closure and fixture behavior."""
