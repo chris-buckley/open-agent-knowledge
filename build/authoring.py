@@ -15,7 +15,10 @@ import yaml
 from oak import Node, render
 from oak.rules import AUTHORING_GUIDANCE as GUIDANCE_SOURCE
 from oak.surface import SURFACES as SURFACE_SOURCE
-from build.authoring_guides import TEMPLATE_DIRECTORIES, TEMPLATE_ENTRY, entry_node, knowledge_nodes, teaching_examples
+from build.authoring_guides import TEMPLATE_DIRECTORIES, TEMPLATE_ENTRY, knowledge_nodes, teaching_examples
+from build.authoring_agent import entry_node
+from build.authoring_platforms import (CODEX_SOURCE, CLAUDE_SOURCE, resource_node, profile,
+                                       codex_authoring, claude_authoring)
 from build.ebnf import grammar
 from build.fusion import fuse
 from build.generated import write_generated
@@ -58,11 +61,12 @@ def artifacts() -> dict[Path, str]:
     shared = skill_documents()
     metadata = {
         "name": "oak-authoring",
-        "description": "Author, review, or revise Open Agent Knowledge (OAK) documents from supplied knowledge. Choose justified parts and schema shapes with populated examples. Use when writing OAK; no installation is needed. Programmatic validation is optional and installation requires separate permission.",
+        "description": "Create, read, update or delete OAK directly or through optional guided intent development. Preserve supplied meaning, choose justified parts and schema shapes, and show the evolving draft. No installation is needed; programmatic validation is optional and dependency installation needs separate consent.",
         "metadata": {"version": validator.SKILL_VERSION, "oak-revision": validator.REVISION,
                      "validator-sha256": validator.SOURCE_SHA256},
     }
     frontmatter = "---\n" + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True) + "---\n\n"
+    standalone = render(tree(shared)) + "\n"
     return {
         SCRIPT: VALIDATOR_SOURCE.read_text(encoding="utf-8"),
         PACKAGE / "SKILL.md": frontmatter + shared[ENTRY] + "\n",
@@ -71,7 +75,11 @@ def artifacts() -> dict[Path, str]:
         PACKAGE / "references" / "oak.ebnf": grammar(),
         PACKAGE / "_template" / "SKILL.md": TEMPLATE_ENTRY,
         **{PACKAGE / "_template" / path / ".gitkeep": "" for path in TEMPLATE_DIRECTORIES},
-        TARGET: render(tree(shared)) + "\n",
+        PACKAGE / "platforms/codex/templates/.codex/agents/oak-authoring.toml":
+            codex_authoring(standalone, profile(resource_node(CODEX_SOURCE), "authoring-profile")),
+        PACKAGE / "platforms/claude/templates/.claude/agents/oak-authoring.md":
+            claude_authoring(standalone, profile(resource_node(CLAUDE_SOURCE), "authoring-profile")),
+        TARGET: standalone,
     }
 
 

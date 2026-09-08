@@ -246,7 +246,7 @@ def _check_deliveries() -> None:
                   if entry.id == 'oak-ebnf' or entry.id.endswith('-oak-ebnf')]
         if values != [expected.rstrip('\n')]:
             raise ValueError(f"EBNF embedded delivery differs: {path}")
-    for path, limit in (('generated/oak-authoring.skill/SKILL.md', 10_000), ('generated/oak-authoring.oak.md', 64_000)):
+    for path, limit in (('generated/oak-authoring.skill/SKILL.md', 24_000), ('generated/oak-authoring.oak.md', 128_000)):
         if len((ROOT / path).read_bytes()) > limit:
             raise ValueError(f"EBNF delivery exceeds existing budget: {path}")
 

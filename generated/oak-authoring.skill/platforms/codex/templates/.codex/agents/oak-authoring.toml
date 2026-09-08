@@ -1,3 +1,6 @@
+name = "oak-authoring"
+description = "Create, read, update or delete OAK; clarify intent only when useful."
+developer_instructions = '''
 <instructions>
 $ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.
@@ -1750,3 +1753,7 @@ authored-document EMITS schema.authoring-result
 conversation-input RECEIVES schema.authoring-turn
 conversation-output EMITS schema.conversation-result
 </interfaces>
+'''
+
+[agents]
+enabled = false

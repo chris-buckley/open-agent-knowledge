@@ -22,8 +22,8 @@ from build.checks.fixtures import ROOT
 from examples.schemas.shape_gallery import EXPECTED_INSTANCES, SHAPES
 from oak.rules import AUTHORING_GUIDANCE
 
-SKILL_ENTRY_MAX_BYTES = 10_000
-AGENT_MAX_BYTES = 64_000
+SKILL_ENTRY_MAX_BYTES = 24_000
+AGENT_MAX_BYTES = 128_000
 
 
 def require(condition: bool, message: str) -> None:
@@ -55,6 +55,10 @@ def validate_authoring_skill() -> None:
     require(hashlib.sha256((ROOT / "pyproject.toml").read_bytes()).hexdigest() == validator.PROJECT_SHA256, "validator dependencies pin is stale")
     require(len(entry_text.encode()) <= SKILL_ENTRY_MAX_BYTES and len(entry_text.splitlines()) <= 500, "skill entry is not focused")
     require(len(TARGET.read_bytes()) <= AGENT_MAX_BYTES, "standalone agent exceeds its reviewed budget")
+    owner = parse((ROOT / "build/AGENTS.md").read_text(encoding="utf-8"))
+    limits = next(constant.value for constant in owner.constants if constant.id == "authoring-product-byte-limits")
+    require(limits == {"skill-entry": SKILL_ENTRY_MAX_BYTES, "standalone-agent": AGENT_MAX_BYTES},
+            "product checks differ from the owner's reviewed byte budgets")
 
     expected = artifacts()
     actual_files = {path for path in PACKAGE.rglob("*") if path.is_file() and "__pycache__" not in path.parts}
@@ -73,7 +77,7 @@ def validate_authoring_skill() -> None:
             canonical = render(node, grouping=grouping)
             require(render(parse(canonical), grouping=grouping) == canonical, "fusion changed canonical meaning")
     require(not fused.state, "stateless authoring acquired unjustified state")
-    require(len(fused.instructions) == 0 and len(fused.triggers) == 2 and len(fused.interfaces) == 2, "fusion widened policy or arrival scope")
+    require(len(fused.instructions) == 0 and len(fused.triggers) == 3 and len(fused.interfaces) == 4, "fusion widened policy or arrival scope")
     require(next(c.value for c in fused.constants if c.id.endswith("-validator-script")) + "\n" == SCRIPT.read_text(), "standalone helper drift")
     owners = [key for group in RULE_OWNERS for key in group]
     require(len(set(owners)) == len(owners) and set(owners) == {r.id for r in AUTHORING_GUIDANCE}, "authoring rules lost their single guide owner")
@@ -111,6 +115,9 @@ EXPECTED_SKILL_FILES = {
     "_template/SKILL.md", "_template/references/.gitkeep", "_template/assets/constants/.gitkeep",
     "_template/assets/schemas/.gitkeep", "_template/guides/.gitkeep", "_template/processes/.gitkeep",
     "_template/scripts/.gitkeep",
+    "assets/constants/artifact-kinds.oak.md", "platforms/claude/adaptor.oak.md",
+    "platforms/codex/templates/.codex/agents/oak-authoring.toml",
+    "platforms/claude/templates/.claude/agents/oak-authoring.md",
 }
 EXPECTED_SKILL_TREE = """SKILL_TREE:
   SKILL.md→Skill entry point
@@ -352,63 +359,9 @@ def _teaching_scope(documents: dict[str, str], fused: Node, teaching: dict[str, 
 
 
 def _execution_parity(documents: dict[str, str], fused: Node) -> None:
-    """Native host fixtures prove dataflow parity, not arbitrary model quality."""
-    candidate = teaching_examples()["assets/examples/fixed_knowledge/example.oak.md"]
-    original = parse(documents[ENTRY])
-    scenarios = (
-        (False, False, False, "unused"),
-        (True, False, False, "passed parse and resolution"),
-        (True, True, False, "Programmatic validation was not performed (installation declined)."),
-        (True, True, True, "passed parse and resolution after approved installation"),
-        (True, False, False, "Programmatic validation was not performed (validator unavailable)."),
-    )
-    for requested, installation_required, approved, status in scenarios:
-        results = []
-        traces = []
-        for node, source, load in ((original, ENTRY, documents.get), (fused, None, None)):
-            trace = []
-            def host(action: Act, values):
-                trace.append((action.instruction, dict(values), tuple(action.outputs)))
-                if "TEMPLATE" in values:
-                    require(values["TEMPLATE"] == (PACKAGE / "_template" / "SKILL.md").read_text(), "template routing changed literal knowledge")
-                    require("Unfilled scaffolding is inert." in values["TEMPLATE_USE"], "template routing lost its inert boundary")
-                if action.outputs == ["DESIGN_1"]:
-                    require(values["TEACHING"] == teaching_examples(), "schema design lost complete literal teaching")
-                if action.outputs == ["DESIGN_6"]:
-                    orchestration = parse(documents["guides/subagent-orchestration.oak.md"])
-                    codex = parse(documents["platforms/codex/adaptor.oak.md"])
-                    expected = {"ORCHESTRATION": next(c.value for c in orchestration.constants if c.id == "orchestration"),
-                                "DELEGATION": next(c.value for c in orchestration.constants if c.id == "guidance"),
-                                "CODEX": next(c.value for c in codex.constants if c.id == "mapping"),
-                                "DEFAULTS": next(c.value for c in codex.constants if c.id == "native-defaults")}
-                    require({key: values[key] for key in expected} == expected, "delegation or native configuration routing changed")
-                if action.outputs == ["SOURCE", "VALIDATE"]:
-                    return {"SOURCE": "The service is Task board; the title limit is 120.", "VALIDATE": requested}
-                if action.outputs == ["INSTALL_REQUIRED", "REPORT"]:
-                    return {"INSTALL_REQUIRED": installation_required, "REPORT": status}
-                if action.outputs == ["APPROVED"]:
-                    return {"APPROVED": approved}
-                if action.outputs == ["OAK", "VALIDATION"]:
-                    require(values["ALLOW_INSTALL"] == (installation_required and approved), "installation permission was invented")
-                    return {"OAK": values["CANDIDATE"], "VALIDATION": status}
-                if action.outputs == ["CANDIDATE"]:
-                    return {"CANDIDATE": candidate}
-                return {name: "fixture design" for name in action.outputs}
-            result = execute(node, Arrival(event="OAK authoring is requested for supplied source material."), {}, act=host, source=source, load=load)
-            require(len(result.emissions) == 1 and result.emissions[0].values["OAK"] == candidate, "authoring fixture did not deliver one document")
-            require(sum("TEMPLATE" in values for _, values, _ in trace) == 1, "template use was not routed exactly once")
-            require(sum("TEACHING" in values for _, values, _ in trace) == 2, "teaching must reach schema design and review")
-            require(sum("ORCHESTRATION" in values for _, values, _ in trace) == 1, "orchestration must reach process design once")
-            require(any("HELPER" in values for _, values, _ in trace) == requested, "unrequested validation work ran")
-            require(any(outputs == ("APPROVED",) for _, _, outputs in trace) == (requested and installation_required), "consent was not requested at the right boundary")
-            if requested and installation_required and not approved:
-                require(result.emissions[0].values["VALIDATION"] == status, "declined installation blocked authoring")
-                require(not any("ALLOW_INSTALL" in values for _, values, _ in trace), "declined installation reached the installer")
-            results.append(result.emissions)
-            traces.append(trace)
-            typed = execute(node, Arrival(interface="interface.authoring-input", values={"SOURCE": "The service is Task board; the title limit is 120.", "VALIDATE": requested}), {}, act=host, source=source, load=load)
-            require(typed.emissions == result.emissions, "typed and natural arrivals differ")
-        require(results[0] == results[1] and traces[0] == traces[1], "skill and agent behavior differ")
+    """Retain legacy validation/consent checks in the complete shared draft workflow."""
+    from build.checks.authoring_agent import exercise_authoring_fixtures
+    exercise_authoring_fixtures(documents, fused)
 
 
 def _fusion_rejections() -> None:

@@ -1,3 +1,12 @@
+---
+name: oak-authoring
+description: Create, read, update or delete OAK; clarify intent only when useful.
+model: inherit
+permissionMode: default
+disallowedTools:
+- Agent
+---
+
 <instructions>
 $ reads a value; local targets start with their part; relative targets start with a document path; a bare $NAME is local to the running process; Targets of SET, CALL, EMIT, and trigger source or process fields omit $.
 Process input schemas seed local bindings, process output schemas validate successful outputs, and CALL binds inputs and promotes declared outputs.

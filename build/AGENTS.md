@@ -12,7 +12,7 @@ source,output
 build/ebnf.py,generated/oak.ebnf
 build/definitions.py,generated/definitions/*.oak.md
 build/agents.py,generated/oak.agents
-build/authoring.py and build/authoring_guides.py,generated/oak-authoring.skill and generated/oak-authoring.oak.md
+"build/authoring.py, build/authoring_agent.py and build/authoring_guides.py","generated/oak-authoring.skill including native templates, and generated/oak-authoring.oak.md"
 examples/catalog.py and registered Python sources,"scenario siblings, local dependency copies, and examples/catalog.oak.md"
 >>
 
@@ -20,7 +20,9 @@ full-verification-command: "python -m build.examples"
 
 direct-verification-command: "python build/examples.py"
 
-authoring-product-byte-limits: {"skill-entry": 10000, "standalone-agent": 64000}
+authoring-product-byte-limits: {"skill-entry": 24000, "standalone-agent": 128000}
+
+authoring-size-budget-policy: "Product byte limits are reviewed repository budgets, not OAK or provider limits. Adjust a budget when the user authorises it; preserve complete required meaning, measure the final artifacts, and update the owning budget, active plan and live checks together."
 
 agent-graph-checks: ["exact path discovery", "canonical parse and render equality", "500-line maximum", "root router coverage", "one owned concern per file", "structured content before authored instructions", "duplicate authored-claim rejection", "obsolete owner rejection", "root-local public and checkpoint contracts, explicit context and change-module closure", "checkpoint, approval, replay, cancellation and revision checks in build/checks/repository_lifecycle.py", "root contract rejection and lifecycle safeguard mutation checks, including the unchanged 500-line bound"]
 
@@ -51,7 +53,7 @@ ebnf-presentation: YAML<<
   of formatting, exercise corruption rejections, and cover both grouping selections
   and orders.
 - Keep the two grammar files byte-identical and both embedded grammar values equal.
-  Preserve non-grammar knowledge and the existing skill and agent byte limits.
+  Preserve non-grammar knowledge and the reviewed skill and agent byte limits.
 >>
 
 example-checks: YAML<<
@@ -86,18 +88,23 @@ output-rules: ["treat generated products as deliveries, never source authority",
 
 capability-sources: CSV<<
 source,owns
-build/authoring_guides.py,guide composition and the authoring workflow
+build/authoring_guides.py,"shared language guidance, literal teaching, scaffold and declarative contract composition"
 oak/rules/guidance.py,shared package authoring rules
 examples/catalog.py and its registered sources,"shared teaching selection, scenario documents, sample data, and catalogue; source layout is owned by examples/AGENTS.md"
 build/authoring_validator.py,"optional runtime helper, skill version, immutable validator revision, and fingerprints"
 build/authoring.py and build/fusion.py,"standard skill metadata, generated knowledge files, and agent assembly"
+build/authoring_agent.py,"one stateless operational entry, local public schemas, internal contracts and direct or guided CRUD"
+build/authoring_resources/assets/constants/artifact-kinds.oak.md,maintained six-kind catalogue and its fixed version
+build/authoring_resources/platforms,separate Codex and Claude knowledge and exact native profiles
+build/authoring_platforms.py,bounded maintained-resource loading and lossless native serialization for both generators
 >>
 
 delivery-contract: YAML<<
 - 'Distribute generated/oak-authoring.skill as a normal Git-versioned product: SKILL.md
   routes work, numbered references own language knowledge, references/oak.ebnf supplies
   grammar, and guides owns authoring, review, and validation practice. Keep scripts/validate.py
-  optional. Do not add provider-specific metadata or directory README indexes.'
+  optional. Keep provider metadata in separate platform templates, never the shared
+  skill metadata. Create no directory README indexes.'
 - Treat generated knowledge guides as the identical input documents for the skill
   and agent, not independently maintained prompts. Keep grammar material in EBNF.
 - Own artifact-kind guidance in one extensible constant catalogue. Keep its values
@@ -134,6 +141,13 @@ delivery-contract: YAML<<
 - Leave runtime validation inactive unless requested, and require separate explicit
   approval before downloads or dependency installation. Preserve no-install authoring
   and honest not-performed results.
+- Retain one complete partial draft with annotations and source mappings as JSON text
+  in the conversation result. The host restores it across turns; OAK state, source
+  text, draft flags and native metadata provide neither persistence nor authority.
+  Return meaningful decisions to the parent without polling or spawning.
+- Give each helper an output schema containing exactly its returned bindings. CALL
+  promotes every declared output; keep existing evidence in the caller and combine
+  it with new view bindings at the complete response boundary.
 >>
 
 generated-layout: "Deliver only oak.ebnf, definitions/*.oak.md, oak-authoring.oak.md, the oak-authoring.skill directory, and the oak.agents directory under generated. Keep maintained sources and repository guidance outside that tree."
@@ -156,7 +170,7 @@ agent-delivery-contract: YAML<<
 
 skill-installation: "The .skill suffix identifies the repository bundle directory, not an archive or skill metadata name. Install its contents in a directory named oak-authoring to match name: oak-authoring in SKILL.md. The Agent Skills naming contract is https://agentskills.io/specification#name-field."
 
-regeneration-checks: ["Generate the optional validator delivery byte-for-byte from build/authoring_validator.py; never load the delivered helper as build source.", "Require complete generated file and directory sets, reject symlinks before writing, and prune only each generator-owned subtree.", "Run cold generation and repair in disposable snapshots without previous products, then compare complete path and byte manifests.", "Verify detached installed-name skill and standalone-agent closure without sibling definitions or repository build imports."]
+regeneration-checks: ["Generate the optional validator delivery byte-for-byte from build/authoring_validator.py; never load the delivered helper as build source.", "Require complete generated file and directory sets, reject symlinks before writing, and prune only each generator-owned subtree.", "Run cold generation and repair in disposable snapshots without previous products, then compare complete path and byte manifests.", "Verify detached installed-name skill and standalone-agent closure without sibling definitions or repository build imports.", "Use build/checks/authoring_agent.py and build/checks/authoring_intent.py for draft, status, fidelity, bounded CRUD, tool-context and native parity specimens. Deterministic native decisions and fixture oracles are offline contract evidence, not model-performance or live-client certification."]
 </constants>
 
 <processes>

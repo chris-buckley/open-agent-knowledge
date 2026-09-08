@@ -1,0 +1,485 @@
+{
+  "baseline_commit": "6df8e13c936376ada0967385888ca61ec09a867b",
+  "baseline_tree": "2ba2dfaeecd3b6bafaea60c3da68fb9eceb16349",
+  "checked_workspace_revision": "e68360b962154b997a76a47737101b7022e81c7e72b3f5214113a79f12afd919",
+  "checked_workspace_revision_method": "SHA-256 of canonical JSON of every non-cache file's path, byte size and SHA-256 plus directory paths; exact workspace before completion-record edits.",
+  "code_and_products_revision": "180853139d9c7028410f4cc763806d2341e7bd37d4baca156d6b41d68fbaba55",
+  "code_and_products_revision_method": "SHA-256 of canonical JSON of all non-docs, non-cache repository file paths, byte sizes and SHA-256 values; metadata records can advance without changing this reviewed implementation.",
+  "environment": {
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "dependencies": {
+      "pydantic": "2.13.4",
+      "pydantic-settings": "2.15.0",
+      "pydantic-extra-types": "2.11.1",
+      "PyYAML": "6.0.3"
+    },
+    "location": "external environment, no editable repository installation"
+  },
+  "commands": [
+    {
+      "command": "python -m compileall -q oak build examples",
+      "exit": 0,
+      "seconds": 0.297
+    },
+    {
+      "command": "python -m examples.catalog",
+      "exit": 0,
+      "seconds": 0.953
+    },
+    {
+      "command": "python -m build.ebnf",
+      "exit": 0,
+      "seconds": 0.735
+    },
+    {
+      "command": "python -m build.definitions",
+      "exit": 0,
+      "seconds": 0.89
+    },
+    {
+      "command": "python -m build.agents",
+      "exit": 0,
+      "seconds": 0.704
+    },
+    {
+      "command": "python -m build.authoring",
+      "exit": 0,
+      "seconds": 1.046
+    },
+    {
+      "command": "python -m build.examples",
+      "exit": 0,
+      "seconds": 77.579
+    },
+    {
+      "command": "python build/examples.py",
+      "exit": 0,
+      "seconds": 82.687
+    },
+    {
+      "command": "python -m examples.catalog",
+      "exit": 0,
+      "seconds": 4.015
+    },
+    {
+      "command": "python -m build.ebnf",
+      "exit": 0,
+      "seconds": 0.641
+    },
+    {
+      "command": "python -m build.definitions",
+      "exit": 0,
+      "seconds": 0.859
+    },
+    {
+      "command": "python -m build.agents",
+      "exit": 0,
+      "seconds": 0.672
+    },
+    {
+      "command": "python -m build.authoring",
+      "exit": 0,
+      "seconds": 0.984
+    }
+  ],
+  "repeat_generation": {
+    "identical": true,
+    "file_count": 629,
+    "directory_count": 191
+  },
+  "independent_preservation_checks": 190,
+  "budgets": {
+    "skill_entry_bytes": 24000,
+    "skill_entry_lines": 500,
+    "standalone_bytes": 128000
+  },
+  "measured": {
+    "skill_entry_bytes": 22256,
+    "skill_entry_lines": 456,
+    "standalone_bytes": 95579,
+    "standalone_sha256": "71b1cb0abef42080e10e9814c5a3733ea90fc2dcc9d8f9c057b44ee81c27ddc9"
+  },
+  "shared_input_bytes_before_fusion": {
+    "SKILL.oak.md": 21735,
+    "references/00-structure.oak.md": 15036,
+    "references/01-schemas.oak.md": 1239,
+    "references/02-constants.oak.md": 363,
+    "references/03-state.oak.md": 460,
+    "references/04-interfaces.oak.md": 830,
+    "references/05-triggers.oak.md": 646,
+    "references/06-processes.oak.md": 1723,
+    "references/07-instructions.oak.md": 347,
+    "guides/review.oak.md": 18051,
+    "guides/validation.oak.md": 14908,
+    "guides/authoring.oak.md": 14761,
+    "guides/subagent-orchestration.oak.md": 1334,
+    "platforms/codex/adaptor.oak.md": 2597,
+    "assets/constants/artifact-kinds.oak.md": 3029,
+    "platforms/claude/adaptor.oak.md": 1968
+  },
+  "shared_input_measurement_note": "All 16 complete inputs are counted, including literals and internal contracts. Fusion namespaces typed targets and derives interpretation guidance; these input measurements are not an additive partition of the final body.",
+  "changed_paths_before_completion_records": [
+    ".agents/adaptors/codex/adaptor.oak.md",
+    ".agents/rules/context.oak.md",
+    "build/AGENTS.md",
+    "build/agents.py",
+    "build/authoring.py",
+    "build/authoring_agent.py",
+    "build/authoring_guides.py",
+    "build/authoring_platforms.py",
+    "build/authoring_resources/assets/constants/artifact-kinds.oak.md",
+    "build/authoring_resources/platforms/claude/adaptor.oak.md",
+    "build/authoring_resources/platforms/codex/adaptor.oak.md",
+    "build/authoring_validator.py",
+    "build/checks/__init__.py",
+    "build/checks/agent_deliveries.py",
+    "build/checks/authoring.py",
+    "build/checks/authoring_agent.py",
+    "build/checks/authoring_intent.py",
+    "build/checks/ebnf.py",
+    "build/checks/outputs.py",
+    "docs/plans/0017-oak-authoring-agent/plan.md",
+    "generated/oak-authoring.oak.md",
+    "generated/oak-authoring.skill/SKILL.md",
+    "generated/oak-authoring.skill/assets/constants/artifact-kinds.oak.md",
+    "generated/oak-authoring.skill/guides/authoring.oak.md",
+    "generated/oak-authoring.skill/guides/validation.oak.md",
+    "generated/oak-authoring.skill/platforms/claude/adaptor.oak.md",
+    "generated/oak-authoring.skill/platforms/claude/templates/.claude/agents/oak-authoring.md",
+    "generated/oak-authoring.skill/platforms/codex/adaptor.oak.md",
+    "generated/oak-authoring.skill/platforms/codex/templates/.codex/agents/oak-authoring.toml",
+    "generated/oak-authoring.skill/scripts/validate.py",
+    "generated/oak.agents/adaptors/codex/adaptor.oak.md"
+  ],
+  "product_manifest": {
+    "generated/definitions/act.oak.md": {
+      "bytes": 2700,
+      "sha256": "98fb2c085d6f8fd9fc110ff040376795bd7d2e753848e17ad7cca92118a26627"
+    },
+    "generated/definitions/all.oak.md": {
+      "bytes": 777,
+      "sha256": "00643be9a2fb5df2b7cdfad0d7052e1e9df4c24103054b551aa3bcb8f1fbdae5"
+    },
+    "generated/definitions/any.oak.md": {
+      "bytes": 788,
+      "sha256": "42ee84fd15770a6007a3c3626ae6321598f57a9740cbd9e0012d312c1fe51a07"
+    },
+    "generated/definitions/assert.oak.md": {
+      "bytes": 947,
+      "sha256": "c3ad7ce13ddbd35ab90aa81233756a27d1f29580b78fe8268fd03996626418e3"
+    },
+    "generated/definitions/at-least.oak.md": {
+      "bytes": 728,
+      "sha256": "dfd488897f7fd4c00b33946bf52eb616e3193b93293ab3661d455ff4e5645ac9"
+    },
+    "generated/definitions/at-most.oak.md": {
+      "bytes": 721,
+      "sha256": "2befa2878533084e387359cee31a2e9109f896b44219c62d4e210e778484515a"
+    },
+    "generated/definitions/binding-value.oak.md": {
+      "bytes": 673,
+      "sha256": "57471cc5891a06b4f539091185f6cd5034964cb7434b46520f5bf5dfff78ec15"
+    },
+    "generated/definitions/call.oak.md": {
+      "bytes": 1093,
+      "sha256": "b30ac097882cee5afc4363e407d5d1f5307105faef6d56f7c8b60b3f7f786a0c"
+    },
+    "generated/definitions/compare.oak.md": {
+      "bytes": 889,
+      "sha256": "a48e53b8622f4012d808a5e6a6fa77e554d14f02bf6a09c7d5b7dd88d70a5730"
+    },
+    "generated/definitions/constant-value.oak.md": {
+      "bytes": 699,
+      "sha256": "9fad51d8ca9a0ea96952598fe3472556bc3a3f50002bf567b52939a8695b807b"
+    },
+    "generated/definitions/constant.oak.md": {
+      "bytes": 4086,
+      "sha256": "85d387f5f072e32fdfead97ef90b6376607170def18fc8e81ca789596440cba2"
+    },
+    "generated/definitions/emit.oak.md": {
+      "bytes": 1614,
+      "sha256": "51e133e3f4f26b93a74fba9c405df318a871f059c6c63ddea586c1165f9e1c13"
+    },
+    "generated/definitions/fail.oak.md": {
+      "bytes": 617,
+      "sha256": "7d93cd0626c1236f207a208dcbde96a9ec52a4b20e46e635a10062c96d794387"
+    },
+    "generated/definitions/foreach.oak.md": {
+      "bytes": 1074,
+      "sha256": "e78dc75bb9bea72162f0842697104c91537e6fbef7d016a9b68202a8c8808c7f"
+    },
+    "generated/definitions/if.oak.md": {
+      "bytes": 1025,
+      "sha256": "fe8fa50d627ae7db769e5c8118c0f5b77d1915c9234d7e2c4a04f7af0feefcd4"
+    },
+    "generated/definitions/instruction.oak.md": {
+      "bytes": 654,
+      "sha256": "5147ece73ae1612e432195d5807bfc451fc1e6fcf8aae51eb7f9b218183760df"
+    },
+    "generated/definitions/interface.oak.md": {
+      "bytes": 1863,
+      "sha256": "dad3d953e9bf570da2ccd8dbf3eecdca8787f6552557a003ad82f78e9fdba5ae"
+    },
+    "generated/definitions/join.oak.md": {
+      "bytes": 627,
+      "sha256": "068e87038c08b18427f449d9804fadd2005932b03993effdb85e152ca4d91a8b"
+    },
+    "generated/definitions/lines.oak.md": {
+      "bytes": 795,
+      "sha256": "bf6c1928940824ca6c77e0238dad9a8c1c6f3fbaddb49eaeaded0e4db458cdd0"
+    },
+    "generated/definitions/list-of.oak.md": {
+      "bytes": 837,
+      "sha256": "3585e0bb01904bcd6e12455fa0bbff794b90dce65b7ae2ff2c3b032b8e12dc23"
+    },
+    "generated/definitions/literal-value.oak.md": {
+      "bytes": 596,
+      "sha256": "1372595ca2f8b1e91f70db2fc044f7bb3e887eb90149dd235c2719ae8917fb96"
+    },
+    "generated/definitions/max-chars.oak.md": {
+      "bytes": 677,
+      "sha256": "051718bbfea207b5f8f51390a4006a6ab06b81b892fbd179204493b16961b3fd"
+    },
+    "generated/definitions/node.oak.md": {
+      "bytes": 1693,
+      "sha256": "2c884243299a82040d676f341460f4ea822212585d31b75511d2d6a7650d8d6a"
+    },
+    "generated/definitions/non-empty.oak.md": {
+      "bytes": 605,
+      "sha256": "d89b3ccdcad4df1b4ed6dd5e88bb44aa4bc5384764777970ba65cf78f2339798"
+    },
+    "generated/definitions/not.oak.md": {
+      "bytes": 665,
+      "sha256": "0162b036aa81207e0825b1a016004b703b42bc9877d1c23ddd690a113c9aa1c6"
+    },
+    "generated/definitions/one-of.oak.md": {
+      "bytes": 662,
+      "sha256": "6e94c09c9115fb1a8d710fd0671dde73965393e70ddf2e975320fbb47c153dca"
+    },
+    "generated/definitions/par.oak.md": {
+      "bytes": 978,
+      "sha256": "01e1dc331b9846e2ef043b6891afd027f92f4dabacbc4f9dc7d8cc599eaa2bef"
+    },
+    "generated/definitions/process.oak.md": {
+      "bytes": 2528,
+      "sha256": "f1c9cc4871a2b4498e021179d19ec1beb17a7e231888026c259d5d496d29dca9"
+    },
+    "generated/definitions/regex.oak.md": {
+      "bytes": 711,
+      "sha256": "54b1b3667c48c6fbb77169e5e49422de984148a8864f79d6b770fd38e6030a8c"
+    },
+    "generated/definitions/schema.oak.md": {
+      "bytes": 1419,
+      "sha256": "a70c35513aa5937446f06d88623ef643f32480578098ce54544b6ed4b3309bee"
+    },
+    "generated/definitions/set.oak.md": {
+      "bytes": 743,
+      "sha256": "37f88e0b9bdb7bbe42fba4eaa7575ec7b9aa234da95aa364b75f2500e1527fd5"
+    },
+    "generated/definitions/state-value.oak.md": {
+      "bytes": 668,
+      "sha256": "6e1bfe8517eed11a624fe0f03c261506de8230eaf3e70f1b95c7f52175285bc6"
+    },
+    "generated/definitions/state.oak.md": {
+      "bytes": 1224,
+      "sha256": "a1bd2529807a0bb8d0b43dc7a758b89d223ec6b2ffaa348752468f1be2fff26f"
+    },
+    "generated/definitions/trigger.oak.md": {
+      "bytes": 1865,
+      "sha256": "4646bfce799a045eb71640e5ee0f34f5f56f6f91da2f2373607ffc6e62f2cf3f"
+    },
+    "generated/definitions/type.oak.md": {
+      "bytes": 646,
+      "sha256": "14abb267cf76dfc4085b0bce57f7d369c8ce2d3a8b80b11c56e74e2f287b11ff"
+    },
+    "generated/definitions/value-binding.oak.md": {
+      "bytes": 770,
+      "sha256": "0ad719734bb3d85a71fe392697be0570dc092533f83ec9644a2f6bd75cf815a7"
+    },
+    "generated/definitions/where.oak.md": {
+      "bytes": 1148,
+      "sha256": "24cca20afcc38cf5b6971ecc7207a431548e42f4f75a82820f655a184be7e2e7"
+    },
+    "generated/definitions/while.oak.md": {
+      "bytes": 1014,
+      "sha256": "ab5a4b97bd03ade6277ed6c5ee423ae67074b122d845d7e945ea1657b80cfdf7"
+    },
+    "generated/oak-authoring.oak.md": {
+      "bytes": 95579,
+      "sha256": "71b1cb0abef42080e10e9814c5a3733ea90fc2dcc9d8f9c057b44ee81c27ddc9"
+    },
+    "generated/oak-authoring.skill/SKILL.md": {
+      "bytes": 22256,
+      "sha256": "b2b18a97214346f4fffc2bf067909b0e558079e07bafb405e8753317d1be0269"
+    },
+    "generated/oak-authoring.skill/_template/SKILL.md": {
+      "bytes": 516,
+      "sha256": "6c5e706344aef4c649256cf57a6842761a7aa3491b4efe5a190fa2e681169c17"
+    },
+    "generated/oak-authoring.skill/_template/assets/constants/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "generated/oak-authoring.skill/_template/assets/schemas/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "generated/oak-authoring.skill/_template/guides/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "generated/oak-authoring.skill/_template/processes/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "generated/oak-authoring.skill/_template/references/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "generated/oak-authoring.skill/_template/scripts/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "generated/oak-authoring.skill/assets/constants/artifact-kinds.oak.md": {
+      "bytes": 3029,
+      "sha256": "0b8e70eb6b43c3b5784f0401e834d4277b9b8622471cd0c7c373cd977a0f358b"
+    },
+    "generated/oak-authoring.skill/assets/examples/catalog.oak.md": {
+      "bytes": 1209,
+      "sha256": "f0d713bf0ebee64a7c88348d9ed63ad3ed229ac8a6a1600e1c43ec12d37783bc"
+    },
+    "generated/oak-authoring.skill/assets/examples/compound_growth/example.oak.md": {
+      "bytes": 4380,
+      "sha256": "a2466e89b8d4eadcbc8146b5557a37fda6e4227ac857fadd2a3f2715adee01df"
+    },
+    "generated/oak-authoring.skill/assets/examples/compound_growth/sample.oak.md": {
+      "bytes": 870,
+      "sha256": "f872254206bdd118b486b29700f8a58df75a256c40e3e28d09aac461fbe6ecc5"
+    },
+    "generated/oak-authoring.skill/assets/examples/fixed_knowledge/example.oak.md": {
+      "bytes": 169,
+      "sha256": "67d9a9b30d55c6bfba75d7a46013cab1e9d1680d1d1f6c51fa322ebd1e57ed7a"
+    },
+    "generated/oak-authoring.skill/assets/examples/shape_gallery/example.oak.md": {
+      "bytes": 1981,
+      "sha256": "371ea60f0ca805839c8033bcefd3df6d544b234a882f4ac19dc3e0623fb6efad"
+    },
+    "generated/oak-authoring.skill/assets/examples/shape_writer/example.oak.md": {
+      "bytes": 4109,
+      "sha256": "89d6de217966134ed22aed5dd697d14d465260c68b956eb465712446030fac1f"
+    },
+    "generated/oak-authoring.skill/assets/examples/shape_writer/sample.oak.md": {
+      "bytes": 1516,
+      "sha256": "3f8b5a28532baa8ca6eb05e0223b1178c9c1483a2a14dc1bdf53eeb27f44e00f"
+    },
+    "generated/oak-authoring.skill/assets/examples/shape_writer/shape_gallery.oak.md": {
+      "bytes": 1981,
+      "sha256": "371ea60f0ca805839c8033bcefd3df6d544b234a882f4ac19dc3e0623fb6efad"
+    },
+    "generated/oak-authoring.skill/guides/authoring.oak.md": {
+      "bytes": 14761,
+      "sha256": "51a52f57f6cc108026ca7599ec6e498adb4737ae88852c39e9e2c14bbc1a39a6"
+    },
+    "generated/oak-authoring.skill/guides/review.oak.md": {
+      "bytes": 18051,
+      "sha256": "d6baa18a96cb6c680d546f7d479a35dd68c3a6eca28787824bb4c1ddd28eb515"
+    },
+    "generated/oak-authoring.skill/guides/subagent-orchestration.oak.md": {
+      "bytes": 1334,
+      "sha256": "2fb12b72096aab8067b7c5edab835933a4ea3da8097023c45f12afd02e6526a5"
+    },
+    "generated/oak-authoring.skill/guides/validation.oak.md": {
+      "bytes": 14908,
+      "sha256": "908c1d190e0625de6f42f87c0e0b53a8e46dc433aa43516ec1a2e350b8c76e9a"
+    },
+    "generated/oak-authoring.skill/platforms/claude/adaptor.oak.md": {
+      "bytes": 1968,
+      "sha256": "28bf0d303b054aaf192929ff75dc94473b714de3e0e26e8d449722e28ec93b80"
+    },
+    "generated/oak-authoring.skill/platforms/claude/templates/.claude/agents/oak-authoring.md": {
+      "bytes": 95754,
+      "sha256": "e1db86003d7066c3f46d8cd75d2e6be0e9e824d045e83a073c5d1dc837a3b08e"
+    },
+    "generated/oak-authoring.skill/platforms/codex/adaptor.oak.md": {
+      "bytes": 2597,
+      "sha256": "08b770df86ff37cfef8913cb5f94019a18e440d15ef2931a4cb1cb303f120e90"
+    },
+    "generated/oak-authoring.skill/platforms/codex/templates/.codex/agents/oak-authoring.toml": {
+      "bytes": 95746,
+      "sha256": "36060e01fd0e34e1fe2676f2e819f2e85c731531b7eb9be1af5ead6fb0124278"
+    },
+    "generated/oak-authoring.skill/references/00-structure.oak.md": {
+      "bytes": 15036,
+      "sha256": "008a1c7defb595beff2afdeb0e73cc1ac2ff97ff1f892ec874b1c55582dda2a8"
+    },
+    "generated/oak-authoring.skill/references/01-schemas.oak.md": {
+      "bytes": 1239,
+      "sha256": "15639c8981abaf5c8d3fe894f90b69f36301426334d29e80170b3403708824a8"
+    },
+    "generated/oak-authoring.skill/references/02-constants.oak.md": {
+      "bytes": 363,
+      "sha256": "b4b1d6d5e7e6bb07ba46f1cc5a4606185d91472b62cdc7ef9daecbb179c3c207"
+    },
+    "generated/oak-authoring.skill/references/03-state.oak.md": {
+      "bytes": 460,
+      "sha256": "2734ccbc7303c76a8e529d7056ec1f9735e4bbe00788366132324457bd3a5b83"
+    },
+    "generated/oak-authoring.skill/references/04-interfaces.oak.md": {
+      "bytes": 830,
+      "sha256": "5a2d3e9a5200817eca47bbd22c1d0082cc31b4a7d187075c42fd4d56b652946e"
+    },
+    "generated/oak-authoring.skill/references/05-triggers.oak.md": {
+      "bytes": 646,
+      "sha256": "9f5538004d456b6b416ff091423d2f9f5af1b3cba305d45383335867efd15444"
+    },
+    "generated/oak-authoring.skill/references/06-processes.oak.md": {
+      "bytes": 1723,
+      "sha256": "e1e4db4d11a93decc820103df1f39e397c79d35cd2d9fc45e74abc34a7fdef6f"
+    },
+    "generated/oak-authoring.skill/references/07-instructions.oak.md": {
+      "bytes": 347,
+      "sha256": "a804b45c7138313520192613bf3064ff4fdb9577d36a5580e8bc40af0e5cbf2d"
+    },
+    "generated/oak-authoring.skill/references/oak.ebnf": {
+      "bytes": 13307,
+      "sha256": "ce419c687b9f4d84f22cef4471ec54e018be1f1222b8aba0d0e93f4fd85350ec"
+    },
+    "generated/oak-authoring.skill/scripts/validate.py": {
+      "bytes": 13197,
+      "sha256": "66f16774fea5b25e020645ddb6dc4e29cc4ee187ed9204b3bd197952b676e02f"
+    },
+    "generated/oak.agents/adaptors/codex/adaptor.oak.md": {
+      "bytes": 2597,
+      "sha256": "08b770df86ff37cfef8913cb5f94019a18e440d15ef2931a4cb1cb303f120e90"
+    },
+    "generated/oak.agents/parallel_exploration/codex/.codex/agents/oak-explorer.toml": {
+      "bytes": 8224,
+      "sha256": "245617494904708d000aef096bcd6ef1cd4454f4fbc84e3cb63a63d6b27c6152"
+    },
+    "generated/oak.agents/parallel_exploration/coordinator.oak.md": {
+      "bytes": 4850,
+      "sha256": "4cbc4334dab2291a9f5e265cedfb8ff4b1a90b097f1a1d04c474b591d60e7261"
+    },
+    "generated/oak.agents/parallel_exploration/explorer.oak.md": {
+      "bytes": 7878,
+      "sha256": "4c0de50e286cd38b8e154a286b28ae7c5e34b0dd29a4533538ff0a6715114eb1"
+    },
+    "generated/oak.agents/parallel_exploration/sample.oak.md": {
+      "bytes": 2131,
+      "sha256": "e4b9aefa8c68f7ea6c70fd8a7ff83002f53bc5457d40ba0822981ac5fb7ea4df"
+    },
+    "generated/oak.ebnf": {
+      "bytes": 13307,
+      "sha256": "ce419c687b9f4d84f22cef4471ec54e018be1f1222b8aba0d0e93f4fd85350ec"
+    }
+  },
+  "limitations": [
+    "Native-action decisions and intent oracles are deterministic offline fixtures, not evidence of live client discovery, model performance or permission enforcement.",
+    "No generated skill or native agent was installed; no runtime services, MCP servers or new workflows were added.",
+    "PR publication and its live GitHub check are recorded separately after the local implementation commit."
+  ],
+  "final_review_corrections": [
+    "Repair cases select explicit generated paths, so Codex authoring, Claude authoring and catalogue corruption are exercised independently.",
+    "Removed one extra source-file EOF blank line. Required checks run again on this final revision before publication."
+  ]
+}

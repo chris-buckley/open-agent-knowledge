@@ -6,13 +6,12 @@ fusion. Package rules and working examples remain their original source owners.
 
 from pathlib import Path
 
-from oak import (ACT, BindingValue, Call, Compare, Constant, ConstantValue, Emit,
-                 If, Interface, LiteralValue, Node, NonEmpty, Process,
-                 Schema, Trigger, Type, ValueBinding, parse, render, where)
+from oak import Constant, Node, parse
 from oak.rules import AUTHORING_GUIDANCE
 from examples.catalog import teaching_examples
 from build.ebnf import grammar
-from build.agents import adaptor_node
+from build.authoring_agent import contract_node
+from build.authoring_platforms import CATALOGUE_SOURCE, CLAUDE_SOURCE, adaptor_node, resource_node
 
 ROOT = Path(__file__).resolve().parents[1]
 GUIDES = (
@@ -22,6 +21,7 @@ GUIDES = (
     "references/06-processes.oak.md", "references/07-instructions.oak.md",
     "guides/review.oak.md", "guides/validation.oak.md", "guides/authoring.oak.md",
     "guides/subagent-orchestration.oak.md", "platforms/codex/adaptor.oak.md",
+    "assets/constants/artifact-kinds.oak.md", "platforms/claude/adaptor.oak.md",
 )
 # Each package authoring rule has one guide owner, not an instruction copy.
 RULE_OWNERS = (
@@ -36,7 +36,7 @@ RULE_OWNERS = (
     ("write-document",),
     ("validate-draft", "emit-document"),
     ("treat-context", "omit-unjustified", "avoid-invention", "reuse-domain"),
-    ("use-native-act", "use-exact-tool", "parallelize-tools", "delegate-document"), (),
+    ("use-native-act", "use-exact-tool", "parallelize-tools", "delegate-document"), (), (), (),
 )
 
 TEMPLATE_DIRECTORIES = ("references", "assets/constants", "assets/schemas", "guides", "processes", "scripts")
@@ -147,98 +147,10 @@ def knowledge_nodes(script: str, version: str, revision: str) -> dict[str, Node]
     ])]
     nodes = {name: Node(constants=items) for name, items in zip(GUIDES, constants, strict=True)}
     nodes[GUIDES[12]] = adaptor_node()
+    contracts = contract_node()
+    authoring = nodes["guides/authoring.oak.md"]
+    nodes["guides/authoring.oak.md"] = Node(
+        constants=[*authoring.constants, *contracts.constants], schemas=contracts.schemas)
+    nodes["assets/constants/artifact-kinds.oak.md"] = resource_node(CATALOGUE_SOURCE)
+    nodes["platforms/claude/adaptor.oak.md"] = resource_node(CLAUDE_SOURCE)
     return nodes
-
-
-def local(name: str) -> ValueBinding:
-    return ValueBinding(placeholder=name, value=BindingValue(binding=name))
-
-
-def knowledge(name: str, guide: int, identifier: str = "guidance") -> ValueBinding:
-    return ValueBinding(placeholder=name, value=ConstantValue(constant=f"{GUIDES[guide]}#constant.{identifier}"))
-
-
-def shape(identifier: str, fields: tuple[str, ...], *, boolean: str | None = None) -> Schema:
-    return Schema(id=identifier, template="\n".join(f"{key}: <{key}>" for key in fields), where=[
-        where(key, Type(of="boolean")) if key == boolean else where(key, Type(of="string"), NonEmpty()) for key in fields
-    ])
-
-
-def finish_validation(approved: bool) -> Call:
-    return Call(process="process.finalize-validation", inputs=[
-        local("CANDIDATE"), local("REPORT"),
-        ValueBinding(placeholder="ALLOW_INSTALL", value=LiteralValue(value=approved)),
-    ])
-
-
-def entry_node() -> Node:
-    """One operational scope for progressive loading and standalone assembly."""
-    body = [ACT(
-        "Apply <AUTHORING> and <STRUCTURE> to all <SOURCE> for <SCOPE>. Use <TEMPLATE> under <TEMPLATE_USE> only for new skills; consult needed guides.",
-        inputs=[knowledge("AUTHORING", 10), knowledge("STRUCTURE", 0), local("SOURCE"),
-                knowledge("TEMPLATE", 10, "skill-template"), knowledge("TEMPLATE_USE", 10, "template-use")], outputs=["SCOPE"],
-    )]
-    previous = "SCOPE"
-    for index, (part, guide) in enumerate((("schemas", 1), ("constants", 2), ("state", 3), ("interfaces", 4), ("triggers", 5), ("processes", 6), ("instructions", 7))):
-        result = f"DESIGN_{index + 1}"
-        text = f"Design justified {part} as <{result}> from <SOURCE> and <{previous}> under <GUIDANCE>."
-        bindings = [knowledge("GUIDANCE", guide), local(previous), local("SOURCE")]
-        if guide == 1:
-            text += " Preserve requested shapes using the complete schemas and populated instances in <TEACHING>."
-            bindings.append(knowledge("TEACHING", 8, "teaching"))
-        if guide == 6:
-            text += " Apply <DELEGATION> and <ORCHESTRATION> to delegation, <CODEX> and <DEFAULTS> to native Codex artifacts."
-            bindings.extend((knowledge("ORCHESTRATION", 11, "orchestration"), knowledge("DELEGATION", 11), knowledge("CODEX", 12, "mapping"), knowledge("DEFAULTS", 12, "native-defaults")))
-        body.append(ACT(text, inputs=bindings, outputs=[result]))
-        previous = result
-    body += [
-        ACT("Review <DESIGN_7> with <REVIEW>, <GRAMMAR> and <TEACHING> for canonical <CANDIDATE>, not programmatic validation. Use its catalogue to select complete scenarios.",
-            inputs=[local("DESIGN_7"), knowledge("REVIEW", 8, "review"), knowledge("GRAMMAR", 0, "oak-ebnf"), knowledge("TEACHING", 8, "teaching")], outputs=["CANDIDATE"]),
-        If(condition=Compare(left=BindingValue(binding="VALIDATE"), operator="equals", right=LiteralValue(value=True)),
-           then=[Call(process="process.validate-and-deliver", inputs=[local("CANDIDATE")])],
-           otherwise=[Emit(interface="interface.authored-document", bindings=[
-               ValueBinding(placeholder="OAK", value=BindingValue(binding="CANDIDATE")),
-               ValueBinding(placeholder="VALIDATION", value=LiteralValue(value="Programmatic validation was not performed (not requested).")),
-           ])]),
-    ]
-    return Node(
-        schemas=[shape("authoring-request", ("SOURCE", "VALIDATE"), boolean="VALIDATE"),
-                 shape("oak-candidate", ("CANDIDATE",)), shape("authoring-result", ("OAK", "VALIDATION")),
-                 shape("validator-check", ("INSTALL_REQUIRED", "REPORT"), boolean="INSTALL_REQUIRED"),
-                 shape("installation-consent", ("APPROVED",), boolean="APPROVED"),
-                 shape("validation-context", ("CANDIDATE", "REPORT", "ALLOW_INSTALL"), boolean="ALLOW_INSTALL")],
-        triggers=[
-            Trigger(id="authoring-requested", event="OAK authoring is requested for supplied source material.", process="process.capture-request"),
-            Trigger(id="request-received", event="A complete OAK authoring request is received.", source="interface.authoring-input", process="process.author-document"),
-        ],
-        processes=[
-            Process(id="capture-request", name="Capture request", body=[
-                ACT("Capture all <SOURCE>; set <VALIDATE> true only for requested programmatic validation, otherwise false.",
-                    output="schema.authoring-request", outputs=["SOURCE", "VALIDATE"]),
-                Call(process="process.author-document", inputs=[local("SOURCE"), local("VALIDATE")]),
-            ]),
-            Process(id="author-document", name="Author document", input="schema.authoring-request", body=body),
-            Process(id="validate-and-deliver", name="Check validator", input="schema.oak-candidate", body=[
-                ACT("Apply <POLICY> and exact <HELPER> to <CANDIDATE> without --allow-install. Return observed <REPORT>; <INSTALL_REQUIRED> means permission-required, not invalid OAK or unavailable execution.",
-                    output="schema.validator-check", inputs=[knowledge("POLICY", 9, "validation-policy"), knowledge("HELPER", 9, "validator-script"), local("CANDIDATE")], outputs=["INSTALL_REQUIRED", "REPORT"]),
-                If(condition=Compare(left=BindingValue(binding="INSTALL_REQUIRED"), operator="equals", right=LiteralValue(value=True)),
-                   then=[
-                       ACT("Request consent to download <IDENTITY> and install its dependencies in an isolated retained environment. <APPROVED> requires explicit installation consent, not a validation request.",
-                           output="schema.installation-consent", inputs=[knowledge("IDENTITY", 9, "identity")], outputs=["APPROVED"]),
-                       If(condition=Compare(left=BindingValue(binding="APPROVED"), operator="equals", right=LiteralValue(value=True)),
-                          then=[finish_validation(True)],
-                          otherwise=[Emit(interface="interface.authored-document", bindings=[
-                              ValueBinding(placeholder="OAK", value=BindingValue(binding="CANDIDATE")),
-                              ValueBinding(placeholder="VALIDATION", value=LiteralValue(value="Programmatic validation was not performed (installation declined).")),
-                          ])]),
-                   ], otherwise=[finish_validation(False)]),
-            ]),
-            Process(id="finalize-validation", name="Report validation", input="schema.validation-context", body=[
-                ACT("Finalize <CANDIDATE> from <REPORT> under <POLICY> with exact <HELPER>. Only <ALLOW_INSTALL> true permits downloads/installation via --allow-install. Repair/recheck changes under the same permission, not unchanged successes. Return <OAK> and truthful <VALIDATION>.",
-                    output="schema.authoring-result", inputs=[local("REPORT"), local("CANDIDATE"), local("ALLOW_INSTALL"), knowledge("POLICY", 9, "validation-policy"), knowledge("HELPER", 9, "validator-script")], outputs=["OAK", "VALIDATION"]),
-                Emit(interface="interface.authored-document"),
-            ]),
-        ],
-        interfaces=[Interface(id="authoring-input", flow="receives", schema="schema.authoring-request"),
-                    Interface(id="authored-document", flow="emits", schema="schema.authoring-result")],
-    )

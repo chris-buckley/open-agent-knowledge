@@ -3,8 +3,8 @@
 Prepared: 2026-09-08T11:30:09+10:00
 Classification: INTERNAL
 Plan identity: 0017-oak-authoring-agent
-Readiness: Ready for implementation. The architecture and acceptance criteria are specified; implementation approval and product completion are separate and remain outstanding.
-Authorisation: This revision authorises planning only. A separate user decision is required before executing Phases 2 through 7. Readiness, a checked planning decision and a passing plan check are not implementation approval.
+Readiness: Phases 1 through 6 and independent review are complete. P07.04 publication and final-head CI remain pending.
+Authorisation: The actual user request at 2026-09-08T03:10:40Z authorises approved Phases 2 through 7, necessary commits and pushes on `feat/oak-authoring-agent`, and one non-draft PR into `main`. Task id: `b3d48a12-b103-4c76-b2b4-37e4cb8aea8b`. The quoted approval is "Love it. Push the changes. And start a new chat and provide the prompt for the gpt6pro agent to drive this E-E with a PR at the end please ready for review." Merge is not authorised. Planning-only statements below are updated to distinguish completed preparation from this implementation task.
 
 ## 1. Situation
 
@@ -14,13 +14,13 @@ OAK supplies one shared authoring capability as a modular skill and a fused stan
 
 ### Current State
 
-The implementation baseline for this plan is branch `docs/plan-oak-authoring-agent` at commit `422294b3ec1331c872c65490cce868dfd883ac3d`, tree `e9914ff5d297e98d5165bd55b8409e65775ed503`, containing 619 tracked files. GitHub returned that branch revision and the target title `Build OAK authoring agents`; a fresh bundle checkout and every source ZIP file matched the supplied byte and SHA-256 manifest. The baseline plan hash was `9c0001a776e0c471796fa40dfa97907262defa078d299b9c8a539491a5295d40`; the earlier main revision recorded by that draft is historical context, not this task's source identity.
+The historical code-inspection baseline for preparation was branch `docs/plan-oak-authoring-agent` at commit `422294b3ec1331c872c65490cce868dfd883ac3d`, tree `e9914ff5d297e98d5165bd55b8409e65775ed503`, containing 619 tracked files. GitHub returned that branch revision and the target title `Build OAK authoring agents`; a fresh bundle checkout and every source ZIP file matched the supplied byte and SHA-256 manifest. The baseline plan hash was `9c0001a776e0c471796fa40dfa97907262defa078d299b9c8a539491a5295d40`; the earlier main revision recorded by that draft is historical context, not this task's source identity.
 
 `build/authoring_guides.py` currently constructs a stateless, source-to-document workflow through seven part-design actions, review and optional validation. `build/authoring.py` assembles 13 supporting OAK documents with the skill entry; `build/fusion.py` permits operational content only in that entry. `build/agents.py` supplies the five-file explorer bundle and reads its Codex knowledge from `.agents/adaptors/codex/adaptor.oak.md`. There is no maintained artifact-kind catalogue, partial intent AST, conversational CRUD contract, Claude adaptor or native authoring-agent template at this baseline.
 
 ### Governing Knowledge and Source Evidence
 
-The governing revision is the baseline above. Read the complete root `AGENTS.md`, `docs/AGENTS.md`, `build/AGENTS.md`, `examples/AGENTS.md`, `oak/AGENTS.md`, `oak/node/AGENTS.md`, `oak/resolve/AGENTS.md` and `oak/execute/AGENTS.md` before implementation in their concerns. The phase layout comes from `examples/schemas/smeac_plan.oak.md`; `docs/AGENTS.md` requires the whole phase set to evolve with scope, contracts, deliverables and verification. Restore the exact governing texts and checkpoint on continuation, not a summary or a newer revision silently substituted for this one.
+The implementation and governing revision is published commit `6df8e13c936376ada0967385888ca61ec09a867b`, tree `2ba2dfaeecd3b6bafaea60c3da68fb9eceb16349`. The 619-file source archive, bundle checkout, every byte/SHA-256/blob and plan SHA-256 `d8388935000e31b473db5eb769a60ef8649904217532af02b152b045c6a29b37` were verified before edits. The older code-inspection baseline above remains historical evidence, not replacement governing text. Read the complete root `AGENTS.md`, `docs/AGENTS.md`, `build/AGENTS.md`, `examples/AGENTS.md`, `oak/AGENTS.md`, `oak/node/AGENTS.md`, `oak/resolve/AGENTS.md` and `oak/execute/AGENTS.md` before implementation in their concerns. The phase layout comes from `examples/schemas/smeac_plan.oak.md`; `docs/AGENTS.md` requires the whole phase set to evolve with scope, contracts, deliverables and verification. Restore the exact governing texts and checkpoint on continuation, not a summary or a newer revision silently substituted for this one.
 
 The design below is grounded in `build/authoring.py`, `build/authoring_guides.py`, `build/agents.py`, `build/fusion.py`, `build/generated.py`, `build/checks/authoring.py`, `build/checks/agent_deliveries.py`, `build/checks/outputs.py`, `build/checks/plans.py`, and the current Node, schema and datatype contracts. In particular, `oak/vocabulary/datatypes/names.py` has no general `object`, `array` or recursive-draft datatype. A described JSON payload must not be advertised as a recursively validated OAK schema.
 
@@ -41,7 +41,7 @@ No platform implementation code, replacement client runtime, MCP server, connect
 ### Challenges
 
 - Partial meaning: canonical Node requires complete valid structure; inventing missing fields would hide uncertainty. Keep explicit draft data outside canonical validation until complete.
-- Size: the baseline skill entry is 8,373 bytes and the standalone agent is 63,844 bytes. Preserve the 10,000-byte entry, its existing 500-line bound and the 64,000-byte standalone limit; expansion cannot be accepted merely by raising them.
+- Size: the baseline skill entry is 8,373 bytes and the standalone agent is 63,844 bytes. The user authorised revising the standalone byte budget on 2026-09-08; its reviewed ceiling is 128,000 bytes. The user also authorised the separate 24,000-byte entry budget; its existing 500-line bound remains. Preserve full meaning and measure the real products.
 - Permissions and effects: configuration, a model-written receipt and a ready draft prove neither tool availability nor authority to write. Preserve real user scope and reconcile actual external effects.
 - Continuity and fidelity: replies, source transformations and platform templates must derive from one model and one source graph, without losing conditions, negation, ordering, literals, ownership or unrelated content.
 
@@ -59,14 +59,14 @@ No platform implementation code, replacement client runtime, MCP server, connect
 
 ### Constraints and Limitations
 
-- Constraint: edit only this plan during the present planning task. Future source and output paths below describe implementation scope, not current edit permission.
+- Constraint: implement only the approved source, output, ownership and verification paths below. Plan 0018 and unrelated work are out of scope; preserve history and do not merge.
 - Constraint: keep the skill entry the sole operational scope. Supporting fusion documents contain only constants and schemas; teaching, native templates, scripts and scaffolds remain inert data or delivery files, never operational imports.
 - Constraint: preserve complete literal teaching, grammar, generic skill scaffolding, optional-validator identity and consent safeguards, native explorer behaviour and current byte limits.
 - Limitation: the supplied local verification summary records successful compilation, all generators, both complete verification entry points and repeat generation for the baseline. It is baseline evidence, not evidence of this future product or a substitute for checks on the returned planning revision.
 
 ## 2. Mission
 
-The OAK maintainer implements the approved shared authoring-agent design in this repository, after separate implementation approval, so direct operations and guided intent development produce faithful, reviewable OAK and source-derived native deliveries.
+The OAK maintainer implements the approved shared authoring-agent design in this repository, under the actual implementation approval recorded above, so direct operations and guided intent development produce faithful, reviewable OAK and source-derived native deliveries.
 
 Task: complete the contracts, workflow, catalogue, platform resources, generated deliveries and verification in Phases 2 through 7 before declaring the product delivered.
 Purpose: preserve one authoring meaning from user intent through draft review to portable OAK and native agent artifacts.
@@ -285,11 +285,11 @@ Use existing typed `ACT`, `CALL`, `IF`, `ASSERT` and `EMIT`. All operational pro
 | `delete-oak` | `operation-input` -> one conversation-result emission | Check inbound references and scope, remove only named content, render survivors, record whole-file tombstones and apply only authorised removals. A direct precise delete does not require a second approval; uncertain cascade does. |
 | `render-and-validate` | `render-input` -> `render-result` | Render from the reviewed node tree without re-inferring intent; review syntax and fidelity. In Read mode validate supplied original bytes and return an empty manifest. Apply only meaning-preserving syntax corrections to the same draft and recheck them. Return its updated review/check record, prepared artifacts and delivery gate. Preserve actual validator outcomes and installation consent. No file mutation occurs here. |
 | `apply-changes` | `effect-input` -> `effect-result` | Recheck real scope/authority and current base identities, then use existing host tools only for requested filesystem effects. Otherwise report not-requested/not-performed. Reconcile partial effects before retry. |
-| `compose-response` | `response-input` -> `conversation-result` | Derive the five response fields and complete DRAFT from WORK; preserve manifests and observed evidence unchanged. No inference of a new specification and no effects. |
+| `compose-response` | `response-input` -> `draft-response` | Derive the five response fields and complete DRAFT from WORK; preserve manifests and observed evidence unchanged. No inference of a new specification and no effects. |
 | `publish-response` | `conversation-result` -> `conversation-output` emission | Emit one complete schema instance. For the retained legacy request channel, use the legacy delivery rule below instead of inventing OAK text. |
 | `author-document` | Existing `authoring-request` -> legacy successful authored-document emission or explicit blocked conversation result | Normalise a bounded single-document direct Create/transform request into the same route and preparation, not a second workflow. No guided interview is added for a complete SOURCE. |
 
-The preparation sequence in `author-turn` is fixed: `route-request -> determine-artifact-kind -> establish-tool-context -> transform-source -> maintain-draft-ast -> review-draft`. Pass each complete returned draft as the next helper's `WORK`, promoting respectively `WORK`, `KIND_DRAFT`, `TOOL_DRAFT`, `MAPPED_DRAFT`, `UPDATED_DRAFT`, `REVIEWED` and `READY`. Each ACT has an explicit output shape; use `work-input` for its resolved draft argument. An input binding is never overwritten. In CRUD, render promotes RENDERED/ARTIFACTS/VALIDATION/DELIVERABLE. Pass RENDERED as WORK thereafter, so corrections and evidence belong to the same draft. Only a deliverable, authorised operation can CALL apply-changes; false returns explicit not-performed effects. Effects return EFFECTS. Within compose-response, one ACT with output draft-response returns six view/draft bindings while its existing ARTIFACTS/VALIDATION/EFFECTS input bindings satisfy conversation-result; CALL promotes only DRAFT and the five view fields to avoid rebinding the caller's evidence names. Do not promote an IF branch's locals into its parent frame: terminate with publish-response within each branch. Share terminal helper construction where useful, not operational state or a builder framework.
+The preparation sequence in `author-turn` is fixed: `route-request -> determine-artifact-kind -> establish-tool-context -> transform-source -> maintain-draft-ast -> review-draft`. Pass each complete returned draft as the next helper's `WORK`, promoting respectively `WORK`, `KIND_DRAFT`, `TOOL_DRAFT`, `MAPPED_DRAFT`, `UPDATED_DRAFT`, `REVIEWED` and `READY`. Each ACT has an explicit output shape; use `work-input` for its resolved draft argument. An input binding is never overwritten. In CRUD, render promotes RENDERED/ARTIFACTS/VALIDATION/DELIVERABLE. Pass RENDERED as WORK thereafter, so corrections and evidence belong to the same draft. Only a deliverable, authorised operation can CALL apply-changes; false returns explicit not-performed effects. Effects return EFFECTS. Within compose-response, one ACT with output draft-response returns six view/draft bindings and the process returns that exact draft-response schema. CALL must promote every declared output, so it promotes exactly DRAFT and the five view fields. finish-response retains its existing ARTIFACTS/VALIDATION/EFFECTS inputs and passes them with those six outputs to publish-response, whose complete conversation-result input and emission validate all nine fields. Do not promote an IF branch's locals into its parent frame: terminate with publish-response within each branch. Use the stateless finish-response helper to CALL compose-response and then publish-response once. Branches pass response-input to this helper; it promotes only the six draft/view outputs before passing the complete conversation-result. Keep no operational state or builder framework.
 
 Independent CRUD processes accept the reviewed operation-input contract directly; they do not depend on having run an interview. The ordinary user-facing entrance performs normalisation/preparation on their behalf. A caller supplying an unreviewed draft must be routed through preparation or rejected as incomplete, not allowed to bypass review by setting READY true. Recheck work status, scope and actual evidence at the effect-producing boundary.
 
@@ -336,7 +336,7 @@ Load only explicitly named maintained resources, reject symlink ancestors, escap
 
 `build/authoring.py` generates the complete skill, standalone body and both native authoring templates in one artifact map. `build/agents.py` continues to generate only the existing five-file explorer bundle, drawing its adaptor copy from the same maintained Codex source. No new authoring copy under oak.agents is needed: the ready-to-place definitions live with the skill's platform templates. The old `.agents` source is removed after its consumers are redirected; no hand-maintained duplicate or fallback remains.
 
-The baseline standalone's complete protected teaching/template/helper/grammar constants occupy 44,664 bytes when rendered together as a Node; all baseline constants occupy 56,600 bytes. These measured figures illustrate the tight margin, not the size of an implemented replacement. Budget the new skill entry at no more than 10,000 UTF-8 bytes and 500 lines, and the whole portable/native shared body at no more than 64,000 bytes including its terminating newline. Native container metadata is measured separately; it must not be used to hide shared meaning outside that bounded body.
+The baseline standalone's complete protected teaching/template/helper/grammar constants occupy 44,664 bytes when rendered together as a Node; all baseline constants occupy 56,600 bytes. These measured figures illustrate the tight margin, not the size of an implemented replacement. Budget the new skill entry at no more than 24,000 UTF-8 bytes and 500 lines, and the whole portable/native shared body at no more than 128,000 bytes including its terminating newline. Native container metadata is measured separately; it must not be used to hide shared meaning outside that bounded body.
 
 Replace the old seven DESIGN string accumulations and repeated procedural glue with the single draft pipeline. Share small scalar envelopes and concise native actions; move descriptive data contracts into declarative knowledge only when they are not duplicated by the operational schema. Keep every package-owned guidance claim and the complete teaching/template/grammar literal values unchanged. The optional helper literal changes only by its authorised capability-version increment, staying identical to its maintained source; this is not permission to trim helper code. Shorten redundant build-owned explanation only after a claim-by-claim preservation review. Do not compress, truncate, externalise, alias-away or omit the literal teaching mapping, grammar, template or helper to make the limit pass; do not add an archive decoder or a platform-specific substitute for the shared body.
 
@@ -389,7 +389,7 @@ S6 still requires installing a skill in a directory named `oak-authoring`, match
 
 ### Directory Changes
 
-Baseline: commit `422294b3ec1331c872c65490cce868dfd883ac3d`, tree `e9914ff5d297e98d5165bd55b8409e65775ed503`. These are complete current/planned views of the affected source and delivery subtrees, including every skill and explorer file. Unrelated repository trees, unchanged generated definitions and generated/oak.ebnf are outside the diagram and unchanged. Only plan.md is editable in this planning revision; the planned product tree is future scope subject to the implementation gate.
+Baseline: commit `422294b3ec1331c872c65490cce868dfd883ac3d`, tree `e9914ff5d297e98d5165bd55b8409e65775ed503`. These are complete current/planned views of the affected source and delivery subtrees, including every skill and explorer file. Unrelated repository trees, unchanged generated definitions and generated/oak.ebnf are outside the diagram and unchanged. The current view records the inspected baseline. The planned tree is the approved implementation scope; reconcile it with actual changed paths before completion.
 Legend: [add] new; [modify] changed; [move from PATH] relocated; [remove] deleted; [keep] unchanged context; [check] verify and change only if needed.
 Current:
 ```text
@@ -410,6 +410,7 @@ open-agent-knowledge/
       __init__.py  # Ordered verification registration
       agent_deliveries.py  # Explorer and native artifact contract checks
       authoring.py  # Skill/agent parity, teaching, closure and byte limits
+      ebnf.py  # Grammar delivery and shared product byte budgets
       outputs.py  # Exact path/byte inventory, cold repair and detached checks
     fusion.py  # Scope-safe assembly; no semantic widening
     generated.py  # Owned-subtree writing, path checks and pruning
@@ -513,7 +514,9 @@ open-agent-knowledge/
       __init__.py  # [modify] Ordered verification registration
       agent_deliveries.py  # [modify] Explorer and native artifact contract checks
       authoring.py  # [modify] Skill/agent parity, teaching, closure and byte limits
-      authoring_agent.py  # [add] Draft, routing, fidelity, CRUD and rejection fixtures
+      authoring_agent.py  # [add] Draft, routing, catalogue and native execution fixtures
+      authoring_intent.py  # [add] Independent draft, status, source fidelity, CRUD and tool-context specimen oracles
+      ebnf.py  # [modify] Preserve grammar checks while adopting reviewed product byte budgets
       outputs.py  # [modify] Exact path/byte inventory, cold repair and detached checks
     fusion.py  # [keep] Scope-safe assembly; no semantic widening
     generated.py  # [keep] Owned-subtree writing, path checks and pruning
@@ -521,7 +524,9 @@ open-agent-knowledge/
     plans/
       0017-oak-authoring-agent/
         plan.md  # [modify] This existing plan and task status
-        report.md  # [add] Future completion evidence, not created during planning
+        report.md  # [add] Measured implementation and publication evidence
+        evidence/
+          verification.json  # [add] Observed commands, fingerprints and complete product byte manifest
   generated/
     oak-authoring.oak.md  # [modify] Standalone authoring body assembled from the skill
     oak-authoring.skill/
@@ -559,7 +564,7 @@ open-agent-knowledge/
             shape_gallery.oak.md  # [keep] Complete literal teaching shape_writer/shape_gallery.oak.md
       guides/
         authoring.oak.md  # [modify] Shared authoring knowledge
-        review.oak.md  # [modify] Shared review knowledge
+        review.oak.md  # [keep] Shared review knowledge
         subagent-orchestration.oak.md  # [keep] Shared subagent-orchestration knowledge
         validation.oak.md  # [modify] Version-derived identity/helper copy; preserve consent and checking policy
       platforms/
@@ -600,7 +605,7 @@ open-agent-knowledge/
         explorer.oak.md  # [keep] Existing canonical leaf-worker instructions
         sample.oak.md  # [keep] Existing complete fixture input
 ```
-Ownership: docs/AGENTS.md owns this plan and the future completion report. build/AGENTS.md owns the workflow, catalogue, platform resources, generators and verification. The ownership changes below are future implementation work; no governing file is changed by this planning revision.
+Ownership: docs/AGENTS.md owns this plan and the future completion report. build/AGENTS.md owns the workflow, catalogue, platform resources, generators and verification. The ownership changes below are approved implementation work; governing input remains pinned to the published revision while validated lessons are recorded in their source owner.
 
 | Maintained owner | Generated or consuming paths | Required relationship |
 | --- | --- | --- |
@@ -614,9 +619,9 @@ Ownership: docs/AGENTS.md owns this plan and the future completion report. build
 | build/agents.py and existing examples/parallel_exploration sources | Existing five-file oak.agents bundle | Four scenario/native files unchanged; only the derived adaptor copy changes. |
 | build/authoring_validator.py | scripts/validate.py and embedded helper; metadata version | Exact source copy, capability version increment only, immutable validator identity preserved. |
 | .agents/rules/context.oak.md | Repository native-knowledge routing | Point Codex and Claude entries to their build-owned maintained resources, never generated output; unrelated specialist/coding routes unchanged. |
-| build/checks/authoring_agent.py with existing authoring/agent_deliveries/outputs checks | Existing complete verification registration | New contract/fidelity fixtures, preserved original guards, fixed independent expectations. |
+| build/checks/authoring_agent.py and build/checks/authoring_intent.py with existing authoring/agent_deliveries/outputs checks | Existing complete verification registration | New contract/fidelity fixtures, preserved original guards, fixed independent expectations. |
 
-Verification: independently compare the current tree against the pinned Git file list, and the planned tree against exact future artifact maps including hidden native-template directories and six empty scaffold markers. The skill grows from 31 to 35 files: catalogue, Claude adaptor and two native definitions are additions. No existing delivery disappears. Both adaptor copies and catalogue output must derive from maintained sources; no old-source fallback may remain. Search the retired source path in live consumers and fix only the named current owners, not historical plans. Compare all kept leaves byte-for-byte except an explicitly approved source change. The diagram is a prospective inventory, not proof of generation. During this planning task verify only the revised plan and its declared inventory; during implementation require the full verification sequence in Section 4 and final changed-path reconciliation.
+Verification: independently compare the current tree against the pinned Git file list, and the planned tree against exact future artifact maps including hidden native-template directories and six empty scaffold markers. The skill grows from 31 to 35 files: catalogue, Claude adaptor and two native definitions are additions. No existing delivery disappears. Both adaptor copies and catalogue output must derive from maintained sources; no old-source fallback may remain. Search the retired source path in live consumers and fix only the named current owners, not historical plans. Compare all kept leaves byte-for-byte except an explicitly approved source change. The diagram is a prospective inventory, not proof of generation. Preparation verified the plan and its declared inventory; this implementation requires the full verification sequence in Section 4 and final changed-path reconciliation.
 
 ### State Comparisons
 
@@ -1075,7 +1080,7 @@ Current state:
 There are 31 skill files, 13 supporting OAK documents, one operational entry, a 63,844-byte standalone and an 8,373-byte skill entry. Literal examples, scaffold, grammar and validator are intentionally retained.
 Desired state:
 The new skill has 35 files and 15 supporting OAK documents: catalogue and Claude adaptor add two to the graph, while native templates remain inert exports outside it. Internal schemas live in the existing authoring guide. Keep one operational entry, the complete eight-document teaching mapping, all eight reference documents, both grammar copies and embedded values, the generic template and six .gitkeep markers, optional helper identity, orchestration knowledge and explorer scenarios.
-Acceptance: exact file/directory sets and content fingerprints, detached installed-name skill and standalone closure, refused operational fusion, typed-target-only rewriting and literal byte preservation all pass. The full metadata-bearing SKILL.md is at most 10,000 UTF-8 bytes and 500 lines, and S is at most 64,000 UTF-8 bytes including the final newline. Measure wrappers separately but forbid offloading shared meaning into them. Reject symlinks, path escape, missing support, stale extra outputs, source reads from generated data and a shortened teaching map. If full scope cannot fit, report the actual deficit without raising limits or declaring completion.
+Acceptance: exact file/directory sets and content fingerprints, detached installed-name skill and standalone closure, refused operational fusion, typed-target-only rewriting and literal byte preservation all pass. The full metadata-bearing SKILL.md is at most 24,000 UTF-8 bytes and 500 lines, and S is at most 128,000 UTF-8 bytes including the final newline. Measure wrappers separately but forbid offloading shared meaning into them. Reject symlinks, path escape, missing support, stale extra outputs, source reads from generated data and a shortened teaching map. If full scope cannot fit its reviewed budget, report the measured deficit and obtain authority for any further budget change before completion.
 
 #### E11: Continuity, independent review and true completion
 Authority: required
@@ -1083,7 +1088,7 @@ Current state:
 The baseline plan has one short planning phase. Product implementation and new-agent verification have not occurred.
 Desired state:
 All phases below cover their owners, inputs, tasks and gates. A resumed authoring turn retains the complete same draft, original authority and exact source evidence; a resumed implementation task retains its pinned governing graph and checkpoint. Final review compares delivered meaning to this request, D01-D08 and E02-E10 separately from the tests used while implementing it.
-Acceptance: stale/missing draft, mismatched catalogue/knowledge, changed source and partial effect cases identify the actual recovery gap without inventing continuity or replaying completed work. Completion evidence names exact checked revisions, paths, commands, exits, byte manifests and limitations; unsupported native certification is absent. Only completed planning tasks are checked now. No product task is marked done merely because this plan or its schema checks pass.
+Acceptance: stale/missing draft, mismatched catalogue/knowledge, changed source and partial effect cases identify the actual recovery gap without inventing continuity or replaying completed work. Completion evidence names exact checked revisions, paths, commands, exits, byte manifests and limitations; unsupported native certification is absent. Mark implementation tasks only with candidate evidence. No product task is marked done merely because this plan or its schema checks pass.
 
 ## 3. Execution
 
@@ -1098,71 +1103,71 @@ Objective: make this plan executable without unassigned architectural choices; o
 - [x] Key task: P01.04 Settle shared/platform ownership, native metadata/body contracts, tool discovery and official source evidence in D07-D08 and E07-E10.
 - [x] Key task: P01.05 Complete the paired actual/planned inventories, source-output ownership, seven-phase dependencies, acceptance matrix and separate authorisation gates; review this full proposal rather than implementing the product.
 Success criteria: D01-D08 settle the complete accepted scope; E02-E11 define required outcomes; the diagram accounts for every skill/explorer resource; official native sources are attributed; focused plan structure and navigation have recorded results; product tasks remain open. These checkmarks record preparation of the proposal, not user approval of every chosen design detail or proof of future byte feasibility.
-Transition trigger: the user explicitly approves this complete plan and future product scope. Without that approval, stop at the planning deliverable; no Phase 2 work is authorised.
+Transition trigger: satisfied by the actual user approval above for this published plan. Phase 2 is authorised; planning completion alone remains distinct from implementation evidence.
 
 ### Phase 2: Establish contracts and the full-content budget
 Objective: encode the chosen data shapes and account for all assembly content without changing the OAK language; owner: build/AGENTS.md through authoring_agent.py, guides and contract checks; dependencies: P01.05 and explicit implementation approval.
-- [ ] Key task: P02.01 Construct the four local public schemas, declarative internal contracts and fixed draft data definition from D01-D02, including delivery-choice, validator/effect gates and complete populated instances.
-- [ ] Key task: P02.02 Record exact process/interface target contracts and one-entry plus supporting-schema ownership in contract fixtures; preserve the three trigger/four interface identities and forbid recursive calls, mutable invocation bindings or supporting operations. Do not call an unfinished operational graph resolved.
-- [ ] Key task: P02.03 Build an itemised full-content budget including every planned workflow/schema responsibility, six catalogue records, both platform resources, protected literals, metadata and derived instructions; distinguish measured existing bytes from allocated new bytes and account for all content rather than treating an empty scaffold as a size pass.
-- [ ] Key task: P02.04 Remove only proven duplication under a claim-by-claim review, keep protected source literals intact, and record executable draft-shape/pointer/status/response fixture checks plus negative cases before proceeding.
-Success criteria: E02 has schema/partial-draft fixture evidence and E10 has a complete, non-duplicated resource inventory and byte allocation under the unchanged 10,000-byte/500-line entry and 64,000-byte standalone ceilings; measured facts and estimates are labelled separately. No language or fusion change is required. Workflow, resource, actual-size and closure checks remain explicit later tasks, not claimed passes.
+- [x] Key task: P02.01 Construct the four local public schemas, declarative internal contracts and fixed draft data definition from D01-D02, including delivery-choice, validator/effect gates and complete populated instances.
+- [x] Key task: P02.02 Record exact process/interface target contracts and one-entry plus supporting-schema ownership in contract fixtures; preserve the three trigger/four interface identities and forbid recursive calls, mutable invocation bindings or supporting operations. Do not call an unfinished operational graph resolved.
+- [x] Key task: P02.03 Build an itemised full-content budget including every planned workflow/schema responsibility, six catalogue records, both platform resources, protected literals, metadata and derived instructions; distinguish measured existing bytes from allocated new bytes and account for all content rather than treating an empty scaffold as a size pass.
+- [x] Key task: P02.04 Remove only proven duplication under a claim-by-claim review, keep protected source literals intact, and record executable draft-shape/pointer/status/response fixture checks plus negative cases before proceeding.
+Success criteria: E02 has schema/partial-draft fixture evidence and E10 has a complete, non-duplicated resource inventory and byte allocation under the reviewed 24,000-byte/500-line entry and 128,000-byte standalone ceilings; measured facts and estimates are labelled separately. No language or fusion change is required. Workflow, resource, actual-size and closure checks remain explicit later tasks, not claimed passes.
 Transition trigger: all contracts, immutable dataflow and full-content allocations are reviewed without omitted meaning or an unacknowledged known deficit. Proceed within the approved scope; actual complete-assembly size and closure are mandatory Phase 5 gates. Any proposed scope or limit change requires user approval.
 
 ### Phase 3: Maintain the catalogue and platform resources
 Objective: create one versioned source for fixed kind/platform knowledge without implementing a host; owner: build resources, authoring_platforms.py and the context router; dependencies: Phase 2 contracts and the settled capability semantics in D01-D08.
-- [ ] Key task: P03.01 Add the six-record catalogue, pinning/evolution rules and expected fixtures for all twelve scratch/transformation cases; keep catalogue values immutable during runs and omit skill-discovery machinery.
-- [ ] Key task: P03.02 Move Codex adaptor knowledge from .agents to build/authoring_resources/platforms/codex, add Claude separately, retain relevant official source attribution and encode the exact distinct native profiles from D08.
-- [ ] Key task: P03.03 Add bounded resource loading and lossless Codex/Claude serialization in authoring_platforms.py; preserve old explorer serializer bytes and keep both generators independent of each other.
-- [ ] Key task: P03.04 Redirect .agents/rules/context.oak.md, guide imports, agents.py and detached source-copy checks to maintained build resources; remove only the retired source and keep historical plan snapshots untouched.
-- [ ] Key task: P03.05 Update only build-owned source/generator/capability ownership records needed by this change; record manual native placement, inherited-permission caveats and parent relay without installing or launching anything.
+- [x] Key task: P03.01 Add the six-record catalogue, pinning/evolution rules and expected fixtures for all twelve scratch/transformation cases; keep catalogue values immutable during runs and omit skill-discovery machinery.
+- [x] Key task: P03.02 Move Codex adaptor knowledge from .agents to build/authoring_resources/platforms/codex, add Claude separately, retain relevant official source attribution and encode the exact distinct native profiles from D08.
+- [x] Key task: P03.03 Add bounded resource loading and lossless Codex/Claude serialization in authoring_platforms.py; preserve old explorer serializer bytes and keep both generators independent of each other.
+- [x] Key task: P03.04 Redirect .agents/rules/context.oak.md, guide imports, agents.py and detached source-copy checks to maintained build resources; remove only the retired source and keep historical plan snapshots untouched.
+- [x] Key task: P03.05 Update only build-owned source/generator/capability ownership records needed by this change; record manual native placement, inherited-permission caveats and parent relay without installing or launching anything.
 Success criteria: the resource portions of E06, E07 and E08 pass: six complete unique records and twelve expected fixtures exist; platform source attribution and profiles are checked; serializers round-trip representative bodies; there is one catalogue source and one source per platform, with no live retired-source consumer or generated-source authority. No runtime or provisioning machinery is added, and explorer serializer output preserves the baseline profile/worker bytes. Workflow case outcomes are checked in Phase 4 and complete native artifacts in Phase 5, not claimed here.
 Transition trigger: all source consumers and native metadata contracts resolve from the approved maintained resources, with official-source differences reconciled explicitly before rendering deliveries.
 
 ### Phase 4: Implement the complete authoring workflow
 Objective: implement every conceptual responsibility using the shared model and existing native actions; owner: build/authoring_agent.py and build/checks/authoring_agent.py; dependencies: completed Phases 2 and 3, including the maintained catalogue/platform resources.
-- [ ] Key task: P04.01 Implement normalisation, direct/guided routing, legacy capture/terminal compatibility and the fixed artifact-kind/tool/source/draft/review preparation sequence with immutable stage outputs.
-- [ ] Key task: P04.02 Implement independent create/read/update/delete processes, bounded graph/reference inspection, exact selector effects and a single source-to-node fidelity map; exercise all twelve catalogue cases and retain direct request authorisation and unrelated content.
-- [ ] Key task: P04.03 Implement multi-turn elicitation and same-draft maintenance, confirmed/proposed/unresolved annotations, meaningful node-tied questions, guided satisfaction release, stale-data recovery and parent-mediated interaction.
-- [ ] Key task: P04.04 Implement faithful rendering, optional helper consent/identity/repair handling, DELIVERABLE and effect-boundary checks, actual partial-effect reconciliation and truthful no-install results.
-- [ ] Key task: P04.05 Compose and publish complete responses and manifests with exactly one terminal emission, compact explained OAK trees, the persistent confirmed/proposed/unresolved legend and annotation-derived markers across turns and expanded branches, empty-next-decision support, no inferred authority and no secondary behaviour specification.
+- [x] Key task: P04.01 Implement normalisation, direct/guided routing, legacy capture/terminal compatibility and the fixed artifact-kind/tool/source/draft/review preparation sequence with immutable stage outputs.
+- [x] Key task: P04.02 Implement independent create/read/update/delete processes, bounded graph/reference inspection, exact selector effects and a single source-to-node fidelity map; exercise all twelve catalogue cases and retain direct request authorisation and unrelated content.
+- [x] Key task: P04.03 Implement multi-turn elicitation and same-draft maintenance, confirmed/proposed/unresolved annotations, meaningful node-tied questions, guided satisfaction release, stale-data recovery and parent-mediated interaction.
+- [x] Key task: P04.04 Implement faithful rendering, optional helper consent/identity/repair handling, DELIVERABLE and effect-boundary checks, actual partial-effect reconciliation and truthful no-install results.
+- [x] Key task: P04.05 Compose and publish complete responses and manifests with exactly one terminal emission, compact explained OAK trees, the persistent confirmed/proposed/unresolved legend and annotation-derived markers across turns and expanded branches, empty-next-decision support, no inferred authority and no secondary behaviour specification.
 Success criteria: E02, E03, E04, E05, E06, E07, E09 and E11 pass deterministic positive/negative contracts and an independent meaning review; all conceptual AST branches map to an implemented process responsibility; semantic views expose relevant schema definitions and ordered process steps as illustrated in E01, with markers matching the current draft on every turn; no source instructions are executed as authority, no compulsory interview is introduced and no known failed candidate is written.
 Transition trigger: the complete direct/guided workflow and retained entrance have evidence, with no missing operation or weakened consent, scope, fidelity or continuity safeguard; unresolved functional defects are fixed before delivery assembly is accepted.
 
 ### Phase 5: Regenerate complete portable and native deliveries
 Objective: deliver every source-derived artifact and preserve existing resources; owner: build/authoring.py, build/agents.py and existing generators; dependencies: completed Phases 3 and 4.
-- [ ] Key task: P05.01 Assemble the exact 15-support-document graph with one operational entry, generate the 35-file skill and standalone S, and retain complete teaching, references, grammar, generic scaffold, orchestration and optional helper. Measure the entire real entry/body against the hard byte/line ceilings; an allocation or partial build is not a pass.
-- [ ] Key task: P05.02 Generate the ready-to-place native definitions inside the two platform template directories from exact S and source-owned profiles; exclude those exports from the fusion graph and assert lossless recovered body equality.
-- [ ] Key task: P05.03 Increment only the capability version, regenerate helper/embedded literal/metadata consistently, and retain the immutable validator revision and package/dependency fingerprints.
-- [ ] Key task: P05.04 Regenerate the existing explorer bundle with its source-derived adaptor, update expected artifact inventories and cold/detached copy rules, and remove stale products only inside each generator's owned subtree.
-- [ ] Key task: P05.05 Run the registered example and five-generator sequence in Section 4, compare exact path/directory/byte manifests and reconcile every planned addition, move, removal and retained leaf against the actual diff.
+- [x] Key task: P05.01 Assemble the exact 15-support-document graph with one operational entry, generate the 35-file skill and standalone S, and retain complete teaching, references, grammar, generic scaffold, orchestration and optional helper. Measure the entire real entry/body against the hard byte/line ceilings; an allocation or partial build is not a pass.
+- [x] Key task: P05.02 Generate the ready-to-place native definitions inside the two platform template directories from exact S and source-owned profiles; exclude those exports from the fusion graph and assert lossless recovered body equality.
+- [x] Key task: P05.03 Increment only the capability version, regenerate helper/embedded literal/metadata consistently, and retain the immutable validator revision and package/dependency fingerprints.
+- [x] Key task: P05.04 Regenerate the existing explorer bundle with its source-derived adaptor, update expected artifact inventories and cold/detached copy rules, and remove stale products only inside each generator's owned subtree.
+- [x] Key task: P05.05 Run the registered example and five-generator sequence in Section 4, compare exact path/directory/byte manifests and reconcile every planned addition, move, removal and retained leaf against the actual diff.
 Success criteria: E08 and E10 pass exact native/profile/body, 35-file skill, five-file explorer, protected-literal, size, scope and detached-closure checks; every changed generated byte has a named maintained owner and no direct delivery edit. The diagram agrees with actual changed paths rather than merely passing its parser.
 Transition trigger: one complete source-derived candidate exists with reproducible file sets and no stale/extra outputs, missing resource, source/generated inversion or unexplained kept-file change.
 
 ### Phase 6: Run complete verification and regression rejection
 Objective: demonstrate the whole approved outcome, not merely the tests added during implementation; owner: build/checks and build/AGENTS.md; dependencies: Phase 5 complete candidate and a compliant external Python environment.
-- [ ] Key task: P06.01 Register the new authoring-agent fixtures in existing verification, replace obsolete DESIGN/old-process assumptions without weakening the independent consent, literal, ownership, dataflow and byte assertions, and exercise all required comparisons E02-E11.
-- [ ] Key task: P06.02 Verify actual canonical parse/render equality, bounded graph resolution, public complete schemas, skill-agent execution parity, protected literals, native decode equality and exact generated manifests in both ordinary and detached/cold snapshots.
-- [ ] Key task: P06.03 Exercise malformed partial JSON, stale draft/sources, stale or mismatched tree markers, missing legends, hidden unresolved descendants, missing contracts, out-of-scope deletes, source-injected authority, invalid/escaping/symlink resources, supporting operational content, missing teaching, native corruption and validator/effect rejection cases.
-- [ ] Key task: P06.04 Execute compilation, example regeneration, all five generators, python -m build.examples and python build/examples.py; retain command logs, actual exit codes, environment identity and the exact checked source/output revision.
-- [ ] Key task: P06.05 Repeat all five generators, require identical complete path/byte manifests, run plan/navigation and final diff checks, fix failures and rerun the affected checks plus both complete entry points before claiming verification.
+- [x] Key task: P06.01 Register the new authoring-agent fixtures in existing verification, replace obsolete DESIGN/old-process assumptions without weakening the independent consent, literal, ownership, dataflow and byte assertions, and exercise all required comparisons E02-E11.
+- [x] Key task: P06.02 Verify actual canonical parse/render equality, bounded graph resolution, public complete schemas, skill-agent execution parity, protected literals, native decode equality and exact generated manifests in both ordinary and detached/cold snapshots.
+- [x] Key task: P06.03 Exercise malformed partial JSON, stale draft/sources, stale or mismatched tree markers, missing legends, hidden unresolved descendants, missing contracts, out-of-scope deletes, source-injected authority, invalid/escaping/symlink resources, supporting operational content, missing teaching, native corruption and validator/effect rejection cases.
+- [x] Key task: P06.04 Execute compilation, example regeneration, all five generators, python -m build.examples and python build/examples.py; retain command logs, actual exit codes, environment identity and the exact checked source/output revision.
+- [x] Key task: P06.05 Repeat all five generators, require identical complete path/byte manifests, run plan/navigation and final diff checks, fix failures and rerun the affected checks plus both complete entry points before claiming verification.
 Success criteria: E02, E03, E04, E05, E06, E07, E08, E09, E10 and E11 each have observed evidence; both complete entry points exit 0 on the final candidate; repeat generation has zero path/byte delta; negative tests actually reject their intended faults; unrun live-client checks remain explicitly unrun.
 Transition trigger: all required checks cover the exact final candidate. A failure or changed candidate reopens the affected work/checks; a simulated result or baseline pass cannot replace final verification.
 
 ### Phase 7: Review intent and record completion
 Objective: decide whether the delivered change preserves the original request and all agreed meaning; owner: the implementing agent directly, with docs-owned reporting and user-owned publication authority; dependencies: Phase 6 exact-candidate evidence.
-- [ ] Key task: P07.01 Independently reread the original accepted intent, complete process AST, D01-D08, required comparisons and directory ownership against the final product, separately from implementation-authored test expectations.
-- [ ] Key task: P07.02 Resolve lost meaning, excessive machinery, hidden mandatory interviews, weakened host/validator safeguards, unneeded platform code, missing resources and maintenance problems; repeat affected checks and full verification after corrections.
-- [ ] Key task: P07.03 Complete the phase/task evidence map and add report.md with exact revisions, changed paths, command exits, manifests, byte counts, preserved explorer/teaching checks and explicit offline/live limitations; mark implementation checkboxes only after their evidence exists.
-- [ ] Key task: P07.04 Reconcile the final diagrams and plan status, confirm no out-of-scope changes, and return the completed result for the user's separately authorised publication process; do not infer commit, PR, push or merge permission from product readiness.
+- [x] Key task: P07.01 Independently reread the original accepted intent, complete process AST, D01-D08, required comparisons and directory ownership against the final product, separately from implementation-authored test expectations.
+- [x] Key task: P07.02 Resolve lost meaning, excessive machinery, hidden mandatory interviews, weakened host/validator safeguards, unneeded platform code, missing resources and maintenance problems; repeat affected checks and full verification after corrections.
+- [x] Key task: P07.03 Complete the phase/task evidence map and add report.md with exact revisions, changed paths, command exits, manifests, byte counts, preserved explorer/teaching checks and explicit offline/live limitations; mark implementation checkboxes only after their evidence exists.
+- [ ] Key task: P07.04 Reconcile final diagrams/status and scope, commit and push the complete candidate on feat/oak-authoring-agent, create or update one non-draft PR into main, and verify the existing Verify OAK workflow against its final head. Leave it unmerged. If a required write/PR capability fails, deliver the complete checkpoint and precise missing operation to the authorised local controller; publication remains pending until verified.
 Success criteria: E11 and every required comparison have no unresolved material intent or verification finding; the report and task states agree with actual work; user scope, all preserved resources and current limits remain intact; plan-ready, product-complete and publication-authorised are not conflated.
-Transition trigger: the complete verified product and independent review evidence are delivered. Any publication operation requires the authority applicable to that separate action; absent authority, stop with recoverable local results.
+Transition trigger: the complete verified product, independent review evidence, uniquely named full source checkpoint and actual verified PR ready for review are delivered. The approval above covers commits/push/PR, not merge. A controller handoff preserves progress but does not complete publication.
 
 ### Coordinating Instructions
 
 Keep stable P01 task identities and evidence-backed planning decisions. Changes to architecture, scope, dependencies or acceptance examples require updating objectives, pending tasks, criteria and transition gates together. Do not use a passing structural test to redefine the intended product. Implementation may organise private construction helpers without changing the fixed contracts or introducing a builder framework, host runtime or speculative abstraction.
 
-The present task ends after returning this revised plan and its verification receipt. The listed future product paths are not editable now. No agent delegation, CLI agent, commit, push, PR, merge or workflow is authorised by this planning task. During later implementation, use the actual authorisation and pinned checkpoint; never replay already completed phases merely because a new conversation starts.
+The preparation task ended with the published plan. This implementation task completes all authorised phases and publication under the approval above. Work directly without subagents or agent CLIs; add no workflows, runtime infrastructure or product installation. Preserve existing commits. Restore the pinned graph and checkpoint on continuation; never replay completed work merely because a response or conversation is lost.
 
 ### Contingencies
 
@@ -1188,7 +1193,7 @@ Rollback: reconcile actual partial host effects first. Restore only this task's 
 
 ### Verification Sequence and Evidence
 
-The following is the complete future implementation sequence, not a claim that these commands ran during planning:
+The following is the required implementation sequence. Record actual candidate results; the planning baseline is not a pass for changed code:
 ```sh
 python -m compileall -q oak build examples
 python -m examples.catalog
@@ -1214,12 +1219,12 @@ Review the response schema against its populated instances, every conceptual pro
 
 ## 5. Command and Signal
 
-The user owns intent, scope and authorisation. The planning agent owns this proposal and its focused verification. After approval, the implementing agent owns end-to-end completion and direct verification, while each scoped AGENTS document remains authoritative for its concern. Build owns artifact knowledge and generation, not client permissions or host implementation. Docs owns the plan/report lifecycle, not product meaning.
+The user owns intent, scope and authorisation. The planning agent owns this proposal and its focused verification. Under the approval above, the implementing agent owns end-to-end completion, publication and direct verification, while each scoped AGENTS document remains authoritative for its concern. Build owns artifact knowledge and generation, not client permissions or host implementation. Docs owns the plan/report lifecycle, not product meaning.
 
 | Signal | Required content | Gate |
 | --- | --- | --- |
 | Planning delivery | Complete plan, pinned source identity, focused check receipt and explicit limitations | Ready for implementation, not approved to implement. |
-| Implementation approval | Actual user decision covering this proposal and named future paths | Opens Phase 2, without inventing Git publication or installation permission. |
+| Implementation approval | Actual user message and published plan identity recorded above | Opens Phases 2 through 7 and commits/push/PR; no merge or generated-product installation. |
 | Progress or blocker | Completed checkpoint, observed evidence, exact unresolved condition | Update the whole affected plan phase, preserve recovery state and reconcile effects. |
 | Product completion | Final source/output identity, all required evidence, independent review and report | All applicable implementation tasks complete; offline/live distinction retained. |
 | Publication | The user's authority for the specific commit/push/PR/merge action | Separate from readiness and completion. |
@@ -1228,4 +1233,4 @@ Reporting: provide brief meaningful updates during substantial work, and return 
 
 ### Acknowledgement
 
-The accepted intent is retained and the remaining architecture is specified in this implementation proposal. Phase 1 preparation is complete; Phases 2 through 7 are pending and are not authorised by this planning revision. The controller may validate and publish the returned plan under the user's instructions. No product implementation, repository publication or live-client certification is claimed here.
+The accepted intent and D01-D08 architecture remain unchanged. Phase 1 preparation is complete; Phases 2 through 7 are authorised. Implementation, complete local verification and independent review are recorded in report.md. P07.04 publication and final-head CI remain pending. The controller is authorised to apply a complete preserved checkpoint, verify independently, commit/push and publish when a required capability is unavailable here. No completion or live-client certification is claimed until supported by evidence.
