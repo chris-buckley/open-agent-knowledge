@@ -104,6 +104,10 @@ Annotate decision-bearing subtrees once, with explicit child overrides. A new se
 
 The readable `intent-ast` is a projection of this same tree and its annotations, including relevant kind/tool context. It is not saved as independent meaning. Responses may collapse unchanged subtrees but must show every new change, contradiction and blocking decision with stable annotation ids. The complete draft is returned to the caller even when the view is brief. A parent/native host may display only the five view fields while retaining the complete result; without such retention, include the draft as response data for continuation rather than assuming hidden memory or creating a persistence service. On missing, stale or mismatched prior data, disclose the precise continuity gap and recover from supplied evidence; never silently rebuild a different model from an old summary.
 
+The default conversational tree exposes the intended OAK definitions under `documents[].node`, grouped by the parts actually present. Use `├─`, `└─` and `│` for compact hierarchy and short inline explanations of what each part or entry means. A schema branch shows its purpose and, when expanded, its fields, types and constraints. A process branch shows its purpose and, when expanded, its input, ordered steps and output. Expand the relevant branch instead of leaving all meaning hidden under a generic `node` label; do not invent unused parts. Keep source records, revision bookkeeping and detailed check receipts outside this default semantic view, while retaining them in the complete result and making the full structure available for inspection.
+
+Every conversational tree keeps the legend `✓ confirmed · ~ proposed · ? unresolved`. Derive each decision marker from the matching JSON annotation status on every turn, including compact overviews and expanded schema fields or process steps. Preserve stable annotation ids and show them where a change or decision needs to be referenced. A marker describes the status of intended meaning; it does not claim implementation, a passed check or authority to act. Update affected markers when a decision changes, retain unchanged ones, and keep proposed decisions, unresolved meaning and contradictions visible. A collapsed branch must not conceal an unresolved descendant or imply that the whole branch is confirmed. Grouping labels need no invented status of their own.
+
 There is no OAK `state` in the authoring capability. Each arrival accepts the prior draft as data and returns the next draft. The host owns retention, serialization and restoration. A skill being authored can still contain justified state and its own explicit lifecycle. This keeps the existing stateless authoring contract instead of mistaking conversation continuity for a persistence service.
 
 #### D02: Data shapes and response contract
@@ -169,7 +173,7 @@ WHERE:
 
 `EFFECTS` records status, each attempted path and operation, before/after observed identity when available, tool result reference and unresolved effects. Do not fill identity fields with guessed hashes. Response-only delivery is `not-requested` for filesystem effects. A failed write can accompany useful prepared artifacts but must not be reported as applied.
 
-The public conversation view uses the five headings in that order. Render each as populated text, with the AST in a text fence. Suppress the `Next decision` heading when its binding is empty rather than forcing a question; the schema instance still contains the empty value. Artifact files follow the conversation, and validation/effect evidence appears outside canonical OAK. No schema repetition marker or fixed option count is introduced. The conversation-response schema template is the five named headings with those five placeholders in order, separated by newlines; its WHERE constraints are string plus nonempty except NEXT_DECISION, which is string alone. The enclosing conversation-result uses labelled draft/manifest/evidence strings and the same five view bindings, not a schema-import or repetition feature. E01 and E02 contain populated examples.
+The public conversation view uses the five headings in that order. Render each as populated text, with the compact semantic AST and persistent status legend from D01 in a text fence. Suppress the `Next decision` heading when its binding is empty rather than forcing a question; the schema instance still contains the empty value. Artifact files follow the conversation, and validation/effect evidence appears outside canonical OAK. No schema repetition marker or fixed option count is introduced. The conversation-response schema template is the five named headings with those five placeholders in order, separated by newlines; its WHERE constraints are string plus nonempty except NEXT_DECISION, which is string alone. The enclosing conversation-result uses labelled draft/manifest/evidence strings and the same five view bindings, not a schema-import or repetition feature. E01 and E02 contain populated examples.
 
 The nested draft records use these fixed shapes rather than an implementing agent inventing a session protocol. `request` has `text`, `operation`, `mode`, `purpose`, `channel`, all strings with the domains above. `context` has string `knowledge_revision`, `catalogue_version`, `authoring_host`, `consumer`; list-of-string `evidence`, `installation_consent`; booleans `validation_requested`, `validation_required`. The last flag is true only when the actual request makes a passing programmatic check a condition of delivery or writing, not merely when validation is requested. Missing host context is the explicit string `unverified`. Host-supplied extra context is interpreted into these fields, not executed.
 
@@ -628,10 +632,14 @@ You need a reviewer that reports findings but does not edit the reviewed files.
 
 Intent AST
 reviewer [agent]
-  process.review [confirmed A1: inspect and report findings]
-  interface.findings [confirmed A2: return evidence and corrections]
-  file writes [confirmed A3: prohibited]
-  review scope [unresolved A4: source text or a repository path]
+├─ processes
+│  └─ review ✓ [A1]       # Inspect and report findings
+├─ interfaces
+│  └─ findings ✓ [A2]     # Return evidence and corrections
+├─ file writes: prohibited ✓ [A3]
+└─ review scope: ? [A4]    # Supplied source or a repository path
+
+✓ confirmed · ~ proposed · ? unresolved
 
 Changes
 A3 now explicitly excludes file edits; the review scope remains undecided.
@@ -643,7 +651,91 @@ This determines the input boundary and whether a read tool is needed.
 Readiness
 Not ready to render the input boundary. No file write is authorised.
 ```
-Acceptance: the question points to A4 and explains its effect; the confirmed no-write requirement is retained. This illustration does not prescribe a fixed question count, output length or additional OAK syntax. E02-E11 define required behaviour.
+A fuller two-turn specimen shows the OAK definitions that the compact view must make understandable. This is an illustrative conversation about authoring a reviewer, not a list of unresolved decisions in this implementation plan. R01-R13 identify annotations in that example's same retained JSON draft. The trees are readable projections, not canonical OAK syntax or execution receipts.
+
+First user turn: `Help me define a reviewer agent. It receives nonempty source text and returns findings. Never edit source files. Each review is independent, with no saved state. I have not decided the review criteria or the findings format.` The agent proposes correctness and clarity as criteria; the findings format remains unresolved.
+
+```text
+Understanding
+You want an independent reviewer of supplied text. It reports findings and never edits files.
+
+Intent AST
+reviewer.oak.md [agent]
+├─ constants                              # Fixed guidance for each review
+│  └─ review-criteria ~ [R02]              # Proposed: correctness and clarity
+├─ schemas                                # Shapes of the information exchanged
+│  ├─ review-request                      # Input for one review
+│  │  └─ SOURCE: string, non-empty ✓ [R03]
+│  └─ review-findings                     # Information returned to the caller
+│     └─ result format: ? [R04]           # Plain text or defined structured fields
+├─ processes                              # Work performed in order
+│  └─ review                              # Review one source without editing it
+│     ├─ input → review-request ✓ [R05]
+│     ├─ 1. inspect SOURCE ✓ [R06]
+│     ├─ 2. assess against review-criteria ~ [R07]
+│     └─ 3. emit review-findings ✓ [R08]
+├─ interfaces                             # Receive or publish complete instances
+│  ├─ review-input → review-request ✓ [R09]
+│  └─ review-output → review-findings ✓ [R10]
+├─ triggers                               # Select work when input arrives
+│  └─ review-input received → review ✓ [R11]
+├─ state: none ✓ [R12]                     # Reviews retain no state between arrivals
+├─ instructions                           # Constraints applying throughout the review
+│  └─ never edit source files ✓ [R01]
+└─ tools: none ✓ [R13]                     # Inspect supplied text through native actions
+
+✓ confirmed · ~ proposed · ? unresolved
+
+Changes
+Captured the supplied-text input, reporting boundary, no-edit rule and independent lifetime.
+Proposed correctness and clarity for R02 and the assessment step R07.
+
+Next decision
+R02/R04: Should the reviewer assess correctness and clarity, and should findings be
+plain text or a structured report? These choices determine the assessment step
+and the output schema.
+
+Readiness
+The criteria and output shape still need decisions. No artifact or file change is claimed.
+```
+
+The confirmed return step R08 records the obligation to return findings; the visible unresolved R04 records that their shape is not yet decided. Neither marker claims the whole process is ready. Grouping labels have no invented status. The tools branch is relevant context alongside the document's seven OAK parts; it does not introduce a tools part into OAK.
+
+Next user turn: `Use correctness and clarity, and make the findings plain text.` The same draft retains every unchanged annotation, confirms R02/R07, and resolves R04 as a string field. The display can focus on the affected schema and process while naming the unchanged branches:
+
+```text
+Understanding
+The reviewer will assess correctness and clarity and return plain-text findings.
+
+Intent AST
+reviewer.oak.md [agent]
+├─ constants
+│  └─ review-criteria: correctness, clarity ✓ [R02]
+├─ schemas
+│  └─ review-findings                     # Output shape now chosen
+│     └─ FINDINGS: string ✓ [R04]
+├─ processes
+│  └─ review                              # Work performed in order
+│     ├─ input → review-request ✓ [R05]
+│     ├─ 1. inspect SOURCE ✓ [R06]
+│     ├─ 2. assess against review-criteria ✓ [R07]
+│     └─ 3. emit review-findings ✓ [R08]
+└─ unchanged: input schema, interfaces, trigger, state, instructions and tools
+
+✓ confirmed · ~ proposed · ? unresolved
+
+Changes
+R02 and R07 changed from proposed to confirmed. R04 changed from unresolved to confirmed.
+All other decisions retain their previous meaning and status in the complete draft.
+
+Readiness
+The intended meaning is ready. This specimen shows conversation views;
+it does not claim artifact delivery, programmatic validation or file changes.
+```
+
+The second response keeps NEXT_DECISION as an empty binding and omits its empty heading, following D02. Both views derive from the same document nodes, tool context and annotation records. The complete draft remains available even when the second tree shows only changed branches.
+
+Acceptance: the initial question points to A4 and explains its effect; the confirmed no-write requirement is retained. In the fuller specimen, each OAK part has a short explanation, the input schema shows a field with its type and constraint, and the process shows its input, ordered steps and output boundary. The second turn keeps the same draft and R identifiers, updates R02/R07 from ~ to ✓ and R04 from ? to ✓, and retains the legend and unchanged decisions. Collapsing confirmed branches must not hide unresolved meaning. These illustrations do not prescribe a fixed question count, output length or additional OAK syntax. E02-E11 define required behaviour.
 
 #### E02: One partial AST, a shaped response and guided release
 Authority: required
@@ -857,7 +949,7 @@ The five populated response bindings for that draft are:
 ```json
 {
   "UNDERSTANDING": "You want a compact fact card for Cedar; support hours still need a value.",
-  "INTENT_AST": "facts.oak.md [compact-knowledge]\n  service-name = Cedar [confirmed A1]\n  support-hours.value [unresolved A2]\n  timezone = UTC [proposed A3]\n  tools = none [confirmed A4]",
+  "INTENT_AST": "facts.oak.md [compact-knowledge]\n├─ constants                         # Fixed facts\n│  ├─ service-name: Cedar ✓ [A1]\n│  ├─ support-hours: ? [A2]\n│  └─ timezone: UTC ~ [A3]\n└─ tools: none ✓ [A4]\n\n✓ confirmed · ~ proposed · ? unresolved",
   "CHANGES": "Created the same initial model from your request. UTC is a proposal, not an adopted fact.",
   "NEXT_DECISION": "A2/A3: What support hours and timezone should the card state? These determine the two remaining constant values.",
   "READINESS": "Blocked on A2 and A3. Guided output has not been released; no artifacts or file effects were produced."
@@ -881,7 +973,18 @@ timezone: "Australia/Brisbane"
 ```
 
 The final view says the hours and timezone are confirmed, lists those changes, has NEXT_DECISION empty, and reports ready/delivered with validation not performed and file effects not requested. The output manifest contains exactly one complete facts.oak.md, with the rendered text above.
-Acceptance: decode the draft string; verify the missing value is truly absent, three annotation states are preserved, the draft is not accepted as canonical OAK, and both turns operate on the same id and pointers. Fill the response schema using the complete instances and check the tree against its underlying values. The second turn must produce the three exact constant values without another approval question, invented process/state/tool or stray draft annotations inside OAK. Wording can vary, but all decisions, statuses, provenance, manifest scope and empty-next-decision behaviour must match. Test malformed JSON, contradictory confirmation, stale prior id, dangling live pointers and attempted source-injected authority as rejections/recovery cases.
+Its tree retains the same legend and updates only the affected decisions:
+```text
+facts.oak.md [compact-knowledge]
+├─ constants                         # Fixed facts
+│  ├─ service-name: Cedar ✓ [A1]
+│  ├─ support-hours: 09:00-17:00 ✓ [A2]
+│  └─ timezone: Australia/Brisbane ✓ [A3]
+└─ tools: none ✓ [A4]
+
+✓ confirmed · ~ proposed · ? unresolved
+```
+Acceptance: decode the draft string; verify the missing value is truly absent, three annotation states are preserved, the draft is not accepted as canonical OAK, and both turns operate on the same id and pointers. Fill the response schema using the complete instances and check the tree against its underlying values. Keep the legend on both turns; A2 changes from ? to ✓, A3 from ~ to ✓, and A1/A4 retain ✓. Apply the same mapping when expanding a schema field or process step. Reject a stale marker, a marker that contradicts its annotation, a lost legend or a collapsed branch that hides unresolved meaning. The second turn must produce the three exact constant values without another approval question, invented process/state/tool or stray draft annotations inside OAK. Wording can vary, but all decisions, statuses, provenance, manifest scope and empty-next-decision behaviour must match. Test malformed JSON, contradictory confirmation, stale prior id, dangling live pointers and attempted source-injected authority as rejections/recovery cases.
 
 #### E03: Direct scratch creation, transformation and the retained entrance
 Authority: required
@@ -897,9 +1000,12 @@ You asked for a compact OAK definition of Cedar and its maximum retry count.
 
 Intent AST
 facts.oak.md [compact-knowledge]
-  service-name = Cedar [confirmed A1]
-  max-retries = 3 [confirmed A2]
-  tools = none [confirmed A3]
+├─ constants                         # Fixed facts
+│  ├─ service-name: Cedar ✓ [A1]
+│  └─ max-retries: 3 ✓ [A2]
+└─ tools: none ✓ [A3]
+
+✓ confirmed · ~ proposed · ? unresolved
 
 Changes
 Created the two requested constants. No other behaviour was added.
@@ -987,7 +1093,7 @@ Concept of operations: complete the design first; after approval, establish cont
 ### Phase 1: Settle the complete implementation design
 Objective: make this plan executable without unassigned architectural choices; owner: planning agent under docs/AGENTS.md; dependencies: the exact published source, full governing text and the user's planning-only request.
 - [x] Key task: P01.01 Preserve the previously agreed independent CRUD and optional elicitation decision in Accepted Intent, D03-D04 and E01-E04.
-- [x] Key task: P01.02 Specify the single partial AST, annotation/continuity rules, scalar-envelope limits, response schema and populated examples in D01-D02 and E02.
+- [x] Key task: P01.02 Specify the single partial AST, annotation/continuity rules, scalar-envelope limits, response schema, compact explained OAK tree, persistent status legend and populated two-turn schema/process examples in D01-D02 and E01-E02.
 - [x] Key task: P01.03 Specify scratch/transformation fidelity, scoped changes and all six catalogue entries, their twelve case outcomes and run-constant evolution in D05-D06 and E03-E07.
 - [x] Key task: P01.04 Settle shared/platform ownership, native metadata/body contracts, tool discovery and official source evidence in D07-D08 and E07-E10.
 - [x] Key task: P01.05 Complete the paired actual/planned inventories, source-output ownership, seven-phase dependencies, acceptance matrix and separate authorisation gates; review this full proposal rather than implementing the product.
@@ -1019,8 +1125,8 @@ Objective: implement every conceptual responsibility using the shared model and 
 - [ ] Key task: P04.02 Implement independent create/read/update/delete processes, bounded graph/reference inspection, exact selector effects and a single source-to-node fidelity map; exercise all twelve catalogue cases and retain direct request authorisation and unrelated content.
 - [ ] Key task: P04.03 Implement multi-turn elicitation and same-draft maintenance, confirmed/proposed/unresolved annotations, meaningful node-tied questions, guided satisfaction release, stale-data recovery and parent-mediated interaction.
 - [ ] Key task: P04.04 Implement faithful rendering, optional helper consent/identity/repair handling, DELIVERABLE and effect-boundary checks, actual partial-effect reconciliation and truthful no-install results.
-- [ ] Key task: P04.05 Compose and publish complete responses and manifests with exactly one terminal emission, derived readable ASTs, empty-next-decision support, no inferred authority and no secondary behaviour specification.
-Success criteria: E02, E03, E04, E05, E06, E07, E09 and E11 pass deterministic positive/negative contracts and an independent meaning review; all conceptual AST branches map to an implemented process responsibility; no source instructions are executed as authority, no compulsory interview is introduced and no known failed candidate is written.
+- [ ] Key task: P04.05 Compose and publish complete responses and manifests with exactly one terminal emission, compact explained OAK trees, the persistent confirmed/proposed/unresolved legend and annotation-derived markers across turns and expanded branches, empty-next-decision support, no inferred authority and no secondary behaviour specification.
+Success criteria: E02, E03, E04, E05, E06, E07, E09 and E11 pass deterministic positive/negative contracts and an independent meaning review; all conceptual AST branches map to an implemented process responsibility; semantic views expose relevant schema definitions and ordered process steps as illustrated in E01, with markers matching the current draft on every turn; no source instructions are executed as authority, no compulsory interview is introduced and no known failed candidate is written.
 Transition trigger: the complete direct/guided workflow and retained entrance have evidence, with no missing operation or weakened consent, scope, fidelity or continuity safeguard; unresolved functional defects are fixed before delivery assembly is accepted.
 
 ### Phase 5: Regenerate complete portable and native deliveries
@@ -1037,7 +1143,7 @@ Transition trigger: one complete source-derived candidate exists with reproducib
 Objective: demonstrate the whole approved outcome, not merely the tests added during implementation; owner: build/checks and build/AGENTS.md; dependencies: Phase 5 complete candidate and a compliant external Python environment.
 - [ ] Key task: P06.01 Register the new authoring-agent fixtures in existing verification, replace obsolete DESIGN/old-process assumptions without weakening the independent consent, literal, ownership, dataflow and byte assertions, and exercise all required comparisons E02-E11.
 - [ ] Key task: P06.02 Verify actual canonical parse/render equality, bounded graph resolution, public complete schemas, skill-agent execution parity, protected literals, native decode equality and exact generated manifests in both ordinary and detached/cold snapshots.
-- [ ] Key task: P06.03 Exercise malformed partial JSON, stale draft/sources, missing contracts, out-of-scope deletes, source-injected authority, invalid/escaping/symlink resources, supporting operational content, missing teaching, native corruption and validator/effect rejection cases.
+- [ ] Key task: P06.03 Exercise malformed partial JSON, stale draft/sources, stale or mismatched tree markers, missing legends, hidden unresolved descendants, missing contracts, out-of-scope deletes, source-injected authority, invalid/escaping/symlink resources, supporting operational content, missing teaching, native corruption and validator/effect rejection cases.
 - [ ] Key task: P06.04 Execute compilation, example regeneration, all five generators, python -m build.examples and python build/examples.py; retain command logs, actual exit codes, environment identity and the exact checked source/output revision.
 - [ ] Key task: P06.05 Repeat all five generators, require identical complete path/byte manifests, run plan/navigation and final diff checks, fix failures and rerun the affected checks plus both complete entry points before claiming verification.
 Success criteria: E02, E03, E04, E05, E06, E07, E08, E09, E10 and E11 each have observed evidence; both complete entry points exit 0 on the final candidate; repeat generation has zero path/byte delta; negative tests actually reject their intended faults; unrun live-client checks remain explicitly unrun.

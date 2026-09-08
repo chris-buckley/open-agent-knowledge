@@ -102,6 +102,11 @@ delivery-contract: YAML<<
   and agent, not independently maintained prompts. Keep grammar material in EBNF.
 - Own artifact-kind guidance in one extensible constant catalogue. Keep its values
   fixed during a run and update the maintained catalogue between releases.
+- Render conversational intent as compact trees of actual OAK definitions derived
+  from the retained draft and annotations, with short explanations of parts and entries.
+- Keep the legend "✓ confirmed · ~ proposed · ? unresolved" and matching decision
+  markers on every turn, including expanded schema fields and process steps. Keep
+  unresolved meaning visible; confirmation is not implementation or permission.
 - Use the default OAK render for the skill entry, shared knowledge documents, and
   standalone agent. The representation defaults are owned by oak/AGENTS.md.
 - Deliver the registered core under assets/examples with its generated catalogue.
