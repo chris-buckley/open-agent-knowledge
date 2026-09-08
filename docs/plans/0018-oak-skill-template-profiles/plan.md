@@ -3,14 +3,14 @@ title: Prepare reusable OAK skill templates with optional state
 prepared: '2026-09-08T11:06:16+00:00'
 classification: PUBLIC
 plan: 0018-oak-skill-template-profiles
-readiness: Implementation authorised. Resolve the concrete D01-D05 contracts before product source edits.
+readiness: Contracts settled under the approved implementation scope. Final acceptance remains pending.
 authorisation: End-to-end implementation, verification, commits, pushes and review delivery on
   docs/prepare-skill-template-profiles are authorised. Installation, live-instance changes,
   unrelated deployment work and merging are not authorised.
-execution: Planning-format implementation is in progress. Every product implementation checkbox remains open.
+execution: Planning format is delivered. Profile sources and fixtures are implemented; complete delivery verification is in progress.
 publication: Continue on docs/prepare-skill-template-profiles through draft PR 26.
   Publication is not product completion; final-head verification and human review remain required.
-baseline: 8c81645becfdd31ab32f49e1c24e7ca82bf21acb
+baseline: 1e21b227faae9a4f5ead997047af718db84ffd8d
 ---
 
 ## Intent
@@ -25,7 +25,7 @@ OAK owns the portable knowledge standard and its reusable authoring template. Th
 
 ### Current State
 
-The planning baseline is repository revision `8c81645becfdd31ab32f49e1c24e7ca82bf21acb`. The root, documentation, example and build owners were read at this baseline. The current build owner describes one generic inert template with optional OAK parts, source-derived generation, a stateless authoring entry and scope-safe fusion. The supplied proposal describes the gap as explicit base/extension selection, complete per-profile package MAPs and an ordinary indexed-memory example. Those detailed implementation observations must be rechecked against the selected implementation baseline before product edits; this plan does not claim that the repository code or its full checks were executed during preparation.
+The product baseline is repository revision `1e21b227faae9a4f5ead997047af718db84ffd8d`, which includes the delivered Intent-first planning format and sanitised plan. The root, documentation, example and build owners were read at this baseline. The current build owner describes one generic inert template with optional OAK parts, source-derived generation, a stateless authoring entry and scope-safe fusion. The supplied proposal describes the gap as explicit base/extension selection, complete per-profile package MAPs and an ordinary indexed-memory example. P01.01 confirmed the template, guide, catalogue and checker observations against that checkout. The complete baseline verification and the planning-format verification passed before profile implementation.
 
 ### Requirements and Source Authority
 
@@ -48,7 +48,7 @@ The requirements and acceptance criteria are self-contained in this plan. Curren
 
 ### Confirmed Requirements
 
-The following confirmed direction and retained requirements govern interpretation of the illustrative designs. The implementation choices remain explicit in D01-D05. The user has now authorised the complete implementation and review delivery; a published plan alone remains neither permission nor completion evidence.
+The following confirmed direction and retained requirements govern interpretation of the illustrative designs. The implementation choices are resolved in D01-D05 below. The user has now authorised the complete implementation and review delivery; a published plan alone remains neither permission nor completion evidence.
 
 | ID | Requirement | Acceptance link |
 | --- | --- | --- |
@@ -64,15 +64,15 @@ The following confirmed direction and retained requirements govern interpretatio
 
 R02 applies to the selected capability's operational state machinery. A stateless authoring toolkit can still teach how to author stateful skills through inert extension knowledge; that teaching must not create state for the toolkit itself. Statefulness and external effects are independent: a stateless capability can read changing sources or perform an explicitly authorised write.
 
-### Illustrations and Unresolved Details
+### Illustrations and Selected Details
 
 The generic `classify-item` and `review-items` packages in E06 are worked design illustrations, not existing package inventories or universal minimums. Helper-script names, `configuration.json`, checkpoint/journal formats, extra CSV columns and configuration field names remain reviewable examples. The four purpose-based state area names are retained requirements; they do not require every area in every stateful skill.
 
-The proposed minimal CSV header `id,name,reference`, reference resolution from the containing CSV, single-writer practice and record-before-index update sequence are useful concrete defaults for this plan. Final schemas, writer coordination, retention modes, first-use wording, dependency packaging and compatibility policy remain decisions, not already implemented OAK APIs. No universal `SKILL.state` file is adopted.
+The selected minimal CSV header `id,name,reference`, reference resolution from the containing CSV, single-writer practice and record-before-index update sequence are useful concrete defaults for this plan. D01-D05 settle schemas, single-writer practice, first-use decisions, future-record retention, dependency packaging and compatible updates for the examples. These are template application contracts, not new OAK APIs. No universal `SKILL.state` file is adopted.
 
 ### Challenges
 
-- Size: the pinned [build owner](../../../build/AGENTS.md) sets repository byte budgets of 24,000 for the skill entry and 128,000 for the standalone authoring agent. Actual entry sizes and remaining headroom have not been remeasured for this proposal. Measure both at the selected implementation revision. Add complete guidance and examples through source factoring and concise expression without losing required knowledge or silently changing the budgets.
+- Size: the pinned [build owner](../../../build/AGENTS.md) sets repository byte budgets of 24,000 for the skill entry and 128,000 for the standalone authoring agent. The baseline measured 22,256 and 95,579 bytes respectively. The selected complete profile delivery measured 22,518 and 122,175 bytes before final verification. Add complete guidance and examples through source factoring and concise expression without losing required knowledge or silently changing the budgets.
 
 - Presentation: the desired role sequence must remain navigable while the OAK document preserves its canonical part order and one owner per instruction or contract.
 
@@ -124,9 +124,9 @@ End state: a new skill can select stateless or stateful authoring from one maint
 
 1. Extract the existing template concern into a small build-owned module, proposed as `build/skill_template.py`. Keep one base entry and a declarative optional extension. Compose selected entries into canonical parts before rendering; do not concatenate two operational documents or maintain two complete common skeletons. The build code assembles repository deliveries; users can still author from the same knowledge without Python.
 
-2. Keep `_template/SKILL.md` as the inert stateless starting point. A proposed `_template/stateful.oak.md` carries the optional extension recipe and fragments as inert knowledge. It is selected deliberately and never automatically becomes another operational fusion input. Its exact filename and fragment representation are D01 choices.
+2. Keep `_template/SKILL.md` as the inert stateless starting point. A proposed `_template/stateful.oak.md` carries the optional extension recipe and fragments as inert knowledge. It is selected deliberately and never automatically becomes another operational fusion input. D01 selects this filename and constants-only recipe representation.
 
-3. Carry the presentation through existing OAK parts. Metadata and a named purpose define identity. An ordered role overview locates optional routing, the main process, a compact task-to-resource index, the literal `layout`/`SKILL_TREE` value and completion conditions. Keep the role overview navigational, with actual meaning owned by the corresponding OAK definitions. Do not reorder canonical parts or add DEFINE/INDEX/MAP as OAK statements. Review the exact rendered specimen under D02 before product edits.
+3. Carry the presentation through existing OAK parts. Metadata and a named purpose define identity. An ordered role overview locates optional routing, the main process, a compact task-to-resource index, the literal `layout`/`SKILL_TREE` value and completion conditions. Keep the role overview navigational, with actual meaning owned by the corresponding OAK definitions. Do not reorder canonical parts or add DEFINE/INDEX/MAP as OAK statements. D02 records the selected rendered roles and the common source-owned definition fields.
 
 4. Derive file membership, INDEX entries and MAP from the selected static resource declarations. Reuse the existing artifact mappings and safe generation primitives. Distinguish shared functional files, instance-local fixed scaffolding, external declared dependencies and variable contents. Check map coverage without following private directories. Remove unused resources and `.gitkeep` files during population; do not ship empty operational state by accident.
 
@@ -136,7 +136,7 @@ End state: a new skill can select stateless or stateful authoring from one maint
 
 7. Teach ordinary memory maintenance as bounded reads and normal file edits: load selected index rows, resolve permitted records, establish evidence/authority, check for intervening changes, write a record, update its stable index entry and read both back. Recover orphan records and interrupted index publication; refuse an unknown writer conflict. Never manufacture a tool-owned receipt or hand-edit a journal to claim success.
 
-8. Teach first-use retention choice and saved preferences separately from active loading and actual Git rules. Reuse an applicable saved decision. Default to context omission and Git exclusion; do not assume configuration text enforces either. Preserve existing policy, evidence, pending work and operational identities when retention changes. Exact modes and exceptions are D04 choices.
+8. Teach first-use retention choice and saved preferences separately from active loading and actual Git rules. Reuse an applicable saved decision. Default to context omission and Git exclusion; do not assume configuration text enforces either. Preserve existing policy, evidence, pending work and operational identities when retention changes. D04 selects full and summary modes for future records, with explicit bounded Git exceptions.
 
 9. Add compact synthetic worked variants through the existing example catalogue. Reuse the new stateless example from the stateful example. Keep worked document/package mappings inert in the authoring skill and standalone agent; materialise install-shaped skill fixtures in disposable directories for tests. Avoid accidentally discoverable nested example skills in the authoring installation.
 
@@ -159,11 +159,9 @@ Generated effects include `generated/oak-authoring.skill/_template/`, its author
 
 ### Directory Changes
 
-Generated outputs are marked [modify] or [add] and explicitly labelled regenerate through their owner. Conditional changes use [check]. Package leaves awaiting D05 are unresolved approval inputs, not omitted implementation details. Unmarked leaves describe the current assessment. There are no planned moves or removals.
+The product views cover the selected profile implementation. The completed planning-format milestone is retained in repository history and the final PR change manifest.
 
-Scope: affected product paths only, not the complete repository inventory. The example-package leaf sets remain an explicit unresolved D05 dependency, not hidden changes or a complete implementation map. Resolve and expand them in Phase 1 before editing the affected product sources. The separately authorised planning-format change does not become a skill-template product task here.
-
-Baseline: repository revision `8c81645becfdd31ab32f49e1c24e7ca82bf21acb` for governing source ownership; the product-file inventory below retains the proposal's assessment and is not a fresh full-tree verification. Reconcile it in P01.01.
+Baseline: product checkout `1e21b227faae9a4f5ead997047af718db84ffd8d`, inspected before profile changes.
 
 Legend: [add] new; [modify] changed; [move from PATH] relocated; [remove] deleted; [keep] unchanged context; [check] verify and change only if needed.
 
@@ -172,21 +170,24 @@ Current:
 ```text
 open-agent-knowledge/
   build/
-    authoring_guides.py                  # Owns generic template and shared declarative guidance
-    authoring.py                         # Owns skill and standalone delivery
-    authoring_agent.py                   # Current stateless operational entry owner
-    authoring_validator.py               # Owns optional validator identity and helper
-    checks/authoring.py                  # One minimal populated-template fixture
-    checks/outputs.py                    # Freshness, cold generation and detached checks
+    AGENTS.md                           # Owns generated authoring products and verification
+    authoring_guides.py                  # Owns the original generic template and shared guidance
+    authoring.py                         # Generates modular and standalone authoring
+    authoring_agent.py                   # Owns the stateless operational entry
+    authoring_validator.py               # Owns optional validator identity
+    checks/
+      __init__.py                       # Registers repository checks
+      authoring.py                      # Checks one minimal template population
+      authoring_agent.py                # Checks direct and guided authoring parity
+      human_examples.py                 # Checks registered scenario closure
+      outputs.py                        # Checks complete generation and repair
   examples/
-    catalog.py                          # Existing scenario registration
-    shape_writer/                       # Typed stateless teaching, not a skill package
-    compound_growth/                    # Persistent-state teaching, not indexed memory
+    AGENTS.md                           # Owns scenario authoring and teaching
+    catalog.py                          # Registers four core stages and other scenarios
   generated/oak-authoring.skill/
-    _template/SKILL.md                   # Common scaffold includes optional state slot
-    guides/authoring.oak.md              # Exact template as literal knowledge
-  generated/oak-authoring.oak.md         # Same knowledge in one standalone delivery
-  docs/plans/                           # Existing plan storage; this draft is not a verified repository file
+    _template/SKILL.md                   # Original scaffold with an optional state slot
+    guides/authoring.oak.md              # Original template as literal knowledge
+  generated/oak-authoring.oak.md         # Original complete standalone authoring knowledge
 ```
 
 Planned:
@@ -194,49 +195,68 @@ Planned:
 ```text
 open-agent-knowledge/
   build/
-    AGENTS.md                           # [modify] Generic convention and checks
-    skill_template.py                   # [add] One base plus optional extension
-    authoring_guides.py                  # [modify] Profile selection and shared guidance
-    authoring.py                         # [modify] Exact template and teaching deliveries
-    authoring_agent.py                   # [modify] Profile routing at the operational owner
-    authoring_validator.py               # [check] Version/identity, if required
+    AGENTS.md                           # [modify] Profile ownership and checks
+    skill_template.py                   # [add] Common foundation, selected extension and resource descriptions
+    authoring_guides.py                  # [modify] Shared profile knowledge
+    authoring.py                         # [modify] Template and teaching deliveries
+    authoring_agent.py                   # [modify] Explicit profile knowledge in draft maintenance
+    authoring_validator.py               # [modify] Skill 3.4.0, unchanged validator source identity
     checks/
-      __init__.py                       # [modify] Register focused profile verification
-      skill_profiles.py                 # [add] Variant and memory fixtures
-      authoring.py                      # [modify] Inventory, inertness, parity and size
-      authoring_agent.py                # [check] Profile routing and public contracts
-      authoring_intent.py               # [check] Direct/guided decision specimens
-      human_examples.py                 # [check] Register new closed scenario files
-      optional_validator.py             # [check] Selected graph-root coverage
-      outputs.py                        # [modify] Exact fresh profile deliveries
+      __init__.py                       # [modify] Register complete profile checks
+      authoring.py                      # [modify] Template, teaching, inertness and manifest checks
+      authoring_agent.py                # [modify] Verify extension knowledge reaches both forms
+      human_examples.py                 # [modify] Validate selected supplementary teaching
+      outputs.py                        # [modify] Extend cold repair and unsafe-link coverage
+      skill_profiles.py                 # [add] Package, composition and detached acceptance
+      skill_profile_memory.py           # [add] Disposable normal-file fixture host
+      skill_profile_cases.py            # [add] Failure, retention, writer and Git cases
   examples/
-    AGENTS.md                           # [modify] Profile examples and owner boundaries
-    catalog.py                          # [modify] Register profile/composition scenario
-    catalog.oak.md                      # [modify] Regenerate through source: Catalogue
-    skill_profiles/                     # [add] D05 unresolved: Proposed package, exact leaves unresolved
+    AGENTS.md                           # [modify] Profile scenario and inert package ownership
+    catalog.py                          # [modify] Register profile scenario without changing core stages
+    catalog.oak.md                      # [modify] Regenerate catalogue from its source
+    skill_profiles/
+      example.py                        # [add] Stateful prepare/resume workflow
+      example.oak.md                    # [add] Regenerate review workflow
+      classifier.py                     # [add] Separate stateless callable
+      classifier.oak.md                 # [add] Regenerate classifier
+      memory.py                         # [add] Example memory schemas and generic policy reference
+      memory.oak.md                     # [add] Regenerate memory contracts
+      packages.py                       # [add] Complete selected package mappings
+      packages.oak.md                   # [add] Regenerate inert package mappings
+      sample.oak.md                     # [add] Regenerate synthetic input and expected outcome
   generated/
     oak-authoring.skill/
-      SKILL.md                          # [modify] Regenerate through source: Shared authoring entry
-      _template/SKILL.md                # [modify] Regenerate through source: Stateless starting scaffold
-      _template/stateful.oak.md         # [add] Inert extension knowledge
-      guides/authoring.oak.md            # [modify] Regenerate through source: Exact base/extension and usage
-      guides/review.oak.md               # [modify] Regenerate through source: Selected examples and checks
-      guides/validation.oak.md           # [check] Regenerate through source if changed Honest validation scope
-      assets/examples/skill_profiles/   # [add] D05 unresolved: Inert teaching, exact leaves unresolved
-      scripts/validate.py               # [check] Regenerate only if source changes Optional helper
-    oak-authoring.oak.md                 # [modify] Regenerate through source: Identical complete authoring knowledge
+      SKILL.md                          # [modify] Regenerate stateless authoring entry
+      _template/
+        SKILL.md                        # [modify] Regenerate stateless foundation
+        stateful.oak.md                  # [add] Regenerate inert extension
+      guides/
+        authoring.oak.md                 # [modify] Regenerate shared template knowledge
+        review.oak.md                    # [modify] Regenerate full inert teaching
+        validation.oak.md                # [modify] Regenerate skill version and identical helper
+      assets/examples/
+        catalog.oak.md                   # [modify] Regenerate supplementary profile entry
+        skill_profiles/
+          packages.oak.md                # [add] Regenerate complete inert package mappings
+          sample.oak.md                  # [add] Regenerate synthetic input
+      scripts/validate.py                # [modify] Regenerate versioned optional helper
+      platforms/codex/templates/.codex/agents/oak-authoring.toml
+                                        # [modify] Regenerate identical native authoring body
+      platforms/claude/templates/.claude/agents/oak-authoring.md
+                                        # [modify] Regenerate identical native authoring body
+    oak-authoring.oak.md                 # [modify] Regenerate complete standalone authoring
   docs/plans/0018-oak-skill-template-profiles/
-    plan.md                             # [modify] Agreed decisions and evidenced task state
-    report.md                           # [add] After implementation: Actual outcomes and checks
+    plan.md                             # [modify] Selected decisions and evidence-backed task state
+    report.md                           # [add] Final outcome, manifests and verification
 ```
 
-Ownership: the source table governs every proposed path. Existing unrelated files remain. There are no planned product moves or repository-wide renames. Proposed example directories deliberately await exact leaf selection; they are not a claim of a complete skill MAP. Phase 1 must replace those explicit pending groups with the final static file set and independently reconcile conditional check changes before implementation.
+Ownership: build/skill_template.py owns the common convention. Registered example sources own each scenario sibling and the four shared files inside the inert package mappings. The catalogue selects only packages.oak.md and sample.oak.md for supplementary installed teaching. Build checks own the disposable file host. Local configuration, policy/history/run indexes and generated instance records are fixture products, never repository or authoring installation state. All generated paths are regenerated through their listed source owners; the six unchanged empty template resource directories remain.
 
-Verification: compare the final affected-path view with the actual diff and source-derived manifests. A generated file is changed through its source owner. Reconcile overlapping edits before selecting the implementation revision. A structurally populated diagram does not prove a complete inventory or delivery.
+Verification: compare this view with the final product diff, independently declared package and scaffold manifests, complete generated paths and Git's staged manifest. Preserve the four original core stages and their literal teaching. Run actual file recovery, owner isolation, bounded loading, Git exclusion and detached acceptance fixtures before claiming delivery.
 
 ### State Comparisons
 
-The current-state descriptions in E01-E05 retain the supplied proposal's assessment. They are not fresh execution evidence for the pinned revision. Recheck them in P01.01 and preserve any difference explicitly before accepting exact specimens.
+P01.01 confirmed the E01-E05 baseline descriptions against the continuation checkout. The before states describe the product before this change; completion evidence belongs in the report.
 
 #### E01: One foundation and selected extension
 
@@ -383,10 +403,10 @@ Concept of operations: under the existing implementation approval, reconcile the
 
 ### Phase 1: Settle contracts and integration
 Objective: Make the approved implementation inputs concrete before editing product sources.
-- [ ] Key task: P01.01 Confirm the authorised branch and integration baseline, pin complete governing content, reconcile remote/local state and inspect the current source/check contracts without replaying unrelated completed work.
-- [ ] Key task: P01.02 Resolve D01-D05, including exact base/extension delivery, canonical role presentation, callable dependency boundary, memory/retention contract and full example file sets.
-- [ ] Key task: P01.03 Prepare paired populated specimens and independent expected manifests for E01-E05; retain E06 as illustrative until exact filenames are accepted.
-- [ ] Key task: P01.04 Measure projected shared knowledge and both authoring deliveries against the current build-owned byte budgets; agree meaning-preserving factoring for the selected baseline.
+- [x] Key task: P01.01 Confirm the authorised branch and integration baseline, pin complete governing content, reconcile remote/local state and inspect the current source/check contracts without replaying unrelated completed work.
+- [x] Key task: P01.02 Resolve D01-D05, including exact base/extension delivery, canonical role presentation, callable dependency boundary, memory/retention contract and full example file sets.
+- [x] Key task: P01.03 Prepare paired populated specimens and independent expected manifests for E01-E05; retain E06 as illustrative until exact filenames are accepted.
+- [x] Key task: P01.04 Measure projected shared knowledge and both authoring deliveries against the current build-owned byte budgets; agree meaning-preserving factoring for the selected baseline.
 Success criteria: E01 and E04 have reviewable exact specimens, E02/E03/E05 have explicit contracts and expected outcomes, D01-D05 are resolved, and a credible measured size allocation preserves all existing required knowledge.
 Transition trigger: The user has authorised the exact implementation scope and the resolved contracts, baseline and size design contain no outstanding conflict.
 
@@ -475,9 +495,9 @@ The optional consumer validator remains distinct from repository profile checks.
 | --- | --- | --- | --- |
 | Retained requirements | R01-R09, E01-E06 and D01-D06 | This self-contained plan | AVAILABLE |
 | Governing OAK/planning knowledge | Root and relevant scoped owners | Linked repository owners read at the pinned planning revision; re-pin for implementation | AVAILABLE |
-| Agreed implementation decisions | D01-D05 | User review of this proposal | PENDING |
-| Verification environment | Python and dependencies declared at the implementation revision | An external environment satisfying pyproject.toml, without an editable repository install; availability to verify | PENDING |
-| Two populated profile packages | Synthetic examples and fixtures | Proposed registered OAK sources | PENDING |
+| Selected implementation decisions | D01-D05 | Resolved within the approved scope below | AVAILABLE |
+| Verification environment | Python 3.13.2 and declared dependencies | External environment, no editable repository install; baseline verification passed | AVAILABLE |
+| Two populated profile packages | Synthetic examples and fixtures | Registered skill_profiles sources and inert package mappings | AVAILABLE |
 | Installed-host verification | Each selected host variant | Separately authorised deployment acceptance, outside this product change | PENDING |
 
 Supply: use existing OAK models, YAML support, standard-library CSV/path/JSON facilities and current build tooling. No new package, state service, provider backend, model asset or agent installation is proposed.
@@ -502,16 +522,16 @@ Rollback: preserve unrelated files and committed history. During product impleme
 
 Reporting: distinguish confirmed requirements, proposed filenames, inspected sources, executed checks, deterministic demonstrations and untested platform behaviour. A prepared or published plan does not complete its product tasks. Report actual branch and commit confirmation separately from local draft preparation; neither a proposed revision nor an issued push is a confirmed checkpoint.
 
-### Decisions Still Needed
+### Decisions and Boundaries
 
-| ID | Decision | Proposed resolution | Authority and timing |
+| ID | Decision | Selected resolution and rationale | Authority and remaining boundary |
 | --- | --- | --- | --- |
-| D01 | Exact template assembly and extension delivery | One build-owned base plus declarative optional entries; retain `_template/SKILL.md`, add an inert extension recipe rather than a second full template. Proposed module and extension filenames may change. | User acceptance of the concrete contract before Phase 2. |
-| D02 | Exact SKILL.md role presentation within canonical OAK | Ordered navigational role overview, one task index, existing literal `SKILL_TREE`, and actual rules/processes/contracts in their existing parts. Preserve the agreed visible roles without a language change. | User review of a populated rendered specimen before product edits. |
-| D03 | Callable dependency and instance-binding contract | Real `.oak.md` exports, explicit selected dependency roots, stable owner/capability identity and instance root supplied independently of source paths. Name what structural and fixture checks prove; leave installed-host linking to separately authorised host acceptance. | User agreement to the authoring contract; later host configuration remains separately owned. |
-| D04 | Minimum memory, retention and recovery contract | Start from `id,name,reference`, containing-CSV-relative references and one active writer. Ask only when no saved retention decision applies; default to omitted context and ignored Git state. Agree record formats, version fields, retention modes/exceptions, shared profiles and preservation rules for pending/tool-owned records. | User decides retention/authority choices; implementation chooses routine file details within that contract. |
-| D05 | Example package leaves, integration baseline and size allocation | Use a small synthetic stateless/stateful pair in one registered scenario, explicit inert teaching and no mandatory runtime helper. Reconcile the selected baseline and preserve current limits with measured, meaning-preserving factoring. | User accepts exact specimens and baseline; any unsatisfied size constraint returns as a specific conflict. |
-| D06 | Host deployment choices outside this product change | Storage/discovery, link mechanisms, update adoption, naming qualifiers, promotion and cross-repository permissions belong to the consuming host. No host-specific configuration or live integration is included here. | Separately authorised deployment work; these choices do not block preparation of this OAK plan. |
+| D01 | Template assembly and extension | build/skill_template.py owns one base and canonical population. _template/SKILL.md is stateless; _template/stateful.oak.md contains constants-only extension knowledge and the selected state slot. Common functional content is maintained once. | Selected within the approved implementation; no consumer runtime or new language construct. |
+| D02 | Role presentation | Metadata plus title, purpose and principle define the skill. A roles constant presents DEFINE, optional ROUTE, LOOP, INDEX, MAP and ASSERT in that order, pointing to actual OAK definitions. The resource declarations derive INDEX and the complete SKILL_TREE. | Concrete rendered package specimens are in examples/skill_profiles/packages.oak.md; canonical OAK part order is preserved. |
+| D03 | Dependency and instance identity | review-items calls the separate classify-item/processes/classify-item.oak.md export within an explicitly selected root. The stable capability is review-items/v1; the host separately binds owner and instance root and retains the complete pending checkpoint. Display names and compatible shared updates do not change ownership. | Host tools, source/dependency pinning and durable checkpoint storage remain explicit obligations. No global discovery, copied dependency or CALL-to-SKILL.md is introduced. |
+| D04 | Memory, retention and recovery | Exact UTF-8 CSV id,name,reference columns, containing-index-relative references, JSON records and one active writer. First use requires a retention decision if none is saved. Full retains future source text; summary retains its digest, result and policy evidence. Pending work keeps its prepared mode. Existing records are preserved. Record-before-index publication reconciles exact orphans or completed pairs and rejects unknown conflicts. | Retention is a user choice when an instance is used. Git defaults to verified exclusions, with separately explicit bounded opt-in; loading, tracking and backup remain distinct. Tool-owned records are preserved. These tests use synthetic local data only. |
+| D05 | Package leaves and size | The stateless package has SKILL.md and processes/classify-item.oak.md. The stateful shared package has SKILL.md and references/memory.oak.md. Its fixed local scaffold is .gitignore, state/configuration.json, policy/index.csv and priority.json, history/index.csv and runs/index.csv. Policy, history records and run contents are generated locally. Runtime and raw directories are omitted because this example does not need them. The inert package mapping preserves the complete graph without nested installed skills. | Baseline 1e21b227faae9a4f5ead997047af718db84ffd8d. Measured selected outputs fit the unchanged 24,000/128,000-byte budgets. Final acceptance rechecks sizes and manifests. |
+| D06 | Host deployment outside this change | Storage/discovery, link mechanisms, update adoption, naming qualifiers, promotion and cross-repository permissions belong to the consuming host. No live installation, provider configuration or integration is included. | Separately authorised host work; not a prerequisite for this product delivery. |
 
 ### Public Design References
 

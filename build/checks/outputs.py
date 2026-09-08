@@ -138,6 +138,8 @@ def _repair_products(root: Path, expected: Mapping[str, bytes]) -> None:
         ("oak-authoring.skill/platforms/codex/templates/.codex/agents/oak-authoring.toml", None),
         ("oak-authoring.skill/platforms/claude/templates/.claude/agents/oak-authoring.md", b"stale authoring body"),
         ("oak-authoring.skill/assets/constants/artifact-kinds.oak.md", None),
+        ("oak-authoring.skill/_template/stateful.oak.md", None),
+        ("oak-authoring.skill/assets/examples/skill_profiles/packages.oak.md", b"stale profile mapping"),
     )
     for relative, content in mutations:
         path = generated / relative
@@ -159,7 +161,8 @@ def _reject_link_writes(root: Path, expected: Mapping[str, bytes]) -> None:
     sentinel.write_text("preserve")
     for name in ("oak.ebnf", "oak-authoring.skill/scripts/validate.py", "definitions/act.oak.md", "oak.agents/parallel_exploration/explorer.oak.md",
                  "oak-authoring.skill/platforms/codex/templates/.codex/agents/oak-authoring.toml",
-                 "oak-authoring.skill/platforms/claude/templates/.claude/agents/oak-authoring.md"):
+                 "oak-authoring.skill/platforms/claude/templates/.claude/agents/oak-authoring.md",
+                 "oak-authoring.skill/_template/stateful.oak.md"):
         link = generated / name
         original = link.read_bytes()
         link.unlink()

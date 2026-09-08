@@ -395,8 +395,10 @@ def _simulate(node, draft: dict, *, source=None, load=None, prior="", legacy=Fal
                 require([item["id"] for item in values["KINDS"]] == list(KINDS), "catalogue was changed in transit")
             if output == ("UPDATED_DRAFT",):
                 from build.authoring_guides import teaching_examples, TEMPLATE_ENTRY
+                from build.skill_template import extension_node
                 require(values["TEACHING"] == teaching_examples() and values["TEMPLATE"] == TEMPLATE_ENTRY,
                         "maintain-draft lost complete inert teaching or template")
+                require(values["EXTENSION"] == render(extension_node()), "maintain-draft lost selected extension knowledge")
             return {output[0]: encoded}
         if output == ("REVIEWED", "READY"):
             require(values["WORK"] == encoded, "review received a different model")

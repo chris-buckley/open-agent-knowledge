@@ -36,6 +36,9 @@ def validate_registry(scenarios: Sequence[catalog.Scenario]) -> None:
         files = catalog.bundle(scenario)
         require("example.oak.md" in files, "scenario has no entry document")
         require(all(Path(name).name == name for name in files), "bundle filename escapes its scenario")
+        require(len(set(scenario.teaching)) == len(scenario.teaching)
+                and all(name in files and name.endswith(".oak.md") for name in scenario.teaching),
+                "selected teaching is missing, duplicated or not an inert OAK document")
         if scenario.detached is not None:
             require(scenario.detached in files, "detached command is missing")
 

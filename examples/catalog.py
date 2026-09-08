@@ -22,6 +22,7 @@ from examples.implementer import example as implementer
 from examples.delegation import example as delegation, task_reviewer
 from examples.parallel_exploration import example as parallel_exploration, explorer
 from examples.successor import example as successor, amendment_reviewer, successor_verifier
+from examples.skill_profiles import example as skill_profiles, classifier, memory, packages
 from examples.schemas import (
     api_coverage_table, code_changes, code_map, docs_index, error,
     hierarchical_outline, ideation_list, link_manifest, process_execution_table,
@@ -51,6 +52,7 @@ class Scenario:
     detached: str | None = None
     sample: Callable[[], Node] | None = None
     run: Callable[[], object] | None = None
+    teaching: tuple[str, ...] = ()
 
     @property
     def modules(self) -> tuple[ModuleType, ...]:
@@ -85,11 +87,19 @@ SCENARIOS = (
     Scenario("successor", successor, "Separate amendment review, compilation, verification, and publication across arrivals.",
              "Included fixed amendment and verification adapters; proof covers the fixture, not arbitrary amendment quality.",
              supporting=(amendment_reviewer, successor_verifier), bindings=True, detached="example.py"),
+    Scenario("skill_profiles", skill_profiles, "Select one stateless foundation or owned memory extension and reuse a separate classifier.",
+             "Complete package maps are inert constants; repository-only file fixtures verify synthetic instances, not installed-host discovery or live effects.",
+             supporting=(classifier, memory, packages), sample=skill_profiles.sample,
+             teaching=("packages.oak.md", "sample.oak.md")),
 )
 
 
 def core() -> tuple[Scenario, ...]:
     return tuple(scenario for scenario in SCENARIOS if scenario.stage is not None)
+
+
+def teaching_scenarios() -> tuple[Scenario, ...]:
+    return tuple(scenario for scenario in SCENARIOS if scenario.stage is not None or scenario.teaching)
 
 
 def generated(scenario: Scenario) -> dict[str, str]:
@@ -116,12 +126,13 @@ def bundle(scenario: Scenario) -> dict[str, str]:
 
 
 def catalog_node(*, teaching: bool = False) -> Node:
-    selected = core() if teaching else SCENARIOS
+    selected = teaching_scenarios() if teaching else SCENARIOS
     rows = []
     for order, scenario in enumerate(selected, 1):
-        node = parse(scenario.entry.build())
+        entry = scenario.teaching[0] if teaching and scenario.teaching else "example.oak.md"
+        node = parse(generated(scenario)[entry])
         row = {
-            "order": order, "entry": f"{scenario.name}/example.oak.md",
+            "order": order, "entry": f"{scenario.name}/{entry}",
             "lesson": scenario.lesson,
             "omitted": ", ".join("authored instructions" if part == "instructions" else part
                                    for part in Node.model_fields if not getattr(node, part)),
@@ -157,9 +168,10 @@ def catalog_node(*, teaching: bool = False) -> Node:
 
 def teaching_examples() -> dict[str, str]:
     files = {"assets/examples/catalog.oak.md": render(catalog_node(teaching=True))}
-    for scenario in core():
+    for scenario in teaching_scenarios():
         files.update({f"assets/examples/{scenario.name}/{name}": text
-                      for name, text in generated(scenario).items() if name.endswith(".oak.md")})
+                      for name, text in generated(scenario).items()
+                      if name in scenario.teaching or not scenario.teaching and name.endswith(".oak.md")})
     return files
 
 

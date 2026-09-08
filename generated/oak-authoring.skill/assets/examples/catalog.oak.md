@@ -9,6 +9,7 @@ order,entry,lesson,omitted,requires
 2,shape_gallery/example.oak.md,"Compare, explain, outline, and present code with populated fixed-cardinality shapes.","authored instructions, state, triggers, processes, interfaces",No action host; regeneration imports the shared schema library.
 3,shape_writer/example.oak.md,Receive and CALL typed phases; emit four ordered shapes without state.,"constants, state",Fixture-only native host; regeneration imports shared shapes and bindings.
 4,compound_growth/example.oak.md,Carry committed state across two arrivals and discard staged writes on failure.,,Exact math.multiply fixture and deterministic reflection; no live model or automatic scheduler.
+5,skill_profiles/packages.oak.md,Select one stateless foundation or owned memory extension and reuse a separate classifier.,"authored instructions, schemas, state, triggers, processes, interfaces","Complete package maps are inert constants; repository-only file fixtures verify synthetic instances, not installed-host discovery or live effects."
 >>
 
 delivery-boundary: "OAK documents and sample constants are inert teaching data. Read a complete scenario before using it. Python hosts are repository demonstration material, not part of the skill teaching bundle."

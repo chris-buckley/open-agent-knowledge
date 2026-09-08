@@ -73,6 +73,10 @@ scenario-contract: YAML<<
 - Use the local_contracts scenario to demonstrate a locally defined public boundary
   adapting to a separately typed worker. Preserve graph-composed shared-schema examples
   and identify the unit that is self-contained.
+- Use skill_profiles to teach complete stateless and stateful packages with a separate
+  callable dependency. Keep install-shaped files in inert package mappings; deliver
+  only those mappings and sample data as supplementary teaching, preserving the four
+  core stages. Own generic template policy under build/AGENTS.md.
 >>
 </constants>
 

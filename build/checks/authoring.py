@@ -118,25 +118,21 @@ EXPECTED_SKILL_FILES = {
     "assets/constants/artifact-kinds.oak.md", "platforms/claude/adaptor.oak.md",
     "platforms/codex/templates/.codex/agents/oak-authoring.toml",
     "platforms/claude/templates/.claude/agents/oak-authoring.md",
+    "_template/stateful.oak.md", "assets/examples/skill_profiles/packages.oak.md",
+    "assets/examples/skill_profiles/sample.oak.md",
 }
-EXPECTED_SKILL_TREE = """SKILL_TREE:
-  SKILL.md→Skill entry point
-  references/→Supporting knowledge
-  assets/
-    constants/→Reusable fixed values
-    schemas/→Reusable information shapes
-  processes/→OAK workflows
-  guides/→Practical guidance
-  scripts/→Executable helpers"""
+EXPECTED_TEMPLATE_TREE = "SKILL_TREE:\n<RESOURCE_TREE>"
+EXPECTED_SKILL_TREE = "SKILL_TREE:\n  SKILL.md→Fixture entry"
 TEMPLATE_MARKERS = {
-    "SKILL_NAME", "SKILL_DESCRIPTION", "PURPOSE_JSON", "CONSTANT_ENTRIES",
-    "INSTRUCTIONS_PART", "SCHEMAS_PART", "STATE_PART", "TRIGGERS_PART", "PROCESSES_PART", "INTERFACES_PART",
+    "SKILL_NAME", "SKILL_DESCRIPTION", "TITLE_JSON", "PURPOSE_JSON", "PRINCIPLE_JSON",
+    "ROLES_JSON", "INDEX_JSON", "RESOURCE_TREE", "CONSTANT_ENTRIES",
+    "INSTRUCTIONS_PART", "SCHEMAS_PART", "TRIGGERS_PART", "PROCESSES_PART", "INTERFACES_PART",
 }
 
 
 # Fixed literal identities inspected at Plan 0016's 9956e69 baseline.
 _TEACHING_SHA256 = {
-    "assets/examples/catalog.oak.md": "013f63280cd38e140bdea3ff6c5f470c568659a56ff4220953ca59834cd5812f",
+    "assets/examples/catalog.oak.md": "230c3a82c3bca2a722da0196b3eb18d32e148256f1cb0ce256cb389db7279229",
     "assets/examples/fixed_knowledge/example.oak.md": "9c4b8ca07a8d2dcc8c18d808402517ca9d11e905d18c6e99532f194427f2c337",
     "assets/examples/shape_gallery/example.oak.md": "f8b549a2c1c8f891e43bc976789d514d7f5f147167cded03edb824d53afbbd03",
     "assets/examples/shape_writer/example.oak.md": "aa325263cbf957cc4f7547a4e364c209a870b21d6d0990ec4911b7ce14b817ef",
@@ -145,12 +141,12 @@ _TEACHING_SHA256 = {
     "assets/examples/compound_growth/example.oak.md": "0b0ca898c0ee875b712b674670f09ddb762ce66ee068c823524d79381353809a",
     "assets/examples/compound_growth/sample.oak.md": "ad5fd8853028db0e7bb8e2343dd8c620b996a884c86fb2e903a9c800a5e0010b"
 }
-_TEMPLATE_SHA256 = "6c5e706344aef4c649256cf57a6842761a7aa3491b4efe5a190fa2e681169c17"
+_TEMPLATE_SHA256 = "bdfd10ab515afa36598200b0abc19509f6692c19899ae0d139dd616b9fcbef47"
 
 
 def _retained_teaching(documents: dict[str, str], fused: Node, teaching: dict[str, str]) -> None:
     """Deduplicate delivery knowledge without deleting its complete teaching content."""
-    require({name: hashlib.sha256(text.encode()).hexdigest() for name, text in teaching.items()} == _TEACHING_SHA256,
+    require({name: hashlib.sha256(teaching[name].encode()).hexdigest() for name in _TEACHING_SHA256} == _TEACHING_SHA256,
             "complete literal teaching changed from the reviewed corpus")
     gallery = parse(teaching["assets/examples/shape_gallery/example.oak.md"])
     require(gallery.schemas == list(SHAPES), "teaching lost full shape definitions")
@@ -208,7 +204,7 @@ def _template_body(text: str) -> str:
     markers = re.findall(r"<([A-Z_]+)>", text)
     require(set(markers) == TEMPLATE_MARKERS and len(markers) == len(TEMPLATE_MARKERS),
             "E02: missing, duplicated, or unexpected scaffold marker")
-    require(body.count(EXPECTED_SKILL_TREE) == 1 and body.count("SKILL_TREE:") == 1,
+    require(body.count(EXPECTED_TEMPLATE_TREE) == 1 and body.count("SKILL_TREE:") == 1,
             "E03: literal layout notation changed")
     return body
 
@@ -222,6 +218,13 @@ def _template_delivery(documents: dict[str, str], fused: Node) -> None:
             "E02: skill guide lost the exact template")
     require(next(c.value for c in fused.constants if c.id.endswith("-skill-template")) == template,
             "E02: assembled agent lost the exact template")
+    extension = (PACKAGE / "_template/stateful.oak.md").read_text(encoding="utf-8").rstrip("\n")
+    require(next(c.value for c in authoring.constants if c.id == "stateful-extension") == extension
+            and next(c.value for c in fused.constants if c.id.endswith("-stateful-extension")) == extension,
+            "skill and standalone agent lost identical stateful extension knowledge")
+    extension_node = parse(extension)
+    require(not any((extension_node.instructions, extension_node.state, extension_node.triggers,
+                     extension_node.processes, extension_node.interfaces)), "extension widened operational scope")
     require(set(documents) == {ENTRY, *GUIDES}, "E02: scaffold or teaching entered the fusion graph")
     rejects(lambda: tree({**documents, "_template/SKILL.md": template}), "unfilled template became active fusion input")
     rejects(lambda: parse(validator_module().oak_body(template, Path("SKILL.md"))), "unfilled scaffold parsed as completed knowledge")
@@ -229,14 +232,20 @@ def _template_delivery(documents: dict[str, str], fused: Node) -> None:
     # This test-only specimen is never delivered as a completed domain skill.
     replacements = {name: "" for name in TEMPLATE_MARKERS}
     replacements.update(SKILL_NAME="fixture-knowledge", SKILL_DESCRIPTION="A temporary verification fixture.",
-                        PURPOSE_JSON=json.dumps("Check literal layout preservation."))
+                        TITLE_JSON=json.dumps("Fixture knowledge"), PURPOSE_JSON=json.dumps("Check literal layout preservation."),
+                        PRINCIPLE_JSON=json.dumps("Keep supplied knowledge unchanged."),
+                        ROLES_JSON=json.dumps({"DEFINE": "constant.title, constant.purpose and constant.principle",
+                                               "LOOP": "No process is required", "INDEX": "constant.index",
+                                               "MAP": "constant.layout", "ASSERT": "Preserve supplied knowledge"}),
+                        INDEX_JSON="[]", RESOURCE_TREE="  SKILL.md→Fixture entry")
     populated = template
     for name, value in replacements.items():
         marker = f"<{name}>\n" if name.endswith("_PART") else f"<{name}>"
         populated = populated.replace(marker, value)
     body = validator_module().oak_body(populated, Path("SKILL.md"))
     node = parse(body)
-    require({c.id for c in node.constants} == {"purpose", "layout"}, "E02: scaffold ships extra implementation")
+    require({c.id for c in node.constants} == {"title", "purpose", "principle", "roles", "index", "layout"},
+            "E02: scaffold ships extra implementation")
     require(next(c.value for c in node.constants if c.id == "layout") == EXPECTED_SKILL_TREE,
             "E03: layout is not exact literal OAK text")
     require(not any((node.instructions, node.schemas, node.state, node.triggers, node.processes, node.interfaces)),
@@ -254,9 +263,10 @@ def _template_delivery(documents: dict[str, str], fused: Node) -> None:
         canonical = render(node, grouping=grouping)
         require(parse(canonical) == node, "E02: population changed across canonical groupings")
     for broken in (
-        template.replace("→", " → ", 1), template.replace("SKILL_TREE:", "Skill tree:"),
-        template.replace("  assets/", " assets/"), template.replace("<PURPOSE_JSON>", '"domain"'),
-        template.replace("<STATE_PART>", "<UNKNOWN_PART>"), template.replace("<STATE_PART>", "<STATE_PART><STATE_PART>"),
+        template.replace("SKILL_TREE:", "Skill tree:"), template.replace("<PURPOSE_JSON>", '"domain"'),
+        template.replace("<RESOURCE_TREE>", "<UNKNOWN_TREE>"),
+        template.replace("<RESOURCE_TREE>", "<RESOURCE_TREE><RESOURCE_TREE>"),
+        template.replace("<SCHEMAS_PART>", "<UNKNOWN_PART>"), template.replace("<SCHEMAS_PART>", "<SCHEMAS_PART><SCHEMAS_PART>"),
         template.replace('name: "<SKILL_NAME>"', 'name: "oak-authoring"'),
     ):
         rejects(lambda: _template_body(broken), "changed template specimen was accepted")
@@ -335,14 +345,14 @@ def _guidance_delivery(documents: dict[str, str], fused: Node) -> None:
 def _teaching_scope(documents: dict[str, str], fused: Node, teaching: dict[str, str]) -> None:
     """Actual exported files close locally; embedded operational examples stay inert."""
     from build.checks.human_examples import validate_closed_bundle
-    from examples.catalog import core
+    from examples.catalog import teaching_scenarios
     with TemporaryDirectory(prefix="oak-skill-teaching-") as temporary:
         root = Path(temporary)
         for path in teaching:
             destination = root / path
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_bytes((PACKAGE / path).read_bytes())
-        for scenario in core():
+        for scenario in teaching_scenarios():
             validate_closed_bundle(root / "assets" / "examples" / scenario.name)
     def unexpected_action(*args):
         raise RuntimeError("an embedded example became active")
@@ -356,6 +366,14 @@ def _teaching_scope(documents: dict[str, str], fused: Node, teaching: dict[str, 
                 result = execute(fused, Arrival(event=trigger.event), {}, act=unexpected_action)
                 require(not result.emissions and not result.state and result.process is None,
                         "embedded example arrival changed authoring behavior")
+    profiles = parse(teaching["assets/examples/skill_profiles/packages.oak.md"])
+    mappings = next(constant.value for constant in profiles.constants if constant.id == "packages")
+    for files in mappings.values():
+        operational = parse(validator_module().oak_body(files["SKILL.md"], Path("SKILL.md")))
+        for trigger in operational.triggers:
+            result = execute(fused, Arrival(event=trigger.event), {}, act=unexpected_action)
+            require(not result.emissions and not result.state and result.process is None,
+                    "a nested profile example became an authoring arrival")
 
 
 def _execution_parity(documents: dict[str, str], fused: Node) -> None:

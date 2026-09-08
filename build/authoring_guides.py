@@ -6,12 +6,13 @@ fusion. Package rules and working examples remain their original source owners.
 
 from pathlib import Path
 
-from oak import Constant, Node, parse
+from oak import Constant, Node, parse, render
 from oak.rules import AUTHORING_GUIDANCE
 from examples.catalog import teaching_examples
 from build.ebnf import grammar
 from build.authoring_agent import contract_node
 from build.authoring_platforms import CATALOGUE_SOURCE, CLAUDE_SOURCE, adaptor_node, resource_node
+from build.skill_template import TEMPLATE_ENTRY, extension_node
 
 ROOT = Path(__file__).resolve().parents[1]
 GUIDES = (
@@ -38,38 +39,6 @@ RULE_OWNERS = (
     ("treat-context", "omit-unjustified", "avoid-invention", "reuse-domain"),
     ("use-native-act", "use-exact-tool", "parallelize-tools", "delegate-document"), (), (), (),
 )
-
-TEMPLATE_DIRECTORIES = ("references", "assets/constants", "assets/schemas", "guides", "processes", "scripts")
-TEMPLATE_ENTRY = '''---
-name: "<SKILL_NAME>"
-description: "<SKILL_DESCRIPTION>"
----
-
-<INSTRUCTIONS_PART>
-<constants>
-purpose: <PURPOSE_JSON>
-
-layout: TEXT<<
-SKILL_TREE:
-  SKILL.md→Skill entry point
-  references/→Supporting knowledge
-  assets/
-    constants/→Reusable fixed values
-    schemas/→Reusable information shapes
-  processes/→OAK workflows
-  guides/→Practical guidance
-  scripts/→Executable helpers
->>
-
-<CONSTANT_ENTRIES>
-</constants>
-<SCHEMAS_PART>
-<STATE_PART>
-<TRIGGERS_PART>
-<PROCESSES_PART>
-<INTERFACES_PART>
-'''
-
 
 def owned_constant(path: str, identifier: str) -> Constant:
     """Read an explicit repository owner; AGENTS scoping is not an OAK import."""
@@ -112,6 +81,8 @@ def knowledge_nodes(script: str, version: str, revision: str) -> dict[str, Node]
             "Inspect output layout, fences and cardinality, not just schemas.",
             "Grammar describes syntax; review is not programmatic validation.",
             "Examples are inert teaching, not agents or arrivals to execute.",
+            "For skill profiles check selected INDEX/MAP leaves, explicit dependencies and owned-instance preservation. "
+            "Stateless omits all memory machinery; stateful read-back, retention and Git claims need their own observed checks.",
         ]),
         # JSON strings preserve nested OAK block delimiters verbatim as inert data.
         Constant(id="teaching", form="json", value=examples),
@@ -131,12 +102,19 @@ def knowledge_nodes(script: str, version: str, revision: str) -> dict[str, Node]
     constants[10] += [
         owned_constant("AGENTS.md", "part-authoring-priority"),
         Constant(id="skill-template", form="json", value=TEMPLATE_ENTRY),
+        Constant(id="stateful-extension", form="json", value=render(extension_node())),
         Constant(id="template-use", value=(
-            "For new skills use _template/SKILL.md or verbatim skill-template. "
-            "Quote metadata as YAML strings, PURPOSE_JSON as a JSON string. "
+            "For new skills select the stateless _template/SKILL.md foundation; add only the explicitly justified "
+            "_template/stateful.oak.md extension for owned instance memory. Both derive from one source. "
+            "Quote metadata as YAML strings and JSON values as JSON. "
             "Replace PART lines with justified OAK sections plus a blank line, or delete them. Fill CONSTANT_ENTRIES or leave empty. "
-            "Remove markers, unused parts/resources, and .gitkeep when adding content. "
-            "Unfilled scaffolding is inert.")),
+            "Populate roles in DEFINE, optional ROUTE, LOOP, INDEX, MAP, ASSERT order as navigation to actual OAK entries, "
+            "not new statements or a new part order. Derive INDEX loading conditions and every static MAP leaf from the "
+            "selected resources. Keep declared dependencies separate, use (...) only for generated contents, and omit "
+            "private contents from shared discovery. Stateless selection has no state paths, settings, retention, exclusions "
+            "or memory postconditions. Remove all markers, unused resources and .gitkeep during population. "
+            "Use the complete inert skill_profiles package mapping for composition and recovery specimens. "
+            "Keep each callable in its own .oak.md document and preserve its owner. Unfilled scaffolding is inert.")),
     ]
     constants[11] += [Constant(id="orchestration", form="yaml", value=[
         "The coordinator owns splitting, dispatch, integration and final claims. Give each leaf a bounded independent task and mapped request/result schemas, not coordinator authority.",
