@@ -1,9 +1,9 @@
 {
   "baseline_commit": "6df8e13c936376ada0967385888ca61ec09a867b",
   "baseline_tree": "2ba2dfaeecd3b6bafaea60c3da68fb9eceb16349",
-  "checked_workspace_revision": "e68360b962154b997a76a47737101b7022e81c7e72b3f5214113a79f12afd919",
-  "checked_workspace_revision_method": "SHA-256 of canonical JSON of every non-cache file's path, byte size and SHA-256 plus directory paths; exact workspace before completion-record edits.",
-  "code_and_products_revision": "180853139d9c7028410f4cc763806d2341e7bd37d4baca156d6b41d68fbaba55",
+  "checked_workspace_revision": "a86b885fc36888af5194fafbf7eca4f0b7365e8cab19ec702b3b06c5b3c756fd",
+  "checked_workspace_revision_method": "SHA-256 of canonical JSON of every non-cache file's path, byte size and SHA-256 plus directory paths; exact final implementation workspace before publication-record and ownership-lesson updates.",
+  "code_and_products_revision": "485ca88a8e3b61352ab8fda41dc3382cca366dc8f369e5560bd6d0f94feeb530",
   "code_and_products_revision_method": "SHA-256 of canonical JSON of all non-docs, non-cache repository file paths, byte sizes and SHA-256 values; metadata records can advance without changing this reviewed implementation.",
   "environment": {
     "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
@@ -19,73 +19,73 @@
     {
       "command": "python -m compileall -q oak build examples",
       "exit": 0,
-      "seconds": 0.297
+      "seconds": 0.36
     },
     {
       "command": "python -m examples.catalog",
       "exit": 0,
-      "seconds": 0.953
+      "seconds": 0.828
     },
     {
       "command": "python -m build.ebnf",
       "exit": 0,
-      "seconds": 0.735
+      "seconds": 0.578
     },
     {
       "command": "python -m build.definitions",
       "exit": 0,
-      "seconds": 0.89
+      "seconds": 0.797
     },
     {
       "command": "python -m build.agents",
       "exit": 0,
-      "seconds": 0.704
+      "seconds": 0.609
     },
     {
       "command": "python -m build.authoring",
       "exit": 0,
-      "seconds": 1.046
+      "seconds": 0.906
     },
     {
       "command": "python -m build.examples",
       "exit": 0,
-      "seconds": 77.579
+      "seconds": 75.078
     },
     {
       "command": "python build/examples.py",
       "exit": 0,
-      "seconds": 82.687
+      "seconds": 72.969
     },
     {
       "command": "python -m examples.catalog",
       "exit": 0,
-      "seconds": 4.015
+      "seconds": 0.812
     },
     {
       "command": "python -m build.ebnf",
       "exit": 0,
-      "seconds": 0.641
+      "seconds": 0.547
     },
     {
       "command": "python -m build.definitions",
       "exit": 0,
-      "seconds": 0.859
+      "seconds": 0.797
     },
     {
       "command": "python -m build.agents",
       "exit": 0,
-      "seconds": 0.672
+      "seconds": 0.61
     },
     {
       "command": "python -m build.authoring",
       "exit": 0,
-      "seconds": 0.984
+      "seconds": 0.906
     }
   ],
   "repeat_generation": {
     "identical": true,
-    "file_count": 629,
-    "directory_count": 191
+    "file_count": 631,
+    "directory_count": 192
   },
   "independent_preservation_checks": 190,
   "budgets": {
@@ -476,10 +476,30 @@
   "limitations": [
     "Native-action decisions and intent oracles are deterministic offline fixtures, not evidence of live client discovery, model performance or permission enforcement.",
     "No generated skill or native agent was installed; no runtime services, MCP servers or new workflows were added.",
-    "PR publication and its live GitHub check are recorded separately after the local implementation commit."
+    "The existing Verify OAK workflow passed on the implementation commit, including approved detached bootstrap and cache reuse. Final-head checks cover this publication record update."
   ],
   "final_review_corrections": [
     "Repair cases select explicit generated paths, so Codex authoring, Claude authoring and catalogue corruption are exercised independently.",
     "Removed one extra source-file EOF blank line. Required checks run again on this final revision before publication."
-  ]
+  ],
+  "publication": {
+    "pr": {
+      "baseRefName": "main",
+      "headRefName": "feat/oak-authoring-agent",
+      "headRefOid": "20cc3c66cbec94cbc6ec9e7bb3499a1659e95367",
+      "isDraft": false,
+      "mergeable": "MERGEABLE",
+      "state": "OPEN",
+      "url": "https://github.com/chris-buckley/open-agent-knowledge/pull/25"
+    },
+    "implementation_commit": "20cc3c66cbec94cbc6ec9e7bb3499a1659e95367",
+    "implementation_ci": {
+      "databaseId": 34190963898,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "20cc3c66cbec94cbc6ec9e7bb3499a1659e95367",
+      "url": "https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34190963898"
+    },
+    "final_record_checks": "The PR checks on the final head cover subsequent record/owner updates; no live client certification is implied."
+  }
 }

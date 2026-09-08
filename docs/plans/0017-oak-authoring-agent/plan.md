@@ -3,7 +3,7 @@
 Prepared: 2026-09-08T11:30:09+10:00
 Classification: INTERNAL
 Plan identity: 0017-oak-authoring-agent
-Readiness: Phases 1 through 6 and independent review are complete. P07.04 publication and final-head CI remain pending.
+Readiness: All seven phases are complete. PR #25 is published for review and the implementation's Verify OAK workflow passed; final record updates receive the same required checks.
 Authorisation: The actual user request at 2026-09-08T03:10:40Z authorises approved Phases 2 through 7, necessary commits and pushes on `feat/oak-authoring-agent`, and one non-draft PR into `main`. Task id: `b3d48a12-b103-4c76-b2b4-37e4cb8aea8b`. The quoted approval is "Love it. Push the changes. And start a new chat and provide the prompt for the gpt6pro agent to drive this E-E with a PR at the end please ready for review." Merge is not authorised. Planning-only statements below are updated to distinguish completed preparation from this implementation task.
 
 ## 1. Situation
@@ -1159,7 +1159,7 @@ Objective: decide whether the delivered change preserves the original request an
 - [x] Key task: P07.01 Independently reread the original accepted intent, complete process AST, D01-D08, required comparisons and directory ownership against the final product, separately from implementation-authored test expectations.
 - [x] Key task: P07.02 Resolve lost meaning, excessive machinery, hidden mandatory interviews, weakened host/validator safeguards, unneeded platform code, missing resources and maintenance problems; repeat affected checks and full verification after corrections.
 - [x] Key task: P07.03 Complete the phase/task evidence map and add report.md with exact revisions, changed paths, command exits, manifests, byte counts, preserved explorer/teaching checks and explicit offline/live limitations; mark implementation checkboxes only after their evidence exists.
-- [ ] Key task: P07.04 Reconcile final diagrams/status and scope, commit and push the complete candidate on feat/oak-authoring-agent, create or update one non-draft PR into main, and verify the existing Verify OAK workflow against its final head. Leave it unmerged. If a required write/PR capability fails, deliver the complete checkpoint and precise missing operation to the authorised local controller; publication remains pending until verified.
+- [x] Key task: P07.04 Reconcile final diagrams/status and scope, commit and push the complete candidate on feat/oak-authoring-agent, create or update one non-draft PR into main, and verify the existing Verify OAK workflow against its final head. Leave it unmerged. If a required write/PR capability fails, deliver the complete checkpoint and precise missing operation to the authorised local controller; publication remains pending until verified.
 Success criteria: E11 and every required comparison have no unresolved material intent or verification finding; the report and task states agree with actual work; user scope, all preserved resources and current limits remain intact; plan-ready, product-complete and publication-authorised are not conflated.
 Transition trigger: the complete verified product, independent review evidence, uniquely named full source checkpoint and actual verified PR ready for review are delivered. The approval above covers commits/push/PR, not merge. A controller handoff preserves progress but does not complete publication.
 
@@ -1233,4 +1233,4 @@ Reporting: provide brief meaningful updates during substantial work, and return 
 
 ### Acknowledgement
 
-The accepted intent and D01-D08 architecture remain unchanged. Phase 1 preparation is complete; Phases 2 through 7 are authorised. Implementation, complete local verification and independent review are recorded in report.md. P07.04 publication and final-head CI remain pending. The controller is authorised to apply a complete preserved checkpoint, verify independently, commit/push and publish when a required capability is unavailable here. No completion or live-client certification is claimed until supported by evidence.
+The accepted intent and D01-D08 architecture remain unchanged. Phase 1 preparation is complete; Phases 2 through 7 are authorised. Implementation, complete local verification, independent review, PR #25 and its successful implementation CI are recorded in report.md. The PR remains open for review; its final-head checks cover subsequent record updates. The controller is authorised to apply a complete preserved checkpoint, verify independently, commit/push and publish when a required capability is unavailable here. No completion or live-client certification is claimed until supported by evidence.

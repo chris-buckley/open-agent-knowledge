@@ -2,7 +2,7 @@
 
 Date: 2026-09-08
 Plan: [0017](plan.md)
-Status: Implementation verified locally. PR publication is pending.
+Status: Complete. PR #25 is open for review; the implementation passed Verify OAK. Final record updates receive the same required checks.
 
 ## Outcome
 
@@ -23,11 +23,11 @@ The user authorised the standalone budget revision and separately approved 24,00
 | Claude native definition | 95,754 bytes | Body is exactly the shared standalone |
 
 Standalone SHA-256: `71b1cb0abef42080e10e9814c5a3733ea90fc2dcc9d8f9c057b44ee81c27ddc9`.
-Code and product fingerprint: `180853139d9c7028410f4cc763806d2341e7bd37d4baca156d6b41d68fbaba55`. The full per-product byte manifest, all 16 shared input measurements and the fingerprint methods are in [verification.json](evidence/verification.json). This accounts for complete content, including protected literals, native metadata and generated interpretation guidance.
+Code and product fingerprint: `485ca88a8e3b61352ab8fda41dc3382cca366dc8f369e5560bd6d0f94feeb530`. The full per-product byte manifest, all 16 shared input measurements and the fingerprint methods are in [verification.json](evidence/verification.json). This accounts for complete content, including protected literals, native metadata and generated interpretation guidance.
 
 ## Verification
 
-The complete module and direct entry points passed all 38 registered checks in an external Python 3.11.9 environment with the declared dependencies. All five generators were repeated; the complete file, directory and byte inventory was identical. The exact checked workspace fingerprint was `e68360b962154b997a76a47737101b7022e81c7e72b3f5214113a79f12afd919` before this completion-record update. The publication process reruns required checks after record changes; the PR's check status is authoritative for its final Git head.
+The complete module and direct entry points passed all 38 registered checks in an external Python 3.11.9 environment with the declared dependencies. All five generators were repeated; the complete file, directory and byte inventory was identical. The exact checked workspace fingerprint was `a86b885fc36888af5194fafbf7eca4f0b7365e8cab19ec702b3b06c5b3c756fd` before this completion-record update. The publication process reruns required checks after record changes; the PR's check status is authoritative for its final Git head.
 
 Independent review against published input commit `6df8e13c936376ada0967385888ca61ec09a867b` passed 190 preservation assertions. The package and dependency bytes were unchanged, all expected skill/native files were present, and both native bodies had standalone closure with no sibling instruction dependency.
 
@@ -73,13 +73,15 @@ E01 remains an illustrative presentation specimen. The E02 status/tree checks ex
 | P05.01-P05.05 | 35-file skill, complete standalone/native bodies, version-only helper change, preserved explorer files and repeated generation. |
 | P06.01-P06.05 | Both full entry points, all negative cases, cold/detached checks, exact manifests and final scope review. |
 | P07.01-P07.03 | Independent intent/preservation review and this measured report. |
-| P07.04 | Pending actual push, non-draft PR and final-head Verify OAK result. |
+| P07.04 | [PR #25](https://github.com/chris-buckley/open-agent-knowledge/pull/25) is open and non-draft; implementation `20cc3c6` passed [Verify OAK](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34190963898). The PR check record covers its final documentation head. |
 
 ## Review findings resolved
 
 The recovered catalogue was moved to its approved build-owned assets/constants path. Repeated terminal code now shares a stateless finish-response process. The composition helper returns exactly its six new bindings; the caller retains artifact and validation/effect evidence and passes all nine fields to the complete publication boundary. This respects CALL's complete output promotion without changing OAK or rebinding existing inputs.
 
 The repair matrix now selects explicit paths for the new native definitions and catalogue, avoiding a branch that previously repeated the explorer mutation.
+
+The publication step compared all 631 Git index blobs with the verified workspace, including the Claude native file beneath the repository's ignored .claude directory pattern. This check is retained in build ownership knowledge.
 
 The final review added independent draft/status/fidelity/CRUD/tool-context oracles and the missing validation cases. Each oracle is labelled as an offline specimen check. It complements actual OAK execution and format checks; it is not a second product runtime or evidence of natural-language model performance.
 
@@ -123,4 +125,4 @@ The implementation changes relative to the published handoff are below. This rep
 
 No live Codex or Claude client loading, model-performance test, installation or permission-enforcement certification was performed. Native metadata requests defaults; the actual host retains tools, permissions, transport and persistence. No new workflow, runtime service, MCP registry or account configuration was introduced. The original Pro run finished without being stopped; its checkpoints and visible edits were recovered, then completed and verified locally.
 
-The user authorised commits, pushes and one reviewable PR into main. Merge is not authorised. Publication and the final GitHub check result are recorded after they actually occur.
+The user authorised commits, pushes and one reviewable PR into main. Merge is not authorised. [PR #25](https://github.com/chris-buckley/open-agent-knowledge/pull/25) was published from `feat/oak-authoring-agent` into `main` at implementation commit `20cc3c66cbec94cbc6ec9e7bb3499a1659e95367`. [Verify OAK run 34190963898](https://github.com/chris-buckley/open-agent-knowledge/actions/runs/34190963898) completed successfully, including its detached bootstrap/cache-reuse step. The PR remains unmerged. The final-head check in the PR is authoritative for this later record update.
