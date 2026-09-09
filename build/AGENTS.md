@@ -12,7 +12,7 @@ source,output
 build/ebnf.py,generated/oak.ebnf
 build/definitions.py,generated/definitions/*.oak.md
 build/agents.py,generated/oak.agents
-"build/authoring.py, build/authoring_agent.py and build/authoring_guides.py","generated/oak-authoring.skill including native templates, and generated/oak-authoring.oak.md"
+"build/authoring.py, build/authoring_agent.py, build/authoring_guides.py and build/skill_template.py","generated/oak-authoring.skill including native templates, and generated/oak-authoring.oak.md"
 examples/catalog.py and registered Python sources,"scenario siblings, local dependency copies, and examples/catalog.oak.md"
 >>
 
@@ -88,7 +88,8 @@ output-rules: ["treat generated products as deliveries, never source authority",
 
 capability-sources: CSV<<
 source,owns
-build/authoring_guides.py,"shared language guidance, literal teaching, scaffold and declarative contract composition"
+build/authoring_guides.py,"shared language guidance, literal teaching and declarative contract composition"
+build/skill_template.py,"one stateless foundation, inert stateful extension, selected resource declarations and derived INDEX/MAP"
 oak/rules/guidance.py,shared package authoring rules
 examples/catalog.py and its registered sources,"shared teaching selection, scenario documents, sample data, and catalogue; source layout is owned by examples/AGENTS.md"
 build/authoring_validator.py,"optional runtime helper, skill version, immutable validator revision, and fingerprints"
@@ -120,14 +121,24 @@ delivery-contract: YAML<<
   Embed the identical complete document mapping as literal JSON knowledge in the review
   guide and assembled agent; Python demonstration hosts stay in repository scenario
   bundles.
-- Generate _template/SKILL.md as generic inert OAK scaffolding with metadata placeholders,
-  purpose, optional parts, and a literal SKILL_TREE block. Retain the deliberately
-  empty references, assets/constants, assets/schemas, guides, processes, and scripts
-  folders with empty .gitkeep files. Explain population and omission of unused resources
-  without shipping a completed domain skill.
+- Generate _template/SKILL.md as the inert stateless foundation with metadata, definition,
+  role, index and literal SKILL_TREE placeholders. Add _template/stateful.oak.md as
+  declarative selected extension knowledge, never a second common skeleton or operational
+  fusion input. Retain the deliberately empty references, assets/constants, assets/schemas,
+  guides, processes, and scripts folders with empty .gitkeep files. Explain population
+  and omission of unused resources without shipping a completed domain skill.
 - Share the exact template entry as literal knowledge in guides/authoring.oak.md and
-  the assembled agent. Keep template and teaching documents outside the operational
-  fusion graph; displayed paths are not imports.
+  the assembled agent, together with the identical extension. Keep template and teaching
+  documents outside the operational fusion graph; displayed paths are not imports.
+- Derive a populated skill's INDEX and complete static MAP from its selected resources.
+  DEFINE, optional ROUTE, LOOP, INDEX, MAP and ASSERT are ordered navigational roles,
+  not OAK parts. Use (...) only for generated contents and retain explicit dependency
+  boundaries. Stateless selections omit instance scaffolds and memory-only behaviour.
+- Keep the ordinary-memory convention in build/skill_template.py. Bind stable owner
+  and capability identities to explicit local instances. Separate shared updates,
+  loading, tracking, retention and backup; preserve policy, evidence, pending work
+  and tool-owned records. Repository file fixtures do not supply a consumer state
+  runtime.
 - Keep the skill entry as the only operational scope. Supporting fusion documents
   may define constants and schemas only. Refuse authored policy, state, arrivals,
   processes, or interfaces in supporting documents instead of widening their scope.

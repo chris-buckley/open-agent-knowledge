@@ -5,7 +5,7 @@ description: Create, read, update or delete OAK directly or through optional gui
   shapes, and show the evolving draft. No installation is needed; programmatic validation
   is optional and dependency installation needs separate consent.
 metadata:
-  version: 3.3.0
+  version: 3.4.0
   oak-revision: 85ddd5393fd4349632f728f5a05cb67f9bc5dbf5
   validator-sha256: 9bca0d69e12c26aac64d3e7218f4ccfc620e7a7196b569d324ff7ac8197053bc
 ---
@@ -174,7 +174,7 @@ ACT output="guides/authoring.oak.md#schema.source-result": Map every supplied Cr
 </process>
 
 <process id="maintain-draft-ast" name="Maintain draft" input="guides/authoring.oak.md#schema.work-input" output="guides/authoring.oak.md#schema.draft-result">
-ACT output="guides/authoring.oak.md#schema.draft-result": Apply this turn once to <WORK> under <CONTRACT> and <AUTHORING>, retaining unaffected meaning, ids, pointers and source mappings in <UPDATED_DRAFT>. Design justified parts in <PRIORITY> using <STRUCTURE>, <SCHEMAS>, <CONSTANTS>, <STATE>, <INTERFACES>, <TRIGGERS>, <PROCESSES>, then <INSTRUCTIONS>. Use complete <TEACHING> and <TEMPLATE> under <TEMPLATE_USE>; <ORCHESTRATION> teaches delegation but grants none. Native outputs use <CODEX>/<CLAUDE>, never a second body. (
+ACT output="guides/authoring.oak.md#schema.draft-result": Apply this turn once to <WORK> under <CONTRACT> and <AUTHORING>, retaining unaffected meaning, ids, pointers and source mappings in <UPDATED_DRAFT>. Design justified parts in <PRIORITY> using <STRUCTURE>, <SCHEMAS>, <CONSTANTS>, <STATE>, <INTERFACES>, <TRIGGERS>, <PROCESSES>, then <INSTRUCTIONS>. Use complete <TEACHING> and the stateless <TEMPLATE> under <TEMPLATE_USE>; select inert <EXTENSION> only for justified owned instance memory. Derive the selected INDEX/MAP and preserve actual completion conditions. The authoring workflow remains stateless. <ORCHESTRATION> teaches delegation but grants none. Native outputs use <CODEX>/<CLAUDE>, never a second body. (
   WORK=$WORK,
   CONTRACT=$guides/authoring.oak.md#constant.draft-contract,
   AUTHORING=$guides/authoring.oak.md#constant.guidance,
@@ -189,6 +189,7 @@ ACT output="guides/authoring.oak.md#schema.draft-result": Apply this turn once t
   INSTRUCTIONS=$references/07-instructions.oak.md#constant.guidance,
   TEACHING=$guides/review.oak.md#constant.teaching,
   TEMPLATE=$guides/authoring.oak.md#constant.skill-template,
+  EXTENSION=$guides/authoring.oak.md#constant.stateful-extension,
   TEMPLATE_USE=$guides/authoring.oak.md#constant.template-use,
   ORCHESTRATION=$guides/subagent-orchestration.oak.md#constant.orchestration,
   CODEX=$platforms/codex/adaptor.oak.md#constant.mapping,

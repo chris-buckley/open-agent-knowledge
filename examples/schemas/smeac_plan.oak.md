@@ -1,15 +1,25 @@
 <instructions>
+Constants hold values that do not change while the knowledge runs.
 Each schema is one information shape: a template with <PLACEHOLDER> slots and WHERE lines that constrain each slot.
 
 A ... line in a template marks repetition of the pattern above it.
 </instructions>
 
-<schemas>
-<schema id="smeac-plan" name="SMEAC Plan" purpose="Structure a planning brief covering situation, mission, execution phases, logistics, and command.">
-# <PLAN_TITLE>
+<constants>
+metadata-conventions: {"serialization": "Use one leading YAML mapping. Quote and escape scalar values when needed; preserve decoded values. Binding validation does not serialize YAML or prove presentation validity.", "required": "title, prepared and classification use the SMEAC identity clauses.", "plan": "The stable numbered plan identity, not a filesystem navigation target.", "readiness": "Whether the proposal is ready for its next decision; not implementation approval.", "authorisation": "The recorded scope of actual user approval; metadata itself grants no permission.", "execution": "Observed task progress, not a claim inferred from a prepared plan.", "publication": "Observed branch and review-delivery status, distinct from execution.", "baseline": "The inspected source revision or an explicit unknown baseline.", "omission": "Omit optional metadata without a meaningful value. Keep all metadata before Intent; keep detailed domain evidence in its SMEAC section."}
+</constants>
 
-Prepared: <TIMESTAMP>
-Classification: <CLASSIFICATION>
+<schemas>
+<schema id="smeac-plan" name="SMEAC Plan" purpose="Structure an Intent-first planning brief with metadata frontmatter, situation, mission, execution phases, logistics, and command.">
+---
+title: <PLAN_TITLE>
+prepared: <TIMESTAMP>
+classification: <CLASSIFICATION>
+---
+
+## Intent
+
+<LEADERS_INTENT>
 
 ## 1. Situation
 
@@ -73,7 +83,6 @@ Acceptance: <COMPARISON_ACCEPTANCE>
 
 ## 3. Execution
 
-Intent: <LEADERS_INTENT>
 Concept of operations: <CONCEPT_OF_OPERATIONS>
 
 ### Phase <PHASE_NUMBER>: <PHASE_NAME>
@@ -129,9 +138,10 @@ Reporting: <REPORTING_REQUIREMENT>
 All parties MUST acknowledge receipt and understanding of this plan.
 
 WHERE:
-- <PLAN_TITLE> is string; is non-empty; one concise name for the plan or operation.
-- <TIMESTAMP> is datetime; when the plan was prepared.
+- <PLAN_TITLE> is string; is non-empty; one concise plan title, safely serialized as a YAML scalar without changing its decoded value.
+- <TIMESTAMP> is datetime; when the plan was prepared, as an ISO datetime with an explicit timezone.
 - <CLASSIFICATION> is string; is one of `PUBLIC`, `INTERNAL`, `CONFIDENTIAL`, `RESTRICTED`; the handling classification.
+- <LEADERS_INTENT> is string; is non-empty; two to four sentences on purpose, key tasks, and end state in the leader's own framing.
 - <OPERATING_ENVIRONMENT> is string; is non-empty; one to three sentences on the domain and scope of operations.
 - <CURRENT_STATE> is string; is non-empty; one to three sentences of factual current assessment.
 - <OBSTACLE> is string; is non-empty; the name of a challenge, competitor, blocker, or risk.
@@ -157,7 +167,6 @@ WHERE:
 - <COMPARISON_CURRENT> is string; is non-empty; the observed starting state, an explicitly absent artifact, or a linked specimen with literal examples preserved in fences.
 - <COMPARISON_DESIRED> is string; is non-empty; the intended result as prose, a fenced specimen, or a linked file with agreed formatting preserved.
 - <COMPARISON_ACCEPTANCE> is string; is non-empty; what must match, what may vary, and how to verify it, or the teaching purpose of an illustrative example.
-- <LEADERS_INTENT> is string; is non-empty; two to four sentences on purpose, key tasks, and end state in the leader's own framing.
 - <CONCEPT_OF_OPERATIONS> is string; is non-empty; two to five sentences on how the phases combine.
 - <PHASE_NUMBER> is integer; is at least 1; the sequential phase number.
 - <PHASE_NAME> is string; is non-empty; one short descriptive phase name.

@@ -200,7 +200,7 @@ transform_source_process = _prepare_process("transform-source", "Transform sourc
     "Map every supplied Create/Update clause and literal in <WORK> under <FIDELITY> into <MAPPED_DRAFT>. Keep ambiguity explicit. Scratch or Read/Delete has an explicit not-applicable mapping, not ignored source.",
     {"FIDELITY": _knowledge(AUTHORING_GUIDE, "fidelity")})
 maintain_draft_ast_process = _prepare_process("maintain-draft-ast", "Maintain draft", "draft-result", "UPDATED_DRAFT",
-    "Apply this turn once to <WORK> under <CONTRACT> and <AUTHORING>, retaining unaffected meaning, ids, pointers and source mappings in <UPDATED_DRAFT>. Design justified parts in <PRIORITY> using <STRUCTURE>, <SCHEMAS>, <CONSTANTS>, <STATE>, <INTERFACES>, <TRIGGERS>, <PROCESSES>, then <INSTRUCTIONS>. Use complete <TEACHING> and <TEMPLATE> under <TEMPLATE_USE>; <ORCHESTRATION> teaches delegation but grants none. Native outputs use <CODEX>/<CLAUDE>, never a second body.",
+    "Apply this turn once to <WORK> under <CONTRACT> and <AUTHORING>, retaining unaffected meaning, ids, pointers and source mappings in <UPDATED_DRAFT>. Design justified parts in <PRIORITY> using <STRUCTURE>, <SCHEMAS>, <CONSTANTS>, <STATE>, <INTERFACES>, <TRIGGERS>, <PROCESSES>, then <INSTRUCTIONS>. Use complete <TEACHING> and the stateless <TEMPLATE> under <TEMPLATE_USE>; select inert <EXTENSION> only for justified owned instance memory. Derive the selected INDEX/MAP and preserve actual completion conditions. The authoring workflow remains stateless. <ORCHESTRATION> teaches delegation but grants none. Native outputs use <CODEX>/<CLAUDE>, never a second body.",
     {"CONTRACT": _knowledge(AUTHORING_GUIDE, "draft-contract"),
      "AUTHORING": _knowledge(AUTHORING_GUIDE, "guidance"), "PRIORITY": _knowledge(AUTHORING_GUIDE, "part-authoring-priority"),
      "STRUCTURE": _knowledge("references/00-structure.oak.md", "guidance"),
@@ -213,6 +213,7 @@ maintain_draft_ast_process = _prepare_process("maintain-draft-ast", "Maintain dr
      "INSTRUCTIONS": _knowledge("references/07-instructions.oak.md", "guidance"),
      "TEACHING": _knowledge("guides/review.oak.md", "teaching"),
      "TEMPLATE": _knowledge(AUTHORING_GUIDE, "skill-template"),
+     "EXTENSION": _knowledge(AUTHORING_GUIDE, "stateful-extension"),
      "TEMPLATE_USE": _knowledge(AUTHORING_GUIDE, "template-use"),
      "ORCHESTRATION": _knowledge("guides/subagent-orchestration.oak.md", "orchestration"),
      "CODEX": _knowledge(CODEX, "mapping"), "CLAUDE": _knowledge(CLAUDE, "mapping")})

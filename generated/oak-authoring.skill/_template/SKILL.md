@@ -5,24 +5,24 @@ description: "<SKILL_DESCRIPTION>"
 
 <INSTRUCTIONS_PART>
 <constants>
+title: <TITLE_JSON>
+
 purpose: <PURPOSE_JSON>
+
+principle: <PRINCIPLE_JSON>
+
+roles: <ROLES_JSON>
+
+index: <INDEX_JSON>
 
 layout: TEXT<<
 SKILL_TREE:
-  SKILL.md→Skill entry point
-  references/→Supporting knowledge
-  assets/
-    constants/→Reusable fixed values
-    schemas/→Reusable information shapes
-  processes/→OAK workflows
-  guides/→Practical guidance
-  scripts/→Executable helpers
+<RESOURCE_TREE>
 >>
 
 <CONSTANT_ENTRIES>
 </constants>
 <SCHEMAS_PART>
-<STATE_PART>
 <TRIGGERS_PART>
 <PROCESSES_PART>
 <INTERFACES_PART>

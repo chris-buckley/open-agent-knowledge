@@ -15,7 +15,8 @@ import yaml
 from oak import Node, render
 from oak.rules import AUTHORING_GUIDANCE as GUIDANCE_SOURCE
 from oak.surface import SURFACES as SURFACE_SOURCE
-from build.authoring_guides import TEMPLATE_DIRECTORIES, TEMPLATE_ENTRY, knowledge_nodes, teaching_examples
+from build.authoring_guides import knowledge_nodes, teaching_examples
+from build.skill_template import TEMPLATE_DIRECTORIES, TEMPLATE_ENTRY, extension_node
 from build.authoring_agent import entry_node
 from build.authoring_platforms import (CODEX_SOURCE, CLAUDE_SOURCE, resource_node, profile,
                                        codex_authoring, claude_authoring)
@@ -74,6 +75,7 @@ def artifacts() -> dict[Path, str]:
         **{PACKAGE / path: text + "\n" for path, text in teaching_examples().items()},
         PACKAGE / "references" / "oak.ebnf": grammar(),
         PACKAGE / "_template" / "SKILL.md": TEMPLATE_ENTRY,
+        PACKAGE / "_template" / "stateful.oak.md": render(extension_node()) + "\n",
         **{PACKAGE / "_template" / path / ".gitkeep": "" for path in TEMPLATE_DIRECTORIES},
         PACKAGE / "platforms/codex/templates/.codex/agents/oak-authoring.toml":
             codex_authoring(standalone, profile(resource_node(CODEX_SOURCE), "authoring-profile")),
