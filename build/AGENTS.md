@@ -177,6 +177,13 @@ agent-delivery-contract: YAML<<
   unsafe-path rejection, cold repair, and synchronized deterministic parallel work.
 - Route identical orchestration and Codex knowledge into both authoring forms while
   retaining literal teaching, grammar, template, validator safeguards and byte limits.
+- Each platform adaptor documents its complete native container metadata and discovery
+  paths. Distinguish portable repository copies from client registration; keep installation
+  links outside generated products and verify client discovery before claiming registration.
+- Refresh .agents/agents/oak-authoring.oak.md byte-for-byte from generated/oak-authoring.oak.md
+  whenever that delivery changes. Keep .codex/agents/oak-authoring.toml linked with
+  a portable relative target to the generated native TOML. Check both against the
+  current generated body; a valid file or link does not prove client discovery.
 >>
 
 skill-installation: "The .skill suffix identifies the repository bundle directory, not an archive or skill metadata name. Install its contents in a directory named oak-authoring to match name: oak-authoring in SKILL.md. The Agent Skills naming contract is https://agentskills.io/specification#name-field."
