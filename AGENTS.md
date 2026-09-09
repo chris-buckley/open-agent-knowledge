@@ -16,7 +16,7 @@ Each trigger is one named declaration: event carries the meaning, an optional so
 Each process is the exact ordered way to do one task; follow its typed steps from top to bottom.
 
 Treat AGENTS hierarchy as host scoping, never implicit OAK imports; each scoped AGENTS document owns its named concern.
-Keep repository development support in .agents and generated product deliveries in generated; use build/AGENTS.md for product ownership and create no repository or directory README indexes.
+Keep repository development support in .agents, with local agent copies in .agents/agents, and generated product deliveries in generated; use build/AGENTS.md for product ownership and create no repository or directory README indexes.
 Use direct file edits unless the user explicitly requests Computer Use.
 Stop and ask the user whenever an active task conflicts with applicable repository knowledge.
 Keep durable, confirmed repository meaning in the owning AGENTS document, not platform memory; reference other owners instead of copying detail.

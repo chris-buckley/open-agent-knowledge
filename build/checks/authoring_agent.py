@@ -6,6 +6,7 @@ from collections.abc import Callable, Mapping
 from copy import deepcopy
 import json
 from pathlib import Path
+import re
 from tempfile import TemporaryDirectory
 import tomllib
 from unittest.mock import patch
@@ -131,6 +132,8 @@ def _native_contracts() -> None:
         require(len(resolve(parse(body)).documents) == 1, "native body not standalone")
     codex_profile = profile(resource_node(CODEX_SOURCE), "authoring-profile")
     claude_profile = profile(resource_node(CLAUDE_SOURCE), "authoring-profile")
+    _native_file_template(codex_profile)
+    _local_agent_files(products)
     samples = ("", "one line", "\n", "雪 ✓ \\ path\n", '"quotes" and \'\'\' triples\n',
                "\x00\x1f\x7f\t\n", "---\nname: not metadata\n---\n", "no final newline")
     for sample in samples:
@@ -147,6 +150,36 @@ def _native_contracts() -> None:
     codex_path = PACKAGE / "platforms/codex/templates/.codex/agents/oak-authoring.toml"
     broken[codex_path] = broken[codex_path].replace("enabled = false", "enabled = true")
     rejects(lambda: native_bodies(broken), "default drift")
+
+
+def _native_file_template(metadata: Mapping[str, object]) -> None:
+    """The inert file specimen must decode like the actual native serializer."""
+    node = resource_node(CODEX_SOURCE)
+    template = next(constant.value for constant in node.constants if constant.id == "native-file-template")
+    slots = re.findall(r"<TOML_[A-Z_]+>", template)
+    require(set(slots) == {"<TOML_NAME>", "<TOML_DESCRIPTION>", "<TOML_OAK_BODY>"}
+            and len(slots) == 3, "native TOML specimen has missing or duplicate fields")
+    sample = 'Complete OAK body\nwith "quotes", Unicode 雪 and literal <TOML_NAME>.\n'
+    bindings = {"<TOML_NAME>": metadata["name"], "<TOML_DESCRIPTION>": metadata["description"],
+                "<TOML_OAK_BODY>": sample}
+    populated = re.sub(r"<TOML_[A-Z_]+>", lambda match: json.dumps(bindings[match[0]], ensure_ascii=False), template)
+    require(tomllib.loads(populated) == tomllib.loads(codex_authoring(sample, metadata)),
+            "native TOML specimen changes metadata scope or the OAK body")
+
+
+def _local_agent_files(products: Mapping[Path, str]) -> None:
+    """Keep the repository registration aligned with all current authoring knowledge."""
+    root = Path(__file__).resolve().parents[2]
+    copy = root / ".agents/agents/oak-authoring.oak.md"
+    require(copy.is_file() and copy.read_bytes() == products[TARGET].encode("utf-8"),
+            "refresh the local agent copy from generated/oak-authoring.oak.md")
+    registration = root / ".codex/agents/oak-authoring.toml"
+    expected_target = "../../generated/oak-authoring.skill/platforms/codex/templates/.codex/agents/oak-authoring.toml"
+    require(registration.is_symlink() and registration.readlink().as_posix() == expected_target,
+            "local Codex registration needs its portable relative symlink")
+    native = PACKAGE / "platforms/codex/templates/.codex/agents/oak-authoring.toml"
+    require(registration.resolve() == native.resolve() and registration.read_bytes() == products[native].encode("utf-8"),
+            "local Codex registration is stale or targets a different native agent")
 
 
 def _workflow_contracts() -> None:

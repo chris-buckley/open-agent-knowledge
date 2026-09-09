@@ -9,9 +9,27 @@ native-defaults: {"sandbox_mode": "read-only", "approval_policy": "never", "web_
 
 authoring-profile: {"name": "oak-authoring", "description": "Create, read, update or delete OAK; clarify intent only when useful.", "agents": {"enabled": false}}
 
+native-file-template: TEXT<<
+name = <TOML_NAME>
+description = <TOML_DESCRIPTION>
+developer_instructions = <TOML_OAK_BODY>
+
+[agents]
+enabled = false
+>>
+
 mapping: YAML<<
-- TOML requires name, description and developer_instructions. Embed complete canonical
-  worker OAK verbatim, with no external instruction file.
+- A Codex agent file is a complete TOML document, not Markdown with YAML frontmatter
+  or a bare OAK file. Required top-level string fields are name (the registered agent
+  identity), description (selection guidance), and developer_instructions (the complete
+  canonical OAK body). Serialize the body as a TOML string and verify lossless decoding;
+  do not substitute OAK constants for native TOML metadata or depend on a sibling
+  instruction file.
+- Write top-level metadata before the [agents] table; later keys belong to that table.
+  The authoring-profile supplies name, description and agents.enabled=false. Generation
+  supplies the complete developer_instructions value. An omitted model or reasoning
+  setting resolves from explicit spawn values, then agents defaults, then the parent.
+  Other omitted session settings inherit from the parent, subject to live overrides.
 - Copy oak-explorer.toml manually to project .codex/agents/ or personal ~/.codex/agents/.
   Check collisions and project trust. Generation neither installs nor edits client
   configuration.
@@ -36,7 +54,18 @@ mapping: YAML<<
   requirements have separate identities and evidence; local MCP configuration belongs
   to the client/host. Do not provision servers, accounts or connectors. Do not invent
   a Codex launch flag.
+- A repository copy under .agents/agents is not automatically registered. When the
+  user requests a symlink, link the complete native TOML into .codex/agents, never
+  rename or link bare OAK as TOML. Verify that the installed client follows the link
+  and discovers the expected name. Installation links do not relax the build rules
+  that reject symlinked source resources or generated outputs.
+- Use a symlink-capable Git checkout for repository registration links. Verify that
+  the link opens as readable TOML; resolving its target alone does not prove read-through.
+- 'native-file-template is inert format guidance: replace each TOML_* marker with
+  one properly encoded TOML string. Outer TOML assignments contain actual metadata
+  and the entire OAK body; placeholders inside inert teaching constants remain literal.
+  Codex reads the name field as identity; matching the filename to it is a convention.'
 >>
 
-sources: {"checked": "2026-09-08", "subagents": "https://learn.chatgpt.com/docs/agent-configuration/subagents", "configuration": "https://learn.chatgpt.com/docs/config-file/config-reference", "mcp": "https://learn.chatgpt.com/docs/extend/mcp?surface=cli"}
+sources: {"checked": "2026-09-09", "subagents": "https://learn.chatgpt.com/docs/agent-configuration/subagents", "configuration": "https://learn.chatgpt.com/docs/config-file/config-reference", "mcp": "https://learn.chatgpt.com/docs/extend/mcp?surface=cli"}
 </constants>
