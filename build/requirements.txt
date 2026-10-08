@@ -1,0 +1,2 @@
+# Verification dependencies; OAK runtime dependencies remain in pyproject.toml.
+lark==1.3.1
