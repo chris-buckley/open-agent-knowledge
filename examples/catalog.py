@@ -18,6 +18,7 @@ from examples.shape_writer import example as shape_writer
 from examples.compound_growth import example as compound_growth
 from examples.interpreter_context import example as interpreter_context
 from examples.local_contracts import example as local_contracts, worker as contract_worker
+from examples.regenerative_code import example as regenerative_code, specimens as regenerative_specimens
 from examples.implementer import example as implementer
 from examples.delegation import example as delegation, task_reviewer
 from examples.parallel_exploration import example as parallel_exploration, explorer
@@ -75,6 +76,9 @@ SCENARIOS = (
     Scenario("local_contracts", local_contracts, "Explain public boundaries locally and adapt a separately typed private worker.",
              "The complete scenario supplies its graph and a deterministic trimming host; the entry alone is boundary-complete, not execution-complete. No external effects or live model.",
              supporting=(contract_worker,), detached="example.py", sample=local_contracts.sample, run=local_contracts.run),
+    Scenario("regenerative_code", regenerative_code, "Encode a program as a Lark recipe and regenerate its tested behavior with two stateless OAK processes.",
+             "OAK and Lark 1.3.1; detached checks replay recorded synthetic fixtures and simulated action results. Live small-model trials, failures, and limits are retained separately in specimens.oak.md. No model calls or credentials are needed for verification.",
+             supporting=(regenerative_specimens,), detached="run.py", run=regenerative_code.run),
     Scenario("implementer", implementer, "Bind acceptance to the exact verified revision before a host effect.",
              "Detached script validates structure only. Execution needs native actions and the declared snapshot, verification, and commit tools; repository checks use a simulated commit sink.",
              dependencies=(verification,), bindings=True, detached="example.py"),

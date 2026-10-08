@@ -20,6 +20,8 @@ full-verification-command: "python -m build.examples"
 
 direct-verification-command: "python build/examples.py"
 
+verification-dependencies: "Install runtime dependencies from pyproject.toml and verification-only dependencies from build/requirements.txt; Lark validates the regenerative code example without becoming an OAK runtime dependency."
+
 authoring-product-byte-limits: {"skill-entry": 24000, "standalone-agent": 128000}
 
 authoring-size-budget-policy: "Product byte limits are reviewed repository budgets, not OAK or provider limits. Adjust a budget when the user authorises it; preserve complete required meaning, measure the final artifacts, and update the owning budget, active plan and live checks together."
